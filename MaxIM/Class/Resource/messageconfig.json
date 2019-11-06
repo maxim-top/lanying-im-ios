@@ -1,0 +1,47 @@
+
+{
+    BMXErrorCodeNoError ： 0,
+    BMXErrorCodeGeneralError   : 1,
+    BMXErrorCodeInvalidParam   : 2,
+    BMXErrorCodeNotFound       : 3,
+    
+    BMXErrorCodeUserNotLogin   : 4,
+    BMXErrorCodeUserAlreadyLogin : 5,
+    BMXErrorCodeUserAuthFailed  : 6,
+    BMXErrorCodeUserPermissionDenied : 7,
+    BMXErrorCodeUserNotExist : 8,
+    BMXErrorCodeUserAlreadyExist : 9,
+    BMXErrorCodeUserFrozen : 10,
+    BMXErrorCodeUserMuted : 11,
+    BMXErrorCodeUserRemoved : 12,
+    BMXErrorCodeUserTooManyDevice : 13,
+    BMXErrorCodeUserPasswordChanged : 14,
+    BMXErrorCodeUserKickeBySameDevice : 15,
+    BMXErrorCodeUserKickedByOtherDevices : 16,
+    BMXErrorCodeUserAbnormal : 17,
+    
+    BMXErrorCodeGroupNotExist : 18,
+    BMXErrorCodeGroupNotMember : 19,
+    
+    BMXErrorCodeSignInCancelled : 20,
+    BMXErrorCodeSignInTimeout : 21,
+    BMXErrorCodeSignInFailed : 22,
+    
+    BMXErrorCodeDbOperationFailed : 23,
+    
+    BMXErrorCodeMessageInvalid : 24,
+    BMXErrorCodeMessageOutRecallTime : 25,
+    BMXErrorCodeMessageRecallDisabled : 26,
+    BMXErrorCodeMessageWordCensored : 27,
+    BMXErrorCodeMessageInvalidType : 28,
+    
+    
+    BMXErrorCodeServerNotReachable : 29,
+    BMXErrorCodeServerUnknownError : 30,
+    BMXErrorCodeServerInvalid : 31,
+    BMXErrorCodeServerDecryptionFailed : 32,
+    BMXErrorCodeServerEncryptMethodUnsupported : 33,
+    BMXErrorCodeServerBusy : 34
+
+}
+

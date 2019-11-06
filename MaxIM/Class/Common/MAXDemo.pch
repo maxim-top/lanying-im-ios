@@ -1,0 +1,90 @@
+//
+//  MAXDemo.pch
+//  MaxIM
+//
+//  Created by hyt on 2018/11/14.
+//  Copyright © 2018年 hyt. All rights reserved.
+//
+
+#ifndef MAXDemo_pch
+#define MAXDemo_pch
+
+#ifdef __OBJC__
+
+#import "MAXCommonColor.h"
+#import "CommonColor.h"
+#import "BMXGlobalDefines.h"
+#import "NetWorkingManager.h"
+
+
+// 偏好设置的单例对象 Preference目录 iTunes、iCloud 备份时会备份这个目录下的数据
+#define MAXPathUserDefaults         [NSUserDefaults standardUserDefaults]
+#define NETWORK_MANAGER [NetWorkingManager netWorkingManager]
+
+
+#define MAXScreenW [UIScreen mainScreen].bounds.size.width
+#define MAXScreenH [UIScreen mainScreen].bounds.size.height
+#define MaxNavHeight 64
+
+#define NavHeight (INTERFACE_IS_IPHONEX ? 88 : 64)
+#define TabBarHeight (INTERFACE_IS_IPHONEX ? 83 : 49)
+
+#define SystemVersion [[UIDevice currentDevice] systemVersion].floatValue
+
+#define MaxRootVC  [UIApplication sharedApplication].keyWindow.rootViewController
+#define MaxKeyWindow  [UIApplication sharedApplication].keyWindow
+
+
+//iPhoneX / iPhoneXS
+#define  isIphoneX_XS     (MAXScreenW == 375.f && MAXScreenH == 812.f ? YES : NO)
+//iPhoneXR / iPhoneXSMax
+#define  isIphoneXR_XSMax    (MAXScreenW == 414.f && MAXScreenH == 896.f ? YES : NO)
+//异性全面屏
+#define   MAXIsFullScreen    (isIphoneX_XS || isIphoneXR_XSMax)
+
+#define INTERFACE_IS_IPHONEX  (@available(iOS 11.0, *) && ([UIApplication sharedApplication].keyWindow.safeAreaInsets.bottom > 0) ? YES:NO)
+ 
+
+#define iOS7LATER ([UIDevice currentDevice].systemVersion.floatValue >= 7.0f)
+#define iOS8LATER ([UIDevice currentDevice].systemVersion.floatValue >= 8.0f)
+#define iOS9LATER ([UIDevice currentDevice].systemVersion.floatValue >= 9.0f)
+#define iOS9_1LATER ([UIDevice currentDevice].systemVersion.floatValue >= 9.1f)
+
+// 弱引用
+#define LHWeakSelf __weak typeof(self) weakSelf = self;
+
+#define recourcesPath [[NSBundle mainBundle] resourcePath]
+
+#define MAXLog(fmt, ...) NSLog((@"%s [Line %d] " fmt), __PRETTY_FUNCTION__, __LINE__, ##__VA_ARGS__);
+
+#ifndef __IPHONE_5_0
+#warning "This project uses features only available in iOS SDK 5.0 and later."
+#endif
+
+#ifdef __OBJC__
+#import <UIKit/UIKit.h>
+#import <Foundation/Foundation.h>
+#import "UIView+frameAdjust.h"
+#import "IMConst.h"
+#import "UIViewController+Set.h"
+#import "UIColor+RGB.h"
+#import "UIImage+Common.h"
+#import "UIView+Addtions.h"
+#import "HQCustomToast.h"
+#import "HQEnum.h"
+#import "UIButton+WebCache.h"
+
+#endif
+
+#ifdef DEBUG
+#define DLog(s,...) NSLog(@"%s LINE:%d < %@ >",__FUNCTION__, __LINE__, [NSString stringWithFormat:(s), ##__VA_ARGS__]);
+#define DMethod() NSLog(@"%s", __func__);
+#else
+#define DLog(...);
+#define DMethod();
+#endif
+
+#define RGB(A, B, C)    [UIColor colorWithRed:A/255.0 green:B/255.0 blue:C/255.0 alpha:1.0]
+#endif /* MAXDemo_pch */
+
+#endif

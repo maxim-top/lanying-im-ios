@@ -1,0 +1,25 @@
+{
+    "type": "profile",
+    "cells": [
+        {
+            "type": "id",
+            "control": "0"
+        },
+        {
+            "type": "昵称",
+            "control": "0"
+        },
+        {
+            "type": "公有信息",
+            "control": "0"
+        },
+        {
+            "type": "设置别名",
+            "control": "0"
+        },
+        {
+            "type": "设置扩展信息",
+            "control": "0"
+        }
+    ]
+}

@@ -1,0 +1,37 @@
+{
+    "type": "profile",
+
+    "cells": [{
+        "type": "头像",
+        "control": "alert"
+    },
+    {
+        "type": "id",
+        "control": "0"
+    },
+    {
+        "type": "昵称",
+        "control": "alert"
+    },
+    {
+        "type": "设置公开信息",
+        "control": "alert"
+    },
+    {
+        "type": "设置私密信息",
+        "control": "alert"
+    },
+    {
+        "type": "好友验证类型",
+        "control": "alert"
+    },
+    {
+        "type": "好友验证问题",
+        "control": "alert"
+    },
+    ]
+}
+
+       
+
+
