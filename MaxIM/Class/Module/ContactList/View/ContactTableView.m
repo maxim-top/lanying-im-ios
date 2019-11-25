@@ -8,7 +8,7 @@
 
 #import "ContactTableView.h"
 #import "ContactTableViewCell.h"
-#import "BMXRoster.h"
+#import <floo-ios/BMXRoster.h>
 
 @interface ContactTableView ()<UITableViewDelegate, UITableViewDataSource>
 

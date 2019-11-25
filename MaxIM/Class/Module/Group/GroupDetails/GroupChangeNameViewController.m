@@ -15,7 +15,7 @@
     
 
 #import "GroupChangeNameViewController.h"
-#import "BMXClient.h"
+#import <floo-ios/BMXClient.h>
 #import "UIViewController+CustomNavigationBar.h"
 
 @interface GroupChangeNameViewController ()

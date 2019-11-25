@@ -18,7 +18,7 @@
 
 #import "GroupListViewController.h"
 #import "ImageTitleBasicTableViewCell.h"
-#import "BMXClient.h"
+#import <floo-ios/BMXClient.h>
 #import "LHChatVC.h"
 
 #import "GroupCreateViewController.h"

@@ -8,8 +8,8 @@
 
 #import "MAXBlackListViewController.h"
 #import "ImageTitleBasicTableViewCell.h"
-#import "BMXClient.h"
-#import "BMXRoster.h"
+#import <floo-ios/BMXClient.h>
+#import <floo-ios/BMXRoster.h>
 #import "UIViewController+CustomNavigationBar.h"
 @interface MAXBlackListViewController ()<UITableViewDelegate, UITableViewDataSource>
 

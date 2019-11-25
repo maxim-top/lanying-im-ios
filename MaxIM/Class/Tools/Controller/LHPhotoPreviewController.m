@@ -10,9 +10,9 @@
 #import "LHPhotoPreviewCell.h"
 #import "XSBrowserAnimateDelegate.h"
 #import "UIActionSheet+Blocks.h"
-#import "BMXImageAttachment.h"
+#import <floo-ios/BMXImageAttachment.h>
 #import "LHMessageModel.h"
-#import "BMXClient.h"
+#import <floo-ios/BMXClient.h>
 #import <Photos/Photos.h>
 
 

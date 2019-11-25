@@ -15,10 +15,10 @@
     
 
 #import "GroupAddMemberController.h"
-#import "BMXClient.h"
-#import "BMXGroup.h"
-#import "BMXRoster.h"
-#import "BMXGroupMember.h"
+#import <floo-ios/BMXClient.h>
+#import <floo-ios/BMXGroup.h>
+#import <floo-ios/BMXRoster.h>
+#import <floo-ios/BMXGroupMember.h>
 #import "GorupLittleCell.h"
 #import "UIViewController+CustomNavigationBar.h"
 

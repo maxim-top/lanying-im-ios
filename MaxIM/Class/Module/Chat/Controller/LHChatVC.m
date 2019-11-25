@@ -24,15 +24,15 @@
 #import "BMXRecoderTools.h"
 #import "BMXVoiceHud.h"
 
-#import "BMXClient.h"
-#import "BMXChatManager.h"
-#import "BMXMessageObject.h"
-#import "BMXMessageAttachment.h"
-#import "BMXImageAttachment.h"
-#import "BMXVoiceAttachment.h"
-#import "BMXLocationAttachment.h"
-#import "BMXFileAttachment.h"
-#import "BMXVideoAttachment.h"
+#import <floo-ios/BMXClient.h>
+#import <floo-ios/BMXChatManager.h>
+#import <floo-ios/BMXMessageObject.h>
+#import <floo-ios/BMXMessageAttachment.h>
+#import <floo-ios/BMXImageAttachment.h>
+#import <floo-ios/BMXVoiceAttachment.h>
+#import <floo-ios/BMXLocationAttachment.h>
+#import <floo-ios/BMXFileAttachment.h>
+#import <floo-ios/BMXVideoAttachment.h>
 
 #import "IMAcount.h"
 #import "IMAcountInfoStorage.h"
@@ -47,7 +47,7 @@
 #import "GroupCreateViewController.h"
 #import "GroupOwnerTransterViewController.h"
 #import "GroupAlreadyReadListViewController.h"
-#import "BMXRoster.h"
+#import <floo-ios/BMXRoster.h>
 
 #import "BubbleViewAlertView.h"
 #import "YYLabel.h"
@@ -62,7 +62,7 @@
 #import "UIViewController+CustomNavigationBar.h"
 
 
-//#import "BMXGroupMember.h"
+//#import <floo-ios/BMXGroupMember.h>
 
 NSString *const kTableViewOffset = @"contentOffset";
 NSString *const kTableViewFrame = @"frame";

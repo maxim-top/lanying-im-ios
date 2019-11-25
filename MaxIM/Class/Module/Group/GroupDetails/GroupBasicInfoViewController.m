@@ -7,9 +7,9 @@
 //
 
 #import "GroupBasicInfoViewController.h"
-#import "BMXGroup.h"
+#import <floo-ios/BMXGroup.h>
 #import "UIView+BMXframe.h"
-#import "BMXClient.h"
+#import <floo-ios/BMXClient.h>
 #import "QRCodeGroupInviteApi.h"
 #import "LHChatVC.h"
 

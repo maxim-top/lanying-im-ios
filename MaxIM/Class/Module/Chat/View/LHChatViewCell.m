@@ -8,7 +8,7 @@
 
 #import "LHChatViewCell.h"
 #import "UIView+BMXframe.h"
-#import "BMXClient.h"
+#import <floo-ios/BMXClient.h>
 CGFloat const ACTIVTIYVIEW_BUBBLE_PADDING = 5.0f;
 CGFloat const SEND_STATUS_SIZE = 20.0f;
 

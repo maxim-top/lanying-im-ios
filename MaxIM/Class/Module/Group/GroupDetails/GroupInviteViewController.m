@@ -16,8 +16,8 @@
 
 #import "GroupInviteViewController.h"
 #import "UIViewController+CustomNavigationBar.h"
-#import "BMXClient.h"
-#import "BMXGroupInvitation.h"
+#import <floo-ios/BMXClient.h>
+#import <floo-ios/BMXGroupInvitation.h>
 #import "GroupHandleCell.h"
 
 

@@ -13,9 +13,9 @@
 #import "LHChatVC.h"
 #import "GroupListViewController.h"
 #import "UIViewController+CustomNavigationBar.h"
-#import "BMXClient.h"
+#import <floo-ios/BMXClient.h>
 #import "GroupListTableViewAdapter.h"
-#import "BMXGroup.h"
+#import <floo-ios/BMXGroup.h>
 #import "GroupCreateViewController.h"
 #import "GroupApplyViewController.h"
 #import "GroupInviteViewController.h"

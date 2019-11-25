@@ -10,7 +10,7 @@
 #import <AVFoundation/AVFoundation.h>
 #import "SearchRosterProfileViewController.h"
 #import "GroupBasicInfoViewController.h"
-#import "BMXClient.h"
+#import <floo-ios/BMXClient.h>
 #import "QRCodeLoginViewController.h"
 #import "NotifierUploadPushInfoApi.h"
 #import "ConsuleAppInfoStorage.h"

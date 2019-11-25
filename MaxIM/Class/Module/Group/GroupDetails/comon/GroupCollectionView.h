@@ -15,7 +15,7 @@
     
 
 #import <UIKit/UIKit.h>
-#import "BMXRoster.h"
+#import <floo-ios/BMXRoster.h>
 
 
 @protocol groupMemberCollectionDelegate <NSObject>

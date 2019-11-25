@@ -9,14 +9,14 @@
 #import "AppDelegate.h"
 #import "MAXTabBarController.h"
 #import "MAXLoginViewController.h"
-#import "BMXClient.h"
+#import <floo-ios/BMXClient.h>
 #import "MainViewController.h"
 #import "IMAcount.h"
 #import "IMAcountInfoStorage.h"
 #import "MAXGlobalTool.h"
 #import <UserNotifications/UserNotifications.h>
 #import "GetTokenApi.h"
-#import <WXApi.h>
+#import "WXApi.h"
 #import "WechatApi.h"
 #import "WechatLoginApi.h"
 #import "RosterListViewController.h"
@@ -24,7 +24,7 @@
 #import "ConsoleAppIDStorage.h"
 #import "ConsoleAppID.h"
 
-#import "BMXHostConfig.h"
+#import <floo-ios/BMXHostConfig.h>
 #import <Bugly/Bugly.h>
 
 

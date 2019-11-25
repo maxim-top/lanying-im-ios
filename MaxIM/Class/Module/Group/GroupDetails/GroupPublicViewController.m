@@ -17,8 +17,8 @@
 #import "GroupPublicViewController.h"
 #import "AnounceCel.h"
 #import "NSString+YYAdd.h"
-#import "BMXGroupAnnounment.h"
-#import "BMXClient.h"
+#import <floo-ios/BMXGroupAnnounment.h>
+#import <floo-ios/BMXClient.h>
 #import "UIViewController+CustomNavigationBar.h"
 
 @interface GroupPublicViewController ()

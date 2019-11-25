@@ -8,10 +8,10 @@
 
 #import "LHPhotoPreviewCell.h"
 #import "SDImageCache.h"
-#import "BMXClient.h"
+#import <floo-ios/BMXClient.h>
 #import "LHMessageModel.h"
-#import "BMXMessageAttachment.h"
-#import "BMXImageAttachment.h"
+#import <floo-ios/BMXMessageAttachment.h>
+#import <floo-ios/BMXImageAttachment.h>
 @interface LHPhotoPreviewCell () <UIScrollViewDelegate>
 
 @property (nonatomic, strong) UIScrollView *scrollView;

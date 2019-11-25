@@ -16,9 +16,9 @@
 
 #import "GroupBlackListViewController.h"
 #import "GorupLittleCell.h"
-#import "BMXClient.h"
-#import "BMXGroupMember.h"
-#import "BMXRoster.h"
+#import <floo-ios/BMXClient.h>
+#import <floo-ios/BMXGroupMember.h>
+#import <floo-ios/BMXRoster.h>
 #import "UIViewController+CustomNavigationBar.h"
 
 @interface GroupBlackListViewController ()<UITabBarDelegate, UITableViewDataSource>

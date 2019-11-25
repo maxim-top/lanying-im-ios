@@ -7,8 +7,8 @@
 //
 
 #import "GroupListTableViewAdapter.h"
-#import "BMXClient.h"
-#import "BMXGroup.h"
+#import <floo-ios/BMXClient.h>
+#import <floo-ios/BMXGroup.h>
 @implementation GroupListTableViewAdapter
 
 + (void)getGroupListcompletion:(void(^)(NSArray <BMXGroup *>*group, NSString *errmsg))aCompletionBlock {

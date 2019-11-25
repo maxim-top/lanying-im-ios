@@ -16,10 +16,10 @@
 
 #import "GroupHandleCell.h"
 
-#import "BMXClient.h"
-#import "BMXGroup.h"
-#import "BMXRoster.h"
-#import "BMXGroupApplication.h"
+#import <floo-ios/BMXClient.h>
+#import <floo-ios/BMXGroup.h>
+#import <floo-ios/BMXRoster.h>
+#import <floo-ios/BMXGroupApplication.h>
 
 #import <UIImageView+WebCache.h>
 

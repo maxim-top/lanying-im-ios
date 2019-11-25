@@ -9,8 +9,8 @@
 #import "SystemNotificationViewController.h"
 #import "UIViewController+CustomNavigationBar.h"
 #import "SystemNotificationTableViewCell.h"
-#import "BMXClient.h"
-#import "BMXMessageObject.h"
+#import <floo-ios/BMXClient.h>
+#import <floo-ios/BMXMessageObject.h>
 
 @interface SystemNotificationViewController ()<UITableViewDelegate, UITableViewDataSource>
 

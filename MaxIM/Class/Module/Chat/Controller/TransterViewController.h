@@ -7,8 +7,8 @@
 //
 
 #import <UIKit/UIKit.h>
-#import "BMXGroup.h"
-#import "BMXRoster.h"
+#import <floo-ios/BMXGroup.h>
+#import <floo-ios/BMXRoster.h>
 
 @protocol TransterContactProtocol <NSObject>
 

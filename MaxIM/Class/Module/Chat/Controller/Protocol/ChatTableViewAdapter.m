@@ -11,9 +11,9 @@
 #import "LHChatTimeCell.h"
 #import "LHMessageModel.h"
 #import "LHChatViewCell.h"
-#import "BMXClient.h"
-#import "BMXRoster.h"
-#import "BMXGroup.h"
+#import <floo-ios/BMXClient.h>
+#import <floo-ios/BMXRoster.h>
+#import <floo-ios/BMXGroup.h>
 
 @interface ChatTableViewAdapter () <UITableViewDelegate, UITableViewDataSource>
 

@@ -10,7 +10,7 @@
 #import "MAXTabBarController.h"
 #import "AppDelegate.h"
 
-#import "BMXClient.h"
+#import <floo-ios/BMXClient.h>
 
 #define TabVC    @"vc"
 #define TabTitle @"title"

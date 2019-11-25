@@ -17,10 +17,10 @@
 
 #import <UIKit/UIKit.h>
 
-#import "BMXGroupApplication.h"
-#import "BMXGroupInvitation.h"
-#import "BMXRoster.h"
-#import "BMXGroup.h"
+#import <floo-ios/BMXGroupApplication.h>
+#import <floo-ios/BMXGroupInvitation.h>
+#import <floo-ios/BMXRoster.h>
+#import <floo-ios/BMXGroup.h>
 
 @class BMXGroup;
 @class BMXClient;

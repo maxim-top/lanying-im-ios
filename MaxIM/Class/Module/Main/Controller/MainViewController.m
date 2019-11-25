@@ -12,24 +12,24 @@
 
 #import "MAXLoginViewController.h"
 #import "IMAcountInfoStorage.h"
-#import "BMXClient.h"
+#import <floo-ios/BMXClient.h>
 
 #import "IMAcount.h"
 #import "IMAcountInfoStorage.h"
 
-#import "BMXClient.h"
-#import "BMXConversation.h"
+#import <floo-ios/BMXClient.h>
+#import <floo-ios/BMXConversation.h>
 
 #import "MAXGlobalTool.h"
 
-#import "BMXConversation.h"
+#import <floo-ios/BMXConversation.h>
 #import "RecentConversaionTableViewCell.h"
-#import "BMXMessageObject.h"
+#import <floo-ios/BMXMessageObject.h>
 
 #import "BMXSearchView.h"
 #import "SearchContentViewController.h"
 #import "UIView+BMXframe.h"
-#import "BMXClient.h"
+#import <floo-ios/BMXClient.h>
 
 #import "UIViewController+CustomNavigationBar.h"
 #import "ScanViewController.h"

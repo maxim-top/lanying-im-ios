@@ -7,7 +7,7 @@
 //
 
 #import <Foundation/Foundation.h>
-#import "BMXMessageObject.h"
+#import <floo-ios/BMXMessageObject.h>
 
 
 NS_ASSUME_NONNULL_BEGIN

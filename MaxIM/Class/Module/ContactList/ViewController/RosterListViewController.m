@@ -10,12 +10,12 @@
 //
 
 #import "RosterListViewController.h"
-#import "BMXClient.h"
+#import <floo-ios/BMXClient.h>
 #import "ImageTitleBasicTableViewCell.h"
 #import "IMAcountInfoStorage.h"
 #import "IMAcount.h"
-#import "BMXRoster.h"
-#import "BMXImageAttachment.h"
+#import <floo-ios/BMXRoster.h>
+#import <floo-ios/BMXImageAttachment.h>
 #import "ImageAlertView.h"
 
 

@@ -17,8 +17,8 @@
 #import "GorupLittleCell.h"
 #import <UIImageView+WebCache.h>
 #import "UIView+BMXframe.h"
-#import "BMXRoster.h"
-#import "BMXClient.h"
+#import <floo-ios/BMXRoster.h>
+#import <floo-ios/BMXClient.h>
 
 // cell height: 60;
 

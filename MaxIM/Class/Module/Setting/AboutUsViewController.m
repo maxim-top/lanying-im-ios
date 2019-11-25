@@ -8,7 +8,8 @@
 //
 
 #import "AboutUsViewController.h"
-#import "BMXClient.h"
+#import <floo-ios/BMXClient.h>
+#import <floo-ios/BMXClient.h>
 #import "UIView+BMXframe.h"
 #import "UIViewController+CustomNavigationBar.h"
 

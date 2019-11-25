@@ -11,10 +11,10 @@
 #import "RosterDetailViewController.h"
 #import "ContactTableViewCell.h"
 
-#import "BMXClient.h"
-#import "BMXRoster.h"
+#import <floo-ios/BMXClient.h>
+#import <floo-ios/BMXRoster.h>
 
-#import "BMXApplication.h"
+#import <floo-ios/BMXApplication.h>
 #import "UIViewController+CustomNavigationBar.h"
 
 @interface RosterDetailViewController ()<UITableViewDelegate, UITableViewDataSource>

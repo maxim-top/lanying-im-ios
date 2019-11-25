@@ -8,9 +8,9 @@
 
 #import "GroupAlreadyReadListViewController.h"
 #import "ImageTitleBasicTableViewCell.h"
-#import "BMXClient.h"
-#import "BMXRoster.h"
-#import "BMXGroupMember.h"
+#import <floo-ios/BMXClient.h>
+#import <floo-ios/BMXRoster.h>
+#import <floo-ios/BMXGroupMember.h>
 #import "UIViewController+CustomNavigationBar.h"
 
 @interface GroupAlreadyReadListViewController () <UITableViewDataSource, UITableViewDelegate>

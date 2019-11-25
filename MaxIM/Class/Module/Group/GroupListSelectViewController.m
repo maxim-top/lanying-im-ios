@@ -9,14 +9,14 @@
 
 #import "GroupListSelectViewController.h"
 #import "ImageTitleBasicTableViewCell.h"
-#import "BMXClient.h"
+#import <floo-ios/BMXClient.h>
 #import "LHChatVC.h"
 
 #import "GroupCreateViewController.h"
 #import "GroupInviteViewController.h"
 #import "GroupApplyViewController.h"
 #import "ImageAlertView.h"
-#import "BMXImageAttachment.h"
+#import <floo-ios/BMXImageAttachment.h>
 
 #import "IMAcountInfoStorage.h"
 #import "IMAcount.h"

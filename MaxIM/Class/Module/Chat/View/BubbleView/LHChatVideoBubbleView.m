@@ -9,7 +9,7 @@
 #import "LHChatVideoBubbleView.h"
 #import "SDImageCache.h"
 #import "UIImageView+WebCache.h"
-#import "BMXVideoAttachment.h"
+#import <floo-ios/BMXVideoAttachment.h>
 #import "UIView+BMXframe.h"
 
 //　图片最大显示大小

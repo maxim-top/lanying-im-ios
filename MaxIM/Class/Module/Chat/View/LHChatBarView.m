@@ -14,7 +14,7 @@
 #import "LHTools.h"
 #import "TZImagePickerController.h"
 #import "ICDocumentViewController.h"
-#import "BMXClient.h"
+#import <floo-ios/BMXClient.h>
 
 #import "VideoView.h"
 #import "VideoManager.h"

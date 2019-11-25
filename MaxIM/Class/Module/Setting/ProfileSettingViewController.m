@@ -16,10 +16,10 @@
 
 #import "ProfileSettingViewController.h"
 #import "ProfileTableViewCell.h"
-#import "BMXClient.h"
-#import "BMXUserProfile.h"
+#import <floo-ios/BMXClient.h>
+#import <floo-ios/BMXUserProfile.h>
 #import <TZImagePickerController.h>
-#import "BMXAuthQuestion.h"
+#import <floo-ios/BMXAuthQuestion.h>
 #import "UIViewController+CustomNavigationBar.h"
 
 @interface ProfileSettingViewController ()<UITableViewDataSource, UITableViewDelegate>

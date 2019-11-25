@@ -13,7 +13,7 @@
 #import "LHChatVC.h"
 #import "GroupListViewController.h"
 
-#import "BMXClient.h"
+#import <floo-ios/BMXClient.h>
 #import "UIViewController+CustomNavigationBar.h"
 
 @interface TransformContactViewController ()<UITableViewDelegate, UITableViewDataSource>

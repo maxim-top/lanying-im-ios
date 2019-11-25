@@ -9,12 +9,12 @@
 #import "MAXLoginViewController.h"
 #import "MAXRegiesterViewController.h"
 #import "MAXLoginView.h"
-#import "BMXClient.h"
+#import <floo-ios/BMXClient.h>
 #import "IMAcountInfoStorage.h"
 #import "IMAcount.h"
 #import "MAXGlobalTool.h"
-#import "BMXUserProfile.h"
-#import "BMXHostConfig.h"
+#import <floo-ios/BMXUserProfile.h>
+#import <floo-ios/BMXHostConfig.h>
 #import "LoginCodeImageViewController.h"
 #import "WXApi.h"
 #import "WechatApi.h"

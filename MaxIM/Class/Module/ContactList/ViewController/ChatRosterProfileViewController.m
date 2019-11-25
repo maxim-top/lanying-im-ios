@@ -16,8 +16,8 @@
 #import "ChatRosterProfileViewController.h"
 #import "TitleSwitchTableViewCell.h"
 #import "UIView+BMXframe.h"
-#import "BMXRoster.h"
-#import "BMXClient.h"
+#import <floo-ios/BMXRoster.h>
+#import <floo-ios/BMXClient.h>
 #import "UIViewController+CustomNavigationBar.h"
 
 @interface ChatRosterProfileViewController ()<UITableViewDelegate, UITableViewDataSource, TitleSwitchTableViewCellDelegate>

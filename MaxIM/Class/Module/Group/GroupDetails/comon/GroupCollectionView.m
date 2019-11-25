@@ -19,8 +19,8 @@
 
 #import "GroupAddMemberController.h"
 
-#import "BMXClient.h"
-#import "BMXRoster.h"
+#import <floo-ios/BMXClient.h>
+#import <floo-ios/BMXRoster.h>
 
 
 

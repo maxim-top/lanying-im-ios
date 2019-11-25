@@ -17,9 +17,9 @@
 #import "GroupAdminListCiewController.h"
 
 #import "GorupLittleCell.h"
-#import "BMXClient.h"
-#import "BMXGroupMember.h"
-#import "BMXRoster.h"
+#import <floo-ios/BMXClient.h>
+#import <floo-ios/BMXGroupMember.h>
+#import <floo-ios/BMXRoster.h>
 
 #import "IMAcount.h"
 #import "IMAcountInfoStorage.h"

@@ -8,10 +8,10 @@
 
 #import "CodeImageViewController.h"
 #import "UIView+BMXframe.h"
-#import "BMXUserProfile.h"
+#import <floo-ios/BMXUserProfile.h>
 #import <ZXingObjC.h>
-#import "BMXClient.h"
-#import "BMXGroup.h"
+#import <floo-ios/BMXClient.h>
+#import <floo-ios/BMXGroup.h>
 #import "GroupQRcodeInfoApi.h"
 #import "UIViewController+CustomNavigationBar.h"
 

@@ -7,7 +7,7 @@
 //
 
 #import "LHChatViewBaseCell.h"
-#import "BMXClient.h"
+#import <floo-ios/BMXClient.h>
 #import "ChatRosterProfileViewController.h"
 
 @implementation LHChatViewBaseCell

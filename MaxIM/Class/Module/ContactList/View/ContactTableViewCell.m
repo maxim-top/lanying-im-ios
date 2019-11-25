@@ -16,8 +16,8 @@
 #import "ContactTableViewCell.h"
 #import "UIView+BMXframe.h"
 #import <SDWebImage/UIImageView+WebCache.h>
-#import "BMXClient.h"
-#import "BMXRoster.h"
+#import <floo-ios/BMXClient.h>
+#import <floo-ios/BMXRoster.h>
 
 static NSString *cellID = @"ContactTableViewCell";
 

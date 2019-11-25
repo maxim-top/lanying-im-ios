@@ -9,9 +9,9 @@
 
 #import "ImageTitleBasicTableViewCell.h"
 #import "UIView+BMXframe.h"
-#import "BMXRoster.h"
-#import "BMXGroup.h"
-#import "BMXClient.h"
+#import <floo-ios/BMXRoster.h>
+#import <floo-ios/BMXGroup.h>
+#import <floo-ios/BMXClient.h>
 
 static NSString *cellID = @"ImageTitleBasicTableViewCell";
 

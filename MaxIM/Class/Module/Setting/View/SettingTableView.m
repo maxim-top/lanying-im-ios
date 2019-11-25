@@ -11,11 +11,11 @@
 #import "MAXBlackListViewController.h"
 #import "ProfileSettingViewController.h"
 #import <UIImageView+WebCache.h>
-#import "BMXUserProfile.h"
-#import "BMXClient.h"
+#import <floo-ios/BMXUserProfile.h>
+#import <floo-ios/BMXClient.h>
 #import "IMAcountInfoStorage.h"
 #import "TitleSwitchTableViewCell.h"
-#import "BMXMessageSetting.h"
+#import <floo-ios/BMXMessageSetting.h>
 #import "AppDelegate.h"
 #import "DeviceManagmentViewController.h"
 #import "UIView+BMXframe.h"

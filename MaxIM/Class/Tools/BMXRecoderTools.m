@@ -7,7 +7,7 @@
 //
 
 #import "BMXRecoderTools.h"
-#import "BMXClient.h"
+#import <floo-ios/BMXClient.h>
 #import "VoiceConverter.h"
 
 #define kChildPath @"Recoder"

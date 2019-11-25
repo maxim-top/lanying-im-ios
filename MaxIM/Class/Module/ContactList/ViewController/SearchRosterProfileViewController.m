@@ -7,8 +7,8 @@
 //
 
 #import "SearchRosterProfileViewController.h"
-#import "BMXClient.h"
-#import "BMXRoster.h"
+#import <floo-ios/BMXClient.h>
+#import <floo-ios/BMXRoster.h>
 #import "LHChatVC.h"
 #import "UIViewController+CustomNavigationBar.h"
 

@@ -12,8 +12,8 @@
 #import "ContactTableView.h"
 #import "ScanViewController.h"
 
-#import "BMXRoster.h"
-#import "BMXClient.h"
+#import <floo-ios/BMXRoster.h>
+#import <floo-ios/BMXClient.h>
 #import "UIViewController+CustomNavigationBar.h"
 
 #define SearchViewHeight 56

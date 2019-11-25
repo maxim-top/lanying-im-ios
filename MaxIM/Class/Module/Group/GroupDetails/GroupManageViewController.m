@@ -22,7 +22,7 @@
 #import "GroupApplyViewController.h"
 
 #import <TZImagePickerController.h>
-#import "BMXClient.h"
+#import <floo-ios/BMXClient.h>
 #import "IMAcount.h"
 #import "IMAcountInfoStorage.h"
 #import "UIViewController+CustomNavigationBar.h"

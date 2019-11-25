@@ -15,7 +15,7 @@
 #import "GroupListViewController.h"
 #import "UIViewController+CustomNavigationBar.h"
 
-#import "BMXClient.h"
+#import <floo-ios/BMXClient.h>
 
 @interface TransterViewController ()<UITableViewDelegate, UITableViewDataSource, BMXRosterServiceProtocol>
 

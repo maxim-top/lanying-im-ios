@@ -9,8 +9,8 @@
 #import "MAXRegiesterViewController.h"
 #import "MAXLoginViewController.h"
 #import "MAXLoginView.h"
-#import "BMXClient.h"
-#import "BMXUserProfile.h"
+#import <floo-ios/BMXClient.h>
+#import <floo-ios/BMXUserProfile.h>
 #import "BindOpenIdApi.h"
 #import "PravitcyViewController.h"
 #import <WebKit/WebKit.h>

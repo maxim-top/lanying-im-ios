@@ -16,8 +16,8 @@
 
 #import "DeviceManagmentViewController.h"
 #import "DeviceTableViewCell.h"
-#import "BMXClient.h"
-#import "BMXDevice.h"
+#import <floo-ios/BMXClient.h>
+#import <floo-ios/BMXDevice.h>
 #import "IMAcountInfoStorage.h"
 #import "IMAcount.h"
 #import "UIViewController+CustomNavigationBar.h"

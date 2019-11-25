@@ -7,9 +7,9 @@
 //
 
 #import <UIKit/UIKit.h>
-#import "BMXRoster.h"
-#import "BMXMessageObject.h"
-#import "BMXGroup.h"
+#import <floo-ios/BMXRoster.h>
+#import <floo-ios/BMXMessageObject.h>
+#import <floo-ios/BMXGroup.h>
 
 @protocol ChatVCDelegate <NSObject>
 

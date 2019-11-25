@@ -16,16 +16,16 @@
 
 #import "SearchContentViewController.h"
 #import "BMXSearchView.h"
-#import "BMXClient.h"
+#import <floo-ios/BMXClient.h>
 #import "ContactTableView.h"
 #import "RecentConversaionTableViewCell.h"
-#import "BMXRoster.h"
-#import "BMXGroup.h"
+#import <floo-ios/BMXRoster.h>
+#import <floo-ios/BMXGroup.h>
 #import "LHChatVC.h"
 #import "IMAcount.h"
 #import "IMAcountInfoStorage.h"
 #import "UIView+BMXframe.h"
-#import "BMXConversation.h"
+#import <floo-ios/BMXConversation.h>
 #import "UIViewController+CustomNavigationBar.h"
 
 

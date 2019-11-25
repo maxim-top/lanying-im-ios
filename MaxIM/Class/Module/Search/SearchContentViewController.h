@@ -15,7 +15,7 @@
     
 
 #import <UIKit/UIKit.h>
-#import "BMXMessageObject.h"
+#import <floo-ios/BMXMessageObject.h>
 @class BMXConversation;
 
 NS_ASSUME_NONNULL_BEGIN

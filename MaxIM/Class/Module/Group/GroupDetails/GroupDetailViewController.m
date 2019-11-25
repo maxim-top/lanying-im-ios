@@ -21,8 +21,8 @@
 #import "GroupPublicViewController.h"
 #import "GroupExtViewController.h"
 #import "GroupFileViewController.h"
-#import "BMXGroupMember.h"
-#import "BMXUserProfile.h"
+#import <floo-ios/BMXGroupMember.h>
+#import <floo-ios/BMXUserProfile.h>
 #import "GroupCommonCell.h"
 #import "IMAcount.h"
 #import "IMAcountInfoStorage.h"
@@ -31,7 +31,7 @@
 #import "GroupCollectionView.h"
 #import "SearchContentViewController.h"
 
-#import "BMXConversation.h"
+#import <floo-ios/BMXConversation.h>
 
 @interface GdetailSettingCell : UITableViewCell
 {
@@ -64,8 +64,8 @@
 
 
 #import "GroupDetailViewController.h"
-#import "BMXClient.h"
-#import "BMXGroup.h"
+#import <floo-ios/BMXClient.h>
+#import <floo-ios/BMXGroup.h>
 #import "GroupAddMemberController.h"
 #import "UIViewController+CustomNavigationBar.h"
 

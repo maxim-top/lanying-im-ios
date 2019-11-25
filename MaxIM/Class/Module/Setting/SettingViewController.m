@@ -10,7 +10,7 @@
 #import "SettingViewController.h"
 #import "SettingTableView.h"
 
-#import "BMXClient.h"
+#import <floo-ios/BMXClient.h>
 
 
 @interface SettingViewController ()
