@@ -22,6 +22,7 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)refreshByTitle:(NSString *)titlel;
 - (void)refresh:(BMXRoster *)roster;
 - (void)refreshByGroup:(BMXGroup *)group;
+- (void)refreshSupportRoster:(BMXRoster *)roster;
 + (instancetype)ImageTitleBasicTableViewCellWith:(UITableView *)tableView;
 
 @end

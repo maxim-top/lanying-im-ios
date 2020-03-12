@@ -88,6 +88,8 @@
     if (!_avatarImageView) {
         _avatarImageView = [[UIImageView alloc] init];
         _avatarImageView.clipsToBounds=YES;
+        _avatarImageView.layer.borderColor = kColorC4_5.CGColor;
+        _avatarImageView.layer.borderWidth = 0.5;
         _avatarImageView.layer.cornerRadius = 24;
         [self addSubview:_avatarImageView];
         [_avatarImageView sizeToFit];

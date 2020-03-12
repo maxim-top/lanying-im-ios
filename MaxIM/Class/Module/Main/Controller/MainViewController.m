@@ -10,7 +10,6 @@
 #import "LHChatVC.h"
 #import "NSString+Extention.h"
 
-#import "MAXLoginViewController.h"
 #import "IMAcountInfoStorage.h"
 #import <floo-ios/BMXClient.h>
 
@@ -35,6 +34,9 @@
 #import "ScanViewController.h"
 #import "SystemNotificationViewController.h"
 #import "MaxEmptyTipView.h"
+#import "UIControl+Category.h"
+#import <floo-ios/BMXChatManager.h>
+
 
 @interface MainViewController ()<UITableViewDelegate, UITableViewDataSource, UITextFieldDelegate, ChatVCDelegate, BMXChatServiceProtocol>
 
@@ -45,33 +47,26 @@
 @property (nonatomic, strong) BMXSearchView *searchView;
 @property (nonatomic, strong) UIButton *searchbigButton;
 @property (nonatomic, strong) UILabel *headerLabel;
-@property (nonatomic, assign) BOOL conversationFinish;
 @property (nonatomic, strong) MaxEmptyTipView *tipView;
-
 
 
 @end
 
 @implementation MainViewController
 
-- (void)viewWillAppear:(BOOL)animated {
-    [super viewWillAppear:animated];
-
-}
-
 - (void)viewDidLoad {
     [super viewDidLoad];
     self.view.backgroundColor = [UIColor whiteColor];
     [self setUpNavItem];
-//    [self setupSearchView];
     
     [[[BMXClient sharedClient] chatService] addChatListener:self];
     
     [NetWorkingManager netWorkingManagerWithNetworkStatusListening];
     [self p_addObserver];
-
-//    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(getAllConversations) name:@"loginSuccess" object:nil];
     
+    [[[BMXClient sharedClient] chatService] getAllConversationsUnreadCountWithCompletion:^(int count) {
+        [self showUnReadNumber:count];
+    }];
 }
 
 - (void)p_addObserver {
@@ -89,6 +84,20 @@
                     selector:@selector(p_networkStatusDidChanged:)
                         name:disConnectionNetworkNotifation
                       object:nil];
+}
+
+
+- (void)showUnReadNumber:(int)num {
+    if (num == 0) {
+        [[UIApplication sharedApplication] setApplicationIconBadgeNumber:0];
+        [self.tabBarController.tabBar.items[0] setBadgeValue:nil];
+    }else if (num > 99) {
+         [[UIApplication sharedApplication] setApplicationIconBadgeNumber:99];
+        [self.tabBarController.tabBar.items[0] setBadgeValue:@"99+"];
+    } else {
+         [[UIApplication sharedApplication] setApplicationIconBadgeNumber:num];
+        [self.tabBarController.tabBar.items[0] setBadgeValue:[NSString stringWithFormat:@"%d",num]];
+    }
 }
 
 - (void)p_networkStatusDidChanged:(NSNotification *)notifiaction {
@@ -110,26 +119,10 @@
         MAXLog(@"蜂窝");
         
     } else if ([notifiaction.name isEqualToString:@"connectingInWifiNetworkNotifation"]) {
-        //        [HQCustomToast showDialog:@"已连接WiFi，正在WiFi下播放"];
-        //        self.internetStatus = ReachableViaWiFi;
          self.tableview.tableHeaderView = nil;
         MAXLog(@"WIFI");
     }
 }
-
-//- (void)setupSearchView {
-//    self.searchView = [BMXSearchView searchView];
-//    self.searchView.searchTF.placeholder = @"  请输入要搜索的内容";
-//    self.searchView.searchTF.delegate = self;
-//    self.searchView.searchTF.returnKeyType = UIReturnKeySearch;
-//
-//    UIButton *button = [UIButton buttonWithType:UIButtonTypeCustom];
-//    [button addTarget:self action:@selector(pushTosearhView) forControlEvents:UIControlEventTouchUpInside];
-//    [self.view addSubview:button];
-//    [self.view addSubview:self.searchView];
-//    button.frame = self.searchView.frame;
-//    [self.view addSubview:button];
-//}
 
 - (void)pushTosearhViewController {
     SearchContentViewController *vc = [[SearchContentViewController alloc]init];
@@ -138,34 +131,38 @@
 }
 
 - (void)getAllConversations{
-
     dispatch_async(dispatch_get_main_queue(), ^{
         [HQCustomToast showWating];
     });
     
     [[[BMXClient sharedClient] chatService] getAllConversationsWithCompletion:^(NSArray *conversations) {
         
-        MAXLog(@"%ld", conversations.count);
+        [HQCustomToast hideWating];
         if (conversations.count == 0) {
              //展示空白页
             [self.view insertSubview:self.tipView aboveSubview:self.tableview];
-            [HQCustomToast hideWating];
         }else {
             [self.tipView removeFromSuperview];
             [self getProfiletWithConversations:conversations];
         }
-    } ];
+    }];
 
     
 }
 
 - (void)getProfiletWithConversations:(NSArray *)conversations {
-    [self getProfileWithConversatonList:[self sortConversationsByLastMessageTime:[NSMutableArray arrayWithArray:conversations]]];
+    
+    if (conversations.count == 0) {
+        return;
+    }
+    dispatch_async(dispatch_get_global_queue(0, 0), ^{
+        [self getProfileWithConversatonList:[self sortConversationsByLastMessageTime:conversations]];
+    });
 }
 
 - (void)getProfileWithConversatonList:(NSMutableArray *)conversatonList {
     NSMutableArray *tempProfileArray = [NSMutableArray array];
-       NSLog(@"===开始获取资料");
+       MAXLog(@"===开始获取资料");
     dispatch_queue_t queue = dispatch_queue_create("getProfile",DISPATCH_QUEUE_SERIAL);
     dispatch_semaphore_t semaphore = dispatch_semaphore_create(0);
         for (BMXConversation *conversation in conversatonList) {
@@ -216,7 +213,6 @@
 
 - (NSDictionary *)getSystemProfile {
     NSDictionary *configDic = [NSDictionary dictionaryWithDictionary:[self readLocalFileWithName:@"SystemRosterProfile"]];
-    MAXLog(@"%@", configDic);
     NSDictionary *dic = configDic[@"profile"];
     return dic;
     
@@ -230,19 +226,21 @@
 }
 
 
-- (NSMutableArray *)sortConversationsByLastMessageTime:(NSMutableArray *)conversations {
-    [conversations sortUsingComparator:^NSComparisonResult(BMXConversation *obj1, BMXConversation *obj2) {
+- (NSMutableArray *)sortConversationsByLastMessageTime:(NSArray *)conversations {
+    
+    NSArray *sort =  [conversations sortedArrayUsingComparator:^NSComparisonResult(id obj1,   id obj2) {
         //此处的规则含义为：若前一元素比后一元素小，则返回降序（即后一元素在前，为从大到小排列）
-        if (obj1.lastMessage == nil) {
+        BMXConversation *conversation1 = obj1;
+        BMXConversation *conversation2 = obj2;
+        if (conversation1.lastMessage == nil) {
             return NSOrderedDescending;
         }
         
-        if (obj2.lastMessage == nil) {
+        if (conversation2.lastMessage == nil) {
             return NSOrderedAscending;
         }
-//           NSLog(@"===排序");
-        
-        if (obj1.lastMessage.serverTimestamp < obj2.lastMessage.serverTimestamp) {
+        //           NSLog(@"===排序");
+        if (conversation1.lastMessage.serverTimestamp < conversation2.lastMessage.serverTimestamp) {
             return NSOrderedDescending;
         }  else {
             return NSOrderedAscending;
@@ -250,7 +248,7 @@
         
     }];
     NSLog(@"===排序完成");
-    return conversations;
+    return [NSMutableArray arrayWithArray:sort];
 }
 
 - (void)receiveNewMessage:(BMXMessageObject *)message {
@@ -314,6 +312,7 @@
 
 - (void)loadAllConversationDidFinished {
     MAXLog(@"all");
+//    self.conversationFinish = YES;
     [self getAllConversations];
 }
 
@@ -476,6 +475,8 @@
                 cell.dotLabel.hidden = [conversation unreadNumber] == 0;
                 cell.dotView.hidden = YES;
                 cell.dotLabel.text  = [NSString stringWithFormat:@"%ld",(long)[conversation unreadNumber]];
+                
+//                MAXLog(@"%ld",(long)conversation.unreadNumber);
             } else {
                 cell.dotView.hidden = YES;
                 cell.dotLabel.hidden = YES;
@@ -497,6 +498,7 @@
             } else {
                 cell.dotLabel.hidden = [conversation unreadNumber] == 0;
                 cell.dotLabel.text  = [NSString stringWithFormat:@"%ld",(long)[conversation unreadNumber]];
+//                MAXLog(@" %ld" ,(long)conversation.unreadNumber);
             }
         }else {
             cell.dotLabel.hidden = YES;
@@ -540,7 +542,10 @@ forRowAtIndexPath:(NSIndexPath *)indexPath {
 - (void)chatVCDidSelectReturnButton {
     
 }
-
+- (void)conversationTotalCountChanged:(NSInteger)unreadCount {
+    
+    [self showUnReadNumber:(int)unreadCount];
+}
 #pragma mark - UITableViewDelegate
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
     [tableView deselectRowAtIndexPath:indexPath animated:YES];
@@ -693,7 +698,7 @@ forRowAtIndexPath:(NSIndexPath *)indexPath {
         if (MAXIsFullScreen) {
             navh  = kNavBarHeight + 24;
         }
-        _tipView = [[MaxEmptyTipView alloc] initWithFrame:CGRectMake(0, navh + 1 , MAXScreenW, MAXScreenH - navh - 37)];
+        _tipView = [[MaxEmptyTipView alloc] initWithFrame:CGRectMake(0, navh + 1 , MAXScreenW, MAXScreenH - navh - 37) type:MaxEmptyTipTypeCommonBlank];
     }
     return _tipView;
 }

@@ -10,7 +10,14 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
+typedef enum : NSUInteger {
+    MaxEmptyTipTypeCommonBlank,
+    MaxEmptyTipTypeContactSupport,
+} MaxEmptyTipType;
+
 @interface MaxEmptyTipView : UIView
+
+- (instancetype)initWithFrame:(CGRect)frame type:(MaxEmptyTipType)type;
 
 @end
 

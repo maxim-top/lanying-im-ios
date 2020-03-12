@@ -28,6 +28,7 @@
 @property (nonatomic, strong) UIButton *beginChatButton;
 @property (nonatomic, strong) UIImageView *avatarImageView;
 @property (nonatomic, strong) UILabel *nameLabel;
+@property (nonatomic, strong) UILabel *userIDLabel;
 @property (nonatomic, strong) NSArray *cellDataArray;
 @property (nonatomic, strong) BMXRoster *currentRoster;
 
@@ -53,10 +54,14 @@
         UIImage *image = [UIImage imageWithContentsOfFile:self.currentRoster.avatarThumbnailPath];
         self.avatarImageView.image = image ? image : [UIImage imageNamed:@"profileavatar"];
     }
+    
     if ([self.currentRoster.userName length]) {
-        self.nameLabel.text = [NSString stringWithFormat:@"%@", self.currentRoster.userName];
+        self.nameLabel.text = [NSString stringWithFormat:@"%@", [self.currentRoster.nickName length] ? self.currentRoster.nickName : self.currentRoster.userName];
         [self.nameLabel sizeToFit];
     }
+    
+    self.userIDLabel.text = [NSString stringWithFormat:@"ID:%lld", self.currentRoster.rosterId];
+    [self.userIDLabel sizeToFit];
     
     self.cellDataArray = [self getSettingConfigDataArray];
     [self.tableView reloadData];
@@ -110,13 +115,13 @@
     cell.delegate = self;
     cell.titleLabel.text = dic[@"type"];
     [cell.mswitch setHidden:YES];
-    if ([dic[@"type"] isEqualToString:@"ID"]) {
-        cell.contentLabel.text = [NSString stringWithFormat:@"%lld", self.currentRoster.rosterId];
-    } else if ([dic[@"type"] isEqualToString:@"公有信息"]) {
-        
+//    if ([dic[@"type"] isEqualToString:@"ID"]) {
+//        cell.contentLabel.text = [NSString stringWithFormat:@"%lld", self.currentRoster.rosterId];
+//    } else
+    if ([dic[@"type"] isEqualToString:@"公有信息"]) {
         cell.contentLabel.text = [NSString stringWithFormat:@"%@", self.currentRoster.json_PublicInfo];
-    } else if ([dic[@"type"] isEqualToString:@"昵称"]) {
-        cell.contentLabel.text = [NSString stringWithFormat:@"%@", self.currentRoster.nickName];
+    } else if ([dic[@"type"] isEqualToString:@"用户名"]) {
+        cell.contentLabel.text = [NSString stringWithFormat:@"%@", self.currentRoster.userName];
     } else if ([dic[@"type"] isEqualToString:@"设置扩展信息"]) {
         cell.contentLabel.text = [NSString stringWithFormat:@"%@", self.currentRoster.json_ext];
         cell.accessoryType = UITableViewCellAccessoryDisclosureIndicator; //显示最右边的箭头
@@ -231,6 +236,7 @@
     
     [self avatarImageView];
     [self nameLabel];
+    [self userIDLabel];
 }
 
 #pragma mark - lazy load
@@ -262,12 +268,31 @@
         [_nameLabel sizeToFit];
         
         CGFloat nameLabelRight = 15;
-        _nameLabel.size = CGSizeMake(80, 50);
-        _nameLabel.bmx_centerY = self.avatarImageView.bmx_centerY;
+        _nameLabel.size = CGSizeMake(80, 30);
+        _nameLabel.bmx_top = self.avatarImageView.bmx_top + 3;
         _nameLabel.bmx_left = self.avatarImageView.bmx_right + nameLabelRight;
     }
     return _nameLabel;
 }
+
+- (UILabel *)userIDLabel {
+    if (!_userIDLabel) {
+        _userIDLabel = [[UILabel alloc] init];
+        [self.headerView addSubview:_userIDLabel];
+        _userIDLabel.text = @"Nick";
+        _userIDLabel.font = [UIFont systemFontOfSize:16];
+        _userIDLabel.textColor = [UIColor blackColor];
+        _userIDLabel.textAlignment = NSTextAlignmentLeft;
+        [_userIDLabel sizeToFit];
+        
+        CGFloat nameLabelRight = 15;
+        _userIDLabel.size = CGSizeMake(80, 30);
+        _userIDLabel.bmx_top = self.nameLabel.bmx_bottom + 5;
+        _userIDLabel.bmx_left = self.avatarImageView.bmx_right + nameLabelRight;
+    }
+    return _userIDLabel;
+}
+
 
 
 

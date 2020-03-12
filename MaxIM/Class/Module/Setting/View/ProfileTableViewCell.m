@@ -19,7 +19,7 @@
 
 @interface ProfileTableViewCell ()
 
-
+@property (nonatomic, strong) UIView *line;
 
 @end
 
@@ -54,6 +54,11 @@
     
     self.avatarimageView.bmx_right = MAXScreenW - 15 - 40 - 20;
     self.avatarimageView.bmx_size = CGSizeMake(40, 40);
+    
+    self.line.bmx_size = CGSizeMake(MAXScreenW - 40 - 35, 0.5);
+    self.line.bmx_left = self.avatarimageView.bmx_right + 5;
+    self.line.bmx_right = MAXScreenW;
+    self.line.bmx_bottom = 68-1;
     
     [self layoutIfNeeded];
 }
@@ -101,6 +106,16 @@
     
     return _contentLabel;
 }
+
+- (UIView *)line {
+    if (!_line) {
+        _line = [[UIView alloc] init];
+        [self addSubview:_line];
+        _line.backgroundColor = kColorC4_5;
+    }
+    return _line;
+}
+
 
 - (void)awakeFromNib {
     [super awakeFromNib];

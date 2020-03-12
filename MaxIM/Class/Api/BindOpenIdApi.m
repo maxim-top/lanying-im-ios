@@ -27,15 +27,16 @@
 }
 
 - (nullable NSString *)apiPath  {
-    return @"app/bind_openid";
+    return @"app/wechat/bind";
 }
 
 -  (NSDictionary *)requestParams {
-    return @{@"open_id": self.openId };
+    return @{@"open_id": self.openId,
+             @"type" : @0};
 }
 
 - (HQRequestMethod)requestMethod {
-    return HQRequestMethodGet;
+    return HQRequestMethodPost;
 }
 
 

@@ -231,8 +231,15 @@
 }
 
 - (void)setUpNavItem {
-    [self setNavigationBarTitle:@"创建群组" navLeftButtonIcon:@"blackback" navRightButtonTitle:@"保存"];
-    [self.navRightButton addTarget:self action:@selector(touchedRightBar) forControlEvents:UIControlEventTouchUpInside];
+    
+    if (self.isAt == YES) {
+        [self setNavigationBarTitle:@"选择提醒的人" navLeftButtonIcon:@"blackback" navRightButtonTitle:@"保存"];
+        [self.navRightButton addTarget:self action:@selector(touchedRightBar) forControlEvents:UIControlEventTouchUpInside];
+    } else {
+        [self setNavigationBarTitle:@"创建群组" navLeftButtonIcon:@"blackback" navRightButtonTitle:@"保存"];
+        [self.navRightButton addTarget:self action:@selector(touchedRightBar) forControlEvents:UIControlEventTouchUpInside];
+    }
+   
 }
 
 

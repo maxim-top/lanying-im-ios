@@ -14,9 +14,11 @@
 #import <floo-ios/BMXGroup.h>
 #import "GroupQRcodeInfoApi.h"
 #import "UIViewController+CustomNavigationBar.h"
+#import "AppWechatUnbindApi.h"
 
 @interface CodeImageViewController ()
 
+@property (nonatomic, strong) UIButton *unbindWechatButton;
 
 @property (nonatomic, strong) UIView *cardView;
 @property (nonatomic, strong) UILabel *nameLabel;
@@ -184,7 +186,22 @@
     self.codeImageView.image = [UIImage imageWithCGImage:image.cgimage];
 }
 
+- (void)clickunbindWechatButton:(UIButton *)button {
+    
+    AppWechatUnbindApi *api = [[AppWechatUnbindApi alloc] init];
+    [api startWithSuccessBlock:^(ApiResult * _Nullable result) {
+        if (result.isOK) {
+            [HQCustomToast showDialog:@"解绑成功"];
+        }
+        
+    } failureBlock:^(NSError * _Nullable error) {
+        
+    }];
+}
+
 - (void)setUpSubview {
+    
+    [self unbindWechatButton];
     [self avatarImageView];
     [self cardView];
     [self nameLabel];
@@ -258,6 +275,16 @@
 
     }
     return _cardView;
+}
+
+- (UIButton *)unbindWechatButton {
+    if (!_unbindWechatButton) {
+        _unbindWechatButton = [UIButton buttonWithType:UIButtonTypeCustom];
+        _unbindWechatButton.frame = CGRectMake(0, NavHeight, 50, 50);
+        [_unbindWechatButton addTarget:self action:@selector(clickunbindWechatButton:) forControlEvents:UIControlEventTouchUpInside];
+        [self.view addSubview:_unbindWechatButton];
+    }
+    return _unbindWechatButton;
 }
 
 - (void)setUpNavItem {

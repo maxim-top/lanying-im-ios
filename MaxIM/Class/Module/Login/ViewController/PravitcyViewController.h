@@ -12,6 +12,8 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface PravitcyViewController : UIViewController
 
+- (instancetype)initWithTitle:(NSString *)title url:(NSString *)url;
+
 @end
 
 NS_ASSUME_NONNULL_END

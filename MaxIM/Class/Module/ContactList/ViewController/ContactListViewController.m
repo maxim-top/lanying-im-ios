@@ -25,6 +25,7 @@
 #import "ScanViewController.h"
 #import "GroupCreateViewController.h"
 #import "MenuViewManager.h"
+#import "MaxEmptyTipView.h"
 
 @interface ContactListViewController ()<UITableViewDelegate,
                                         UITableViewDataSource,
@@ -50,6 +51,8 @@
 @property (nonatomic, strong) NSArray *supportArray;
 @property (nonatomic, strong) MenuViewManager *menuViewManager;
 
+@property (nonatomic, strong) MaxEmptyTipView *tipView;
+
 @end
 
 @implementation ContactListViewController
@@ -62,17 +65,33 @@
     [self getAllRoster];
     [self actionArray];
     [self.rosterListTableView reloadData];
-    [self getSupportData];
+    
+    
+    [self configSupportData];
     
     [[[BMXClient sharedClient] rosterService] addRosterListener:self];
     
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(getAllRoster) name:@"RefreshContactList" object:nil];
-    
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(hideMenu) name:@"HideMenu" object:nil];
+    [self setNotifications];
+
 }
 
 - (void)hideMenu {
     [self.menuViewManager hide];
+}
+
+- (void)configSupportData {
+    if ([self isShowSupportData]) {
+        [self getSupportData];
+    } else {
+        
+    }
+}
+
+- (BOOL)isShowSupportData {
+    if ([[[BMXClient sharedClient] sdkConfig].appID isEqualToString:@"welovemaxim"]) {
+        return YES;
+    }
+    return NO;
 }
 
 - (void)getSupportData {
@@ -87,7 +106,6 @@
             [self getSupportListProfileWithArray:[NSArray arrayWithArray:idArrayM]];
         } else {
             MAXLog(@"bbbbbb");
-
         }
     } failureBlock:^(NSError * _Nullable error) {
         
@@ -98,8 +116,8 @@
     [[[BMXClient sharedClient] rosterService] searchRostersByRosterIdList:array forceRefresh:NO completion:^(NSArray<BMXRoster *> *rosterList, BMXError *error) {
         if (!error) {
             self.supportArray = rosterList;
+            [self.supportListTableView reloadData];
         }
-        
     }];
     
 }
@@ -134,7 +152,7 @@
     [HQCustomToast showWating];
     [[[BMXClient sharedClient] rosterService] getRosterListforceRefresh:NO completion:^(NSArray *rostIdList, BMXError *error) {
         if (!error) {
-            MAXLog(@"%ld", rostIdList.count);
+            MAXLog(@"%lu", (unsigned long)rostIdList.count);
             [self searchRostersByidArray:[NSArray arrayWithArray:rostIdList]];
         }
     }];
@@ -146,13 +164,12 @@
         [HQCustomToast hideWating];
 
         if (!error) {
-            MAXLog(@"%ld", rosterList.count);
+            MAXLog(@"%lu", (unsigned long)rosterList.count);
             self.rosterArray = [NSArray arrayWithArray:rosterList];
             [self.rosterListTableView reloadData];
         } else {
             
         }
-       
     }];
 }
 
@@ -306,7 +323,7 @@
         }
     } else {
         BMXRoster *roster = self.supportArray[indexPath.row];
-        [cell refresh:roster];
+        [cell refreshSupportRoster:roster];
     }
 
     return cell;
@@ -399,6 +416,8 @@
 
 -(void)indexDidChangeForSegmentedControl:(UISegmentedControl *)sender {
     
+    [self.tipView removeFromSuperview];
+    
     [self.menuViewManager hide];
     NSInteger selecIndex = sender.selectedSegmentIndex;
     switch(selecIndex){
@@ -442,10 +461,20 @@
             
             [self selectViewAnimationWithTag:self.tag];
             
-            if (self.supportArray.count <= 0) {
-                [self getSupportData];
+            
+            [self getSupportData];
+            [self.supportListTableView reloadData];
+
+            
+            if (![self isShowSupportData]) {
+                [self.view insertSubview:self.tipView aboveSubview:self.supportListTableView];
             } else {
-                [self.supportListTableView reloadData];
+                [self.tipView removeFromSuperview];
+//                if (self.supportArray.count <= 0) {
+//                    [self getSupportData];
+//                } else {
+//                    [self.supportListTableView reloadData];
+//                }
             }
             
             break;
@@ -592,6 +621,27 @@
     }
     return _groupArray;
 }
++ (UIImage *)imageWithColor:(UIColor *)color {
+    CGRect rect = CGRectMake(0, 0, 1, 1);
+    UIGraphicsBeginImageContext(rect.size);
+    CGContextRef context = UIGraphicsGetCurrentContext();
+    CGContextSetFillColorWithColor(context, [color CGColor]);
+    CGContextFillRect(context, rect);
+    UIImage *image = UIGraphicsGetImageFromCurrentImageContext();
+    UIGraphicsEndImageContext();
+    return image;
+}
+
+- (UIImage *)imageWithColor:(UIColor *)color {
+    CGRect rect = CGRectMake(0, 0, 1, 1);
+    UIGraphicsBeginImageContext(rect.size);
+    CGContextRef context = UIGraphicsGetCurrentContext();
+    CGContextSetFillColorWithColor(context, [color CGColor]);
+    CGContextFillRect(context, rect);
+    UIImage *image = UIGraphicsGetImageFromCurrentImageContext();
+    UIGraphicsEndImageContext();
+    return image;
+}
 
 - (void)setUpNavItem{
     UIView *navigationBar = [[UIView alloc]  initWithFrame:CGRectMake(0, 0, MAXScreenW, NavHeight)];
@@ -601,6 +651,14 @@
     
     UISegmentedControl *control = [[UISegmentedControl alloc] initWithItems: @[@"好友", @"群组", @"支持"]];
 //                                   initWithFrame:CGRectMake(16, 10, 32 * 3, 30)];
+//    
+    [control setBackgroundImage:[self imageWithColor:[UIColor clearColor]] forState:UIControlStateNormal barMetrics:UIBarMetricsDefault];
+    [control setBackgroundImage:[self imageWithColor:[UIColor clearColor]] forState:UIControlStateSelected barMetrics:UIBarMetricsDefault];
+    
+    UIImage *_dividerImage= [self imageWithColor:[UIColor clearColor]];
+            [control setDividerImage:_dividerImage forLeftSegmentState:UIControlStateNormal rightSegmentState:UIControlStateNormal barMetrics:UIBarMetricsDefault];
+  
+  
     control.frame = CGRectMake(5, MAXIsFullScreen ? 28 + 26 :  28 , 190, 25);
     control.tintColor = [UIColor whiteColor];
     
@@ -635,6 +693,36 @@
 
     }
     return _menuViewManager;
+}
+
+- (MaxEmptyTipView *)tipView {
+    if (!_tipView) {
+        
+        CGFloat navh = kNavBarHeight;
+        if (MAXIsFullScreen) {
+            navh  = kNavBarHeight + 24;
+        }
+        _tipView = [[MaxEmptyTipView alloc] initWithFrame:CGRectMake(0, navh + 1 , MAXScreenW, MAXScreenH - navh - 37) type:MaxEmptyTipTypeContactSupport];
+    }
+    return _tipView;
+}
+
+
+#pragma mark == delegate of create group
+- (void) setNotifications {
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(onGrouplistChange) name:@"KGroupListModified" object:nil];
+    
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(getAllRoster) name:@"RefreshContactList" object:nil];
+    
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(hideMenu) name:@"HideMenu" object:nil];
+}
+
+- (void)onGrouplistChange {
+    
+    if (self.tag == 1) {
+        MAXLog(@"1");
+         [self getGroupTableViewDatasource];
+    }
 }
 
 @end

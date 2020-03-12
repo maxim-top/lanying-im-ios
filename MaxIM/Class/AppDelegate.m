@@ -8,7 +8,6 @@
 
 #import "AppDelegate.h"
 #import "MAXTabBarController.h"
-#import "MAXLoginViewController.h"
 #import <floo-ios/BMXClient.h>
 #import "MainViewController.h"
 #import "IMAcount.h"
@@ -23,9 +22,15 @@
 #import "GroupListSelectViewController.h"
 #import "ConsoleAppIDStorage.h"
 #import "ConsoleAppID.h"
+#import "MAXLauchVideoViewController.h"
+#import "LoginViewController.h"
+#import "AccountListStorage.h"
+#import "AccountManagementManager.h"
 
 #import <floo-ios/BMXHostConfig.h>
 #import <Bugly/Bugly.h>
+
+
 
 
 @interface AppDelegate ()<UNUserNotificationCenterDelegate, BMXUserServiceProtocol, WXApiDelegate>
@@ -47,10 +52,10 @@
     
     [self autologin];
     [self configapnsWithapplication:application didFinishLaunchingWithOptions:launchOptions];
-    
-    if (application.applicationIconBadgeNumber > 0) {
-        application.applicationIconBadgeNumber = 0;
-    }
+  
+//    if (application.applicationIconBadgeNumber > 0) {
+//        application.applicationIconBadgeNumber = 0;
+//    }
     return YES;
 }
 
@@ -66,6 +71,7 @@
     IMAcount *accout = [IMAcountInfoStorage loadObject];
     if (accout) {
         [self signByName:accout.userName password:accout.password];
+
     }
 }
 
@@ -74,7 +80,7 @@
 }
 
 - (void)signByName:(NSString *)name password:(NSString *)password {
-    [[[BMXClient sharedClient] userService] fastSignInByName:name password:password  completion:^(BMXError *error) {
+    [[BMXClient sharedClient] fastSignInByName:name password:password  completion:^(BMXError *error) {
         if (!error) {
             MAXLog(@"登录成功 username = %@ , password = %@",name, password);
             [self.maintabController addIMListener];
@@ -89,7 +95,7 @@
             [self getAppTokenWithName:name password:password];
         }else {
             MAXLog(@"失败 errorCode = %ld ", error.errorCode);
-            self.window.rootViewController = [[MAXLoginViewController alloc] init];
+            self.window.rootViewController = [LoginViewController loginViewWithViewControllerWithNavigation];
         }
     }];
 }
@@ -101,7 +107,6 @@
             IMAcount *account = [IMAcountInfoStorage loadObject];
             NSDictionary *dic = result.resultData;
             account.token = dic[@"token"];
-        
             [IMAcountInfoStorage saveObject:account];
         }
     } failureBlock:^(NSError * _Nullable error) {
@@ -113,9 +118,18 @@
     [[[BMXClient sharedClient] userService] getProfileForceRefresh:NO completion:^(BMXUserProfile *profile, BMXError *aError) {
         [[NSNotificationCenter defaultCenter] postNotificationName:@"RefreshProfile" object:profile];
         
+        NSString *appid = [[BMXClient sharedClient] sdkConfig].appID;
         IMAcount *account = [IMAcountInfoStorage loadObject];
         account.usedId = [NSString stringWithFormat:@"%lld", profile.userId];
         [IMAcountInfoStorage saveObject:account];
+        
+        NSArray *accountlist  = [NSArray arrayWithArray:[AccountListStorage loadObject]];
+        if (accountlist.count == 0) {
+            [[AccountManagementManager sharedAccountManagementManager] addAccountUserName:account.userName
+                                                                                 password:account.password
+                                                                                   userid:account.usedId
+                                                                                    appid:appid];
+        }
     }];
 }
 
@@ -149,12 +163,35 @@
 }
 
 - (void)application:(UIApplication *)application didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)deviceToken {
-    NSString *deviceTokenStr = [[[[deviceToken description]
-                                  stringByReplacingOccurrencesOfString:@"<" withString:@""]
-                                 stringByReplacingOccurrencesOfString:@">" withString:@""]
-                                stringByReplacingOccurrencesOfString:@" " withString:@""];
-    MAXLog(@"deviceTokenStr:\n%@",deviceTokenStr);
-    [[NSUserDefaults standardUserDefaults] setObject:deviceTokenStr forKey:@"deviceToken"];
+    
+    if (![deviceToken isKindOfClass:[NSData class]]) return;
+    const unsigned *tokenBytes = [deviceToken bytes];
+    NSString *hexToken = [NSString stringWithFormat:@"%08x%08x%08x%08x%08x%08x%08x%08x",
+                          ntohl(tokenBytes[0]), ntohl(tokenBytes[1]), ntohl(tokenBytes[2]),
+                          ntohl(tokenBytes[3]), ntohl(tokenBytes[4]), ntohl(tokenBytes[5]),
+                          ntohl(tokenBytes[6]), ntohl(tokenBytes[7])];
+    MAXLog(@"deviceToken:%@", hexToken);
+    
+    
+//    NSString *deviceTokenStr = [[[[deviceToken description]
+//                                  stringByReplacingOccurrencesOfString:@"<" withString:@""]
+//                                 stringByReplacingOccurrencesOfString:@">" withString:@""]
+//                                stringByReplacingOccurrencesOfString:@" " withString:@""];
+//    MAXLog(@"deviceTokenStr:\n%@",deviceTokenStr);
+    [[NSUserDefaults standardUserDefaults] setObject:hexToken forKey:@"deviceToken"];
+    
+}
+
+- (void)addNotification {
+    [[NSNotificationCenter defaultCenter] removeObserver:self name:@"updatedeviceToken" object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self
+                                             selector:@selector(updatePushId)
+                                                 name:@"updatedeviceToken"
+                                               object:nil];
+}
+
+- (void)updatePushId {
+    
 }
 
 - (void)initializeBMX {
@@ -206,14 +243,36 @@
 }
 
 - (void)setupMainViewController {
+    
     self.maintabController = [[MAXTabBarController alloc] initWithNibName:nil bundle:nil];
     [MAXGlobalTool share].rootViewController = self.maintabController;
     
+    BOOL firstLauch = [[NSUserDefaults standardUserDefaults] boolForKey:@"MAXFirstLauch"];
+    if (!firstLauch) {
+    
+        MAXLauchVideoViewController *lauchVideoViewController = [[MAXLauchVideoViewController alloc] init];
+        self.window.rootViewController = lauchVideoViewController;
+        [[NSUserDefaults standardUserDefaults] setBool:YES forKey:@"MAXFirstLauch"];
+        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(changeRootViewController) name:@"LauchVideoPlayeFinish" object:nil];
+        
+    }else {
+    
+        if (![IMAcountInfoStorage isHaveLocalData]) {
+            self.window.rootViewController = [LoginViewController loginViewWithViewControllerWithNavigation];
+        }else {
+            self.window.rootViewController = self.maintabController;
+        }
+    }
+
+}
+- (void)changeRootViewController {
+    
     if (![IMAcountInfoStorage isHaveLocalData]) {
-        self.window.rootViewController = [[MAXLoginViewController alloc] init];
+        self.window.rootViewController = [LoginViewController loginViewWithViewControllerWithNavigation];
     }else {
         self.window.rootViewController = self.maintabController;
     }
+    [[NSNotificationCenter defaultCenter] removeObserver:self name:@"LauchVideoPlayeFinish" object:nil];
 }
 
 - (BOOL)application:(UIApplication *)application openURL:(NSURL *)url sourceApplication:(NSString *)sourceApplication annotation:(id)annotation {
@@ -264,15 +323,17 @@
             [api startWithSuccessBlock:^(ApiResult * _Nullable result) {
                 if ( result.isOK) {
                     if (!result.resultData[@"password"] ) {
-                       //   注册登录
+                       //  注册登录
                         [HQCustomToast showDialog:@"请登录注册绑定微信"];
-                         [[NSNotificationCenter defaultCenter] postNotificationName:@"wechatloginsuccess_newuser" object:result.resultData];
+                        [[NSNotificationCenter defaultCenter] postNotificationName:@"wechatloginsuccess_newuser" object:result.resultData];
                     } else {
+                        
                         IMAcount *account = [[IMAcount alloc] init];
                         account.usedId  = [NSString stringWithFormat:@"%@",result.resultData[@"user_id"]];
                         account.password = result.resultData[@"password"];
+                        account.userName = result.resultData[@"username"];
                         [IMAcountInfoStorage saveObject:account];
-                          [[NSNotificationCenter defaultCenter] postNotificationName:@"wechatloginsuccess" object:nil];
+                        [[NSNotificationCenter defaultCenter] postNotificationName:@"wechatloginsuccess" object:nil];
                     }
                 }
 
@@ -306,8 +367,6 @@
     //                }
 }
 
-
-
 - (void)application:(UIApplication *)application didReceiveRemoteNotification:(NSDictionary * _Nonnull)userInfo fetchCompletionHandler:(void (^ _Nonnull)(UIBackgroundFetchResult))completionHandler{
     MAXLog(@"didReceiveRemoteNotification:%@",userInfo);
 }
@@ -322,16 +381,19 @@
 }
 
 - (void)applicationWillEnterForeground:(UIApplication *)application {
-}
-
-
-- (void)applicationDidBecomeActive:(UIApplication *)application {
-    //进入前台
-    if (application.applicationIconBadgeNumber > 0) {
-        application.applicationIconBadgeNumber = 0;
+    // app从后台进入前台都会调用这个方法
+    //    if (application.applicationIconBadgeNumber > 0) {
+    //        application.applicationIconBadgeNumber = 0;
+    //    }
+    
+    IMAcount *accout = [IMAcountInfoStorage loadObject];
+    if (accout) {
+        [[BMXClient sharedClient]  reconnect];
+        MAXLog(@"reconnect");
+        
     }
-    [[[BMXClient sharedClient] userService]  reconnect];
 }
+
 
 
 - (void)applicationWillTerminate:(UIApplication *)application {

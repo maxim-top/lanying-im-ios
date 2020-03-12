@@ -22,6 +22,7 @@
 #import "CodeImageViewController.h"
 #import "AboutUsViewController.h"
 #import "ConsoleAppIDStorage.h"
+#import "AccountMangementViewController.h"
 
 #import <ZXingObjC.h>
 
@@ -38,7 +39,7 @@
 @property (nonatomic, strong) BMXUserProfile *profile;
 @property (nonatomic, strong) UILabel *idLabel;
 @property (nonatomic, strong) UILabel *nickNameLabel;
-@property (nonatomic, strong) UILabel *subTitleLabel;
+//@property (nonatomic, strong) UILabel *subTitleLabel;
 
 @end
 
@@ -79,7 +80,7 @@
 }
 
 - (void)logoutclick{
-    [[[BMXClient sharedClient] userService] signOutWithcompletion:^(BMXError *error) {
+    [[BMXClient sharedClient] signOutWithcompletion:^(BMXError *error) {
         if (!error) {
             
             [ConsoleAppIDStorage clearObject];
@@ -129,20 +130,20 @@
 - (void)refeshProfile:(BMXUserProfile *)profile {
     self.profile = profile;
     [self reloadData];
-    self.nameLabel.text = profile.userName;
-    self.nickNameLabel.text = [profile.nickName length] ? [NSString stringWithFormat:@"昵称：%@", profile.nickName] : @"昵称：请设置昵称";
+    self.nameLabel.text = [profile.nickName length] ? [NSString stringWithFormat:@"%@", profile.nickName] : @"点击设置昵称";
+    self.nickNameLabel.text = [NSString stringWithFormat:@"用户名：%@", profile.userName];
     [self.nickNameLabel sizeToFit];
 
     self.idLabel.text = [NSString stringWithFormat:@"ID: %lld", profile.userId];
     [self.idLabel sizeToFit];
-    if ([profile.publicInfoJson length] > 0) {
-        self.subTitleLabel.text = [NSString stringWithFormat:@"个性签名：%@", profile.publicInfoJson];
-
-    } else {
-        self.subTitleLabel.text = @"个性签名：赶快去更新签名吧";
-
-    }
-    [self.subTitleLabel sizeToFit];
+//    if ([profile.publicInfoJson length] > 0) {
+//        self.subTitleLabel.text = [NSString stringWithFormat:@"个性签名：%@", profile.publicInfoJson];
+//
+//    } else {
+//        self.subTitleLabel.text = @"个性签名：赶快去更新签名吧";
+//
+//    }
+//    [self.subTitleLabel sizeToFit];
 
     
     UIImage *avarat = [UIImage imageWithContentsOfFile:profile.avatarThumbnailPath];
@@ -150,6 +151,7 @@
         self.avatarImageView.image  = avarat;
     }else {
         [[[BMXClient sharedClient] userService] downloadAvatarWithProfile:profile thumbnail:YES  progress:^(int progress, BMXError *error) {
+            
         } completion:^(BMXUserProfile *profile, BMXError *error) {
             if (error== nil) {
                 UIImage *image = [UIImage imageWithContentsOfFile:profile.avatarThumbnailPath];
@@ -206,7 +208,6 @@
         [cell.mswitch setHidden:NO];
         cell.accessoryType = UITableViewCellAccessoryNone;
     }
-    
     if ([cell.titleLabel.text isEqualToString:@"接受新消息通知"]) {
         [cell.mswitch setOn:self.profile.messageSetting.mPushEnabled];
     } else if ([cell.titleLabel.text isEqualToString:@"震动"]) {
@@ -220,9 +221,6 @@
     } else if ([cell.titleLabel.text isEqualToString:@"是否推送详情"]) {
         [cell.mswitch setOn:self.profile.messageSetting.mPushDetail];
     } else if ([cell.titleLabel.text isEqualToString:@"关于我们"]) {
-        //        NSDictionary *infoDictionary = [[NSBundle mainBundle] infoDictionary];
-        //        NSString *app_Version = [infoDictionary objectForKey:@"CFBundleShortVersionString"];
-        //        cell.contentLabel.text = app_Version;
         cell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
     } else if ([cell.titleLabel.text isEqualToString:@"设置推送昵称"]) {
         cell.contentLabel.text = self.profile.messageSetting.pushNickname;
@@ -236,7 +234,8 @@
     NSDictionary *dic = self.cellDataArray[indexPath.row];
     NSString *str = dic[@"type"];
     BOOL state = mswtich.on ? YES : NO;
-    if ([str isEqualToString:@"接受新消息通知"]) {
+    
+   if ([str isEqualToString:@"接受新消息通知"]) {
         [[[BMXClient sharedClient] userService] setEnablePushStatus:state completion:^(BMXError *error) {
             if (!error) {
                 [HQCustomToast showDialog:@"设置成功"];
@@ -296,7 +295,11 @@
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
     NSDictionary *dic = self.cellDataArray[indexPath.row];
     NSString *str = [NSString stringWithFormat:@"%@", dic[@"type"]];
-    if ([str isEqualToString:@"黑名单列表"]) {
+    if ([str isEqualToString:@"切换账号"]) {
+        AccountMangementViewController *vc = [[AccountMangementViewController alloc] init];
+        vc.hidesBottomBarWhenPushed = YES;
+        [self.currentViewController.navigationController pushViewController:vc animated:YES];
+    } else if ([str isEqualToString:@"黑名单列表"]) {
         MAXBlackListViewController *vc = [[MAXBlackListViewController alloc] init];
         vc.hidesBottomBarWhenPushed = YES;
         [self.currentViewController.navigationController pushViewController:vc animated:YES];
@@ -304,8 +307,7 @@
         DeviceManagmentViewController *vc = [[DeviceManagmentViewController alloc] init];
         vc.hidesBottomBarWhenPushed = YES;
         [self.currentViewController.navigationController pushViewController:vc animated:YES];
-
-    }else if ([str isEqualToString:@"关于我们"]) {
+    } else if ([str isEqualToString:@"关于我们"]) {
         AboutUsViewController *vc = [[AboutUsViewController alloc] init];
         vc.hidesBottomBarWhenPushed = YES;
         [self.currentViewController.navigationController pushViewController:vc animated:YES];
@@ -345,7 +347,6 @@
     self.headerImageView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"Backgroud"]];
     self.headerImageView.frame = CGRectMake(0, 0, MAXScreenW, image.size.height);
     self.headerImageView.tag = 101;
-    self.headerImageView.backgroundColor = [UIColor redColor];
     self.headerImageView.contentMode = UIViewContentModeScaleAspectFill;
     self.headerImageView.clipsToBounds = YES;
     [self.headerView addSubview:self.headerImageView];
@@ -354,7 +355,7 @@
     [self codeButton];
     [self nickNameLabel];
     [self idLabel];
-    [self subTitleLabel];
+//    [self subTitleLabel];
     [self avatarImageView];
     [self editImageView];
 }
@@ -430,7 +431,7 @@
         CGFloat nameLabelleft = 36;
 
         _nameLabel.size = CGSizeMake(60,30);
-        _nameLabel.bmx_centerY = 120 / 2.0 + 10 - 30;
+        _nameLabel.bmx_centerY = 120 / 2.0 + 10 - 10;
         _nameLabel.bmx_left = nameLabelleft;
         
     }
@@ -492,28 +493,5 @@
     }
     return _nickNameLabel;
 }
-
-
-
-- (UILabel *)subTitleLabel {
-    if (!_subTitleLabel) {
-        _subTitleLabel = [[UILabel alloc] init];
-        [self.headerView addSubview:_subTitleLabel];
-        _subTitleLabel.text = @"";
-        _subTitleLabel.font =[UIFont fontWithName:@"PingFangSC-Regular" size:12];
-        _subTitleLabel.textColor = [UIColor colorWithRed:255/255.0 green:255/255.0 blue:255/255.0 alpha:1/1.0];
-        _subTitleLabel.textAlignment = NSTextAlignmentLeft;
-        [_subTitleLabel sizeToFit];
-    
-        CGFloat nameLabelleft = 36;
-        
-        _subTitleLabel.size = CGSizeMake(80,20);
-        _subTitleLabel.bmx_top =  _idLabel.bmx_bottom + 5;
-        _subTitleLabel.bmx_left = nameLabelleft;
-        
-    }
-    return _subTitleLabel;
-}
-
 
 @end

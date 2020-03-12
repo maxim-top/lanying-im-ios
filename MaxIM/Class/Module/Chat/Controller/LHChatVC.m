@@ -60,7 +60,7 @@
 
 #import <CoreLocation/CoreLocation.h>
 #import "UIViewController+CustomNavigationBar.h"
-
+#import <floo-ios/BMXMessageConfig.h>
 
 //#import <floo-ios/BMXGroupMember.h>
 
@@ -802,14 +802,14 @@ CLLocationManagerDelegate>
 
 - (void)transterSlectedGroup:(BMXGroup *)group {
     BMXMessageObject *m = [[BMXMessageObject alloc] initWithForwardMessage:self.currentMessage.messageObjc fromId:[self.account.usedId longLongValue] toId:group.groupId type:BMXMessageTypeGroup conversationId:group.groupId];
-    m.enableGroupAck = YES;
+//    m.enableGroupAck = YES;
     [[[BMXClient sharedClient] chatService] forwardMessage:m];
 }
 
 - (void)groupOwnerTransterVCdidSelect:(id)toModel {
     BMXRoster *roster = toModel;
     BMXMessageObject *m = [[BMXMessageObject alloc] initWithForwardMessage:self.currentMessage.messageObjc fromId:[self.account.usedId longLongValue] toId:roster.rosterId type:BMXMessageTypeSingle conversationId:roster.rosterId];
-    m.enableGroupAck = YES;
+//    m.enableGroupAck = YES;
     [[[BMXClient sharedClient] chatService] forwardMessage:m];
 }
 
@@ -1030,12 +1030,12 @@ CLLocationManagerDelegate>
                 messageCell.readStatusLabel.text = @"未读";
             }
         } else {
-            if (messageModel.messageObjc.enableGroupAck == YES) {
+//            if (messageModel.messageObjct.enableGroupAck == YES) {
                 messageCell.readStatusLabel.text = [NSString stringWithFormat:@"%d人已读", messageModel.messageObjc.groupAckCount];
-            } else {
-                messageCell.readStatusLabel.text = @"";
-
-            }
+//            } else {
+//                messageCell.readStatusLabel.text = @"";
+//
+//            }
         }
     } else {
         __weak  LHChatViewCell *weakCell = messageCell;
@@ -1262,7 +1262,7 @@ CLLocationManagerDelegate>
     long long firstMessageId = firstMessage? firstMessage.msgId : 0;
     
     [[[BMXClient sharedClient] chatService] retrieveHistoryBMXconversation:self.conversation msgId:firstMessageId size:10 completion:^(NSArray *messageListms, BMXError *error) {
-        
+        MAXLog(@"retrieveHistoryBMXconversation:%lulld", (unsigned long)messageListms.count);
         messageListms =  [messageListms sortedArrayUsingComparator:^NSComparisonResult(BMXMessageObject *message1, BMXMessageObject *message2) {
             return message1.serverTimestamp < message2.serverTimestamp;
         }];
@@ -1347,6 +1347,7 @@ CLLocationManagerDelegate>
 
 // 收到消息
 - (void)receivedMessages:(NSArray<BMXMessageObject*> *)messages {
+    MAXLog(@"11--11---收到");
     if (messages.count > 0) {
         for (BMXMessageObject *message in messages) {
             [self dealWithMessage:message];
@@ -1355,10 +1356,14 @@ CLLocationManagerDelegate>
 }
 
 - (void)dealWithMessage:(BMXMessageObject *)message {
+
     if (message.messageType == BMXMessageTypeGroup) {
         if (self.conversation.type != BMXMessageTypeGroup || message.toId.longLongValue != self.conversation.conversationId) {
             return;
         }
+        
+ 
+
         
     } else {
         if (message.fromId.longLongValue  != self.conversation.conversationId || message.messageType != BMXMessageTypeSingle) {
@@ -1513,6 +1518,8 @@ CLLocationManagerDelegate>
                 [self.tableView scrollToRowAtIndexPath:index atScrollPosition:UITableViewScrollPositionBottom animated:YES];
             }
         });
+    } else {
+        MAXLog(@"%@", error.errorMessage);
     }
 }
 
@@ -1726,29 +1733,25 @@ CLLocationManagerDelegate>
                                                                     toId:toId
                                                                     type:self.messageType
                                                           conversationId:conversationId];
-        messageObject.enableGroupAck = YES;
 
     }else {
         messageObject = [[BMXMessageObject alloc] initWithBMXMessageAttachment:message
                                                                         fromId:[self.account.usedId longLongValue]
                                                                           toId:toId type:self.messageType
                                                                 conversationId:conversationId];
-        messageObject.enableGroupAck = YES;
     }
     return messageObject;
 }
 
-- (NSString *)dealtWithConfigjson {
+- (BMXMessageConfig *)dealtWithConfigjson {
+    BMXMessageConfig *config = [[BMXMessageConfig alloc] initConfigWithMentionAll:NO];
     NSMutableArray *idArray = [NSMutableArray array];
     for (BMXRoster *roster in self.atArray) {
         [idArray addObject:[NSString stringWithFormat:@"%lld", roster.rosterId]];
     }
-    
-    NSDictionary *dic = @{@"mentionAll": @0,
-                          @"mentionList": idArray,
-                          @"pushMessage": @"",
-                          @"senderNickname": @""};
-    return [NSString jsonStringWithDictionary:dic];
+    config.mentionList = idArray;
+    config.mentionAll  = false;
+    return config;
 }
 
 #pragma mark  - sendMessage
@@ -1765,7 +1768,7 @@ CLLocationManagerDelegate>
             NSString *messageText = content;
             messageObject = [self configMessage:messageText];
             if (self.messageType == BMXMessageTypeGroup && self.groupAt == YES) {
-                messageObject.configJson = [self dealtWithConfigjson];
+                messageObject.messageconfig = [self dealtWithConfigjson];
                 self.groupAt = NO;
             }
             
@@ -1948,7 +1951,7 @@ CLLocationManagerDelegate>
 //group mention event
 - (void)inputat {
     if (self.messageType == BMXMessageTypeGroup) {
-        GroupCreateViewController *vc = [[GroupCreateViewController alloc] initWithCurrentGroup:self.currentGroup];
+        GroupCreateViewController  *vc = [[GroupCreateViewController alloc] initWithCurrentGroup:self.currentGroup];
         vc.isAt = YES;
         vc.delegate = self;
         [self.navigationController pushViewController:vc animated:YES];

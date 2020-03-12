@@ -11,11 +11,14 @@
 #import <floo-ios/BMXClient.h>
 #import <floo-ios/BMXRoster.h>
 #import "UIViewController+CustomNavigationBar.h"
+#import "MaxEmptyTipView.h"
+
 @interface MAXBlackListViewController ()<UITableViewDelegate, UITableViewDataSource>
 
 @property (nonatomic, strong) UITableView *tableview;
 @property (nonatomic, strong) NSArray *rosterIdArray;
 @property (nonatomic, strong) NSArray *rosterArray;
+@property (nonatomic, strong) MaxEmptyTipView *tipView;
 
 @end
 
@@ -67,6 +70,10 @@
 }
 
 - (void)getBlackList {
+    if (self.tipView) {
+        [self.tipView removeFromSuperview];
+    }
+
     [[[BMXClient sharedClient] rosterService] getBlockListforceRefresh:YES completion:^(NSArray *blockList, BMXError *error) {
         if (!error && blockList.count > 0 ) {
             self.rosterIdArray = [NSArray arrayWithArray:blockList];
@@ -77,7 +84,7 @@
             self.rosterIdArray = [NSArray array];
             self.rosterArray = [NSArray array];
             [self.tableview reloadData];
-
+            [self.view insertSubview:self.tipView aboveSubview:self.tableview];
         }
     }];
 }
@@ -158,5 +165,18 @@ forRowAtIndexPath:(NSIndexPath *)indexPath {
     }
     return _tableview;
 }
+
+- (MaxEmptyTipView *)tipView {
+    if (!_tipView) {
+        
+        CGFloat navh = kNavBarHeight;
+        if (MAXIsFullScreen) {
+            navh  = kNavBarHeight + 24;
+        }
+        _tipView = [[MaxEmptyTipView alloc] initWithFrame:CGRectMake(0, navh + 1 , MAXScreenW, MAXScreenH - navh - 37) type:MaxEmptyTipTypeCommonBlank];
+    }
+    return _tipView;
+}
+
 
 @end

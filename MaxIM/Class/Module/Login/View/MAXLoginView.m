@@ -22,14 +22,17 @@
 
 
 @property (nonatomic, strong) UILabel *titleLabel;
+
 @property (nonatomic, strong) UILabel *appIDLabel;
 @property (nonatomic, strong) UIButton *editButton;
 
 @property (nonatomic, copy)   NSString *title;
 @property (nonatomic, strong) UITextField *usernameTextField;
 @property (nonatomic, strong) UIView *usernameTextFieldLine;
+
 @property (nonatomic, strong) UITextField *passwordTextField;
 @property (nonatomic, strong) UIView *passwordTextFieldLine;
+
 @property (nonatomic, strong) UIButton *confirmButton;
 
 @property (nonatomic, strong) UITextField *phoneTextField;
@@ -41,6 +44,7 @@
 
 @property (nonatomic, strong) UIButton *getSmsButton;
 @property (nonatomic, strong) UIButton *commitPhoneButton;
+
 @property (nonatomic, strong) UIButton *scanLoginButton;
 
 @property (nonatomic, strong) UIView *wechatLine;
@@ -59,7 +63,6 @@
 @property (nonatomic, copy) NSString *password;
 @property (nonatomic, copy) NSString *phone;
 @property (nonatomic, copy) NSString *captch;
-
 
 
 @property (nonatomic, copy) LoginViewConfirmButtonClick confrimButtonClick;
@@ -507,7 +510,6 @@
         self.commitPhoneButton.enabled = NO;
         self.commitPhoneButton.backgroundColor = [BMXCOLOR_HEX(0x0079F4) colorWithAlphaComponent:0.1];
     }
-    
 }
 
 - (void)touchesBegan:(NSSet<UITouch *> *)touches withEvent:(UIEvent *)event {

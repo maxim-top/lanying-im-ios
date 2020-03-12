@@ -7,37 +7,44 @@
 //
 
 #import "PravitcyViewController.h"
-
+#import "UIViewController+CustomNavigationBar.h"
+#import <WebKit/WebKit.h>
 @interface PravitcyViewController ()
+
+@property (nonatomic,copy) NSString *navtitle;
+@property (nonatomic,copy) NSString *url;
 
 @end
 
 @implementation PravitcyViewController
 
+- (instancetype)initWithTitle:(NSString *)title url:(NSString *)url {
+    if (self = [super init]) {
+        self.navtitle = title;
+        self.url = url;
+    }
+    return self;
+}
+
 - (void)viewDidLoad {
     [super viewDidLoad];
     self.view.backgroundColor = [UIColor whiteColor];
-    
-    UIButton *returnButton = [UIButton buttonWithType:UIButtonTypeCustom];
-    returnButton.frame = CGRectMake(10, 15, 50, 50);
-    [returnButton setImage:[UIImage imageNamed:@"blackback"] forState:UIControlStateNormal];
-    [returnButton addTarget:self action:@selector(returnVC) forControlEvents:UIControlEventTouchUpInside];
-    [self.view addSubview:returnButton];
-    
-    UIWebView *webview = [[UIWebView alloc] initWithFrame:CGRectMake(0, kNavBarHeight, self.view.width, self.view.height - kNavBarHeight)];
-    [webview loadRequest:[NSURLRequest requestWithURL:[NSURL URLWithString:@"https://www.maximtop.com/privacy"]]];
-    [self.view addSubview:webview];
+    [self setNav];
     
     
-    // Do any additional setup after loading the view.
+    
+    
+    WKWebView *webView = [[WKWebView alloc] initWithFrame:CGRectMake(0, NavHeight, self.view.width, self.view.height - kNavBarHeight)];
+    NSURL *url = [NSURL URLWithString:self.url];
+    NSURLRequest *request = [[NSURLRequest alloc] initWithURL:url];
+    [webView loadRequest:request];
+    [self.view addSubview:webView];
 }
 
-- (void)returnVC {
-    [self dismissViewControllerAnimated:YES completion:^{
-        
-    }];
-    
+- (void)setNav {
+    [self setNavigationBarTitle:self.navtitle navLeftButtonIcon:@"blackback"];
 }
+
 
 /*
 #pragma mark - Navigation

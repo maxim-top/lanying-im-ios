@@ -105,8 +105,10 @@
         if (!error) {
             NSMutableArray *array = [NSMutableArray arrayWithObject:roster];
             [self.tableview refresh:[NSArray arrayWithArray:array]];
+        } else if (error.errorCode == BMXInvalidParam){
+            [HQCustomToast showDialog:@"请输入正确的用户名"];
         } else {
-            [HQCustomToast showWatingWithString:error.errorMessage];
+            [HQCustomToast showDialog:error.errorMessage];
         }
     }];
 }

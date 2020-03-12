@@ -23,6 +23,7 @@
 @interface DeviceTableViewCell ()
 
 @property (nonatomic, strong) UIButton *button;
+@property (nonatomic, strong) UIView *line;
 
 @end
 
@@ -42,7 +43,6 @@
 - (instancetype)initWithStyle:(UITableViewCellStyle)style reuseIdentifier:(NSString *)reuseIdentifier {
     if (self = [super initWithStyle:style reuseIdentifier:reuseIdentifier]) {
         [self setupSubview];
-        
     }
     return self;
 }
@@ -74,6 +74,11 @@
     self.button.bmx_centerY = self.titleLabel.bmx_centerY;
     self.button.bmx_size = CGSizeMake(50, 30);
     self.button.bmx_right = MAXScreenW - avatarLeft;
+    
+    self.line.bmx_size = CGSizeMake(MAXScreenW - 10, 0.5);
+    self.line.bmx_left =  10;
+    self.line.bmx_right = MAXScreenW;
+    self.line.bmx_bottom = 100-1;
 
     [self layoutIfNeeded];
 }
@@ -119,8 +124,14 @@
     return _button;
 }
 
-
-
+- (UIView *)line {
+    if (!_line) {
+        _line = [[UIView alloc] init];
+        [self addSubview:_line];
+        _line.backgroundColor = kColorC4_5;
+    }
+    return _line;
+}
 
 - (void)awakeFromNib {
     [super awakeFromNib];

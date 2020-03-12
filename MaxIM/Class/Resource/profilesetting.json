@@ -1,12 +1,9 @@
 {
     "type": "profile",
 
-    "cells": [{
-        "type": "头像",
-        "control": "alert"
-    },
+    "cells": [
     {
-        "type": "id",
+        "type": "ID",
         "control": "0"
     },
     {
@@ -14,15 +11,23 @@
         "control": "alert"
     },
     {
-        "type": "设置公开信息",
+        "type": "手机号",
         "control": "alert"
     },
     {
-        "type": "设置私密信息",
+        "type": "微信",
         "control": "alert"
     },
     {
-        "type": "好友验证类型",
+        "type": "公开信息",
+        "control": "alert"
+    },
+    {
+        "type": "私密信息",
+        "control": "alert"
+    },
+    {
+        "type": "好友验证",
         "control": "alert"
     },
     {

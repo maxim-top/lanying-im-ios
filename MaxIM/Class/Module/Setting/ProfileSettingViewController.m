@@ -22,12 +22,27 @@
 #import <floo-ios/BMXAuthQuestion.h>
 #import "UIViewController+CustomNavigationBar.h"
 
-@interface ProfileSettingViewController ()<UITableViewDataSource, UITableViewDelegate>
+#import "BindPhoneViewController.h"
+#import "ChangeMobileAlert.h"
+#import "VerifyPhoneViewController.h"
+#import "VerifyPasswordViewController.h"
+#import "UIView+BMXframe.h"
+#import "WechatIsBindApi.h"
+#import "AppWechatUnbindApi.h"
+
+@interface ProfileSettingViewController ()<UITableViewDataSource, UITableViewDelegate, ChangeMobileAlertDelegate>
 
 
 @property (nonatomic, strong) UITableView *tableView;
 @property (nonatomic, strong) NSArray *dataArray;
 @property (nonatomic, strong) BMXUserProfile *profile;
+@property (nonatomic, strong) ChangeMobileAlert *alert;
+@property (nonatomic, strong) UIView *headerView;
+@property (nonatomic, strong) UIImageView *headerImageView;
+@property (nonatomic, strong) UIImageView *avatarImageView;
+@property (nonatomic, strong) UIImageView *editImageView;
+@property (nonatomic,assign) BOOL isbindWechat;
+
 
 @end
 
@@ -39,12 +54,35 @@
     [self setUpNavItem];
     self.dataArray = [self getSettingConfigDataArray];
     [self getprofile];
+    [self checkWechatBind];
+    [self setupHeaderView];
+    
+    
+}
+
+- (void)checkWechatBind {
+    WechatIsBindApi *api = [[WechatIsBindApi alloc] init];
+    [api startWithSuccessBlock:^(ApiResult * _Nullable result) {
+        if (result.isOK) {
+            
+            NSString  *isbind=[NSString stringWithFormat:@"%@", result.resultData];
+            self.isbindWechat = [isbind integerValue] > 0 ? YES :NO;
+            
+        } else {
+            self.isbindWechat = NO;
+        }
+        
+        [self.tableView reloadData];
+    } failureBlock:^(NSError * _Nullable error) {
+        
+    }];
 }
 
 #pragma mark - manager
 - (void)getprofile {
     [[[BMXClient sharedClient] userService] getProfileForceRefresh:YES completion:^(BMXUserProfile *profile, BMXError *aError) {
         if (!aError) {
+            
             self.profile = profile;
             if (self.profile.addFriendAuthMode != BMXAddFriendAuthModeAnswerQuestion) {
                 self.dataArray = [self getSettingConfigDataArray];
@@ -54,23 +92,36 @@
             } else {
                 self.dataArray = [self getSettingConfigDataArray];
             }
+            
+
+                if ([[NSFileManager defaultManager] fileExistsAtPath:self.profile.avatarThumbnailPath]) {
+                    UIImage *avarat = [UIImage imageWithContentsOfFile:self.profile.avatarThumbnailPath];
+                    self.avatarImageView.image = avarat;
+//                    [cell.avatarimageView setImage:avarat];
+                }
+
+            
+            
             [self.tableView reloadData];
         } else {
         }
     }];
 }
 
-// 设置手机号
-- (void)modifyPhone:(NSString *)phone {
-    [HQCustomToast showWating];
-    [[[BMXClient sharedClient] userService] setMobilePhone:phone completion:^(BMXError *error) {
-        [HQCustomToast hideWating];
-        if (!error) {
-            [HQCustomToast showDialog:@"设置成功"];
-            MAXLog(@"%@", error);
-            [self getprofile];
-        }
-    }];
+- (void)changeMobileAlertDidSelectCaptchaButton {
+    [self.alert hide];
+    VerifyPhoneViewController *vc = [[VerifyPhoneViewController alloc] init];
+    vc.profile = self.profile;
+    [self.navigationController pushViewController:vc animated:YES];
+    
+    MAXLog(@"验证码方式");
+}
+
+- (void)changeMobileAlertDidSelectPasswordButton {
+    MAXLog(@"密码方式");
+    [self.alert hide];
+    VerifyPasswordViewController *vc = [[VerifyPasswordViewController alloc] init];
+    [self.navigationController pushViewController:vc animated:YES];
 }
 
 // 修改昵称
@@ -140,6 +191,93 @@
     return [NSJSONSerialization JSONObjectWithData:data options:kNilOptions error:nil];
 }
 
+- (void)gotoBindPhone {
+    BindPhoneViewController *bindPhone = [[BindPhoneViewController alloc] init];
+    [self.navigationController pushViewController:bindPhone animated:YES];
+}
+
+- (void)showSetMobileAlert {
+    
+            UIAlertController* alert = [UIAlertController alertControllerWithTitle:@"修改手机号"
+                                                                           message:@""
+                                                                    preferredStyle:UIAlertControllerStyleAlert];
+    
+            UIAlertAction* okAction = [UIAlertAction actionWithTitle:@"确定" style:UIAlertActionStyleDefault
+                                                             handler:^(UIAlertAction * action) {
+                                                                 //响应事件
+                                                                 //得到文本信息
+                                                                 for(UITextField *text in alert.textFields){
+                                                                     MAXLog(@"text = %@", text.text);
+    //                                                                 [self modifyPhone:text.text];
+                                                                 }
+                                                             }];
+            UIAlertAction* cancelAction = [UIAlertAction actionWithTitle:@"取消" style:UIAlertActionStyleCancel
+                                                                 handler:^(UIAlertAction * action) {
+                                                                     //响应事件
+                                                                     MAXLog(@"action = %@", alert.textFields);
+                                                                 }];
+            [alert addTextFieldWithConfigurationHandler:^(UITextField *textField) {
+                textField.placeholder = @"请输入手机号";
+            }];
+    
+            [alert addAction:okAction];
+            [alert addAction:cancelAction];
+            [self presentViewController:alert animated:YES completion:nil];
+    
+}
+
+- (void)setupHeaderView {
+    UIImage *image = [UIImage imageNamed:@"Backgroud"];
+    
+    self.headerView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, MAXScreenW, image.size.height)];
+    self.headerView.backgroundColor = [UIColor whiteColor]; //BMXCOLOR_HEX(0xf8f8f8);
+    
+    UITapGestureRecognizer *tap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(choiseImage)];
+    [self.headerView addGestureRecognizer:tap];
+    
+    self.headerImageView = [[UIImageView alloc] initWithImage:image];
+    self.headerImageView.frame = CGRectMake(0, 0, MAXScreenW, image.size.height);
+    self.headerImageView.tag = 101;
+    self.headerImageView.backgroundColor = [UIColor whiteColor];
+    self.headerImageView.contentMode = UIViewContentModeScaleAspectFill;
+    self.headerImageView.clipsToBounds = YES;
+    [self.headerView addSubview:self.headerImageView];
+    
+    [self avatarImageView];
+    [self editImageView];
+}
+
+- (UIImageView *)avatarImageView {
+    if (!_avatarImageView) {
+        
+        _avatarImageView = [[UIImageView alloc] init];
+        [self.headerView addSubview:_avatarImageView];
+        UIImage *image = [UIImage imageNamed:@"Backgroud"];
+        _avatarImageView.frame = CGRectMake(MAXScreenW/2.0 - 100 /2.0, image.size.height /2.0 - 100 / 2.0, 100, 100);
+        _avatarImageView.clipsToBounds = YES;
+        _avatarImageView.layer.cornerRadius = 50;
+        _avatarImageView.image = [UIImage imageNamed:@"mine_avater_placoholder"];
+        
+    }
+    return _avatarImageView;
+}
+
+- (UIImageView *)editImageView {
+    if (!_editImageView) {
+        _editImageView = [[UIImageView alloc] init];
+        [self.headerView addSubview:_editImageView];
+        _editImageView.image = [UIImage imageNamed:@"mine_photo"];
+        
+        //        CGSize arrowImageViewSize = CGSizeMake(_editImageView.image.size.width, _editImageView.image.size.height);
+        CGSize arrowImageViewSize = CGSizeMake(30, 30); // 临时
+        _editImageView.bmx_size =  arrowImageViewSize;
+        _editImageView.bmx_right = self.avatarImageView.bmx_right + 5;
+        _editImageView.bmx_bottom = self.avatarImageView.bmx_bottom  ;
+//        _editImageView.bmx_top = 20;
+    }
+    return _editImageView;
+}
+
 #pragma mark - data
 - (NSArray *)getSettingConfigDataArray {
     NSDictionary *configDic = [NSDictionary dictionaryWithDictionary:[self readLocalFileWithName:@"profilesetting"]];
@@ -152,6 +290,20 @@
     return dataArray;
 }
 
+- (void)clickunbindWechat {
+    
+    AppWechatUnbindApi *api = [[AppWechatUnbindApi alloc] init];
+    [api startWithSuccessBlock:^(ApiResult * _Nullable result) {
+        if (result.isOK) {
+            [HQCustomToast showDialog:@"解绑成功"];
+        }
+        
+        [self checkWechatBind];
+    } failureBlock:^(NSError * _Nullable error) {
+        
+    }];
+}
+
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView {
     return 1;
 }
@@ -161,37 +313,29 @@
 }
 
 - (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath {
-    return 50.f;
+    return 69.f;
 }
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
     ProfileTableViewCell *cell =[ProfileTableViewCell cellWithTableView:tableView];
     NSDictionary *dic = self.dataArray[indexPath.row];
     
-    if ([dic[@"type"] isEqualToString:@"头像"]) {
-        [cell.avatarimageView setHidden:NO];
-        if ([[NSFileManager defaultManager] fileExistsAtPath:self.profile.avatarThumbnailPath]) {
-            UIImage *avarat = [UIImage imageWithContentsOfFile:self.profile.avatarThumbnailPath];
-            [cell.avatarimageView setImage:avarat];
-        } else {
-            [cell.avatarimageView setImage:[UIImage imageNamed:@"profileavatar"]];
-        }
-    } else {
-        [cell.avatarimageView setHidden:YES];
-    }
-
-    
-    if ([dic[@"type"] isEqualToString:@"id"]) {
+    if ([dic[@"type"] isEqualToString:@"ID"]) {
         cell.contentLabel.text = [NSString stringWithFormat:@"%lld", self.profile.userId];
     } else if ([dic[@"type"] isEqualToString:@"昵称"]) {
-        cell.contentLabel.text = [NSString stringWithFormat:@"%@", self.profile.nickName];
-    } else if ([dic[@"type"] isEqualToString:@"设置手机号"]) {
-        cell.contentLabel.text = [NSString stringWithFormat:@"%@", self.profile.mobilePhone];
-    } else if ([dic[@"type"] isEqualToString:@"设置公开信息"]) {
+        NSString *aString = [self.profile.nickName length] ? self.profile.nickName : @"请设置昵称";
+        cell.contentLabel.text = aString;
+    } else if ([dic[@"type"] isEqualToString:@"手机号"]) {
+        NSString *aString = [self.profile.mobilePhone length] ? self.profile.mobilePhone : @"去绑定";
+        cell.contentLabel.text = aString;
+    } else if ([dic[@"type"] isEqualToString:@"微信"]) {
+        NSString *aString = self.isbindWechat ? @"解绑" : @"未绑定";
+        cell.contentLabel.text = aString;
+    } else if ([dic[@"type"] isEqualToString:@"公开信息"]) {
         cell.contentLabel.text = [NSString stringWithFormat:@"%@", self.profile.publicInfoJson];
-    } else if ([dic[@"type"] isEqualToString:@"设置私密信息"]) {
+    } else if ([dic[@"type"] isEqualToString:@"私密信息"]) {
         cell.contentLabel.text = [NSString stringWithFormat:@"%@", self.profile.privateInfoJson];
-    } else if ([dic[@"type"] isEqualToString:@"好友验证类型"]) {
+    } else if ([dic[@"type"] isEqualToString:@"好友验证"]) {
         switch (self.profile.addFriendAuthMode) {
             case BMXAddFriendAuthModeOpen:
                 cell.contentLabel.text = [NSString stringWithFormat:@"公开"];
@@ -257,32 +401,40 @@
         [self presentViewController:alert animated:YES completion:nil];
         
         
-    } else if ([dic[@"type"] isEqualToString:@"设置手机号"]) {
-        UIAlertController* alert = [UIAlertController alertControllerWithTitle:@"修改手机号"
-                                                                       message:@""
+    } else if ([dic[@"type"] isEqualToString:@"手机号"]) {
+        if ([self.profile.mobilePhone length]) {
+            self.alert = [ChangeMobileAlert alertWithPhone:self.profile.mobilePhone];
+            self.alert.delegate = self;
+            [self.alert show];
+        } else {
+            [self gotoBindPhone];
+        }
+
+    } else if ([dic[@"type"] isEqualToString:@"微信"]) {
+        
+        UIAlertController* alert = [UIAlertController alertControllerWithTitle:@"提醒"
+                                                                       message:@"确定解绑微信？"
                                                                 preferredStyle:UIAlertControllerStyleAlert];
         
         UIAlertAction* okAction = [UIAlertAction actionWithTitle:@"确定" style:UIAlertActionStyleDefault
                                                          handler:^(UIAlertAction * action) {
                                                              //响应事件
                                                              //得到文本信息
-                                                             for(UITextField *text in alert.textFields){
-                                                                 MAXLog(@"text = %@", text.text);
-                                                                 [self modifyPhone:text.text];
-                                                             }
+                                                             
+                                                             [self clickunbindWechat];
+                                                             
                                                          }];
         UIAlertAction* cancelAction = [UIAlertAction actionWithTitle:@"取消" style:UIAlertActionStyleCancel
                                                              handler:^(UIAlertAction * action) {
                                                                  //响应事件
                                                                  MAXLog(@"action = %@", alert.textFields);
                                                              }];
-        [alert addTextFieldWithConfigurationHandler:^(UITextField *textField) {
-            textField.placeholder = @"请输入手机号";
-        }];
         
         [alert addAction:okAction];
         [alert addAction:cancelAction];
         [self presentViewController:alert animated:YES completion:nil];
+
+        
     } else if ([dic[@"type"] isEqualToString:@"设置公开信息"]) {
         UIAlertController* alert = [UIAlertController alertControllerWithTitle:@"设置公开信息"
                                                                        message:@""
@@ -439,10 +591,13 @@
         _tableView = [[UITableView alloc] initWithFrame:CGRectMake(0, NavHeight, MAXScreenW, MAXScreenH - NavHeight - kTabBarHeight) style:UITableViewStylePlain];
         _tableView.delegate = self;
         _tableView.dataSource = self;
+        _tableView.separatorStyle = UITableViewCellSeparatorStyleNone;
+        _tableView.tableHeaderView = self.headerView;
         [self.view addSubview:_tableView];
     }
     return _tableView;
 }
+
 - (void)choiseImage {
     TZImagePickerController *imagePickerVc = [[TZImagePickerController alloc] initWithMaxImagesCount:1 delegate:self];
     imagePickerVc.cropRect = CGRectMake(0, (MAXScreenH - MAXScreenW) / 2 , MAXScreenW, MAXScreenW);

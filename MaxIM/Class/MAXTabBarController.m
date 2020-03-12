@@ -137,6 +137,11 @@ typedef enum : NSUInteger {
 
 }
 
+- (void)groupOwnerAssigned:(BMXGroup *)group {
+    MAXLog(@"群主是我了");
+
+}
+
 /**
  加入了某群
  

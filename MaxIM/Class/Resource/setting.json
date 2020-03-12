@@ -2,6 +2,9 @@
     "type": "settingconfig",
     "cells":
     [{
+        "type": "切换账号",
+        "control": "0"
+    },{
         "type": "接受新消息通知",
         "control": "1"
     },

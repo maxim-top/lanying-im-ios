@@ -24,5 +24,6 @@
 @property (nonatomic,copy) NSString *userName;
 
 @property (nonatomic, strong) NSString *token;
+@property (nonatomic,copy) NSString *appid;
 
 @end

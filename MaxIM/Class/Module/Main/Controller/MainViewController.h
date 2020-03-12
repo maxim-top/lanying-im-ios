@@ -11,11 +11,13 @@
 
 @interface MainViewController : UIViewController
 
+//@property (nonatomic, assign) BOOL conversationFinish;
 
 - (void)getAllConversations;
 
 - (void)receiveNewMessage:(BMXMessageObject *)message;
 
 - (void)sendNewMessage:(BMXMessageObject *)message;
+
 
 @end

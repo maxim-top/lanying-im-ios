@@ -29,6 +29,7 @@
         self.responseObject = dic;
         self.resultData = dic[@"data"];
         self.code = [NSString stringWithFormat:@"%@", dic[@"code"]];
+        self.errmsg = [NSString stringWithFormat:@"%@", dic[@"message"]];
         
     }
     return self;

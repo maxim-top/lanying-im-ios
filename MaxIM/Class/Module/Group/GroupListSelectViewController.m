@@ -55,7 +55,7 @@
             NSMutableArray *groupNormalArray = [NSMutableArray array];
             for (BMXGroup *group in groupList) {
                 
-                if (group.groupStatus != BMXGroupDestroyed && group.isMember == YES) {
+                if (group.groupStatus != BMXGroupDestroyed && group.roleType == BMXGroupMemberRoleTypeMember) {
                     [groupNormalArray addObject:group];
                 } else {
                     MAXLog(@"%lld", group.groupId);

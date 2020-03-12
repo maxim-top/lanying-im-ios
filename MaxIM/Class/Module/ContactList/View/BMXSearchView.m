@@ -68,10 +68,8 @@
         
         _searchTF.leftViewMode = UITextFieldViewModeAlways;
         [_searchTF.leftView sizeToFit];
-        [_searchTF setValue:[NSNumber numberWithInt:10] forKey:@"paddingLeft"];
-        NSString *holderText = @"  输入要查找的好友用户名";
-        _searchTF.placeholder = holderText;
-        [_searchTF setValue:BMXCOLOR_HEX(0x666666) forKeyPath:@"_placeholderLabel.textColor"];
+        _searchTF.attributedPlaceholder = [[NSAttributedString alloc] initWithString:@"输入要查找的好友用户名"attributes:@{NSForegroundColorAttributeName: BMXCOLOR_HEX(0x666666)}];
+
         [_searchTF setClearButtonMode:UITextFieldViewModeWhileEditing];
         [self addSubview:_searchTF];
     }

@@ -33,13 +33,24 @@ static NSString *cellID = @"ImageTitleBasicTableViewCell";
 - (void)refreshByTitle:(NSString *)titlel {
     self.nicknameLabel.text = titlel;
     
+    self.avatarImg.layer.borderWidth = 0.5;
+    self.avatarImg.layer.borderColor = kColorC4_5.CGColor;
+    
     if ([titlel isEqualToString:@"好友申请与通知"]) {
         self.avatarImg.image = [UIImage imageNamed:@"application"];
-    } else if  ([titlel isEqualToString:@"群申请与通知"]){
+        self.avatarImg.layer.borderWidth = 0;
+        self.avatarImg.layer.borderColor = [UIColor clearColor].CGColor;
+        
+    } else if  ([titlel isEqualToString:@"群申请与通知"] || [titlel isEqualToString:@"群聊系统消息"]) {
         self.avatarImg.image = [UIImage imageNamed:@"application"];
+        self.avatarImg.layer.borderWidth = 0;
+        self.avatarImg.layer.borderColor = [UIColor clearColor].CGColor;
+        
     } else {
         self.avatarImg.image = [UIImage imageNamed:@"group"];
     }
+
+    
 
 }
 
@@ -68,6 +79,9 @@ static NSString *cellID = @"ImageTitleBasicTableViewCell";
 - (void)refresh:(BMXRoster *)roster {
     
     self.avatarImg.image = [UIImage imageNamed:@"contact_placeholder"];
+    self.avatarImg.layer.borderWidth = 0.5;
+    self.avatarImg.layer.borderColor = kColorC4_5.CGColor;
+    
     self.nicknameLabel.text = [[roster nickName] length] ?  roster.nickName : roster.userName;
     
     UIImage *image = [UIImage imageWithContentsOfFile:roster.avatarThumbnailPath];
@@ -77,6 +91,10 @@ static NSString *cellID = @"ImageTitleBasicTableViewCell";
         }  completion:^(BMXRoster *rosterObjc, BMXError *error) {
             if (!error) {
                 UIImage *image = [UIImage imageWithContentsOfFile:rosterObjc.avatarThumbnailPath];
+                
+                
+                MAXLog(@"%@", rosterObjc.avatarThumbnailPath);
+
                 dispatch_async(dispatch_get_main_queue(), ^{
                     self.avatarImg.image = image;
                 });
@@ -86,7 +104,30 @@ static NSString *cellID = @"ImageTitleBasicTableViewCell";
         self.avatarImg.image = image;
     }
     
+    MAXLog(@"%@", roster.avatarThumbnailPath);
+}
 
+- (void)refreshSupportRoster:(BMXRoster *)roster {
+    
+    self.avatarImg.image = [UIImage imageNamed:@"contact_placeholder"];
+    self.avatarImg.layer.borderWidth = 0.5;
+    self.avatarImg.layer.borderColor = kColorC4_5.CGColor;
+    
+    self.nicknameLabel.text = [[roster nickName] length] ?  roster.nickName : roster.userName;
+    
+        [[[BMXClient sharedClient] rosterService] downloadAvatarWithRoster:roster progress:^(int progress, BMXError *error) {
+            
+        }  completion:^(BMXRoster *rosterObjc, BMXError *error) {
+            if (!error) {
+                UIImage *image = [UIImage imageWithContentsOfFile:rosterObjc.avatarThumbnailPath];
+                
+                dispatch_async(dispatch_get_main_queue(), ^{
+                    self.avatarImg.image = image;
+                });
+            } else {
+                self.avatarImg.image = [UIImage imageNamed:@"contact_placeholder"];
+            }
+        }];
 }
 
 - (void)refreshByGroup:(BMXGroup *)group {
@@ -138,6 +179,9 @@ static NSString *cellID = @"ImageTitleBasicTableViewCell";
     if (!_avatarImg) {
         _avatarImg = [[UIImageView alloc] init];
         UIImage *image = [UIImage imageNamed:@"contact_placeholder"];
+        
+        self.avatarImg.layer.borderWidth = 0.5;
+        self.avatarImg.layer.borderColor = kColorC4_5.CGColor;
 
         self.avatarImg.clipsToBounds = YES;
         self.avatarImg.layer.cornerRadius = image.size.width / 2.0;

@@ -8,11 +8,11 @@
 
 #import "ICFileScanController.h"
 #import <QuickLook/QuickLook.h>
+#import <WebKit/WebKit.h>
 
+@interface ICFileScanController ()<QLPreviewControllerDataSource,QLPreviewControllerDelegate,WKUIDelegate,UIDocumentInteractionControllerDelegate>
 
-@interface ICFileScanController ()<QLPreviewControllerDataSource,QLPreviewControllerDelegate,UIWebViewDelegate,UIDocumentInteractionControllerDelegate>
-
-@property (nonatomic, weak) UIWebView *webView;
+@property (nonatomic, weak) WKWebView *webView;
 @property (nonatomic, strong) QLPreviewController *previewController;
 @property (nonatomic, strong) NSURL *fileURL;
 @property (nonatomic, strong) UIDocumentInteractionController *documentInCtr;
@@ -44,8 +44,17 @@
 - (void)setupVew:(NSString *)type
 {
     if ([type isEqualToString:@"html"] || [type isEqualToString:@"htm"]) {
-        UIWebView *webView = [[UIWebView alloc] initWithFrame:CGRectMake(0, 0, self.view.width,MAXScreenH)];
-        webView.delegate = self;
+        
+        
+//        WKWebView *webView = [[WKWebView alloc] initWithFrame:CGRectMake(0, NavHeight, self.view.width, self.view.height - kNavBarHeight)];
+//        NSURL *url = [NSURL URLWithString:self.url];
+//        NSURLRequest *request = [[NSURLRequest alloc] initWithURL:url];
+//        [webView loadRequest:request];
+//        [self.view addSubview:webView];
+//
+//
+        
+        WKWebView *webView = [[WKWebView alloc] initWithFrame:CGRectMake(0, 0, self.view.width,MAXScreenH)];
         //        webView.scalesPageToFit = YES;
         [self.view addSubview:webView];
         _webView           = webView;
@@ -114,7 +123,7 @@
     NSURL *baseUrl = [NSURL fileURLWithPath:[paths objectAtIndex:0]];
     NSData *data = [[NSData alloc] initWithContentsOfFile:self.filePath];
     NSString *MIMEType = [NSString stringWithFormat:@"text/%@",type];
-    [_webView loadData:data MIMEType:MIMEType textEncodingName:@"UTF-8" baseURL:baseUrl];
+    [_webView loadData:data MIMEType:MIMEType characterEncodingName:@"UTF-8" baseURL:baseUrl];
 }
 
 - (void)otherApplicationOpen

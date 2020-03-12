@@ -333,7 +333,9 @@
         }
         
         if ([className isEqualToString: @"CodeImageViewController"]) {
-            if (self.group.isAdmin == YES || [self isOwner]) {
+            
+            MAXLog(@"%u", self.group.inviteMode);
+            if (self.group.inviteMode == BMXGroupInviteModeOpen ) {
                 CodeImageViewController * vc = [[CodeImageViewController alloc] initWithGroup:self.group];
                 [self.navigationController pushViewController:vc animated:YES];
                 return;
@@ -419,7 +421,8 @@
 
 -(void) addLeaveBtn
 {
-    UIView* bottom = [[UIView alloc] initWithFrame:CGRectMake(0, MAXScreenH-54, MAXScreenW, 54)];
+    CGFloat buttonHeight = MAXIsFullScreen ? 54 + 32 : 54;
+    UIView* bottom = [[UIView alloc] initWithFrame:CGRectMake(0, MAXScreenH-buttonHeight, MAXScreenW, buttonHeight)];
     UIView* sline = [[UIView alloc] initWithFrame:CGRectMake(0, 0, MAXScreenW, 0.5)];
     sline.backgroundColor = [UIColor lh_colorWithHexString:@"dfdfdf"];
     [bottom addSubview:sline];

@@ -9,8 +9,8 @@
 #import "MAXRegiesterViewController.h"
 #import "MAXLoginViewController.h"
 #import "MAXLoginView.h"
-#import <floo-ios/BMXClient.h>
-#import <floo-ios/BMXUserProfile.h>
+#import "BMXClient.h"
+#import "BMXUserProfile.h"
 #import "BindOpenIdApi.h"
 #import "PravitcyViewController.h"
 #import <WebKit/WebKit.h>
@@ -148,26 +148,31 @@
     
     MAXLog(@"开始注册");
     [HQCustomToast showWating];
-    [[[BMXClient sharedClient] userService] signUpMobile:mobile password:password vertifyCode:vertifyCode userName:username completion:^(BMXUserProfile *profile, BMXError *aError) {
-        
-        [HQCustomToast hideWating];
-        if(!aError) {
-            [HQCustomToast hideWating];
-            [HQCustomToast showDialog:@"注册成功"];
-            if ([self.openId length] > 0) {
-                [self bindWechat];
+    
+#warning 1.1
+//    [[BMXClient sharedClient] signUpMobile:mobile password:password vertifyCode:vertifyCode userName:username completion:^(BMXUserProfile *profile, BMXError *aError) {
+//
+//        [HQCustomToast hideWating];
+//        if(!aError) {
+//            [HQCustomToast hideWating];
+//            [HQCustomToast showDialog:@"注册成功"];
+//            if ([self.openId length] > 0) {
+//                [self bindWechat];
+//
+//            }
+//
+//            [self dismissViewControllerAnimated:YES completion:^{
+//
+//            }];
+//        }  else {
+//            [HQCustomToast showDialog:aError.errorMessage];
+//        }
+//        MAXLog(@"%@", aError);
+//
+//    }];
 
-            }
 
-            [self dismissViewControllerAnimated:YES completion:^{
-                
-            }];
-        }  else {
-            [HQCustomToast showDialog:aError.errorMessage];
-        }
-        MAXLog(@"%@", aError);
 
-    }];
 }
 - (void)bindWechat {
     BindOpenIdApi *api = [[BindOpenIdApi alloc] initWithopenId:self.openId];

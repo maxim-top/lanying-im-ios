@@ -9,12 +9,12 @@
 #import "MAXLoginViewController.h"
 #import "MAXRegiesterViewController.h"
 #import "MAXLoginView.h"
-#import <floo-ios/BMXClient.h>
+#import "BMXClient.h"
 #import "IMAcountInfoStorage.h"
 #import "IMAcount.h"
 #import "MAXGlobalTool.h"
-#import <floo-ios/BMXUserProfile.h>
-#import <floo-ios/BMXHostConfig.h>
+#import "BMXUserProfile.h"
+#import "BMXHostConfig.h"
 #import "LoginCodeImageViewController.h"
 #import "WXApi.h"
 #import "WechatApi.h"
@@ -100,11 +100,8 @@
 }
 
 - (void)jumpToScanViewController {
-    ScanViewController *vc = [[ScanViewController alloc] init];
-    vc.modalPresentationStyle =  UIModalPresentationFullScreen;
-    [self presentViewController:vc animated:YES completion:nil];
-}
 
+}
 
 - (void)jumpToRegistVC:(NSNotification *)notify {
     NSDictionary *dict = notify.object;
@@ -131,32 +128,13 @@
 }
 
 - (void)login {
-    IMAcount *account = [IMAcountInfoStorage loadObject];
-    [self signById:[account.usedId integerValue] password:account.password];
+ 
 }
 
 
 
 
 - (void)weChatLogin {
-//        方法一：只有手机安装了微信才能使用
-    if ([WXApi isWXAppInstalled]) {
-        SendAuthReq *req = [[SendAuthReq alloc] init];
-        //这里是按照官方文档的说明来的此处我要获取的是个人信息内容
-        req.scope = @"snsapi_userinfo";
-        req.state = @"login";
-        //向微信终端发起SendAuthReq消息
-        [WXApi sendReq:req];
-    } else {
-        [HQCustomToast showDialog:@"请安装微信客户端"];
-        MAXLog(@"安装微信客户端");
-    }
-    
-//        方法二：手机没有安装微信也可以使用，推荐使用这个
-//    SendAuthReq *req = [[SendAuthReq alloc] init];
-//    req.scope = @"snsapi_userinfo";
-//    req.state = @"123";
-//    [WXApi sendAuthReq:req viewController:self delegate:self];
 }
 
 - (void)initializeBMXWithHostDict:(NSDictionary *)dic {
@@ -206,126 +184,17 @@
 
 - (void)signById:(NSInteger)userid
         password:(NSString *)password {
-    [HQCustomToast showWating];
-    [[[BMXClient sharedClient] userService] signInById:userid password:password completion:^(BMXError *error) {
-        [HQCustomToast hideWating];
-        if (!error) {
-            MAXLog(@"登录成功 username = %lld , password = %@",userid, password);
-            
-            [self willMoveToParentViewController:nil];
-            [self removeFromParentViewController];
-            [self.view removeFromSuperview];
-            
-            IMAcount *a = [IMAcountInfoStorage loadObject];
-            a.isLogin = YES;
-            a.password = password;
-            a.usedId = [NSString stringWithFormat:@"%ld", (long)userid];
-            //            a.userName = [NSString stringWithFormat:@"%@", name];
-            [IMAcountInfoStorage saveObject: a];
-            [UIApplication sharedApplication].delegate.window.rootViewController = [MAXGlobalTool share].rootViewController;
-            [[MAXGlobalTool share].rootViewController addIMListener];
-            [self bindToken];
-            [self getProfile];
-            
-            [[NSNotificationCenter defaultCenter] postNotificationName:@"loginSuccess" object:nil];
-            [HQCustomToast showDialog:@"登录成功"];
-            //            [self bindWechat];
-            
-            
-            //            IMAcount *a = [[IMAcount alloc] init];
-            //            a.isLogin = YES;
-            //            a.password = password;
-            //            a.usedId = [NSString stringWithFormat:@"%ld", (long)userid];
-            //            [IMAcountInfoStorage saveObject: a];
-            [[MAXGlobalTool share].rootViewController addIMListener];
-        }else {
-            [HQCustomToast showDialog:[NSString stringWithFormat:@"%@",error.errorMessage]];
-            
-            MAXLog(@"失败 errorCode = %lu ", error.errorCode);
-        }
-    }];
 }
 
 - (void)signByName:(NSString *)name password:(NSString *)password {
-    [HQCustomToast showWating];
-    [[[BMXClient sharedClient] userService] signInByName:name password:password completion:^(BMXError *error) {
-        [HQCustomToast hideWating];
-        if (!error) {
-            MAXLog(@"登录成功 username = %@ , password = %@",name, password);
-
-            [self willMoveToParentViewController:nil];
-            [self removeFromParentViewController];
-            [self.view removeFromSuperview];
-            
-            IMAcount *a = [[IMAcount alloc] init];
-            a.isLogin = YES;
-            a.password = password;
-            a.userName = [NSString stringWithFormat:@"%@", name];
-            [IMAcountInfoStorage saveObject: a];
-            [UIApplication sharedApplication].delegate.window.rootViewController = [MAXGlobalTool share].rootViewController;
-            [[MAXGlobalTool share].rootViewController addIMListener];
-            [self bindToken];
-            [self getProfile];
-            
-            [self uploadAppIdIfNeededWithUserName:name];
-            
-            ConsoleAppID *appidModel = [[ConsoleAppID alloc] init];
-            BMXSDKConfig *sdkconfig = [[BMXClient sharedClient] sdkConfig];
-            appidModel.appId = sdkconfig.appID;
-            [ConsoleAppIDStorage saveObject:appidModel];
-            
-            [[NSNotificationCenter defaultCenter] postNotificationName:@"loginSuccess" object:nil];
-            [HQCustomToast showDialog:@"登录成功"];
-
-        }else {
-            MAXLog(@"失败 errorCode = %lu ", error.errorCode);
-            [HQCustomToast showDialog:[NSString stringWithFormat:@"%@", error.errorMessage]];
-        }
-    }];
 }
 
 
 - (void)uploadAppIdIfNeededWithUserName:(NSString *)userName {
-    if (!self.scanConsuleResultDic) {
-        MAXLog(@"scanConsuleResultDic为空，异常");
-        return;
-    }
-    if ([self.scanConsuleUserName isEqualToString:userName]) {
-        NSString *deviceToken = [[NSUserDefaults standardUserDefaults] valueForKey:@"deviceToken"];
-        
-        NSString *appid = self.scanConsuleResultDic[@"appId"];
-        NSString *userid = self.scanConsuleResultDic[@"uid"];
-        
-        NotifierBindApi *api = [[NotifierBindApi alloc] initWithAppID:appid
-                                                          deviceToken:deviceToken
-                                                         notifierName:@"NotiCer"
-                                                               userID:userid];
-        
-        [api startWithSuccessBlock:^(ApiResult * _Nullable result) {
-            if (result.isOK) {
-                MAXLog(@"bind success");
-                ConsuleAppInfo *appInfo = [[ConsuleAppInfo alloc] init];
-                appInfo.appId = appid;
-                appInfo.uuid = userid;
-                appInfo.deviceToken = deviceToken;
-                [ConsuleAppInfoStorage saveObject:appInfo];
-            }
-            
-        } failureBlock:^(NSError * _Nullable error) {
-            MAXLog(@"consule绑定失败");
-        }];
-        
-    }
 }
 
 
 - (void)bindToken {
-    NSString *deviceToken = [[NSUserDefaults standardUserDefaults] valueForKey:@"deviceToken"];
-    if ([deviceToken length]) {
-        [[[BMXClient sharedClient] userService] bindDevice:deviceToken completion:^(BMXError *error) {
-            MAXLog(@"绑定成功");
-        }];
-    }
 }
 
 - (void)getProfile {
@@ -364,41 +233,9 @@
 }
 
 - (void)showAppIDEditAlert {
-    UIAlertController* alert = [UIAlertController alertControllerWithTitle:@"修改AppID"
-                                                                   message:@"如果需要更改需要重启客户端"
-                                                            preferredStyle:UIAlertControllerStyleAlert];
-    
-    UIAlertAction* okAction = [UIAlertAction actionWithTitle:@"确定" style:UIAlertActionStyleDefault
-                                                     handler:^(UIAlertAction * action) {
-                                                         //响应事件
-                                                         //得到文本信息
-                                                         for(UITextField *text in alert.textFields){
-                                                             MAXLog(@"text = %@", text.text);
-                                                             [self reloadAppID:text.text];
-                                                             
-                                                             [self.contentView addappIDLabelButtonClickWithTitle:text.text buttonClick:^{
-                                                                 //            BMXAppID = dic[@"appId"];
-                                                             }];
-                                                             
-                                                         }
-                                                     }];
-    UIAlertAction* cancelAction = [UIAlertAction actionWithTitle:@"取消" style:UIAlertActionStyleCancel
-                                                         handler:^(UIAlertAction * action) {
-                                                             //响应事件
-                                                             MAXLog(@"action = %@", alert.textFields);
-                                                         }];
-    [alert addTextFieldWithConfigurationHandler:^(UITextField *textField) {
-        textField.placeholder = @"请输入AppID";
-    }];
-    
-    [alert addAction:okAction];
-    [alert addAction:cancelAction];
-    [self presentViewController:alert animated:YES completion:nil];
 }
 
 - (void)reloadAppID:(NSString *)appid {
-    AppDelegate *appDelegate = [UIApplication sharedApplication].delegate;
-    [appDelegate reloadAppID:appid];
 }
 
 //

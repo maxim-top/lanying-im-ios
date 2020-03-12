@@ -12,6 +12,7 @@
 #import <floo-ios/BMXRoster.h>
 #import <floo-ios/BMXGroupMember.h>
 #import "UIViewController+CustomNavigationBar.h"
+#import <floo-ios/BMXMessageConfig.h>
 
 @interface GroupAlreadyReadListViewController () <UITableViewDataSource, UITableViewDelegate>
 
@@ -77,30 +78,43 @@
 
 - (void)getUnreadRoster {
     MAXLog(@"拉取未读群成员");
-    [HQCustomToast showWating];
-    [[[BMXClient sharedClient] groupService] getMembers:self.group forceRefresh:NO completion:^(NSArray<BMXGroupMember *> *groupList, BMXError *error) {
-        NSMutableArray *arrayM = [NSMutableArray array];
-        for (BMXGroupMember *member in groupList) {
-            NSString *memberUid = [NSString stringWithFormat:@"%ld", member.uid];
-            [arrayM addObject:memberUid];
-            if (self.message.groupAckCount > 0) {
-                for (NSString *uid in self.alreadyRosterIdArray) {
-                    if ([memberUid isEqualToString:uid]) {
-                    } else {
-                        [arrayM removeObject:uid];
-                    }
-                }
-            }
-        }
-        
-        [[[BMXClient sharedClient] rosterService] searchRostersByRosterIdList:arrayM forceRefresh:NO completion:^(NSArray<BMXRoster *> *rosterList, BMXError *error) {
+    
+    
+    [[[BMXClient sharedClient] chatService] getGroupAckMessageUnreadUserIdListWithMessage:self.message completion:^(NSArray *groupMemberIdList, BMXError *error) {
+        [[[BMXClient sharedClient] rosterService] searchRostersByRosterIdList:groupMemberIdList forceRefresh:NO completion:^(NSArray<BMXRoster *> *rosterList, BMXError *error) {
             [HQCustomToast hideWating];
             self.unReadRosterArray = rosterList;
             dispatch_async(dispatch_get_main_queue(), ^{
                 [self.rightTableView reloadData];
             });
         }];
+        
     }];
+    
+//    [HQCustomToast showWating];
+//    [[[BMXClient sharedClient] groupService] getMembers:self.group forceRefresh:NO completion:^(NSArray<BMXGroupMember *> *groupList, BMXError *error) {
+//        NSMutableArray *arrayM = [NSMutableArray array];
+//        for (BMXGroupMember *member in groupList) {
+//            NSString *memberUid = [NSString stringWithFormat:@"%ld", member.uid];
+//            [arrayM addObject:memberUid];
+//            if (self.message.groupAckCount > 0) {
+//                for (NSString *uid in self.alreadyRosterIdArray) {
+//                    if ([memberUid isEqualToString:uid]) {
+//                    } else {
+//                        [arrayM removeObject:uid];
+//                    }
+//                }
+//            }
+//        }
+//
+//        [[[BMXClient sharedClient] rosterService] searchRostersByRosterIdList:arrayM forceRefresh:NO completion:^(NSArray<BMXRoster *> *rosterList, BMXError *error) {
+//            [HQCustomToast hideWating];
+//            self.unReadRosterArray = rosterList;
+//            dispatch_async(dispatch_get_main_queue(), ^{
+//                [self.rightTableView reloadData];
+//            });
+//        }];
+//    }];
 }
 
 -(void)indexDidChangeForSegmentedControl:(UISegmentedControl *)sender {

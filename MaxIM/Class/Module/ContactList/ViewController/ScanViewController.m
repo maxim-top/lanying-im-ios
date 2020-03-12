@@ -117,6 +117,8 @@
     }
 }
 
+
+
 - (void)p_dealWithAppQRcodeWithAction:(NSString *)action infoDic:(NSDictionary *)dic {
     if ([action isEqualToString:@"profile"] && [self isLogin]) {
         NSString *rosterID = dic[@"uid"];
@@ -249,7 +251,7 @@
     if (upOrdown == NO) {
         num ++;
         _line.frame = CGRectMake(self.view.bounds.size.width /2 - 279/2-1, 2*num+50, 280  ,110);
-        if (2*num == 290) {
+        if (2 * num == 290) {
             upOrdown = YES;
         }
     }
@@ -280,6 +282,8 @@
     }];
 }
 
+
+
 - (void)searcGroupById:(NSInteger)groupId WithInfo:(NSString *)info{
     [HQCustomToast showWating];
     [[[BMXClient sharedClient] groupService]  getGroupInfoByGroupId:groupId forceRefresh:YES completion:^(BMXGroup *group, BMXError *error) {
@@ -296,7 +300,7 @@
 }
 
 - (void)jumpToQRCodeLoginVCWithInfo:(NSString *)info {
-    [self dismissViewControllerAnimated:YES completion:nil];
+    [self.navigationController popViewControllerAnimated:YES];
     QRCodeLoginViewController *vc = [[QRCodeLoginViewController alloc] initWithInfo:info];
     [self presentViewController:vc animated:YES completion:^{
         
@@ -332,11 +336,16 @@
         AVMetadataMachineReadableCodeObject *metadataObject = [metadataObjects objectAtIndex:0];
         stringValue = metadataObject.stringValue;
     }
-
-    NSDictionary *configDic = [self dictionaryWithJsonString:stringValue];
-    [_session stopRunning];
-    
-    [self dealWithCodeJson:configDic];
+//     if ([stringValue containsString:@"L_"] && [self isLogin]) {
+//        NSArray *array = [stringValue componentsSeparatedByString:@"_"];
+//        NSString *info = array[1];
+//        [self jumpToQRCodeLoginVCWithInfo:info];
+//     } else {
+         NSDictionary *configDic = [self dictionaryWithJsonString:stringValue];
+         [_session stopRunning];
+         
+         [self dealWithCodeJson:configDic];
+//     }
 }
 
 - (BOOL)isLogin {

@@ -116,6 +116,8 @@ static NSString *cellID = @"ContactTableViewCell";
 - (UIImageView *)avatarImg {
     if (!_avatarImg) {
         _avatarImg = [[UIImageView alloc] init];
+        _avatarImg.layer.borderColor = kColorC4_5.CGColor;
+        _avatarImg.layer.borderWidth = 0.5;
         [self addSubview:_avatarImg];
         [_avatarImg sizeToFit];
     }

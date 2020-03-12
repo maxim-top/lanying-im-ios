@@ -26,8 +26,8 @@
 #define MAXScreenH [UIScreen mainScreen].bounds.size.height
 #define MaxNavHeight 64
 
-#define NavHeight (INTERFACE_IS_IPHONEX ? 88 : 64)
-#define TabBarHeight (INTERFACE_IS_IPHONEX ? 83 : 49)
+#define NavHeight (MAXIsFullScreen ? 88 : 64)
+#define TabBarHeight (MAXIsFullScreen ? 83 : 49)
 
 #define SystemVersion [[UIDevice currentDevice] systemVersion].floatValue
 
@@ -41,6 +41,9 @@
 #define  isIphoneXR_XSMax    (MAXScreenW == 414.f && MAXScreenH == 896.f ? YES : NO)
 //异性全面屏
 #define   MAXIsFullScreen    (isIphoneX_XS || isIphoneXR_XSMax)
+
+#define IS_iPhone_Plus ([UIScreen instancesRespondToSelector:@selector(currentMode)] ? (CGSizeEqualToSize(CGSizeMake(1125,2001), [[UIScreen mainScreen] currentMode].size) || CGSizeEqualToSize(CGSizeMake(1242,2208), [[UIScreen mainScreen] currentMode].size)) : NO)
+
 
 #define INTERFACE_IS_IPHONEX  (@available(iOS 11.0, *) && ([UIApplication sharedApplication].keyWindow.safeAreaInsets.bottom > 0) ? YES:NO)
  

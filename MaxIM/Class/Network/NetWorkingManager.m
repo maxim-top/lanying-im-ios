@@ -113,24 +113,31 @@ NSString * connectingIPhoneNetworkNotifation = @"connectingIPhoneNetworkNotifati
 
 - (void)resetHeaderWithAppID:(NSString *)appID {
     [self.manager.requestSerializer setValue:appID forHTTPHeaderField:@"app_id"];
+    MAXLog(@"appid:%@", appID);
+
 }
 
 
 - (void)setHeader {
     IMAcount *acount = [IMAcountInfoStorage loadObject];
+    MAXLog(@"token :%@", acount.token);
+
     if ([acount.token length]) {
         [self.manager.requestSerializer setValue:acount.token forHTTPHeaderField:@"access-token"];
     }
     
-    [self.manager.requestSerializer setValue:@"welovemaxim" forHTTPHeaderField:@"app_id"];
-
-    
     
     ConsuleAppInfo *appinfo = [ConsuleAppInfoStorage loadObject];
+    
+    NSString *appid;
     if ([appinfo.appId length]) {
-        [self.manager.requestSerializer setValue:appinfo.appId forHTTPHeaderField:@"app_id"];
+        appid = appinfo.appId;
+    } else {
+        appid = @"welovemaxim";
     }
+    [self.manager.requestSerializer setValue:appid forHTTPHeaderField:@"app_id"];
 
+    MAXLog(@"appid:%@", appid);
 }
 
 - (NSURLSessionDataTask*)GET:(NSString*)URLString
