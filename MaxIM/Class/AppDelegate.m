@@ -15,13 +15,12 @@
 #import "MAXGlobalTool.h"
 #import <UserNotifications/UserNotifications.h>
 #import "GetTokenApi.h"
-#import "WXApi.h"
+#import <WXApi.h>
 #import "WechatApi.h"
 #import "WechatLoginApi.h"
 #import "RosterListViewController.h"
 #import "GroupListSelectViewController.h"
-#import "ConsoleAppIDStorage.h"
-#import "ConsoleAppID.h"
+#import "AppIDManager.h"
 #import "MAXLauchVideoViewController.h"
 #import "LoginViewController.h"
 #import "AccountListStorage.h"
@@ -29,7 +28,6 @@
 
 #import <floo-ios/BMXHostConfig.h>
 #import <Bugly/Bugly.h>
-
 
 
 
@@ -147,9 +145,19 @@
         [center requestAuthorizationWithOptions:type completionHandler:^(BOOL granted, NSError * _Nullable error) {
             if (granted) {
                 MAXLog(@"注册成功");
+
             }else{
                 MAXLog(@"注册失败");
             }
+            
+            
+            dispatch_async(dispatch_get_main_queue(), ^{
+                // 注册获得device Token
+                [application registerForRemoteNotifications];
+                
+            });
+            
+
         }];
     }else if (@available(iOS 8.0, *)){
         UIUserNotificationType notificationTypes = UIUserNotificationTypeBadge |
@@ -157,10 +165,17 @@
         UIUserNotificationTypeAlert;
         UIUserNotificationSettings *settings = [UIUserNotificationSettings settingsForTypes:notificationTypes categories:nil];
         [application registerUserNotificationSettings:settings];
+        
+        // 注册获得device Token
+        [application registerForRemoteNotifications];
     }
-    // 注册获得device Token
-    [application registerForRemoteNotifications];
+    
 }
+
+- (void)application:(UIApplication *)application didFailToRegisterForRemoteNotificationsWithError:(NSError *)error API_AVAILABLE(ios(3.0)) {
+    MAXLog(@"%@", error);
+}
+
 
 - (void)application:(UIApplication *)application didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)deviceToken {
     
@@ -216,20 +231,20 @@
     BMXSDKConfig *config  = [[BMXSDKConfig alloc] initConfigWithDataDir:dataDir cacheDir:cacheDir pushCertName:@"NotiCer_Product" userAgent:phone];
 //    BMXSDKConfig *config  = [[BMXSDKConfig alloc] initConfigWithDataDir:dataDir cacheDir:cacheDir pushCertName:@"NotiCer" userAgent:phone];
     
-    if ([ConsoleAppIDStorage hasAppID]) {
-        ConsoleAppID *model = [ConsoleAppIDStorage loadObject];
-        config.appID = model.appId;
-    } else {
-        config.appID = @"welovemaxim";
-        [[NetWorkingManager netWorkingManager] resetHeaderWithAppID:config.appID];
-    }
+
+    config.appID = [AppIDManager sharedManager].appid.appId;
+    
     config.loadAllServerConversations = YES;
     
     [[BMXClient sharedClient] registerWithSDKConfig:config];
 }
 
 - (void)reloadAppID:(NSString *)appid {
-    [[BMXClient sharedClient] changeAppID:appid];
+    
+    [AppIDManager changeAppid:appid isSave:NO];
+    [[BMXClient sharedClient] changeAppID:appid completion:^(BMXError * _Nonnull error) {
+        
+    }];
     [[NetWorkingManager netWorkingManager] resetHeaderWithAppID:appid];
 }
 

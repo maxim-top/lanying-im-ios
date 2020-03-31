@@ -14,10 +14,9 @@
 #import "IMAcount.h"
 #import "IMAcountInfoStorage.h"
 #import <floo-ios/BMXClient.h>
-#import "ConsoleAppIDStorage.h"
+#import "AppIDManager.h"
 #import "AppDelegate.h"
 
-#import "ConsoleAppID.h"
 #import "GetTokenApi.h"
 #import "MAXGlobalTool.h"
 #import "AccountManagementManager.h"
@@ -67,59 +66,75 @@
 }
 
 - (void)logoutDealWithData {
-    [ConsoleAppIDStorage clearObject];
+    
+    [AppIDManager clearAppid];
     [IMAcountInfoStorage clearObject];
 }
 
 - (void)loginWithaccount:(IMAcount *)account {
     
-
+    [HQCustomToast showWating];
     
-    [[BMXClient sharedClient] changeAppID:account.appid];
-    [[BMXClient sharedClient] signInByName:account.userName password:account.password completion:^(BMXError * _Nonnull error) {
-        
+    [[BMXClient sharedClient] changeAppID:account.appid completion:^(BMXError * _Nonnull error) {
         if (!error) {
-            
-            MAXLog(@"登录成功 username = %@ , password = %@",account.userName, account.password);
-//            [self uploadAppIdIfNeededWithUserName:name];
-            
-            [self saveLastLoginAppid];
-            
-            [self getAppTokenWithName:account.userName password:account.password];
-            
-            [self getProfile];
-            
-            [self bindDeviceToken];
-            
-            [self saveIMAcountName:account.userName password:account.password];
-            
-            IMAcount *account = [IMAcountInfoStorage loadObject];
-            account.isLogin = YES;
-            [IMAcountInfoStorage saveObject:account];
-            
-
-            [UIApplication sharedApplication].delegate.window.rootViewController = [MAXGlobalTool share].rootViewController;
-            
-            [[NSNotificationCenter defaultCenter] postNotificationName:@"loginSuccess" object:nil];
-            
-            [[MAXGlobalTool share].rootViewController addIMListener];
-            
-            AppDelegate *appDelegate = (AppDelegate *)[UIApplication sharedApplication].delegate;
-            [appDelegate userLogout];
-            [[MAXGlobalTool share].rootViewController addIMListener];
-
-            
-            
-        }else {
-            
-            [ConsoleAppIDStorage clearObject];
-            [[BMXClient sharedClient] changeAppID:@"welovemaxim"];
+            [self signByaccount:account];
+        } else {
+            [HQCustomToast hideWating];
 
             [IMAcountInfoStorage clearObject]; //清除当前存储的账号
             AppDelegate *appDelegate = (AppDelegate *)[UIApplication sharedApplication].delegate;
             [appDelegate userLogout];
+            // 切换失败之后，退出登录状态，但是保存切换后的appid
+            [appDelegate reloadAppID:account.appid];
         }
+        
     }];
+}
+
+- (void)signByaccount:(IMAcount *)account {
+        [[BMXClient sharedClient] signInByName:account.userName password:account.password completion:^(BMXError * _Nonnull error) {
+            [HQCustomToast hideWating];
+                if (!error) {
+                    
+                    MAXLog(@"登录成功 username = %@ , password = %@",account.userName, account.password);
+        //            [self uploadAppIdIfNeededWithUserName:name];
+                    
+                    [self saveLastLoginAppid];
+                    
+                    [self getAppTokenWithName:account.userName password:account.password];
+                    
+                    [self getProfile];
+                    
+                    [self bindDeviceToken];
+                    
+                    [self saveIMAcountName:account.userName password:account.password];
+                    
+                    IMAcount *account = [IMAcountInfoStorage loadObject];
+                    account.isLogin = YES;
+                    [IMAcountInfoStorage saveObject:account];
+                    
+
+                    [UIApplication sharedApplication].delegate.window.rootViewController = [MAXGlobalTool share].rootViewController;
+                    
+                    [[NSNotificationCenter defaultCenter] postNotificationName:@"loginSuccess" object:nil];
+                    
+                    [[MAXGlobalTool share].rootViewController addIMListener];
+                    
+                    AppDelegate *appDelegate = (AppDelegate *)[UIApplication sharedApplication].delegate;
+                    [appDelegate userLogout];
+                    [[MAXGlobalTool share].rootViewController addIMListener];
+
+                    
+                    
+                }else {
+                    
+                    [IMAcountInfoStorage clearObject]; //清除当前存储的账号
+                    AppDelegate *appDelegate = (AppDelegate *)[UIApplication sharedApplication].delegate;
+                    [appDelegate userLogout];
+                    // 切换失败之后，退出登录状态，但是保存切换后的appid
+                    [appDelegate reloadAppID:account.appid];
+                }
+            }];
     
 }
 
@@ -178,7 +193,7 @@
     NSString *deviceToken = [[NSUserDefaults standardUserDefaults] valueForKey:@"deviceToken"];
     if ([deviceToken length]) {
         [[[BMXClient sharedClient] userService] bindDevice:deviceToken completion:^(BMXError *error) {
-            MAXLog(@"绑定成功");
+            MAXLog(@"绑定成功 %@", deviceToken);
         }];
     }
 }
@@ -225,10 +240,17 @@
 }
 
 - (void)saveLastLoginAppid {
-    ConsoleAppID *appidModel = [[ConsoleAppID alloc] init];
+    
     BMXSDKConfig *sdkconfig = [[BMXClient sharedClient] sdkConfig];
-    appidModel.appId = sdkconfig.appID;
-    [ConsoleAppIDStorage saveObject:appidModel];
+
+    [AppIDManager changeAppid:sdkconfig.appID isSave:YES];
+
+    [[NetWorkingManager netWorkingManager] resetHeaderWithAppID:sdkconfig.appID];
+    
+//    BMXSDKConfig *sdkconfig = [[BMXClient sharedClient] sdkConfig];
+//    AppDelegate *appDelegate = (AppDelegate *)[UIApplication sharedApplication].delegate;
+//    [appDelegate reloadAppID:sdkconfig.appID];
+
 }
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView {
     return 1;
@@ -248,7 +270,7 @@
         [cell.selectImageView setHidden:YES];
     }
     
-    cell.titleLabel.text = account.userName;
+    cell.titleLabel.text = [NSString stringWithFormat:@"%@ (AppID:%@)",account.userName, account.appid];
     cell.subtitleLabel.text = account.usedId;
     MAXLog(@"====%@",NSStringFromCGRect(cell.titleLabel.frame));
     return cell;

@@ -344,6 +344,11 @@ typedef enum : NSUInteger {
     MAXLog(@"已经收到消息 %@", [messages firstObject]);
 }
 
+- (void)receivedCommandMessages:(NSArray<BMXMessageObject *> *)messages {
+    MAXLog(@"收到命令消息 %@", [messages firstObject]);
+
+}
+
 - (void)messageStatusChanged:(BMXMessageObject *)message
                        error:(BMXError *)error {
 

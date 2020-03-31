@@ -104,7 +104,6 @@ static NSString *cellID = @"ImageTitleBasicTableViewCell";
         self.avatarImg.image = image;
     }
     
-    MAXLog(@"%@", roster.avatarThumbnailPath);
 }
 
 - (void)refreshSupportRoster:(BMXRoster *)roster {

@@ -10,6 +10,7 @@
 #import "LHChatVC.h"
 #import "NSString+Extention.h"
 
+#import "MAXLoginViewController.h"
 #import "IMAcountInfoStorage.h"
 #import <floo-ios/BMXClient.h>
 

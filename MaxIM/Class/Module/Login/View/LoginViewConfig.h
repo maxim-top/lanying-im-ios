@@ -100,6 +100,7 @@ typedef enum : NSUInteger {
 
 - (void)setUserName:(NSString *)name;
 
+- (void)showWechatButton:(BOOL)show;
 
 @end
 

@@ -29,6 +29,7 @@
 #import "UIView+BMXframe.h"
 #import "WechatIsBindApi.h"
 #import "AppWechatUnbindApi.h"
+#import "LogViewController.h"
 
 @interface ProfileSettingViewController ()<UITableViewDataSource, UITableViewDelegate, ChangeMobileAlertDelegate>
 
@@ -373,7 +374,11 @@
 
     if ([dic[@"type"] isEqualToString:@"头像"]) {
         [self choiseImage];
-    }  else if ([dic[@"type"] isEqualToString:@"昵称"]) {
+    } else if ([dic[@"type"] isEqualToString:@"ID"]) {
+        
+        LogViewController *logvc = [[LogViewController alloc] init];
+        [self.navigationController pushViewController:logvc animated:YES];
+    } else if ([dic[@"type"] isEqualToString:@"昵称"]) {
         UIAlertController* alert = [UIAlertController alertControllerWithTitle:@"修改昵称"
                                                                        message:@""
                                                                 preferredStyle:UIAlertControllerStyleAlert];

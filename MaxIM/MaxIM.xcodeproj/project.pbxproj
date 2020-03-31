@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 50;
+	objectVersion = 51;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -77,6 +77,8 @@
 		B51FFBF32398148D00E82887 /* VerifyPasswordView.m in Sources */ = {isa = PBXBuildFile; fileRef = B51FFBF22398148D00E82887 /* VerifyPasswordView.m */; };
 		B51FFBF6239816DA00E82887 /* UnbindWechatViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = B51FFBF5239816DA00E82887 /* UnbindWechatViewController.m */; };
 		B51FFBF92398181A00E82887 /* VerifyPasswordViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = B51FFBF82398181A00E82887 /* VerifyPasswordViewController.m */; };
+		B520BE02242E2B3700B51B5E /* AppIDManager.m in Sources */ = {isa = PBXBuildFile; fileRef = B520BE01242E2B3700B51B5E /* AppIDManager.m */; };
+		B520BE05242F574C00B51B5E /* LogViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = B520BE04242F574C00B51B5E /* LogViewController.m */; };
 		B521C08F22E85649003D7DB9 /* ChatTableViewAdapter.m in Sources */ = {isa = PBXBuildFile; fileRef = B521C08E22E85649003D7DB9 /* ChatTableViewAdapter.m */; };
 		B52243A22371E747002C61AE /* MaxEmptyTipView.m in Sources */ = {isa = PBXBuildFile; fileRef = B52243A12371E747002C61AE /* MaxEmptyTipView.m */; };
 		B52506E62398E47700E6A0BD /* UserMobilePrechangeByMobileApi.m in Sources */ = {isa = PBXBuildFile; fileRef = B52506E52398E47700E6A0BD /* UserMobilePrechangeByMobileApi.m */; };
@@ -134,10 +136,8 @@
 		B53D1ED623A8CDAE004E01BA /* AccountListStorage.m in Sources */ = {isa = PBXBuildFile; fileRef = B53D1ED523A8CDAE004E01BA /* AccountListStorage.m */; };
 		B53D1ED923AA12C2004E01BA /* AccountInfoTableViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = B53D1ED823AA12C2004E01BA /* AccountInfoTableViewCell.m */; };
 		B53FB37822C5F57B002A4B1F /* NotifierUploadPushInfoApi.m in Sources */ = {isa = PBXBuildFile; fileRef = B53FB37722C5F57B002A4B1F /* NotifierUploadPushInfoApi.m */; };
-		B53FB37C22C5F81A002A4B1F /* ConsuleAppInfoStorage.m in Sources */ = {isa = PBXBuildFile; fileRef = B53FB37B22C5F81A002A4B1F /* ConsuleAppInfoStorage.m */; };
 		B53FB38222C5FCF6002A4B1F /* IMAcountInfoStorage.m in Sources */ = {isa = PBXBuildFile; fileRef = B53FB37E22C5FCF6002A4B1F /* IMAcountInfoStorage.m */; };
 		B53FB38322C5FCF6002A4B1F /* IMAcount.m in Sources */ = {isa = PBXBuildFile; fileRef = B53FB37F22C5FCF6002A4B1F /* IMAcount.m */; };
-		B53FB38622C5FD17002A4B1F /* ConsuleAppInfo.m in Sources */ = {isa = PBXBuildFile; fileRef = B53FB38522C5FD17002A4B1F /* ConsuleAppInfo.m */; };
 		B5433A6C21C4E7AB0062E141 /* ImageTitleBasicTableViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = B5433A6B21C4E7AB0062E141 /* ImageTitleBasicTableViewCell.m */; };
 		B5433A6F21C4F96C0062E141 /* RosterDetailViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = B5433A6E21C4F96C0062E141 /* RosterDetailViewController.m */; };
 		B5433A7221C523C80062E141 /* ApplyNotificationContainer.m in Sources */ = {isa = PBXBuildFile; fileRef = B5433A7121C523C80062E141 /* ApplyNotificationContainer.m */; };
@@ -479,6 +479,10 @@
 		B51FFBF5239816DA00E82887 /* UnbindWechatViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = UnbindWechatViewController.m; sourceTree = "<group>"; };
 		B51FFBF72398181A00E82887 /* VerifyPasswordViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = VerifyPasswordViewController.h; sourceTree = "<group>"; };
 		B51FFBF82398181A00E82887 /* VerifyPasswordViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = VerifyPasswordViewController.m; sourceTree = "<group>"; };
+		B520BE00242E2B3700B51B5E /* AppIDManager.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppIDManager.h; sourceTree = "<group>"; };
+		B520BE01242E2B3700B51B5E /* AppIDManager.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppIDManager.m; sourceTree = "<group>"; };
+		B520BE03242F574C00B51B5E /* LogViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = LogViewController.h; sourceTree = "<group>"; };
+		B520BE04242F574C00B51B5E /* LogViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = LogViewController.m; sourceTree = "<group>"; };
 		B521C08D22E85649003D7DB9 /* ChatTableViewAdapter.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ChatTableViewAdapter.h; sourceTree = "<group>"; };
 		B521C08E22E85649003D7DB9 /* ChatTableViewAdapter.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ChatTableViewAdapter.m; sourceTree = "<group>"; };
 		B52243A02371E747002C61AE /* MaxEmptyTipView.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MaxEmptyTipView.h; sourceTree = "<group>"; };
@@ -584,14 +588,10 @@
 		B53D1ED823AA12C2004E01BA /* AccountInfoTableViewCell.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AccountInfoTableViewCell.m; sourceTree = "<group>"; };
 		B53FB37622C5F57B002A4B1F /* NotifierUploadPushInfoApi.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = NotifierUploadPushInfoApi.h; sourceTree = "<group>"; };
 		B53FB37722C5F57B002A4B1F /* NotifierUploadPushInfoApi.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = NotifierUploadPushInfoApi.m; sourceTree = "<group>"; };
-		B53FB37A22C5F81A002A4B1F /* ConsuleAppInfoStorage.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ConsuleAppInfoStorage.h; sourceTree = "<group>"; };
-		B53FB37B22C5F81A002A4B1F /* ConsuleAppInfoStorage.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ConsuleAppInfoStorage.m; sourceTree = "<group>"; };
 		B53FB37E22C5FCF6002A4B1F /* IMAcountInfoStorage.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = IMAcountInfoStorage.m; sourceTree = "<group>"; };
 		B53FB37F22C5FCF6002A4B1F /* IMAcount.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = IMAcount.m; sourceTree = "<group>"; };
 		B53FB38022C5FCF6002A4B1F /* IMAcount.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IMAcount.h; sourceTree = "<group>"; };
 		B53FB38122C5FCF6002A4B1F /* IMAcountInfoStorage.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IMAcountInfoStorage.h; sourceTree = "<group>"; };
-		B53FB38422C5FD17002A4B1F /* ConsuleAppInfo.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ConsuleAppInfo.h; sourceTree = "<group>"; };
-		B53FB38522C5FD17002A4B1F /* ConsuleAppInfo.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ConsuleAppInfo.m; sourceTree = "<group>"; };
 		B5433A6A21C4E7AB0062E141 /* ImageTitleBasicTableViewCell.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ImageTitleBasicTableViewCell.h; sourceTree = "<group>"; };
 		B5433A6B21C4E7AB0062E141 /* ImageTitleBasicTableViewCell.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ImageTitleBasicTableViewCell.m; sourceTree = "<group>"; };
 		B5433A6D21C4F96C0062E141 /* RosterDetailViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = RosterDetailViewController.h; sourceTree = "<group>"; };
@@ -1475,6 +1475,8 @@
 				B539D64C21BFDD370011D30E /* XSBrowserAnimateDelegate.m */,
 				B539D64721BFDD370011D30E /* XSBrowserTransition.h */,
 				B539D63E21BFDD370011D30E /* XSBrowserTransition.m */,
+				B520BE03242F574C00B51B5E /* LogViewController.h */,
+				B520BE04242F574C00B51B5E /* LogViewController.m */,
 			);
 			path = Tools;
 			sourceTree = "<group>";
@@ -1683,10 +1685,6 @@
 		B53FB37922C5F7F1002A4B1F /* consule */ = {
 			isa = PBXGroup;
 			children = (
-				B53FB38422C5FD17002A4B1F /* ConsuleAppInfo.h */,
-				B53FB38522C5FD17002A4B1F /* ConsuleAppInfo.m */,
-				B53FB37A22C5F81A002A4B1F /* ConsuleAppInfoStorage.h */,
-				B53FB37B22C5F81A002A4B1F /* ConsuleAppInfoStorage.m */,
 				B5E8F69F23029E46003C8CD3 /* ConsoleAppID.h */,
 				B5E8F6A023029E46003C8CD3 /* ConsoleAppID.m */,
 				B5E8F69C23029C6C003C8CD3 /* ConsoleAppIDStorage.h */,
@@ -1757,6 +1755,8 @@
 				B53D1ED223A8C514004E01BA /* AccountManagementManager.m */,
 				B53D1ED423A8CDAE004E01BA /* AccountListStorage.h */,
 				B53D1ED523A8CDAE004E01BA /* AccountListStorage.m */,
+				B520BE00242E2B3700B51B5E /* AppIDManager.h */,
+				B520BE01242E2B3700B51B5E /* AppIDManager.m */,
 			);
 			path = Manager;
 			sourceTree = "<group>";
@@ -2539,19 +2539,16 @@
 			buildActionMask = 2147483647;
 			files = (
 			);
-			inputPaths = (
-				"${SRCROOT}/Pods/Target Support Files/Pods-MaxIM/Pods-MaxIM-resources.sh",
-				"${PODS_ROOT}/MJRefresh/MJRefresh/MJRefresh.bundle",
-				"${PODS_ROOT}/TZImagePickerController/TZImagePickerController/TZImagePickerController/TZImagePickerController.bundle",
+			inputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-MaxIM/Pods-MaxIM-resources-${CONFIGURATION}-input-files.xcfilelist",
 			);
 			name = "[CP] Copy Pods Resources";
-			outputPaths = (
-				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/MJRefresh.bundle",
-				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/TZImagePickerController.bundle",
+			outputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-MaxIM/Pods-MaxIM-resources-${CONFIGURATION}-output-files.xcfilelist",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-MaxIM/Pods-MaxIM-resources.sh\"\n";
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-MaxIM/Pods-MaxIM-resources.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
 /* End PBXShellScriptBuildPhase section */
@@ -2590,6 +2587,7 @@
 				B539D6B621BFDD370011D30E /* UIActionSheet+Blocks.m in Sources */,
 				B50BEAD82255E6B200B0753D /* NetworkService.m in Sources */,
 				B559004A22D0A64B003FDA76 /* YYTextParser.m in Sources */,
+				B520BE02242E2B3700B51B5E /* AppIDManager.m in Sources */,
 				B56B02572382F2D0005E22B8 /* UserMobileBindWithSignApi.m in Sources */,
 				B55FFC7E224227F100DF0BAB /* CodeImageViewController.m in Sources */,
 				B539D6D721BFDD370011D30E /* KeyboardButton.m in Sources */,
@@ -2614,7 +2612,6 @@
 				B5A7882E2389352400A3730D /* UserMobileChangeApi.m in Sources */,
 				B5F17B8721C2551A00B613A9 /* BMXSearchView.m in Sources */,
 				B559003A22D0A64B003FDA76 /* YYFrameImage.m in Sources */,
-				B53FB38622C5FD17002A4B1F /* ConsuleAppInfo.m in Sources */,
 				B5144F192351AFC500CF163E /* MenuView.m in Sources */,
 				B56B025D23830DCA005E22B8 /* MAXLauchVideoViewController.m in Sources */,
 				B539D6AD21BFDD370011D30E /* LHTools.m in Sources */,
@@ -2626,7 +2623,6 @@
 				B5AFB3002276E24000C23559 /* WechatApi.m in Sources */,
 				B559003B22D0A64B003FDA76 /* YYAnimatedImageView.m in Sources */,
 				B539D6D521BFDD370011D30E /* KeyboardEmojiModel.m in Sources */,
-				B53FB37C22C5F81A002A4B1F /* ConsuleAppInfoStorage.m in Sources */,
 				B5B85F1A2204468600B76D9A /* DeviceManagmentViewController.m in Sources */,
 				B53D1ED023A8BCD4004E01BA /* AccountMangementViewController.m in Sources */,
 				B539D6C221BFDD370011D30E /* LHChatImageBubbleView.m in Sources */,
@@ -2650,6 +2646,7 @@
 				B5433A7221C523C80062E141 /* ApplyNotificationContainer.m in Sources */,
 				B53D1ED623A8CDAE004E01BA /* AccountListStorage.m in Sources */,
 				B559004822D0A64B003FDA76 /* YYLabel.m in Sources */,
+				B520BE05242F574C00B51B5E /* LogViewController.m in Sources */,
 				B55900C622D0A7E3003FDA76 /* HQToast.m in Sources */,
 				4849CD7121A52C36006CB41D /* MAXTabBarController.m in Sources */,
 				B50BEAD92255E6B200B0753D /* NetworkStatusMonitor.m in Sources */,
@@ -2999,6 +2996,9 @@
 					"\"$(SRCROOT)/crypto/include\"",
 					"\"${PODS_ROOT}/Headers/Public/SDWebImage\"",
 					"\"${PODS_ROOT}/Headers/Public/Toast\"",
+					"\"$(SRCROOT)/../../bmxsdk/bmxsdk\"",
+					"\"$(SRCROOT)/../../floo-ios\"",
+					"$(SRCROOT)/**",
 				);
 				INFOPLIST_FILE = "$(SRCROOT)/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -3014,7 +3014,7 @@
 					"$(PROJECT_DIR)/Class/Vendor/VoiceConvert/lib",
 				);
 				MACH_O_TYPE = mh_execute;
-				MARKETING_VERSION = 2.0.1;
+				MARKETING_VERSION = 2.0.2;
 				OTHER_LDFLAGS = (
 					"$(inherited)",
 					"-ObjC",
@@ -3069,6 +3069,9 @@
 					"\"$(SRCROOT)/crypto/include\"",
 					"\"${PODS_ROOT}/Headers/Public/SDWebImage\"",
 					"\"${PODS_ROOT}/Headers/Public/Toast\"",
+					"\"$(SRCROOT)/../../bmxsdk/bmxsdk\"",
+					"\"$(SRCROOT)/../../floo-ios\"",
+					"$(SRCROOT)/**",
 				);
 				INFOPLIST_FILE = "$(SRCROOT)/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -3084,7 +3087,7 @@
 					"$(PROJECT_DIR)/Class/Vendor/VoiceConvert/lib",
 				);
 				MACH_O_TYPE = mh_execute;
-				MARKETING_VERSION = 2.0.1;
+				MARKETING_VERSION = 2.0.2;
 				OTHER_LDFLAGS = (
 					"$(inherited)",
 					"-ObjC",

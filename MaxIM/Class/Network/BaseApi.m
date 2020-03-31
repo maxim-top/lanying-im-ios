@@ -16,6 +16,7 @@
 #import "NetWorkingManager.h"
 //#import "ApiResult.h"
 #import "NSString+URLEncoding.h"
+#import "AppIDManager.h"
 
 //typedef void(^SuccessBlock)(id successObject);
 //typedef void(^FailureBlock)(id object);
@@ -116,6 +117,14 @@
 
 - (void)startWithSuccessBlock:(ApiSuccessBlock)success
                  failureBlock:(ApiFailureBlock)failure {
+    
+    if (![AppIDManager  isDefaultAppID] && [self baseURL] == MaxIMRequestApp) {
+        failure(nil);
+        [HQCustomToast showDialog:@"请使用默认APPID：\"welovemaxim\"" time:2];
+        return;
+    }
+
+    
     _customerSuccessBlock = success;
     _customerFailureBlock = failure;
     if ([self requestMethod] == HQRequestMethodGet) {
@@ -125,15 +134,6 @@
     }
 }
 
-//郭小明添加
-- (void)uploadImageWithSuccessBlock:(ApiSuccessBlock)success
-                       failureBlock:(ApiFailureBlock)failure {
-    _customerSuccessBlock = success;
-    _customerFailureBlock = failure;
-    if ([self requestMethod] == HQRequestMethodPost) {
-        [self p_httpPost];
-    }
-}
 
 - (void)startWithSuccessBlock:(ApiSuccessBlock)success {
     [self startWithSuccessBlock:success failureBlock:nil];

@@ -348,6 +348,19 @@
     self.wechatLabel.bmx_centerY = self.wechatLine.bmx_centerY;
 }
 
+- (void)removeWechatButton {
+    [self.otherLoginButton removeFromSuperview];
+    [self.wechatLine removeFromSuperview];
+    [self.wechatLine1 removeFromSuperview];
+    [self.wechatLabel removeFromSuperview];
+    
+    _otherLoginButton = nil;
+    _wechatLine = nil;
+    _wechatLine1 = nil;
+    _wechatLabel = nil;
+    
+}
+
 - (void)addPrivacyLabel {
     
     self.privacyLabel.bmx_bottom = self.confirmButton.bmx_top - 5;

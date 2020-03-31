@@ -228,11 +228,7 @@ CLLocationManagerDelegate>
                                                                         conversationId:self.currentRoster.rosterId];
     messageObject.extensionJson = [NSString jsonStringWithDictionary:configdic];
     messageObject.qos = DeliveryQosModeAtMostOnce;
-    [[[BMXClient sharedClient] chatService] sendMessage:messageObject completion:^(BMXMessageObject *message, BMXError *error) {
-        if (!error) {
-            MAXLog(@"发送对方要显示正在输入的标题");
-        }
-    }];
+    [[[BMXClient sharedClient] chatService] sendMessage:messageObject];
 }
 
 - (void)beginEdit {
@@ -405,7 +401,8 @@ CLLocationManagerDelegate>
     NSString *date =  [NSString stringWithFormat:@"%lld", message.serverTimestamp];
     LHMessageModel *dbMessageModel = [[LHIMDBManager shareManager] searchModel:[LHMessageModel class] keyValues:@{@"date" : date, @"status" : @(MessageDeliveryState_Delivered)}];
     dbMessageModel.messageObjc = message;
-    dbMessageModel.isSender = [message.fromId isEqualToString:self.account.usedId];
+    NSString *fromidStr = [NSString stringWithFormat:@"%lld", message.fromId];
+    dbMessageModel.isSender = [fromidStr isEqualToString:self.account.usedId];
     dbMessageModel.date = date;
     dbMessageModel.id = date;
     switch ( message.deliverystatus) {
@@ -629,12 +626,25 @@ CLLocationManagerDelegate>
             if(self.currentRoster != nil) {
                 ChatRosterProfileViewController* vc = [[ChatRosterProfileViewController alloc] initWithRoster:self.currentRoster];
                 [self.navigationController pushViewController:vc animated:YES];
+                
+                
+//                [self testCommon];
             }
             break;
         default:
             break;
     }
 }
+
+
+//#pragma warning - test
+//- (void)testCommon {
+//
+//    BMXMessageObject *commondmessage = [[BMXMessageObject alloc] initWithBMXCommandMessageText:@"commond" fromId:[self.account.usedId longLongValue ] toId:self.currentRoster.rosterId type:BMXMessageTypeSingle conversationId:self.currentRoster.rosterId];
+//
+//    [[[BMXClient sharedClient] chatService] sendMessage:commondmessage];
+//
+//}
 
 #pragma mark - Event
 - (void)returnButtonClick {
@@ -900,11 +910,28 @@ CLLocationManagerDelegate>
     [alert addAction:action2];
     [alert addAction:[UIAlertAction actionWithTitle:@"取消" style:UIAlertActionStyleCancel handler:nil]];
     [self presentViewController:alert animated:YES completion:nil];
+    
+   
+
 }
+
+//#warning -test
+//- (void)test:(BMXMessageObject *)msg {
+//    [self.conversation updateMessageExtension:msg completion:^(BMXError * _Nonnull error) {
+//        if (!error) {
+//            MAXLog(@"更新成功");
+//        }
+//
+//    }];
+//}
 
 
 - (void)chatBubbleLongPressed:(LHMessageModel *)message
                           ges:(UILongPressGestureRecognizer*)ges {
+    
+    
+//    message.messageObjc.extensionJson = @"rehh";
+//    [self test:message.messageObjc];
     
     NSString *date = [NSString stringWithFormat:@"%@",  message.date];
     __block LHChatViewCell *messagecell;
@@ -1039,7 +1066,7 @@ CLLocationManagerDelegate>
         }
     } else {
         __weak  LHChatViewCell *weakCell = messageCell;
-        [[[BMXClient sharedClient] rosterService] searchByRosterId:messageModel.messageObjc.fromId.integerValue forceRefresh:NO completion:^(BMXRoster *roster, BMXError *error) {
+        [[[BMXClient sharedClient] rosterService] searchByRosterId:messageModel.messageObjc.fromId forceRefresh:NO completion:^(BMXRoster *roster, BMXError *error) {
             if (!error) {
                 
                 if ([[NSFileManager defaultManager] fileExistsAtPath:roster.avatarThumbnailPath]) {
@@ -1067,7 +1094,7 @@ CLLocationManagerDelegate>
         messageModel.isChatGroup = YES;
         
         __weak  LHChatViewCell *weakCell = messageCell;
-        [[[BMXClient sharedClient] rosterService] searchByRosterId:[messageModel.messageObjc.fromId integerValue] forceRefresh:NO completion:^(BMXRoster *roster, BMXError *error) {
+        [[[BMXClient sharedClient] rosterService] searchByRosterId:messageModel.messageObjc.fromId forceRefresh:NO completion:^(BMXRoster *roster, BMXError *error) {
             if (!error) {
                 messageModel.nickName = [roster.nickName length] ? roster.nickName : roster.userName;
                 [weakCell setMessageName:messageModel.nickName];
@@ -1162,7 +1189,8 @@ CLLocationManagerDelegate>
 }
 
 - (void)ackMessagebyMessageObject:(BMXMessageObject *)messageObject {
-    if (![messageObject.fromId isEqualToString:self.account.usedId] && messageObject.isRead == NO) {
+    NSString *fromIdStr = [NSString stringWithFormat:@"%lld", messageObject.fromId];
+    if (![fromIdStr isEqualToString:self.account.usedId] && messageObject.isRead == NO) {
         [[[BMXClient sharedClient] chatService] ackMessage:messageObject];
     }
 }
@@ -1358,7 +1386,7 @@ CLLocationManagerDelegate>
 - (void)dealWithMessage:(BMXMessageObject *)message {
 
     if (message.messageType == BMXMessageTypeGroup) {
-        if (self.conversation.type != BMXMessageTypeGroup || message.toId.longLongValue != self.conversation.conversationId) {
+        if (self.conversation.type != BMXMessageTypeGroup || message.toId != self.conversation.conversationId) {
             return;
         }
         
@@ -1366,8 +1394,8 @@ CLLocationManagerDelegate>
 
         
     } else {
-        if (message.fromId.longLongValue  != self.conversation.conversationId || message.messageType != BMXMessageTypeSingle) {
-            if (message.fromId.longLongValue == [self.account.usedId longLongValue] && message.toId.longLongValue == self.conversation.conversationId) {
+        if (message.fromId  != self.conversation.conversationId || message.messageType != BMXMessageTypeSingle) {
+            if (message.fromId == [self.account.usedId longLongValue] && message.toId == self.conversation.conversationId) {
 
             } else {
                 return;
@@ -1396,7 +1424,9 @@ CLLocationManagerDelegate>
         LHMessageModel *dbMessageModel = [[LHIMDBManager shareManager] searchModel:[LHMessageModel class] keyValues:@{@"date" : date, @"status" : @(MessageDeliveryState_Delivered)}];
         dbMessageModel.content = message.content;
         dbMessageModel.status = MessageDeliveryState_Delivering;
-        dbMessageModel.isSender = [message.fromId isEqualToString:self.account.usedId];
+        NSString *fromIdStr = [NSString stringWithFormat:@"%lld", message.fromId];
+
+        dbMessageModel.isSender = [fromIdStr isEqualToString:self.account.usedId];
         dbMessageModel.date = date;
         dbMessageModel.id = date;
         
@@ -1443,12 +1473,12 @@ CLLocationManagerDelegate>
                                     error:(BMXError*)error
                                   percent:(int)percent {
     if (message.messageType == BMXMessageTypeGroup) {
-        if (self.conversation.type != BMXMessageTypeGroup || message.toId.longLongValue != self.conversation.conversationId) {
+        if (self.conversation.type != BMXMessageTypeGroup || message.toId != self.conversation.conversationId) {
             return;
         }
     } else {
-        if (message.fromId.longLongValue  != self.conversation.conversationId || message.messageType != BMXMessageTypeSingle) {
-            if (message.fromId.longLongValue == [self.account.usedId longLongValue] && message.toId.longLongValue == self.conversation.conversationId) {
+        if (message.fromId  != self.conversation.conversationId || message.messageType != BMXMessageTypeSingle) {
+            if (message.fromId == [self.account.usedId longLongValue] && message.toId == self.conversation.conversationId) {
                 
             } else {
                 return;
@@ -1462,7 +1492,9 @@ CLLocationManagerDelegate>
         LHMessageModel *dbMessageModel = [[LHIMDBManager shareManager] searchModel:[LHMessageModel class] keyValues:@{@"date" : date}];
         dbMessageModel.status = MessageDeliveryState_Delivered;
         dbMessageModel.messageObjc = message;
-        dbMessageModel.isSender = [message.fromId isEqualToString:self.account.usedId];
+        NSString *fromIdStr = [NSString stringWithFormat:@"%lld", message.fromId];
+
+        dbMessageModel.isSender = [fromIdStr isEqualToString:self.account.usedId];
         dbMessageModel.id = date;
         dbMessageModel.date = date;
         
@@ -1865,9 +1897,7 @@ CLLocationManagerDelegate>
     
     if (messageObject) {
         messageObject.clientTimestamp = [messageModel.date longLongValue];
-        [[[BMXClient sharedClient] chatService] sendMessage:messageObject completion:^(BMXMessageObject *message, BMXError *error) {
-            MAXLog(@"发送消息%@", error);
-        }];
+        [[[BMXClient sharedClient] chatService] sendMessage:messageObject];
     }
 }
 

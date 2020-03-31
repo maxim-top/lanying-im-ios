@@ -94,8 +94,7 @@
         BMXMessageObject *messageObject = [[BMXMessageObject alloc] initWithBMXMessageAttachment:imageAttachment fromId:[account.usedId longLongValue] toId:roster.rosterId type:BMXMessageTypeSingle conversationId:roster.rosterId];
             messageObject.contentType = BMXContentTypeImage;
         if (messageObject) {
-            [[[BMXClient sharedClient] chatService] sendMessage:messageObject completion:^(BMXMessageObject *message, BMXError *error) {
-            }];
+            [[[BMXClient sharedClient] chatService] sendMessage:messageObject];
             [self.navigationController popViewControllerAnimated:YES];
         }
         

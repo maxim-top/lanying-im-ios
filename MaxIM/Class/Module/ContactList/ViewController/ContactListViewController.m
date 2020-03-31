@@ -26,6 +26,7 @@
 #import "GroupCreateViewController.h"
 #import "MenuViewManager.h"
 #import "MaxEmptyTipView.h"
+#import "AppIDManager.h"
 
 @interface ContactListViewController ()<UITableViewDelegate,
                                         UITableViewDataSource,
@@ -88,7 +89,7 @@
 }
 
 - (BOOL)isShowSupportData {
-    if ([[[BMXClient sharedClient] sdkConfig].appID isEqualToString:@"welovemaxim"]) {
+    if ([[[BMXClient sharedClient] sdkConfig].appID isEqualToString:BMXAppID]) {
         return YES;
     }
     return NO;

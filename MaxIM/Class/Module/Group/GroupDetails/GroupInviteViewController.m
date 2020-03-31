@@ -51,8 +51,8 @@
             NSMutableSet* rosterIdSet = [NSMutableSet set];
             NSMutableSet* groupIdSet = [NSMutableSet set];
             for (BMXGroupInvitation* invitation in invitationList) {
-                [rosterIdSet addObject:[NSString stringWithFormat:@"%lld", invitation.inviterId]];
-                [groupIdSet addObject:[NSString stringWithFormat:@"%lld", invitation.groupId]];
+                [rosterIdSet addObject:[NSNumber numberWithLongLong:invitation.inviterId]];
+                [groupIdSet addObject:[NSNumber numberWithLongLong:invitation.groupId]];
             }
             [self searchGroupInfosByGids:[NSArray arrayWithArray:[groupIdSet allObjects] ] andRosters:[NSArray arrayWithArray:[rosterIdSet allObjects]]];
         } else {

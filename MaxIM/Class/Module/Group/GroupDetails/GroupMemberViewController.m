@@ -134,8 +134,8 @@
     UIAlertController* alert = [UIAlertController alertControllerWithTitle:@"警告" message:@"确定加入黑名单？" preferredStyle:UIAlertControllerStyleAlert];
     UIAlertAction* okAction = [UIAlertAction actionWithTitle:@"确定" style:UIAlertActionStyleDefault handler:^(UIAlertAction * action) {
         BMXRoster* roster = [self.memberList objectAtIndex:index];
-        NSString* rosterIdStr = [NSString stringWithFormat:@"%lld", roster.rosterId];
-        [[[BMXClient sharedClient] groupService] blockMembers:self.group members:@[rosterIdStr] completion:^(BMXError *error) {
+        NSNumber *rosterId = [NSNumber numberWithLongLong:roster.rosterId];
+        [[[BMXClient sharedClient] groupService] blockMembers:self.group members:@[rosterId] completion:^(BMXError *error) {
             if(!error) {
                 [[NSNotificationCenter defaultCenter] postNotificationName:@"KEY_NOTIFICATION_GROUP_MEMBER_UPDATED" object:nil];
                 [self getMembers];
@@ -152,10 +152,10 @@
     UIAlertController* alert = [UIAlertController alertControllerWithTitle:@"警告" message:@"确定要禁言吗？" preferredStyle:UIAlertControllerStyleAlert];
     UIAlertAction* okAction = [UIAlertAction actionWithTitle:@"确定" style:UIAlertActionStyleDefault handler:^(UIAlertAction * action) {
         BMXRoster* roster = [self.memberList objectAtIndex:index];
-        NSString* rosterIdStr = [NSString stringWithFormat:@"%lld", roster.rosterId];
+        NSNumber* rosterId = [NSNumber numberWithLongLong:roster.rosterId];
         NSString* muteDurationStr = [alert.textFields objectAtIndex:0].text;
         NSInteger duration = [muteDurationStr longLongValue];
-        [[[BMXClient sharedClient] groupService] banMembers:@[rosterIdStr] group:self.group reason:@"禁言" duration:duration completion:^(BMXError *error) {
+        [[[BMXClient sharedClient] groupService] banMembers:@[rosterId] group:self.group reason:@"禁言" duration:duration completion:^(BMXError *error) {
             if (error) {
                 MAXLog(@"mute member error, code: %ld", error.errorCode);
                 
@@ -194,7 +194,7 @@
 }
 
 - (void)deleteR:(BMXRoster *)roster{
-    NSString *s= [NSString stringWithFormat:@"%lld", roster.rosterId];
+    NSNumber *s= [NSNumber numberWithLongLong: roster.rosterId];
     [[[BMXClient sharedClient] groupService]removeMembersWithGroup:self.group memberlist:@[s] reason:@"" completion:^(BMXError *error) {
         if (!error) {
             [HQCustomToast showDialog:@"删除成功"];

@@ -19,10 +19,7 @@
 #import "IMAcount.h"
 #import "MAXGlobalTool.h"
 #import "GetTokenApi.h"
-#import "ConsuleAppInfo.h"
-#import "ConsuleAppInfoStorage.h"
-#import "ConsoleAppID.h"
-#import "ConsoleAppIDStorage.h"
+#import "AppIDManager.h"
 #import "NotifierBindApi.h"
 #import "BindOpenIdApi.h"
 #import "UserMobileBindApi.h"
@@ -83,8 +80,7 @@
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(jumpToRegistVC:) name:@"wechatloginsuccess_newuser" object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(inputUserTextFeild:) name:@"ScanConsule" object:nil];
     
-    
-    [self.config setAppid:@"welovemaxim"];
+    [self.config setAppid:[AppIDManager sharedManager].appid.appId];
 //    [self.config showErrorText:@"用户名或密码不对"];
 }
 
@@ -364,7 +360,7 @@
     NSDictionary *dic = noti.object;
     if (dic) {
         self.scanConsuleUserName = dic[@"userName"];
-        [self reloadAppID:dic[@"appId"]];
+        [self reloadLocalAppID:dic[@"appId"]];
         [self.config setAppid:dic[@"appId"]];
         [self.config setUserName:self.scanConsuleUserName];
     }
@@ -382,7 +378,7 @@
                                                          //得到文本信息
                                                          for(UITextField *text in alert.textFields){
                                                              MAXLog(@"text = %@", text.text);
-                                                             [self reloadAppID:text.text];
+                                                             [self reloadLocalAppID:text.text];
                                                              [self.config setAppid:text.text];
                                                              
                                                          }
@@ -394,6 +390,7 @@
                                                          }];
     [alert addTextFieldWithConfigurationHandler:^(UITextField *textField) {
         textField.placeholder = @"请输入AppID";
+        textField.text = [AppIDManager sharedManager].appid.appId;
     }];
     
     [alert addAction:okAction];
@@ -401,9 +398,12 @@
     [self presentViewController:alert animated:YES completion:nil];
 }
 
-- (void)reloadAppID:(NSString *)appid {
+- (void)reloadLocalAppID:(NSString *)appid {
+    
     AppDelegate *appDelegate = [UIApplication sharedApplication].delegate;
     [appDelegate reloadAppID:appid];
+
+    [self.config showWechatButton:[AppIDManager isDefaultAppID]];
 }
 
 - (void)uploadAppIdIfNeededWithUserName:(NSString *)userName {
@@ -418,12 +418,6 @@
         NSString *appid = self.scanConsuleResultDic[@"appId"];
         NSString *userid = self.scanConsuleResultDic[@"uid"];
         
-        ConsuleAppInfo *appInfo = [[ConsuleAppInfo alloc] init];
-        appInfo.appId = appid;
-        appInfo.uuid = userid;
-        appInfo.deviceToken = deviceToken;
-        [ConsuleAppInfoStorage saveObject:appInfo];
-
         
         if ([deviceToken length]) {
             NotifierBindApi *api = [[NotifierBindApi alloc] initWithAppID:appid
@@ -461,7 +455,7 @@
     NSString *deviceToken = [[NSUserDefaults standardUserDefaults] valueForKey:@"deviceToken"];
     if ([deviceToken length]) {
         [[[BMXClient sharedClient] userService] bindDevice:deviceToken completion:^(BMXError *error) {
-            MAXLog(@"绑定成功");
+            MAXLog(@"绑定成功%@", deviceToken);
         }];
     }
 }
@@ -634,20 +628,13 @@
     }];
 }
 
-
-
-
-
-
 - (void)saveAccountToLoaclListWithaccount:(IMAcount *)account {
     [[AccountManagementManager sharedAccountManagementManager] addAccountUserName:account.userName password:account.password userid:account.usedId appid:account.appid];
 }
 
 - (void)saveLastLoginAppid {
-    ConsoleAppID *appidModel = [[ConsoleAppID alloc] init];
     BMXSDKConfig *sdkconfig = [[BMXClient sharedClient] sdkConfig];
-    appidModel.appId = sdkconfig.appID;
-    [ConsoleAppIDStorage saveObject:appidModel];
+    [AppIDManager changeAppid:sdkconfig.appID isSave:YES];
 }
 
 // 注册后的登录
@@ -719,9 +706,5 @@
         }
     }];
 }
-
-
-
-
 
 @end

@@ -64,7 +64,7 @@
     
     
     __weak LHChatViewBaseCell *weakSelf = self;
-    [[[BMXClient sharedClient] rosterService] searchByRosterId:[self.messageModel.messageObjc.fromId integerValue] forceRefresh:NO completion:^(BMXRoster *roster, BMXError *error) {
+    [[[BMXClient sharedClient] rosterService] searchByRosterId:self.messageModel.messageObjc.fromId forceRefresh:NO completion:^(BMXRoster *roster, BMXError *error) {
         if (!error) {
             if (!weakSelf.messageModel.isSender) {
                 ChatRosterProfileViewController *vc = [[ChatRosterProfileViewController alloc] initWithRoster:roster];

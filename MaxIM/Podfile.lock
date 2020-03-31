@@ -49,7 +49,7 @@ DEPENDENCIES:
   - ZXingObjC (~> 3.6.5)
 
 SPEC REPOS:
-  https://github.com/cocoapods/specs.git:
+  https://github.com/CocoaPods/Specs.git:
     - AFNetworking
     - Bugly
     - FMDB
@@ -81,4 +81,4 @@ SPEC CHECKSUMS:
 
 PODFILE CHECKSUM: 44c0ac9f42ce2c5788ef22bbe713da6468468eee
 
-COCOAPODS: 1.5.3
+COCOAPODS: 1.9.1

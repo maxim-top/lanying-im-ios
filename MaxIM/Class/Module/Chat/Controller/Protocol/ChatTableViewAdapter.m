@@ -68,7 +68,7 @@
         
     } else {
         __weak  LHChatViewCell *weakCell = messageCell;
-        [[[BMXClient sharedClient] rosterService] searchByRosterId:messageModel.messageObjc.fromId.integerValue forceRefresh:NO completion:^(BMXRoster *roster, BMXError *error) {
+        [[[BMXClient sharedClient] rosterService] searchByRosterId:messageModel.messageObjc.fromId forceRefresh:NO completion:^(BMXRoster *roster, BMXError *error) {
             if (!error) {
                 
                 if ([[NSFileManager defaultManager] fileExistsAtPath:roster.avatarThumbnailPath]) {
@@ -96,7 +96,7 @@
         messageModel.isChatGroup = YES;
         
         __weak  LHChatViewCell *weakCell = messageCell;
-        [[[BMXClient sharedClient] rosterService] searchByRosterId:[messageModel.messageObjc.fromId integerValue] forceRefresh:NO completion:^(BMXRoster *roster, BMXError *error) {
+        [[[BMXClient sharedClient] rosterService] searchByRosterId:messageModel.messageObjc.fromId  forceRefresh:NO completion:^(BMXRoster *roster, BMXError *error) {
             if (!error) {
                 messageModel.nickName = [roster.nickName length] ? roster.nickName : roster.userName;
                 [weakCell setMessageName:messageModel.nickName];

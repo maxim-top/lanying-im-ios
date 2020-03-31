@@ -49,6 +49,8 @@ NS_ASSUME_NONNULL_BEGIN
 
 - (void)addWechatButton;
 
+- (void)removeWechatButton;
+
 - (void)addPrivacyLabel;
 
 - (void)showCaptchButton;

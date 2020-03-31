@@ -19,8 +19,8 @@
 #import "NSString+URLEncoding.h"
 #import "IMAcountInfoStorage.h"
 #import "IMAcount.h"
-#import "ConsuleAppInfoStorage.h"
-#import "ConsuleAppInfo.h"
+
+#import "AppIDManager.h"
 
 static NetworkService *_networkService;
 
@@ -126,18 +126,9 @@ NSString * connectingIPhoneNetworkNotifation = @"connectingIPhoneNetworkNotifati
         [self.manager.requestSerializer setValue:acount.token forHTTPHeaderField:@"access-token"];
     }
     
-    
-    ConsuleAppInfo *appinfo = [ConsuleAppInfoStorage loadObject];
-    
-    NSString *appid;
-    if ([appinfo.appId length]) {
-        appid = appinfo.appId;
-    } else {
-        appid = @"welovemaxim";
-    }
-    [self.manager.requestSerializer setValue:appid forHTTPHeaderField:@"app_id"];
+    [self.manager.requestSerializer setValue:[AppIDManager sharedManager].appid.appId forHTTPHeaderField:@"app_id"];
 
-    MAXLog(@"appid:%@", appid);
+    MAXLog(@"appid:%@", [AppIDManager sharedManager].appid.appId);
 }
 
 - (NSURLSessionDataTask*)GET:(NSString*)URLString

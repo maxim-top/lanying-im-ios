@@ -13,11 +13,8 @@
 #import <floo-ios/BMXClient.h>
 #import "QRCodeLoginViewController.h"
 #import "NotifierUploadPushInfoApi.h"
-#import "ConsuleAppInfoStorage.h"
-#import "ConsuleAppInfo.h"
 #import "AppDelegate.h"
-#import "ConsoleAppIDStorage.h"
-#import "ConsoleAppID.h"
+#import "AppIDManager.h"
 #import "IMAcountInfoStorage.h"
 #import "UIViewController+CustomNavigationBar.h"
 
@@ -135,7 +132,7 @@
 }
 
 - (void)p_dealWithConsoleQRcodeWithAction:(NSString *)action infoDic:(NSDictionary *)dic {
-    if ([action isEqualToString:@"login"]) {
+    if ([action isEqualToString:@"login"] && ![self isLogin]) {
         NSString *appId = [NSString stringWithFormat:@"%@", dic[@"app_id"]];
         NSString *uid = [NSString stringWithFormat:@"%@",dic[@"uid"]];
         NSString *userName = [NSString stringWithFormat:@"%@", dic[@"username"]];
@@ -149,20 +146,48 @@
     } else if ([action isEqualToString:@"upload_device_token"] && [self isLogin]) {
         [self configUploadDeviceTokenWithInfo:dic];
         
-    } else if ([action isEqualToString:@"app"]) {
+    } else if ([action isEqualToString:@"app"] && ![self isLogin]) {
         NSString *appId = [NSString stringWithFormat:@"%@", dic[@"app_id"]];
         NSDictionary *dic = @{@"appId": appId};
         [self reloadAppID:appId];
-        ConsoleAppID *appidModel = [[ConsoleAppID alloc] init];
-        appidModel.appId = appId;
-        [ConsoleAppIDStorage saveObject:appidModel];
         [[NSNotificationCenter defaultCenter] postNotificationName:@"ScanConsule" object:dic];
         [self closwBtnClick];
         
     } else {
-        [HQCustomToast showDialog:@"请使用正确设备扫描"];
+        [HQCustomToast showDialog:@"未识别该二维码"];
         [self.navigationController popToRootViewControllerAnimated:YES];
     }
+}
+
+-(void)showAlertWithAction:(NSString *)actionString infoDic:(NSDictionary *)dic {
+    UIAlertController *alertController = [UIAlertController alertControllerWithTitle:@"是否切换AppID?" message:@"切换AppID，需要退出当前账号" preferredStyle:UIAlertControllerStyleAlert];
+    [alertController addAction:[UIAlertAction actionWithTitle:@"取消" style:UIAlertActionStyleCancel handler:^(UIAlertAction * _Nonnull action) {
+        [self.navigationController popToRootViewControllerAnimated:YES];
+    }]];
+    [alertController addAction:[UIAlertAction actionWithTitle:@"确定" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+        
+        if ([actionString isEqualToString:@"login"]) {
+            NSString *appId = [NSString stringWithFormat:@"%@", dic[@"app_id"]];
+            NSString *uid = [NSString stringWithFormat:@"%@",dic[@"uid"]];
+            NSString *userName = [NSString stringWithFormat:@"%@", dic[@"username"]];
+            NSDictionary *dic = @{@"appId": appId,
+                                  @"uid": uid,
+                                  @"userName": userName};
+            [self reloadAppID:appId];
+            [[NSNotificationCenter defaultCenter] postNotificationName:@"ScanConsule" object:dic];
+            [self closwBtnClick];
+            
+        } else {
+            NSString *appId = [NSString stringWithFormat:@"%@", dic[@"app_id"]];
+            NSDictionary *dic = @{@"appId": appId};
+            [self reloadAppID:appId];
+            [[NSNotificationCenter defaultCenter] postNotificationName:@"ScanConsule" object:dic];
+            [self closwBtnClick];
+        }
+        
+    }]];
+    
+    [self presentViewController:alertController animated:YES completion:nil];
 }
 
 - (void)setupCamera {

@@ -146,13 +146,10 @@
         BMXMessageObject *messageObject = [[BMXMessageObject alloc] initWithBMXMessageAttachment:imageAttachment fromId:[account.usedId longLongValue] toId:group.groupId type:BMXMessageTypeGroup conversationId:group.groupId];
         messageObject.contentType = BMXContentTypeImage;
         if (messageObject) {
-            [[[BMXClient sharedClient] chatService] sendMessage:messageObject completion:^(BMXMessageObject *message, BMXError *error) {
-            }];
+            [[[BMXClient sharedClient] chatService] sendMessage:messageObject];
             [self.navigationController popViewControllerAnimated:YES];
         }
-        
     };
-    
     
     [self.view addSubview:alertView];
     

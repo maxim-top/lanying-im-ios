@@ -141,13 +141,13 @@
 - (void)searchContentWith:(NSString *)keywords {
     if (self.isConversation == YES) {
         if (self.searchContentType == BMXContentTypeText) {
-            [self.conversation searchMessages:keywords refTime:0 size:100 directionType:BMXMessageDirectionUp completion:^(NSArray<BMXMessageObject *> * _Nonnull messageList, BMXError * _Nonnull error) {
+            [self.conversation searchMessagesByKeyWords:keywords refTime:0 size:100 directionType:BMXMessageDirectionUp completion:^(NSArray<BMXMessageObject *> * _Nonnull messageList, BMXError * _Nonnull error) {
                 [self dataHandleMessages:messageList];
 
             }];
         }
     } else {
-        [[[BMXClient sharedClient] chatService] searchMessages:keywords refTime:0 size:100 directionType:BMXMessageDirectionUp completion:^(NSArray *array, BMXError *error) {
+        [[[BMXClient sharedClient] chatService] searchMessagesByKeyWords:keywords refTime:0 size:100 directionType:BMXMessageDirectionUp completion:^(NSArray *array, BMXError *error) {
             [self dataHandleConversation:array];
             
         }];
@@ -169,7 +169,9 @@
             dispatch_async(queue, ^{
                 if (messageObjc.messageType == BMXMessageTypeSingle) {
                     IMAcount *im =  [IMAcountInfoStorage loadObject];
-                    NSInteger rosterId = [messageObjc.fromId isEqualToString:im.usedId] ? messageObjc.toId.integerValue : messageObjc.fromId.integerValue;
+                    
+                    NSString *fromIdstr = [NSString stringWithFormat:@"%lld", messageObjc.fromId];
+                    NSInteger rosterId = [fromIdstr isEqualToString:im.usedId] ? messageObjc.toId : messageObjc.fromId;
                     
                     [[[BMXClient sharedClient] rosterService] searchByRosterId:rosterId forceRefresh:NO completion:^(BMXRoster *roster, BMXError *error) {
                         dispatch_semaphore_signal(semaphore);
@@ -213,7 +215,8 @@
         dispatch_async(queue, ^{
             if (messageObjc.messageType == BMXMessageTypeSingle) {
                 IMAcount *im =  [IMAcountInfoStorage loadObject];
-                NSInteger rosterId = [messageObjc.fromId isEqualToString:im.usedId] ? messageObjc.toId.integerValue : messageObjc.fromId.integerValue;
+                NSString *fromIdStr = [NSString stringWithFormat:@"%lld", messageObjc.fromId];
+                NSInteger rosterId = [fromIdStr isEqualToString:im.usedId] ? messageObjc.toId : messageObjc.fromId;
                 
                 [[[BMXClient sharedClient] rosterService] searchByRosterId:rosterId forceRefresh:NO completion:^(BMXRoster *roster, BMXError *error) {
                     dispatch_semaphore_signal(semaphore);

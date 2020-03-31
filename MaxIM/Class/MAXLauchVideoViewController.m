@@ -117,9 +117,9 @@
     self.scaleAnimation = scaleAnimation;
     scaleAnimation.fromValue = [NSNumber numberWithFloat:0.0];
     scaleAnimation.toValue = [NSNumber numberWithFloat:1.0];
-    scaleAnimation.duration = 3.0f;
+    scaleAnimation.duration = 1.0f;
     scaleAnimation.timingFunction = [CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionEaseInEaseOut];
-    
+
     AnimationDelegate *animationDelegate = [[AnimationDelegate alloc] init];
     animationDelegate.player = self.player;
     scaleAnimation.delegate = animationDelegate;

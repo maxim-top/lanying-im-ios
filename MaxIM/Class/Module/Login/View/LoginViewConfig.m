@@ -9,6 +9,7 @@
 #import "LoginViewConfig.h"
 #import "LoginView.h"
 #import "WXApi.h"
+#import "AppIDManager.h"
 
 @interface LoginViewConfig () <LoginViewProtocol>
 
@@ -37,7 +38,7 @@
             [loginView setPlaceHoderWithText:@"用户名/手机号" SecondText:@"密码"];
             [loginView setConfirmButtonTitle:@"登录"];
             [loginView addJumpButtonLeftButton:@"验证码登录" rightButton:@"注册"];
-            if ([WXApi isWXAppInstalled]) {
+            if ([WXApi isWXAppInstalled] && [AppIDManager isDefaultAppID]) {
                 [loginView addWechatButton];
             }
             [loginView addScanConsuleButton];
@@ -62,7 +63,7 @@
             [loginView addJumpButtonLeftButton:@"密码登录" rightButton:@"注册"];
             [loginView setConfirmButtonTitle:@"继续"];
             [loginView showCaptchButton];
-            if ([WXApi isWXAppInstalled]) {
+            if ([WXApi isWXAppInstalled] && [AppIDManager isDefaultAppID]) {
                 [loginView addWechatButton];
             }
             [loginView addScanConsuleButton];
@@ -122,6 +123,14 @@
 - (void)setUserName:(NSString *)name {
     
     [self.loginView inputUserName:name];
+}
+
+- (void)showWechatButton:(BOOL)show {
+    if (show) {
+        [self.loginView addWechatButton];
+    } else {
+        [self.loginView removeWechatButton];
+    }
 }
 
 

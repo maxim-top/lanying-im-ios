@@ -21,8 +21,8 @@
 #import "UIView+BMXframe.h"
 #import "CodeImageViewController.h"
 #import "AboutUsViewController.h"
-#import "ConsoleAppIDStorage.h"
 #import "AccountMangementViewController.h"
+#import "AppIDManager.h"
 
 #import <ZXingObjC.h>
 
@@ -83,8 +83,9 @@
     [[BMXClient sharedClient] signOutWithcompletion:^(BMXError *error) {
         if (!error) {
             
-            [ConsoleAppIDStorage clearObject];
-            [[BMXClient sharedClient] changeAppID:@"welovemaxim"];
+            [AppIDManager clearAppid];
+            AppDelegate *appDelegate = [UIApplication sharedApplication].delegate;
+            [appDelegate reloadAppID:BMXAppID];
             
             [HQCustomToast showDialog:@"退出成功"];
             
@@ -93,7 +94,6 @@
             [self reloadData];
             [IMAcountInfoStorage clearObject];
             
-            AppDelegate *appDelegate = [UIApplication sharedApplication].delegate;
             [appDelegate userLogout];
         } else {
             [HQCustomToast showDialog:@"退出失败"];
@@ -166,27 +166,7 @@
             
         }];
     }
-    
-    
-//    NSString *data = [NSString stringWithFormat:@"R_%lld", profile.userId];
-//    if (data == 0) return;
-//
-//    ZXMultiFormatWriter *writer = [[ZXMultiFormatWriter alloc] init];
-//    ZXBitMatrix *result = [writer encode:data
-//                                  format:kBarcodeFormatQRCode
-//                                   width:self.codeButton.frame.size.width
-//                                  height:self.codeButton.frame.size.width
-//                                   error:nil];
-//
-//    if (result) {
-//        ZXImage *image = [ZXImage imageWithMatrix:result];
-//        [self.codeButton setBackgroundImage:[UIImage imageWithCGImage:image.cgimage] forState:UIControlStateNormal];
-//    } else {
-//        [self.codeButton setBackgroundImage:nil forState:UIControlStateNormal];
-//
-//    }
-//    self.codeButton.backgroundColor = [UIColor clearColor];
-//
+
     [self.codeButton setImage:[UIImage imageNamed:@"codeicon"] forState:UIControlStateNormal];
     [self.nameLabel sizeToFit];
     self.codeButton.bmx_left = self.nameLabel.bmx_right + 10;

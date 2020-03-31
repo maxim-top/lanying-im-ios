@@ -128,7 +128,8 @@
 {
     if(section == 0) {// 取消管理
         NSString* uid = [self.adminUidArray objectAtIndex:row];
-        [[[BMXClient sharedClient] groupService] removeAdmins:self.group admins:@[uid] reason:@"添加管理" completion:^(BMXError *error) {
+        NSNumber *uidnumber = [NSNumber numberWithLongLong:[uid longLongValue]];
+        [[[BMXClient sharedClient] groupService] removeAdmins:self.group admins:@[uidnumber] reason:@"添加管理" completion:^(BMXError *error) {
             if(!error) {
                 [self.adminUidArray removeObject:uid];
                 [self.normalUidArray addObject:uid];
@@ -139,7 +140,7 @@
             
         }];
     }else { //添加管理
-        NSString* uid = [self.normalUidArray objectAtIndex:row];
+        NSNumber* uid = [NSNumber numberWithLongLong:[[self.normalUidArray objectAtIndex:row] longLongValue]];
         [[[BMXClient sharedClient] groupService] addAdmins:self.group admins:@[uid] message:@"取消管理" completion:^(BMXError *error) {
             if(!error) {
                 [self.normalUidArray removeObject:uid];

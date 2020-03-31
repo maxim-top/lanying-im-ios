@@ -106,7 +106,7 @@
     for (NSString* uid in _selectedIdDictionary) {
         BOOL issel = [[_selectedIdDictionary objectForKey:uid] boolValue];
         if (issel) {
-            [xids addObject:uid];
+            [xids addObject:[NSNumber numberWithLongLong:[uid longLongValue]]];
         }
     }
     if (xids.count <=0) {

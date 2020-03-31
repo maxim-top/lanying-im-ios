@@ -150,7 +150,7 @@
     NSArray* allKey = _selectedUids.allKeys;
     for (NSString* idkey in allKey) {
         if ([[_selectedUids objectForKey:idkey] isEqualToString:@"1"]) {
-            [ids addObject:idkey];
+            [ids addObject:[NSNumber numberWithLongLong:[idkey longLongValue]]];
         }
     }
     if(ids.count == 0 ) {
