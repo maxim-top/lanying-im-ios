@@ -10,8 +10,9 @@
 #import "LoginCodeImageViewController.h"
 #import "UIView+BMXframe.h"
 #import "LoginQRCodeInfoApi.h"
-#import <ZXingObjC.h>
+//#import <ZXingbObjC.h>
 #import "UIViewController+CustomNavigationBar.h"
+#import "QRCoodeFactor.h"
 
 @interface LoginCodeImageViewController ()
 
@@ -52,15 +53,15 @@
     NSString *data = [NSString stringWithFormat:@"L_%@", info[@"qr_info"]];
     if (![data length]) return;
     
-    ZXMultiFormatWriter *writer = [[ZXMultiFormatWriter alloc] init];
-    ZXBitMatrix *r = [writer encode:data
-                             format:kBarcodeFormatQRCode
-                              width:self.codeImageView.frame.size.width
-                             height:self.codeImageView.frame.size.width
-                              error:nil];
+//    ZXMultiFormatWriter *writer = [[ZXMultiFormatWriter alloc] init];
+//    ZXBitMatrix *r = [writer encode:data
+//                             format:kBarcodeFormatQRCode
+//                              width:self.codeImageView.frame.size.width
+//                             height:self.codeImageView.frame.size.width
+//                              error:nil];
     if (info) {
-        ZXImage *image = [ZXImage imageWithMatrix:r];
-        self.codeImageView.image = [UIImage imageWithCGImage:image.cgimage];
+//        ZXImage *image = [ZXImage imageWithMatrix:r];
+        self.codeImageView.image = [QRCoodeFactor generateQRCodeWithString:data Size:self.codeImageView.frame.size.width];
     } else {
         self.codeImageView.image = nil;
     }

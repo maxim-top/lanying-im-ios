@@ -10,10 +10,12 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
+@class ChangeMobileAlert;
+
 @protocol ChangeMobileAlertDelegate <NSObject>
 
-- (void)changeMobileAlertDidSelectCaptchaButton;
-- (void)changeMobileAlertDidSelectPasswordButton;
+- (void)alertDidSelectCaptchaButton:(ChangeMobileAlert *)alert;
+- (void)alertDidSelectPasswordButton:(ChangeMobileAlert *)alert;
 
 @end
 
@@ -21,7 +23,8 @@ NS_ASSUME_NONNULL_BEGIN
 
 - (void)show;
 //- (instancetype)initWithFrame:(CGRect)frame phone:(NSString *)phone;
-+ (instancetype)alertWithPhone:(NSString *)phone;
++ (instancetype)alertWithTitle:(NSString *)title
+                         Phone:(NSString *)phone;
 //+ (void)showAlertWithPhone:(NSString *)phone viewController:(UIViewController<ChangeMobileAlertDelegate> *)vc;
 - (void)hide;
 

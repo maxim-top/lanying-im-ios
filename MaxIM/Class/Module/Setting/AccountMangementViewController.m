@@ -21,6 +21,7 @@
 #import "MAXGlobalTool.h"
 #import "AccountManagementManager.h"
 #import "AccountListStorage.h"
+#import "HostConfigManager.h"
 
 @interface AccountMangementViewController ()<UITableViewDataSource, UITableViewDelegate>
 
@@ -43,7 +44,6 @@
 - (void)loadAccountData {
     NSArray *list = [AccountListStorage loadObject];
     self.accountArray = list;
-    
     IMAcount *a = self.accountArray[0];
     [[[BMXClient sharedClient] rosterService] searchByRosterId:[a.usedId integerValue] forceRefresh:YES completion:^(BMXRoster *roster, BMXError *error) {
         
@@ -75,12 +75,16 @@
     
     [HQCustomToast showWating];
     
+    [HostConfigManager sharedManager].IMServer = account.IMServer;
+    [HostConfigManager sharedManager].IMPort = account.IMPort;
+    [HostConfigManager sharedManager].restServer = account.restServer;
+    [[HostConfigManager sharedManager]  updataConfig];
+    
     [[BMXClient sharedClient] changeAppID:account.appid completion:^(BMXError * _Nonnull error) {
         if (!error) {
             [self signByaccount:account];
         } else {
             [HQCustomToast hideWating];
-
             [IMAcountInfoStorage clearObject]; //清除当前存储的账号
             AppDelegate *appDelegate = (AppDelegate *)[UIApplication sharedApplication].delegate;
             [appDelegate userLogout];
@@ -277,6 +281,7 @@
 }
 
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
+    
     IMAcount *account = self.accountArray[indexPath.row];
     if ([account.usedId isEqualToString:self.currentAccount.usedId]) {
         

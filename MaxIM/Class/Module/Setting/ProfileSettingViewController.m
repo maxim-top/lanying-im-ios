@@ -109,9 +109,26 @@
     }];
 }
 
+- (void)alertDidSelectCaptchaButton:(ChangeMobileAlert *)alert {
+    
+    if (alert.tag == 1000) {
+        [self changeMobileAlertDidSelectCaptchaButton];
+    }else {
+        [self changePasswordAlertDidSelectCaptchaButton];
+    }
+}
+- (void)alertDidSelectPasswordButton:(ChangeMobileAlert *)alert {
+    
+    if (alert.tag == 1000) {
+        [self changeMobileAlertDidSelectPasswordButton];
+    }else {
+        [self changePasswordAlertDidSelectPasswordButton];
+    }
+}
+
 - (void)changeMobileAlertDidSelectCaptchaButton {
     [self.alert hide];
-    VerifyPhoneViewController *vc = [[VerifyPhoneViewController alloc] init];
+    VerifyPhoneViewController *vc = [[VerifyPhoneViewController alloc] initWithEditType:EditTypePhone];
     vc.profile = self.profile;
     [self.navigationController pushViewController:vc animated:YES];
     
@@ -121,9 +138,27 @@
 - (void)changeMobileAlertDidSelectPasswordButton {
     MAXLog(@"密码方式");
     [self.alert hide];
-    VerifyPasswordViewController *vc = [[VerifyPasswordViewController alloc] init];
+    VerifyPasswordViewController *vc = [[VerifyPasswordViewController alloc] initWithEditType:EditTypePhone];
     [self.navigationController pushViewController:vc animated:YES];
 }
+
+
+- (void)changePasswordAlertDidSelectCaptchaButton {
+    [self.alert hide];
+    VerifyPhoneViewController *vc = [[VerifyPhoneViewController alloc] initWithEditType:EditTypePassword];
+    vc.profile = self.profile;
+    [self.navigationController pushViewController:vc animated:YES];
+    
+    MAXLog(@"验证码方式");
+}
+
+- (void)changePasswordAlertDidSelectPasswordButton {
+    MAXLog(@"密码方式");
+    [self.alert hide];
+    VerifyPasswordViewController *vc = [[VerifyPasswordViewController alloc] initWithEditType:EditTypePassword];
+    [self.navigationController pushViewController:vc animated:YES];
+}
+
 
 // 修改昵称
 - (void)modifyNickname:(NSString *)nickname {
@@ -329,6 +364,9 @@
     } else if ([dic[@"type"] isEqualToString:@"手机号"]) {
         NSString *aString = [self.profile.mobilePhone length] ? self.profile.mobilePhone : @"去绑定";
         cell.contentLabel.text = aString;
+    }else if ([dic[@"type"] isEqualToString:@"修改密码"]) {
+        NSString *aString = @"";
+        cell.contentLabel.text = aString;
     } else if ([dic[@"type"] isEqualToString:@"微信"]) {
         NSString *aString = self.isbindWechat ? @"解绑" : @"未绑定";
         cell.contentLabel.text = aString;
@@ -408,13 +446,23 @@
         
     } else if ([dic[@"type"] isEqualToString:@"手机号"]) {
         if ([self.profile.mobilePhone length]) {
-            self.alert = [ChangeMobileAlert alertWithPhone:self.profile.mobilePhone];
+            self.alert = [ChangeMobileAlert alertWithTitle:@"更改绑定手机号" Phone:self.profile.mobilePhone];
+            self.alert.tag = 1000;
             self.alert.delegate = self;
             [self.alert show];
         } else {
             [self gotoBindPhone];
         }
 
+    }else if ([dic[@"type"] isEqualToString:@"修改密码"]) {
+        if ([self.profile.mobilePhone length]) {
+            self.alert = [ChangeMobileAlert alertWithTitle:@"更改密码" Phone:self.profile.mobilePhone];
+            self.alert.tag = 1001;
+            self.alert.delegate = self;
+            [self.alert show];
+        } else {
+            [self gotoBindPhone];
+        }
     } else if ([dic[@"type"] isEqualToString:@"微信"]) {
         
         UIAlertController* alert = [UIAlertController alertControllerWithTitle:@"提醒"

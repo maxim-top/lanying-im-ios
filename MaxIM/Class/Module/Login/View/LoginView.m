@@ -62,6 +62,8 @@
 
 @property (nonatomic, strong) CodeTimerManager *codeTimerManager;
 
+@property (nonatomic, strong) UIButton *logButton;
+
 //@property (nonatomic, strong) DropdownListView *tableview;
 
 @end
@@ -252,6 +254,14 @@
     self.scanConsuleButton.bmx_height = 30;
     self.scanConsuleButton.bmx_top = NavHeight -3 ;
     self.scanConsuleButton.bmx_left = MAXScreenW - 100;
+}
+
+- (void)addLogButton {
+    self.logButton.bmx_width = 100;
+    self.logButton.bmx_height = 30;
+    self.logButton.bmx_top = self.confirmButton.bmx_centerY + 100;
+    self.logButton.bmx_centerX = MAXScreenW/2.0;
+
 }
 
 
@@ -483,6 +493,14 @@
     }
 }
 
+- (void)logButtonClicked {
+    
+    if (self.delegate && [self.delegate respondsToSelector:@selector(logButtonClick)]) {
+        [self.delegate logButtonClick];
+    }
+}
+
+
 - (void)editButtonClick {
 
     if (self.delegate && [self.delegate respondsToSelector:@selector(editButtonClick)]) {
@@ -601,6 +619,19 @@
         [self addSubview:_scanConsuleButton];
     }
     return _scanConsuleButton;
+}
+
+- (UIButton *)logButton {
+    if (!_logButton) {
+        _logButton = [UIButton buttonWithType:UIButtonTypeCustom];
+        [_logButton setTitle:@"查看日志" forState:UIControlStateNormal];;
+        [_logButton setTitleColor:BMXCOLOR_HEX(0x333333) forState:UIControlStateNormal];
+        [_logButton addTarget:self action:@selector(logButtonClicked) forControlEvents:UIControlEventTouchUpInside];
+        _logButton.layer.masksToBounds = YES;
+        _logButton.titleLabel.font = [UIFont systemFontOfSize:14];
+        [self addSubview:_logButton];
+    }
+    return _logButton;
 }
 
 

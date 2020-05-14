@@ -15,6 +15,7 @@ PODS:
   - AFNetworking/UIKit (3.2.1):
     - AFNetworking/NSURLSession
   - Bugly (2.5.0)
+  - floo-ios (2.2.2)
   - FMDB (2.7.5):
     - FMDB/standard (= 2.7.5)
   - FMDB/standard (2.7.5)
@@ -29,13 +30,11 @@ PODS:
   - Toast (3.1.0)
   - TSActionAlertView (1.0.1)
   - TZImagePickerController (1.9.8)
-  - ZXingObjC (3.6.5):
-    - ZXingObjC/All (= 3.6.5)
-  - ZXingObjC/All (3.6.5)
 
 DEPENDENCIES:
   - AFNetworking
   - Bugly
+  - floo-ios
   - FMDB
   - M80AttributedLabel (~> 1.6.3)
   - Masonry
@@ -46,7 +45,6 @@ DEPENDENCIES:
   - Toast (~> 3.0)
   - TSActionAlertView
   - TZImagePickerController (~> 1.9.3)
-  - ZXingObjC (~> 3.6.5)
 
 SPEC REPOS:
   https://github.com/CocoaPods/Specs.git:
@@ -62,11 +60,13 @@ SPEC REPOS:
     - Toast
     - TSActionAlertView
     - TZImagePickerController
-    - ZXingObjC
+  trunk:
+    - floo-ios
 
 SPEC CHECKSUMS:
   AFNetworking: b6f891fdfaed196b46c7a83cf209e09697b94057
   Bugly: 3ca9f255c01025582df26f9222893b383c7e4b4e
+  floo-ios: ad66893ff2664f8f05b0de949a6aee2c96beadee
   FMDB: 2ce00b547f966261cd18927a3ddb07cb6f3db82a
   M80AttributedLabel: d06543195d3e451d2ea62ad76d04aa9cea7661d4
   Masonry: 678fab65091a9290e40e2832a55e7ab731aad201
@@ -77,8 +77,7 @@ SPEC CHECKSUMS:
   Toast: 14a93686d6c8bfe2727afd342414e35660a8a1f3
   TSActionAlertView: c366d2c278a1ebf3e0d81db5a17c2c9f894779c8
   TZImagePickerController: 3b9413ae5d049b1fdc5b0c720ad283f35b679a50
-  ZXingObjC: fdbb269f25dd2032da343e06f10224d62f537bdb
 
-PODFILE CHECKSUM: 44c0ac9f42ce2c5788ef22bbe713da6468468eee
+PODFILE CHECKSUM: 94dd91af0805b370ad4aa2055b9c404332501319
 
-COCOAPODS: 1.9.1
+COCOAPODS: 1.8.4

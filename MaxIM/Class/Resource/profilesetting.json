@@ -15,6 +15,10 @@
         "control": "alert"
     },
     {
+        "type": "修改密码",
+        "control": "alert"
+    },
+    {
         "type": "微信",
         "control": "alert"
     },

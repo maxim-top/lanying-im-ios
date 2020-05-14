@@ -117,12 +117,12 @@
 
 - (void)startWithSuccessBlock:(ApiSuccessBlock)success
                  failureBlock:(ApiFailureBlock)failure {
-    
-    if (![AppIDManager  isDefaultAppID] && [self baseURL] == MaxIMRequestApp) {
-        failure(nil);
-        [HQCustomToast showDialog:@"请使用默认APPID：\"welovemaxim\"" time:2];
-        return;
-    }
+//    
+//    if (![AppIDManager  isDefaultAppID] && [self baseURL] == MaxIMRequestApp) {
+//        failure(nil);
+//        [HQCustomToast showDialog:@"请使用默认APPID：\"welovemaxim\"" time:2];
+//        return;
+//    }
 
     
     _customerSuccessBlock = success;

@@ -50,6 +50,8 @@ typedef enum : NSUInteger {
 
 - (void)beginScanQRCode;
 
+- (void)showLogVC;
+
 - (void)loginByWechat;
 
 - (void)signByName:(NSString *)name

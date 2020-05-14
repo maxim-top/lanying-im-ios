@@ -24,7 +24,7 @@
 #import "AccountMangementViewController.h"
 #import "AppIDManager.h"
 
-#import <ZXingObjC.h>
+//#import <ZXingObjC.h>
 
 @interface SettingTableView()<UITableViewDelegate,UITableViewDataSource, TitleSwitchTableViewCellDelegate>
 
@@ -80,26 +80,40 @@
 }
 
 - (void)logoutclick{
-    [[BMXClient sharedClient] signOutWithcompletion:^(BMXError *error) {
+    [HQCustomToast showWating];
+    [[BMXClient sharedClient] signOutID:(NSInteger)self.profile.userId ignoreUnbindDevice:NO completion:^(BMXError * _Nonnull error) {
+        
+
         if (!error) {
+            [HQCustomToast hideWating];
             
-            [AppIDManager clearAppid];
-            AppDelegate *appDelegate = [UIApplication sharedApplication].delegate;
-            [appDelegate reloadAppID:BMXAppID];
-            
-            [HQCustomToast showDialog:@"退出成功"];
-            
-            [self.avatarImageView sd_setImageWithURL:nil placeholderImage:[UIImage imageNamed:@"profileavatar"]];
-            self.nameLabel.text = @"请登录";
-            [self reloadData];
-            [IMAcountInfoStorage clearObject];
-            
-            [appDelegate userLogout];
+            [self dealWithLogout];
         } else {
-            [HQCustomToast showDialog:@"退出失败"];
+            
+            [[BMXClient sharedClient] signOutID:(NSInteger)self.profile.userId ignoreUnbindDevice:YES completion:^(BMXError * _Nonnull error) {
+                [self dealWithLogout];
+            }];
+            
+            [HQCustomToast hideWating];
         }
     }];
 
+}
+
+- (void)dealWithLogout {
+    [AppIDManager clearAppid];
+    AppDelegate *appDelegate = [UIApplication sharedApplication].delegate;
+    [appDelegate reloadAppID:BMXAppID];
+    [[BMXClient sharedClient] sdkConfig].enableDNS = YES;
+    
+    [HQCustomToast showDialog:@"退出成功"];
+    
+    [self.avatarImageView sd_setImageWithURL:nil placeholderImage:[UIImage imageNamed:@"profileavatar"]];
+    self.nameLabel.text = @"请登录";
+    [self reloadData];
+    [IMAcountInfoStorage clearObject];
+    
+    [appDelegate userLogout];
 }
 
 - (void)tapCodeImageView:(UITapGestureRecognizer*)tap {

@@ -9,6 +9,7 @@
 #import "AccountManagementManager.h"
 #import "AccountListStorage.h"
 #import "IMAcount.h"
+#import "HostConfigManager.h"
 
 @implementation AccountManagementManager
 
@@ -22,9 +23,7 @@
 }
 
 - (void)addAccountUserName:(NSString *)userName password:(NSString *)password userid:(NSString *)userid appid:(NSString *)appid {
-//    NSMutableArray *accountArray = [NSMutableArray arrayWithArray: [AccountListStorage loadObject]];
-    
-    
+        
     NSArray * array = [NSArray arrayWithArray: [AccountListStorage loadObject]];
     NSMutableArray *mArr = [NSMutableArray arrayWithArray:array];
     for (IMAcount *account in array) {
@@ -38,6 +37,10 @@
     account.password = password;
     account.usedId = userid;
     account.appid = appid;
+    account.IMServer = [HostConfigManager sharedManager].IMServer;
+    account.IMPort = [HostConfigManager sharedManager].IMPort;
+    account.restServer = [HostConfigManager sharedManager].restServer;
+    
     [mArr addObject:account];
     
     [AccountListStorage saveObject:[NSArray arrayWithArray:mArr]];

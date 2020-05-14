@@ -28,8 +28,13 @@
 
 #import "TokenIdApi.h"
 #import "AccountManagementManager.h"
+#import "LogViewController.h"
 
-@interface LoginViewController ()<LoginViewConfigProtocol>
+#import "SDKConfigViewController.h"
+
+#import <floo-ios/BMXHostConfig.h>
+
+@interface LoginViewController ()<LoginViewConfigProtocol, SDKConfigViewControllerProtocl>
 
 @property (nonatomic, strong) LoginViewConfig *config;
 @property (nonatomic,copy) NSString *scanConsuleUserName;
@@ -123,6 +128,15 @@
     ScanViewController *vc = [[ScanViewController alloc] init];
     vc.modalPresentationStyle =  UIModalPresentationFullScreen;
     [self.navigationController pushViewController:vc animated:YES];
+}
+
+
+- (void)showLogVC {
+    MAXLog(@"show log vc");
+    
+    LogViewController *vc = [[LogViewController alloc] init];
+    [self.navigationController pushViewController:vc animated:YES];
+    
 }
 
 // 微信登录
@@ -284,8 +298,17 @@
 }
 
 - (void)editAppid {
-    
-    [self showAppIDEditAlert];
+       
+    SDKConfigViewController *vc = [[SDKConfigViewController alloc] init];
+    vc.delegate = self;
+    [self.navigationController pushViewController:vc animated:YES];
+//    [self showAppIDEditAlert];
+}
+
+- (void)sdkconfigdidClickReturn {
+    [self.config setAppid:[AppIDManager sharedManager].appid.appId];
+    [self.config showWechatButton:[AppIDManager isDefaultAppID]];
+
 }
 
 - (void)pushToBindNickNameWithWechatOpenId:(NSString *)wechatOpenId {
@@ -590,6 +613,8 @@
 
 // 直接登录
 - (void)loginAndEntryMainVCWithName:(NSString *)name password:(NSString *)password {
+    
+    MAXLog(@"%@", [[BMXClient sharedClient] sdkConfig].hostConfig.restHost);
     
     [HQCustomToast showWating];
     [[BMXClient sharedClient] signInByName:name password:password completion:^(BMXError *error) {

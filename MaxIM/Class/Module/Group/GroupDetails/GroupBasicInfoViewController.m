@@ -13,6 +13,8 @@
 #import "QRCodeGroupInviteApi.h"
 #import "LHChatVC.h"
 
+#import "UIViewController+CustomNavigationBar.h"
+
 @interface GroupBasicInfoViewController ()
 
 @property (nonatomic, strong) BMXGroup *group;
@@ -39,12 +41,15 @@
     [super viewDidLoad];
     self.view.backgroundColor = [UIColor whiteColor];
     
-    self.navigationItem.title = @"加入群";
+
+    
     [self setupSubview];
     
     self.avatarImageview.image = [UIImage imageNamed:@"contact_placeholder"];
     self.nameLabel.text = self.group.name;
 
+    [self setNavigationBarTitle:@"加入群" navLeftButtonIcon:@"blackback"];
+    
     UIImage *avarat = [UIImage imageWithContentsOfFile:self.group.avatarThumbnailPath];
     if (avarat) {
         self.avatarImageview.image = avarat;
@@ -97,7 +102,7 @@
 
 - (void)setupSubview {
     self.infoView.x = 0;
-    self.infoView.y = kNavBarHeight;
+    self.infoView.y = NavHeight;
     self.infoView.width = MAXScreenW;
     self.infoView.height = 180;
     

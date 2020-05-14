@@ -21,6 +21,7 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)rightJumpButtonClick;
 - (void)wechatButtonClick;
 - (void)scanButtonClick;
+- (void)logButtonClick;
 - (void)editButtonClick;
 - (void)skipButtonClick;
 
@@ -50,6 +51,8 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)addWechatButton;
 
 - (void)removeWechatButton;
+
+- (void)addLogButton;
 
 - (void)addPrivacyLabel;
 

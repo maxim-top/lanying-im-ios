@@ -33,8 +33,9 @@ NSUInteger kChangeMobileAlertTag = 100030;
 //    aler.delegate = vc;
 //    [MaxKeyWindow addSubview:aler];
 //}
-+ (instancetype)alertWithPhone:(NSString *)phone  {
-    ChangeMobileAlert *aler = [[ChangeMobileAlert alloc] initWithFrame:[UIScreen mainScreen].bounds phone:phone];
++ (instancetype)alertWithTitle:(NSString *)title
+                         Phone:(NSString *)phone  {
+    ChangeMobileAlert *aler = [[ChangeMobileAlert alloc] initWithFrame:[UIScreen mainScreen].bounds title:title phone:phone];
     return aler;
 }
 
@@ -56,27 +57,30 @@ NSUInteger kChangeMobileAlertTag = 100030;
     [self p_remove];
 }
 
-- (instancetype)initWithFrame:(CGRect)frame phone:(NSString *)phone {
+- (instancetype)initWithFrame:(CGRect)frame
+                        title:(NSString *)title
+                        phone:(NSString *)phone {
     if (self = [super initWithFrame:frame]) {
         self.backgroundColor = BMXColorAlpha([UIColor grayColor], 0.75);
         self.phone = phone;
         self.subTitleLabel.text = [NSString stringWithFormat:@"你已绑定手机号 %@",phone];
         self.tag = kChangeMobileAlertTag;
+        self.titleLabel.text = title;
         [self setupSubview];
     }
     return self;
 }
 
 - (void)passwordbuttonClick:(UIButton *)button {
-    if (self.delegate && [self.delegate respondsToSelector:@selector(changeMobileAlertDidSelectPasswordButton)]) {
-        [self.delegate changeMobileAlertDidSelectPasswordButton];
+    if (self.delegate && [self.delegate respondsToSelector:@selector(alertDidSelectPasswordButton:)]) {
+        [self.delegate alertDidSelectPasswordButton:self];
     }
     
 }
 
 - (void)phonebuttonClick:(UIButton *)button {
-    if (self.delegate && [self.delegate respondsToSelector:@selector(changeMobileAlertDidSelectCaptchaButton)]) {
-        [self.delegate changeMobileAlertDidSelectCaptchaButton];
+    if (self.delegate && [self.delegate respondsToSelector:@selector(alertDidSelectCaptchaButton:)]) {
+        [self.delegate alertDidSelectCaptchaButton:self];
     }
 }
 
@@ -122,7 +126,6 @@ NSUInteger kChangeMobileAlertTag = 100030;
 - (UILabel *)titleLabel {
     if (!_titleLabel) {
         _titleLabel = [[UILabel alloc] init];
-        _titleLabel.text = @"更改绑定手机号";
         [_titleLabel sizeToFit];
         _titleLabel.font = [UIFont fontWithName:@"PingFangSC-Semibold" size:18];
         _titleLabel.textColor =  [UIColor colorWithRed:0/255.0 green:0/255.0 blue:0/255.0 alpha:1/1.0];

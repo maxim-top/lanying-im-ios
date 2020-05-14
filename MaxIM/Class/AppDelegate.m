@@ -28,6 +28,7 @@
 
 #import <floo-ios/BMXHostConfig.h>
 #import <Bugly/Bugly.h>
+#import "HostConfigManager.h"
 
 
 
@@ -40,9 +41,8 @@
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
     
     [NSThread sleepForTimeInterval:2];
-
-    [self configProperties];
     
+    [self configProperties];
     [self initializeBMX];
     [self initBugly];
     [self initialWechat];
@@ -65,11 +65,11 @@
     [WXApi registerApp:@"wx96edf8b1e48af083"];
 }
 
+
 - (void)autologin {
     IMAcount *accout = [IMAcountInfoStorage loadObject];
     if (accout) {
         [self signByName:accout.userName password:accout.password];
-
     }
 }
 
@@ -113,6 +113,7 @@
 }
 
 - (void)getProfile {
+    
     [[[BMXClient sharedClient] userService] getProfileForceRefresh:NO completion:^(BMXUserProfile *profile, BMXError *aError) {
         [[NSNotificationCenter defaultCenter] postNotificationName:@"RefreshProfile" object:profile];
         
@@ -229,13 +230,24 @@
   
     NSString *phone = [NSString stringWithFormat:@"设备名称:%@;%@;%@;%@", phoneName,localizedModel,systemName,phoneVersion];
     BMXSDKConfig *config  = [[BMXSDKConfig alloc] initConfigWithDataDir:dataDir cacheDir:cacheDir pushCertName:@"NotiCer_Product" userAgent:phone];
-//    BMXSDKConfig *config  = [[BMXSDKConfig alloc] initConfigWithDataDir:dataDir cacheDir:cacheDir pushCertName:@"NotiCer" userAgent:phone];
-    
-
     config.appID = [AppIDManager sharedManager].appid.appId;
-    
     config.loadAllServerConversations = YES;
     
+    IMAcount *accout = [IMAcountInfoStorage loadObject];
+    if (accout.isLogin) {
+        if ([HostConfigManager checkLocalConfig]) {
+            
+            BMXHostConfig *hostConfig = [[BMXHostConfig alloc] initWithRestHostConfig:[HostConfigManager sharedManager].restServer imPort:[[HostConfigManager sharedManager].IMPort intValue] imHost:[HostConfigManager sharedManager].IMServer];
+            config.hostConfig = hostConfig;
+            config.enableDNS = NO;
+
+        } else {
+            config.enableDNS = YES;
+        }
+    } else {
+        config.enableDNS = YES;
+
+    }
     [[BMXClient sharedClient] registerWithSDKConfig:config];
 }
 

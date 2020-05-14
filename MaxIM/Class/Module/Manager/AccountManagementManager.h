@@ -14,7 +14,10 @@ NS_ASSUME_NONNULL_BEGIN
 
 + (instancetype)sharedAccountManagementManager;
 
-- (void)addAccountUserName:(NSString *)userName password:(NSString *)password userid:(NSString *)userid appid:(NSString *)appid;
+- (void)addAccountUserName:(NSString *)userName
+                  password:(NSString *)password
+                    userid:(NSString *)userid
+                     appid:(NSString *)appid;
 
 @end
 

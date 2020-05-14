@@ -14,6 +14,8 @@
 
 #import "IMAcountInfoStorage.h"
 #import "IMAcount.h"
+#import "HostConfigManager.h"
+
 @implementation IMAcountInfoStorage
 
 + (NSString *)modelPath {
@@ -23,6 +25,23 @@
 + (BOOL)isHaveLocalData {
     IMAcount *a = [self loadObject];
     return a.isLogin;
+}
+
++ (void)saveObject:(nonnull id)object {
+    
+    if (object == nil) {
+        return;
+    }
+    
+    if ([object isKindOfClass:[IMAcount class]]) {
+        
+        IMAcount *account = (IMAcount *)object;
+        account.IMServer = [HostConfigManager sharedManager].IMServer;
+        account.IMPort = [HostConfigManager sharedManager].IMPort;
+        account.restServer = [HostConfigManager sharedManager].restServer;
+    }
+    
+    [super saveObject:object];
 }
 
 @end

@@ -9,7 +9,8 @@
 #import "CodeImageViewController.h"
 #import "UIView+BMXframe.h"
 #import <floo-ios/BMXUserProfile.h>
-#import <ZXingObjC.h>
+//#import <ZXingObjC.h>
+#import "QRCoodeFactor.h"
 #import <floo-ios/BMXClient.h>
 #import <floo-ios/BMXGroup.h>
 #import "GroupQRcodeInfoApi.h"
@@ -104,20 +105,22 @@
 - (void)configGroupQRCodeWithQRCodeInfo:(NSString *)info {
     NSString *data = [self p_configGroupQRCodeInfo:info];
     if (![data length]) return;
-    
-    ZXMultiFormatWriter *writer = [[ZXMultiFormatWriter alloc] init];
-    ZXBitMatrix *r = [writer encode:data
-                                  format:kBarcodeFormatQRCode
-                                   width:self.codeImageView.frame.size.width
-                                  height:self.codeImageView.frame.size.width
-                                   error:nil];
+//
+//    ZXMultiFormatWriter *writer = [[ZXMultiFormatWriter alloc] init];
+//    ZXBitMatrix *r = [writer encode:data
+//                                  format:kBarcodeFormatQRCode
+//                                   width:self.codeImageView.frame.size.width
+//                                  height:self.codeImageView.frame.size.width
+//                                   error:nil];
     if (info) {
-        ZXImage *image = [ZXImage imageWithMatrix:r];
-        self.codeImageView.image = [UIImage imageWithCGImage:image.cgimage];
+//        ZXImage *image = [ZXImage imageWithMatrix:r];
+        self.codeImageView.image = [QRCoodeFactor generateQRCodeWithString:data Size:self.codeImageView.frame.size.width];
     } else {
         self.codeImageView.image = nil;
     }
 }
+
+
 
 - (NSString *)p_configGroupQRCodeInfo:(NSString *)info {
     NSDictionary *dic  = @{@"source": @"app",
@@ -176,14 +179,14 @@
     
     NSString *data = [self p_configUserQRCodeInfo];
     if (![data length]) return;
-    ZXMultiFormatWriter *writer = [[ZXMultiFormatWriter alloc] init];
-    ZXBitMatrix *r = [writer encode:data
-                             format:kBarcodeFormatQRCode
-                              width:self.codeImageView.frame.size.width
-                             height:self.codeImageView.frame.size.width
-                              error:nil];
-    ZXImage *image = [ZXImage imageWithMatrix:r];
-    self.codeImageView.image = [UIImage imageWithCGImage:image.cgimage];
+//    ZXMultiFormatWriter *writer = [[ZXMultiFormatWriter alloc] init];
+//    ZXBitMatrix *r = [writer encode:data
+//                             format:kBarcodeFormatQRCode
+//                              width:self.codeImageView.frame.size.width
+//                             height:self.codeImageView.frame.size.width
+//                              error:nil];
+//    ZXImage *image = [ZXImage imageWithMatrix:r];
+    self.codeImageView.image = [QRCoodeFactor generateQRCodeWithString:data Size:self.codeImageView.frame.size.width];
 }
 
 - (void)clickunbindWechatButton:(UIButton *)button {

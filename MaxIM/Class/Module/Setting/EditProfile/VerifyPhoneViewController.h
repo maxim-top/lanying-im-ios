@@ -9,9 +9,12 @@
 #import <UIKit/UIKit.h>
 @class BMXUserProfile;
 
+
 NS_ASSUME_NONNULL_BEGIN
 
 @interface VerifyPhoneViewController : UIViewController
+
+- (instancetype)initWithEditType:(EditType)type;
 
 @property (nonatomic, strong) BMXUserProfile *profile;
 

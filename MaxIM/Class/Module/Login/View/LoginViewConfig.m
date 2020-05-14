@@ -42,6 +42,8 @@
                 [loginView addWechatButton];
             }
             [loginView addScanConsuleButton];
+            
+            [loginView addLogButton];
 
         }
             
@@ -154,6 +156,13 @@
     
     if (self.delegate && [self.delegate respondsToSelector:@selector(beginScanQRCode)]) {
         [self.delegate beginScanQRCode];
+    }
+}
+
+- (void)logButtonClick {
+    
+    if (self.delegate && [self.delegate respondsToSelector:@selector(showLogVC)]) {
+        [self.delegate showLogVC];
     }
 }
 

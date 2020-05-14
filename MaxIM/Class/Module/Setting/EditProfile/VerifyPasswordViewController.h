@@ -10,7 +10,10 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
+
 @interface VerifyPasswordViewController : UIViewController
+
+- (instancetype)initWithEditType:(EditType)type;
 
 @end
 

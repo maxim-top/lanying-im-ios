@@ -67,7 +67,7 @@
     dispatch_group_async(group, dispatch_get_global_queue(0, 0), ^{
         dispatch_group_enter(group);
         [[[BMXClient sharedClient] rosterService] searchRostersByRosterIdList:rosterIds forceRefresh:NO completion:^(NSArray<BMXRoster *> *rosterList, BMXError *error) {
-            MAXLog(@"%ld", rosterList.count);
+            MAXLog(@"%lu", (unsigned long)rosterList.count);
             for (BMXRoster* roster in rosterList) {
                 [self.rosterInfos setObject:roster forKey:[NSString stringWithFormat:@"%lld", roster.rosterId]];
             }

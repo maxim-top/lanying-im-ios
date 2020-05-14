@@ -26,4 +26,9 @@
 @property (nonatomic, strong) NSString *token;
 @property (nonatomic,copy) NSString *appid;
 
+@property (nonatomic, copy) NSString *IMServer;
+@property (nonatomic, copy) NSString *IMPort;
+@property (nonatomic, copy) NSString *restServer;
+
+
 @end

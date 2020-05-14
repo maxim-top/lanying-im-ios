@@ -22,5 +22,11 @@ extern NSString *const VideoPathKey;
 extern NSString *const GXRouterEventVideoRecordFinish;
 extern NSString *const GXRouterEventVideoRecordExit;
 
+typedef enum : NSUInteger {
+    EditTypePhone,
+    EditTypePassword
+} EditType;
+
+
 
 #endif /* BMXGlobalDefines_h */
