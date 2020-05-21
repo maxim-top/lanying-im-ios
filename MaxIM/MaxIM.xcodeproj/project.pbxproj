@@ -278,6 +278,7 @@
 		B5CDA8AF2244C37700BF04BE /* searchDetailProfiledetail.json in Resources */ = {isa = PBXBuildFile; fileRef = B5CDA8AE2244C37700BF04BE /* searchDetailProfiledetail.json */; };
 		B5CDA8BB224CA82600BF04BE /* BubbleViewAlertView.m in Sources */ = {isa = PBXBuildFile; fileRef = B5CDA8BA224CA82600BF04BE /* BubbleViewAlertView.m */; };
 		B5D09C3B23191F2100CFD13F /* AboutUsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = B5D09C3A23191F2100CFD13F /* AboutUsViewController.m */; };
+		B5D9EA6A2473869A00492947 /* floo-ios.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B5D9EA692473869A00492947 /* floo-ios.framework */; };
 		B5D9F45921D649A800B31AC3 /* ProfileSettingViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = B5D9F45821D649A800B31AC3 /* ProfileSettingViewController.m */; };
 		B5D9F45C21D64A8C00B31AC3 /* ProfileTableViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = B5D9F45B21D64A8C00B31AC3 /* ProfileTableViewCell.m */; };
 		B5D9F46821D74E5700B31AC3 /* HQLoadingAnimation.m in Sources */ = {isa = PBXBuildFile; fileRef = B5D9F46521D74E5700B31AC3 /* HQLoadingAnimation.m */; };
@@ -861,6 +862,7 @@
 		B5D09C3923191F2100CFD13F /* AboutUsViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AboutUsViewController.h; sourceTree = "<group>"; };
 		B5D09C3A23191F2100CFD13F /* AboutUsViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AboutUsViewController.m; sourceTree = "<group>"; };
 		B5D12FA522C34A2500D2C4BF /* UIResponder+Router.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "UIResponder+Router.h"; sourceTree = "<group>"; };
+		B5D9EA692473869A00492947 /* floo-ios.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = "floo-ios.framework"; sourceTree = "<group>"; };
 		B5D9F45721D649A800B31AC3 /* ProfileSettingViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ProfileSettingViewController.h; sourceTree = "<group>"; };
 		B5D9F45821D649A800B31AC3 /* ProfileSettingViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ProfileSettingViewController.m; sourceTree = "<group>"; };
 		B5D9F45A21D64A8C00B31AC3 /* ProfileTableViewCell.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ProfileTableViewCell.h; sourceTree = "<group>"; };
@@ -925,6 +927,7 @@
 				B535A5E821C00893002FBECD /* libc++.tbd in Frameworks */,
 				48FBBC6121A5852E00DB875A /* AssetsLibrary.framework in Frameworks */,
 				488665E621A577F5003110D4 /* CoreFoundation.framework in Frameworks */,
+				B5D9EA6A2473869A00492947 /* floo-ios.framework in Frameworks */,
 				B321D07F2B7F3BE8404603F6 /* libPods-MaxIM.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -1114,6 +1117,7 @@
 		48FB3E642193F4FC007740F4 = {
 			isa = PBXGroup;
 			children = (
+				B5D9EA692473869A00492947 /* floo-ios.framework */,
 				B5142F1F21CF73530013DBBD /* MaxIM.entitlements */,
 				4849CD2521A52C36006CB41D /* Class */,
 				4849CD8B21A52CBC006CB41D /* Info.plist */,
@@ -2859,7 +2863,15 @@
 					"\"${PODS_ROOT}/Headers/Public/SDWebImage\"",
 					"\"${PODS_ROOT}/Headers/Public/Toast\"",
 					"\"$(SRCROOT)/../../bmxsdk/bmxsdk\"",
+					"\"$(SRCROOT)/../../floo-ios\"",
+					"\"$(SRCROOT)/../../floo-ios/src\"",
 					"$(SRCROOT)/**",
+					../../floo/src,
+					"\"$(SRCROOT)/../../floo/include\"",
+					"\"$(SRCROOT)/../../floo/deps/curlcpp/include\"",
+					"\"$(SRCROOT)/../../floo/deps/rapidjson/include\"",
+					"\"$(SRCROOT)/../../floo/deps/protobuf\"",
+					"\"$(SRCROOT)/../../floo/deps/openssl/include\"",
 				);
 				INFOPLIST_FILE = "$(SRCROOT)/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -2931,7 +2943,15 @@
 					"\"${PODS_ROOT}/Headers/Public/SDWebImage\"",
 					"\"${PODS_ROOT}/Headers/Public/Toast\"",
 					"\"$(SRCROOT)/../../bmxsdk/bmxsdk\"",
+					"\"$(SRCROOT)/../../floo-ios\"",
+					"\"$(SRCROOT)/../../floo-ios/src\"",
 					"$(SRCROOT)/**",
+					../../floo/src,
+					"\"$(SRCROOT)/../../floo/include\"",
+					"\"$(SRCROOT)/../../floo/deps/curlcpp/include\"",
+					"\"$(SRCROOT)/../../floo/deps/rapidjson/include\"",
+					"\"$(SRCROOT)/../../floo/deps/protobuf\"",
+					"\"$(SRCROOT)/../../floo/deps/openssl/include\"",
 				);
 				INFOPLIST_FILE = "$(SRCROOT)/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = (

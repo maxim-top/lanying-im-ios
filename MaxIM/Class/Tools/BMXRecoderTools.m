@@ -172,6 +172,10 @@ typedef void(^RecordFinishBlock)(NSString *recordPath, int duration);
 // 录音文件主路径
 - (NSString *)recorderMainPath
 {
+    
+    
+//    NSString* dataDir = [NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES).firstObject stringByAppendingPathComponent:@"CWVoice"];
+
     NSString *path = [[[[BMXClient sharedClient] chatService] getAttachmentDir] stringByAppendingPathComponent:kChildPath];
     NSFileManager *fileManager = [NSFileManager defaultManager];
     if (![fileManager fileExistsAtPath:path]) {

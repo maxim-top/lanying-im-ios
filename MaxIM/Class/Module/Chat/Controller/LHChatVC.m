@@ -1825,7 +1825,7 @@ CLLocationManagerDelegate>
         case MessageBodyType_Voice: {
             NSString *voicePath = (NSString *)content;
             
-            BMXVoiceAttachment *vocieAttachment = [[BMXVoiceAttachment alloc] initWithPath:voicePath displayName:@"voice" duration:duartion];
+            BMXVoiceAttachment *vocieAttachment = [[BMXVoiceAttachment alloc] initWithPath:voicePath displayName:@"voice" duration:duartion conversationId:[NSString stringWithFormat:@"%ld",(long)self.conversationId]];
             messageObject = [self configMessage:vocieAttachment];
             messageObject.contentType = BMXContentTypeVoice;
             messageModel.vociePath = voicePath;

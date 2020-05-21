@@ -104,7 +104,6 @@
     [AppIDManager clearAppid];
     AppDelegate *appDelegate = [UIApplication sharedApplication].delegate;
     [appDelegate reloadAppID:BMXAppID];
-    [[BMXClient sharedClient] sdkConfig].enableDNS = YES;
     
     [HQCustomToast showDialog:@"退出成功"];
     

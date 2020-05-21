@@ -2,6 +2,48 @@
 
 
 
+## v2.2.3 - 2020/05/19
+
+新增：
+
+1. 新增BMXVoiceAttachment的通过二进制流初始化attachment方法
+
+	```
+	/// 初始化BMXFileAttachment
+	/// @param aData 音频Data
+	/// @param displayName 显示名称
+	/// @param duration 时长
+	/// @param conversationId 会话Id
+	- (instancetype)initWithData:(NSData *)aData
+                 displayName:(NSString *)displayName
+                  fileLength:(NSInteger)fileLength
+                    duration:(NSInteger)duration
+              conversationId:(NSString *)conversationId;
+
+	```
+
+变更：
+
+1. 变更BMXVoiceAttachment的通过路径初始化attachment方法， 新增conversationId参数
+
+	```
+	/**
+ 初始化BMXFileAttachment
+
+ @param path 音频路径
+ @param displayName 显示
+ @param duration 时长
+ @return BMXFileAttachment
+ */
+- (instancetype)initWithPath:(NSString *)path
+                 displayName:(NSString *)displayName
+                    duration:(NSInteger)duration
+              conversationId:(NSString *)conversationId;
+
+	```
+	
+
+
 ## v2.2.2 - 2020/05/07
 
 变更：
@@ -16,6 +58,7 @@
 	- (instancetype)initWithRestHostConfig:(NSString *)restHost imPort:(int)imPort imHost:(NSString *)imHost;
 
 	```
+
 
 ## v2.1.1 - 2020/03/27
 
