@@ -91,7 +91,7 @@
         _avatarImageView.layer.borderColor = kColorC4_5.CGColor;
         _avatarImageView.layer.borderWidth = 0.5;
         _avatarImageView.layer.cornerRadius = 24;
-        [self addSubview:_avatarImageView];
+        [self.contentView addSubview:_avatarImageView];
         [_avatarImageView sizeToFit];
     }
     return _avatarImageView;
@@ -103,7 +103,7 @@
         _titleLabel.text = @"";
         _titleLabel.font = [UIFont fontWithName:@"PingFangSC-Regular" size:15];
         _titleLabel.textColor = [UIColor colorWithRed:51/255.0 green:51/255.0 blue:51/255.0 alpha:1/1.0];
-        [self addSubview:_titleLabel];
+        [self.contentView addSubview:_titleLabel];
     }
     return _titleLabel;
 }
@@ -114,7 +114,7 @@
         _subtitleLabel.text = @"";
         _subtitleLabel.font = [UIFont fontWithName:@"PingFangSC-Regular" size:13];
         _subtitleLabel.textColor = [UIColor colorWithRed:153/255.0 green:153/255.0 blue:153/255.0 alpha:1/1.0];
-        [self addSubview:_subtitleLabel];
+        [self.contentView addSubview:_subtitleLabel];
     }
     return _subtitleLabel;
 }
@@ -125,7 +125,7 @@
         _timeLabel.font = [UIFont fontWithName:@"PingFangSC-Regular" size:12];
         _timeLabel.textColor = [UIColor colorWithRed:153/255.0 green:153/255.0 blue:153/255.0 alpha:1/1.0];
         _timeLabel.textAlignment = NSTextAlignmentRight;
-        [self addSubview:_timeLabel];
+        [self.contentView addSubview:_timeLabel];
 
     }
     return _timeLabel;
@@ -134,7 +134,7 @@
 - (UIImageView *)recordImageview {
     if (_recordImageview == nil) {
         _recordImageview = [[UIImageView alloc] init];
-        [self addSubview:_recordImageview];
+        [self.contentView addSubview:_recordImageview];
     }
     return _recordImageview;
 }
@@ -142,7 +142,7 @@
 - (UILabel *)dotLabel {
     if (!_dotLabel) {
         _dotLabel = [[UILabel alloc] init];
-        [self addSubview:_dotLabel];
+        [self.contentView addSubview:_dotLabel];
         _dotLabel.font = [UIFont systemFontOfSize:10];
         _dotLabel.textAlignment = NSTextAlignmentCenter;
         _dotLabel.backgroundColor = [UIColor redColor];
@@ -156,7 +156,7 @@
 - (UIImageView *)dotView {
     if (!_dotView) {
         _dotView = [[UIImageView alloc] init];
-        [self addSubview:_dotView];
+        [self.contentView addSubview:_dotView];
         _dotView.backgroundColor = [UIColor redColor];
         _dotView.layer.masksToBounds = YES;
         _dotView.layer.cornerRadius = 5;
@@ -168,7 +168,7 @@
 - (UIView *)line {
     if (!_line) {
         _line = [[UIView alloc] init];
-        [self addSubview:_line];
+        [self.contentView addSubview:_line];
         _line.backgroundColor = kColorC4_5;
     }
     return _line;

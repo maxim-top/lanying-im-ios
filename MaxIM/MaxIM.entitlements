@@ -6,7 +6,7 @@
 	<string>development</string>
 	<key>com.apple.security.application-groups</key>
 	<array>
-		<string>group.top.maxim.MaxIM.MaxIMShare</string>
+		<string>group.com.maximtop.MaxIM.ShareExtention</string>
 	</array>
 </dict>
 </plist>

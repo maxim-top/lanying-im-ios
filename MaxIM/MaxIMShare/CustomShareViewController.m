@@ -172,7 +172,7 @@
 
 - (void)saveUrl:(NSURL *)url item:(NSExtensionItem *)item{
 
-    NSString *suitName = @"group.top.maxim.MaxIM.MaxIMShare";
+    NSString *suitName = @"group.com.maximtop.MaxIM.ShareExtention";
     NSURL *groupURL = [[NSFileManager defaultManager] containerURLForSecurityApplicationGroupIdentifier:suitName];
     NSURL *fileURL = [groupURL URLByAppendingPathComponent:@"incomingShared"];
     NSData *imageData = [[NSData alloc]initWithContentsOfURL:url];

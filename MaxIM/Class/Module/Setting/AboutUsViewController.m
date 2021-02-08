@@ -82,7 +82,7 @@
     [label7 addGestureRecognizer:phoneTap];
     
     UILabel *bottom_label= [[UILabel alloc] init];
-    bottom_label.text = @"© 2019 美信拓扑";
+    bottom_label.text = @"© 2020 美信拓扑";
     bottom_label.textAlignment = NSTextAlignmentCenter;
     bottom_label.numberOfLines = 0;
     bottom_label.font = [UIFont systemFontOfSize:15];
@@ -119,9 +119,8 @@
 
     bottom_label.bmx_top =  MAXScreenH - 30;
     bottom_label.bmx_width = MAXScreenW - 20 * 2;
-    bottom_label.bmx_height = 10;
+    bottom_label.bmx_height = 20;
     bottom_label.bmx_centerX = self.view.bmx_centerX;
-    
     
     
 

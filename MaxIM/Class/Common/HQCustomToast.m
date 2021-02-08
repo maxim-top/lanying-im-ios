@@ -122,7 +122,7 @@ static bool isShowing = NO;
     }
     [self p_setIsShowing:YES];
     MBProgressHUD *hud = [MBProgressHUD showHUDAddedTo:view animated:YES];
-    hud.labelText = string;
+    hud.label.text = string;
 }
 
 + (void)showWatingWithString:(NSString *)string {

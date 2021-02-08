@@ -48,8 +48,8 @@
 - (void)labelString:(MaxEmptyTipType)type {
     if (type == MaxEmptyTipTypeCommonBlank) {
         self.tipLabel.text = @"这里什么也没有~";
-    } else {
-        self.tipLabel.text = @"如果想联系技术支持，请退出后，将APPID切换成\"welovemaxim\"";
+    } else if(type == MaxEmptyTipTypeContactSupport) {
+        self.tipLabel.text = @"如果想要体验该功能，请退出后，将APPID切换成\"welovemaxim\"";
 //        [self.tipLabel sizeToFit];
     }
 }

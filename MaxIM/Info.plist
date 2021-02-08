@@ -44,11 +44,20 @@
 				<string>MaxIMExtension</string>
 			</array>
 		</dict>
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>tingyun.40730</string>
+			</array>
+		</dict>
 	</array>
 	<key>CFBundleVersion</key>
-	<string>1</string>
+	<string>$(CURRENT_PROJECT_VERSION)</string>
 	<key>LSApplicationQueriesSchemes</key>
 	<array>
+		<string>weixinULAPI</string>
 		<string>weixin</string>
 	</array>
 	<key>LSRequiresIPhoneOS</key>
@@ -58,6 +67,10 @@
 		<key>NSAllowsArbitraryLoads</key>
 		<true/>
 	</dict>
+	<key>NSBluetoothAlwaysUsageDescription</key>
+	<string>为了使用视频功能，需要使用您的蓝牙功能</string>
+	<key>NSBluetoothPeripheralUsageDescription</key>
+	<string>为了使用视频功能，需要使用您的蓝牙功能</string>
 	<key>NSCameraUsageDescription</key>
 	<string>为了使用拍照和扫一扫功能，需要使用您的相机</string>
 	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
@@ -95,6 +108,8 @@
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
+	<key>UIUserInterfaceStyle</key>
+	<string>Light</string>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<false/>
 </dict>

@@ -63,7 +63,7 @@
         _titleLabel = [[UILabel alloc] init];
         _titleLabel.font = [UIFont fontWithName:@"PingFangSC-Semibold" size:16];
         _titleLabel.textColor = [UIColor colorWithRed:51/255.0 green:51/255.0 blue:51/255.0 alpha:1/1.0];
-        [self addSubview:_titleLabel];
+        [self.contentView addSubview:_titleLabel];
     }
     return _titleLabel;
 }
@@ -74,7 +74,7 @@
         _contentLabel.textAlignment = NSTextAlignmentRight;
         _contentLabel.font = [UIFont fontWithName:@"PingFangSC-Semibold" size:16];
         _contentLabel.textColor = [UIColor colorWithRed:51/255.0 green:51/255.0 blue:51/255.0 alpha:1/1.0];
-        [self addSubview:_contentLabel];
+        [self.contentView addSubview:_contentLabel];
         
     }
     
@@ -87,7 +87,7 @@
         _mswitch.onTintColor = BMXCOLOR_HEX(0x0079f4);
         _mswitch.transform = CGAffineTransformMakeScale(0.65, 0.65);
         [_mswitch addTarget:self action:@selector(clickSwitch:) forControlEvents:UIControlEventValueChanged];
-        [self addSubview:_mswitch];
+        [self.contentView addSubview:_mswitch];
     }
     return _mswitch;
 }

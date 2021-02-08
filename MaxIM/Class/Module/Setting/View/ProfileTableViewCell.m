@@ -75,7 +75,7 @@
 - (UIImageView *)avatarimageView {
     if (!_avatarimageView) {
         _avatarimageView = [[UIImageView alloc] init];
-        [self addSubview:_avatarimageView];
+        [self.contentView addSubview:_avatarimageView];
         _avatarimageView.layer.masksToBounds = YES;
         _avatarimageView.layer.cornerRadius = 2;
         [_avatarimageView sizeToFit];
@@ -88,7 +88,7 @@
         _titleLabel = [[UILabel alloc] init];
         _titleLabel.font = [UIFont fontWithName:@"PingFangSC-Semibold" size:16];
         _titleLabel.textColor = [UIColor colorWithRed:51/255.0 green:51/255.0 blue:51/255.0 alpha:1/1.0];
-        [self addSubview:_titleLabel];
+        [self.contentView addSubview:_titleLabel];
         [_titleLabel sizeToFit];
     }
     return _titleLabel;
@@ -100,7 +100,7 @@
         _contentLabel.textAlignment = NSTextAlignmentRight;
         _contentLabel.font = [UIFont fontWithName:@"PingFangSC-Semibold" size:16];
         _contentLabel.textColor = [UIColor colorWithRed:51/255.0 green:51/255.0 blue:51/255.0 alpha:1/1.0];
-        [self addSubview:_contentLabel];
+        [self.contentView addSubview:_contentLabel];
         [_contentLabel sizeToFit];
     }
     
@@ -110,7 +110,7 @@
 - (UIView *)line {
     if (!_line) {
         _line = [[UIView alloc] init];
-        [self addSubview:_line];
+        [self.contentView addSubview:_line];
         _line.backgroundColor = kColorC4_5;
     }
     return _line;

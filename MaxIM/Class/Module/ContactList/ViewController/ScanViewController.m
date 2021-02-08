@@ -327,6 +327,7 @@
 - (void)jumpToQRCodeLoginVCWithInfo:(NSString *)info {
     [self.navigationController popViewControllerAnimated:YES];
     QRCodeLoginViewController *vc = [[QRCodeLoginViewController alloc] initWithInfo:info];
+    vc.modalPresentationStyle = UIModalPresentationFullScreen;
     [self presentViewController:vc animated:YES completion:^{
         
     }];

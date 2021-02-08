@@ -16,6 +16,10 @@
 #import "BMXGlobalDefines.h"
 #import "NetWorkingManager.h"
 
+#import <tingyunApp/NBSAppAgent.h>
+
+
+
 
 // 偏好设置的单例对象 Preference目录 iTunes、iCloud 备份时会备份这个目录下的数据
 #define MAXPathUserDefaults         [NSUserDefaults standardUserDefaults]

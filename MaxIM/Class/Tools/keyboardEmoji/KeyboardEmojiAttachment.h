@@ -7,6 +7,8 @@
 //
 
 #import <UIKit/UIKit.h>
+#import <WebKit/WKWebView.h>
+
 @class KeyboardEmojiModel;
 
 
@@ -14,7 +16,7 @@
 /** 保存当前附件对应的字符串 */
 @property (nonatomic, strong) NSString *chs;
 /** 图片 */
-@property (nonatomic, strong) UIWebView *webImage;
+@property (nonatomic, strong) WKWebView *webImage;
 
 /**
  *  根据表情模型生成表情字符串

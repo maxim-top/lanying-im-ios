@@ -3040,6 +3040,7 @@ typedef NS_ENUM(NSUInteger, YYTextMoveDirection) {
     
     UIReferenceLibraryViewController* ref = [[UIReferenceLibraryViewController alloc] initWithTerm:string];
     ref.view.backgroundColor = [UIColor whiteColor];
+    ref.modalPresentationStyle = UIModalPresentationFullScreen;
     [[self _getRootViewController] presentViewController:ref animated:YES completion:^{}];
 }
 

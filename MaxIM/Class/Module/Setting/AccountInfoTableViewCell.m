@@ -69,7 +69,7 @@
         _titleLabel = [[UILabel alloc] init];
         _titleLabel.font = [UIFont fontWithName:@"PingFangSC-Regular" size:15];
         _titleLabel.textColor = [UIColor colorWithRed:51/255.0 green:51/255.0 blue:51/255.0 alpha:1/1.0];
-        [self addSubview:_titleLabel];
+        [self.contentView addSubview:_titleLabel];
     }
     return _titleLabel;
 }
@@ -79,7 +79,7 @@
         _subtitleLabel = [[UILabel alloc] init];
         _subtitleLabel.font = [UIFont fontWithName:@"PingFangSC-Regular" size:13];
         _subtitleLabel.textColor = [UIColor colorWithRed:153/255.0 green:153/255.0 blue:153/255.0 alpha:1/1.0];
-        [self addSubview:_subtitleLabel];
+        [self.contentView addSubview:_subtitleLabel];
     }
     return _subtitleLabel;
 }
@@ -87,7 +87,7 @@
 - (UIImageView *)selectImageView {
     if (_selectImageView == nil) {
         _selectImageView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"check"]];
-        [self addSubview:_selectImageView];
+        [self.contentView addSubview:_selectImageView];
     }
     return  _selectImageView;
 }
@@ -95,7 +95,7 @@
 - (UIView *)line {
     if (!_line) {
         _line = [[UIView alloc] init];
-        [self addSubview:_line];
+        [self.contentView addSubview:_line];
         _line.backgroundColor = kColorC4_5;
     }
     return _line;

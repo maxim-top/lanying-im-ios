@@ -88,7 +88,7 @@
         _titleLabel = [[UILabel alloc] init];
         _titleLabel.font = [UIFont fontWithName:@"PingFangSC-Semibold" size:16];
         _titleLabel.textColor = [UIColor colorWithRed:51/255.0 green:51/255.0 blue:51/255.0 alpha:1/1.0];
-        [self addSubview:_titleLabel];
+        [self.contentView addSubview:_titleLabel];
         [_titleLabel sizeToFit];
     }
     return _titleLabel;
@@ -101,7 +101,7 @@
         _contentLabel.textAlignment = NSTextAlignmentLeft;
         _contentLabel.font = [UIFont fontWithName:@"PingFangSC-Semibold" size:13];
         _contentLabel.textColor = [UIColor colorWithRed:51/255.0 green:51/255.0 blue:51/255.0 alpha:1/1.0];
-        [self addSubview:_contentLabel];
+        [self.contentView addSubview:_contentLabel];
         [_contentLabel sizeToFit];
     }
     
@@ -118,7 +118,7 @@
         [_button setTitleColor:[UIColor blackColor] forState:UIControlStateNormal];
         [_button setTitle:@"删除设备" forState:UIControlStateNormal];
         [_button addTarget:self action:@selector(deleteDevice:) forControlEvents:UIControlEventTouchUpInside];
-        [self addSubview:_button];
+        [self.contentView addSubview:_button];
         [_button sizeToFit];
     }
     return _button;
@@ -127,7 +127,7 @@
 - (UIView *)line {
     if (!_line) {
         _line = [[UIView alloc] init];
-        [self addSubview:_line];
+        [self.contentView addSubview:_line];
         _line.backgroundColor = kColorC4_5;
     }
     return _line;

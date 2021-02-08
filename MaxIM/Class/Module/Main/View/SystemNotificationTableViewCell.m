@@ -40,11 +40,11 @@
   
     
     self.titleLabel.bmx_left = nickNameleft + self.avatarImageView.bmx_right;
-    self.titleLabel.size = CGSizeMake(MAXScreenH - nickNameleft * 2  - self.avatarImageView.width , 22);
+    self.titleLabel.size = CGSizeMake(MAXScreenW - nickNameleft * 2  - self.avatarImageView.width - 10 , 22);
     self.titleLabel.bmx_top = top;
     
     self.subtitleLabel.bmx_left = nickNameleft + self.avatarImageView.bmx_right;
-    self.subtitleLabel.size = CGSizeMake(MAXScreenH - nickNameleft * 2  - self.avatarImageView.width , 22);
+    self.subtitleLabel.size = CGSizeMake(MAXScreenW - nickNameleft * 2  - self.avatarImageView.width -10, 22);
     self.subtitleLabel.bmx_top = top + subtitleLabeltop + 22;
     
     self.timeLabel.bmx_size = CGSizeMake(120, 22);
@@ -61,7 +61,7 @@
         _avatarImageView = [[UIImageView alloc] init];
         _avatarImageView.clipsToBounds=YES;
         _avatarImageView.layer.cornerRadius = 24;
-        [self addSubview:_avatarImageView];
+        [self.contentView addSubview:_avatarImageView];
         [_avatarImageView sizeToFit];
     }
     return _avatarImageView;
@@ -73,7 +73,7 @@
         _titleLabel.text = @"";
         _titleLabel.font = [UIFont fontWithName:@"PingFangSC-Regular" size:15];
         _titleLabel.textColor = [UIColor colorWithRed:51/255.0 green:51/255.0 blue:51/255.0 alpha:1/1.0];
-        [self addSubview:_titleLabel];
+        [self.contentView addSubview:_titleLabel];
     }
     return _titleLabel;
 }
@@ -82,9 +82,10 @@
     if (_subtitleLabel == nil) {
         _subtitleLabel = [[UILabel alloc] init];
         _subtitleLabel.text = @"";
+        _subtitleLabel.numberOfLines  = 1;
         _subtitleLabel.font = [UIFont fontWithName:@"PingFangSC-Regular" size:13];
         _subtitleLabel.textColor = [UIColor colorWithRed:153/255.0 green:153/255.0 blue:153/255.0 alpha:1/1.0];
-        [self addSubview:_subtitleLabel];
+        [self.contentView addSubview:_subtitleLabel];
     }
     return _subtitleLabel;
 }
@@ -95,7 +96,7 @@
         _timeLabel.font = [UIFont fontWithName:@"PingFangSC-Regular" size:12];
         _timeLabel.textColor = [UIColor colorWithRed:153/255.0 green:153/255.0 blue:153/255.0 alpha:1/1.0];
         _timeLabel.textAlignment = NSTextAlignmentRight;
-        [self addSubview:_timeLabel];
+        [self.contentView addSubview:_timeLabel];
         
     }
     return _timeLabel;

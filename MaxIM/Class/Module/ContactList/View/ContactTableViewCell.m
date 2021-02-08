@@ -118,7 +118,7 @@ static NSString *cellID = @"ContactTableViewCell";
         _avatarImg = [[UIImageView alloc] init];
         _avatarImg.layer.borderColor = kColorC4_5.CGColor;
         _avatarImg.layer.borderWidth = 0.5;
-        [self addSubview:_avatarImg];
+        [self.contentView addSubview:_avatarImg];
         [_avatarImg sizeToFit];
     }
     return _avatarImg;
@@ -128,7 +128,8 @@ static NSString *cellID = @"ContactTableViewCell";
     if (!_nicknameLabel) {
         _nicknameLabel = [[UILabel alloc] init];
         _nicknameLabel.font = [UIFont fontWithName:@"PingFangSC-Semibold" size:16];
-        _nicknameLabel.textColor = [UIColor colorWithRed:51/255.0 green:51/255.0 blue:51/255.0 alpha:1/1.0];        [self addSubview:_nicknameLabel];
+        _nicknameLabel.textColor = [UIColor colorWithRed:51/255.0 green:51/255.0 blue:51/255.0 alpha:1/1.0];
+        [self.contentView addSubview:_nicknameLabel];
         [_nicknameLabel sizeToFit];
     }
     return _nicknameLabel;
@@ -138,7 +139,8 @@ static NSString *cellID = @"ContactTableViewCell";
     if (!_contentLabel) {
         _contentLabel = [[UILabel alloc] init];
         _contentLabel.font = [UIFont fontWithName:@"PingFangSC-Semibold" size:16];
-        _contentLabel.textColor = [UIColor colorWithRed:51/255.0 green:51/255.0 blue:51/255.0 alpha:1/1.0];        [self addSubview:_contentLabel];
+        _contentLabel.textColor = [UIColor colorWithRed:51/255.0 green:51/255.0 blue:51/255.0 alpha:1/1.0];
+        [self.contentView addSubview:_contentLabel];
         [_contentLabel sizeToFit];
     }
     return _contentLabel;
@@ -155,7 +157,7 @@ static NSString *cellID = @"ContactTableViewCell";
         [_button setTitleColor:[UIColor blackColor] forState:UIControlStateNormal];
         [_button setTitle:@"添加好友" forState:UIControlStateNormal];
         [_button addTarget:self action:@selector(clickAccept:) forControlEvents:UIControlEventTouchUpInside];
-        [self addSubview:_button];
+        [self.contentView addSubview:_button];
         [_button sizeToFit];
     }
     return _button;
@@ -166,7 +168,7 @@ static NSString *cellID = @"ContactTableViewCell";
         _infoLabel = [[UILabel alloc] init];
         _infoLabel.font = [UIFont fontWithName:@"PingFangSC-Semibold" size:12];
         _infoLabel.textColor = [UIColor colorWithRed:51/255.0 green:51/255.0 blue:51/255.0 alpha:1/1.0];
-        [self addSubview:_infoLabel];
+        [self.contentView addSubview:_infoLabel];
         [_infoLabel sizeToFit];
 //        _infoLabel.text = @"0000000000";
     }

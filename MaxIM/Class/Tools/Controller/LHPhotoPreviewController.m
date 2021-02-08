@@ -39,7 +39,7 @@
 - (void)messageAttachmentStatusDidChanged:(BMXMessageObject *)message error:(BMXError *)error percent:(int)percent {
     
 //    MAXLog(@"走了吗");
-    if (!error && percent == 100) {
+    if (!error && percent == 101) {
         self.messageObject = message;
         _models = @[self.messageObject];
         [_collectionView reloadData];

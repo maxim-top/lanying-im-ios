@@ -7,6 +7,7 @@
 //
 
 #import <UIKit/UIKit.h>
+#import <floo-ios/BMXGroup.h>
 #import <floo-ios/BMXMessageObject.h>
 
 @interface MainViewController : UIViewController

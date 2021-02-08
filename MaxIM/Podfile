@@ -1,16 +1,16 @@
 # Uncomment the next line to define a global platform for your project
-# platform :ios, '9.0'
+platform :ios, '9.0'
 
-
+project 'MaxIM.xcodeproj'
 target 'MaxIM' do
   # Uncomment the next line if you're using Swift or would like to use dynamic frameworks
   # use_frameworks!
   
   # Pods for MaxIM
-  pod 'SDWebImage', '~> 4.2.2'
-  pod 'Toast', '~> 3.0'
-  pod 'M80AttributedLabel', '~> 1.6.3'
-  pod 'TZImagePickerController', '~> 1.9.3'
+  pod 'SDWebImage'
+  pod 'Toast'
+  pod 'M80AttributedLabel'
+  pod 'TZImagePickerController'
   pod 'MJExtension'
   pod 'TSActionAlertView'
   pod 'MBProgressHUD'
@@ -18,11 +18,11 @@ target 'MaxIM' do
   pod 'AFNetworking'
   pod 'Masonry'
   pod 'Bugly'
-
-  pod 'floo-ios'
-  
+  pod 'tingyunApp'
   pod 'FMDB'
   
+  pod 'floo-ios'
+
   target 'MaxIMTests' do
     inherit! :search_paths
     # Pods for testing

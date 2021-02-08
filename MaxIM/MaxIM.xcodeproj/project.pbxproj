@@ -7,7 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		4815430821E28D4D0082E38D /* libcrypto.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 4815430721E28D4D0082E38D /* libcrypto.a */; };
 		4815431121E290790082E38D /* UIButton+Extention.m in Sources */ = {isa = PBXBuildFile; fileRef = 4815430F21E290790082E38D /* UIButton+Extention.m */; };
 		4815431721E7AD520082E38D /* TransterViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 4815431621E7AD520082E38D /* TransterViewController.m */; };
 		4832591C21CE4FA50061D47F /* BMXRecoderTools.m in Sources */ = {isa = PBXBuildFile; fileRef = 4832591B21CE4FA50061D47F /* BMXRecoderTools.m */; };
@@ -31,6 +30,7 @@
 		48FB3E8A2193F4FD007740F4 /* MaxIMTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 48FB3E892193F4FD007740F4 /* MaxIMTests.m */; };
 		48FB3E952193F4FD007740F4 /* MaxIMUITests.m in Sources */ = {isa = PBXBuildFile; fileRef = 48FB3E942193F4FD007740F4 /* MaxIMUITests.m */; };
 		48FBBC6121A5852E00DB875A /* AssetsLibrary.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 48FBBC6021A5852D00DB875A /* AssetsLibrary.framework */; };
+		AFF48A7425CF21D000634E80 /* MobileRTC.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AFF48A6C25CF1FE300634E80 /* MobileRTC.framework */; settings = {ATTRIBUTES = (Weak, ); }; };
 		B321D07F2B7F3BE8404603F6 /* libPods-MaxIM.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 0817B35A699F1BD1DD697481 /* libPods-MaxIM.a */; };
 		B500050821D508DA00CD1CF8 /* RecentConversaionTableViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = B500050621D508DA00CD1CF8 /* RecentConversaionTableViewCell.m */; };
 		B500050C21D5493500CD1CF8 /* LHChatFileBubbleView.m in Sources */ = {isa = PBXBuildFile; fileRef = B500050B21D5493500CD1CF8 /* LHChatFileBubbleView.m */; };
@@ -91,6 +91,8 @@
 		B535A5E721BFE677002FBECD /* SettingViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = B535A5E421BFE677002FBECD /* SettingViewController.m */; };
 		B535A5E821C00893002FBECD /* libc++.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 488665E321A577D9003110D4 /* libc++.tbd */; };
 		B535A5E921C008E6002FBECD /* libz.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 48FBBC6321A5863300DB875A /* libz.tbd */; };
+		B539139924ADB3EB00EB0A4C /* PrivacyWebView.m in Sources */ = {isa = PBXBuildFile; fileRef = B539139524ADB3EB00EB0A4C /* PrivacyWebView.m */; };
+		B539139A24ADB3EB00EB0A4C /* PrivacyView.m in Sources */ = {isa = PBXBuildFile; fileRef = B539139724ADB3EB00EB0A4C /* PrivacyView.m */; };
 		B539D6AC21BFDD370011D30E /* XSBrowserTransition.m in Sources */ = {isa = PBXBuildFile; fileRef = B539D63E21BFDD370011D30E /* XSBrowserTransition.m */; };
 		B539D6AD21BFDD370011D30E /* LHTools.m in Sources */ = {isa = PBXBuildFile; fileRef = B539D63F21BFDD370011D30E /* LHTools.m */; };
 		B539D6AE21BFDD370011D30E /* LHPhotoPreviewController.m in Sources */ = {isa = PBXBuildFile; fileRef = B539D64221BFDD370011D30E /* LHPhotoPreviewController.m */; };
@@ -142,6 +144,7 @@
 		B5433A6C21C4E7AB0062E141 /* ImageTitleBasicTableViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = B5433A6B21C4E7AB0062E141 /* ImageTitleBasicTableViewCell.m */; };
 		B5433A6F21C4F96C0062E141 /* RosterDetailViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = B5433A6E21C4F96C0062E141 /* RosterDetailViewController.m */; };
 		B5433A7221C523C80062E141 /* ApplyNotificationContainer.m in Sources */ = {isa = PBXBuildFile; fileRef = B5433A7121C523C80062E141 /* ApplyNotificationContainer.m */; };
+		B54BBA79247BE98B00862CE2 /* JoinMeetingView.m in Sources */ = {isa = PBXBuildFile; fileRef = B54BBA78247BE98B00862CE2 /* JoinMeetingView.m */; };
 		B556B2EB21DE113A0051FCEB /* chatdetailproiledetail.json in Resources */ = {isa = PBXBuildFile; fileRef = B556B2EA21DE113A0051FCEB /* chatdetailproiledetail.json */; };
 		B5577C9923BF2E6600ED76E6 /* DropdownListView.m in Sources */ = {isa = PBXBuildFile; fileRef = B5577C9823BF2E6600ED76E6 /* DropdownListView.m */; };
 		B557D49A2451AB4E0035D60E /* QRCoodeFactor.m in Sources */ = {isa = PBXBuildFile; fileRef = B557D4992451AB4E0035D60E /* QRCoodeFactor.m */; };
@@ -241,11 +244,16 @@
 		B56B02542382A9B6005E22B8 /* AppUserInfoPwdApi.m in Sources */ = {isa = PBXBuildFile; fileRef = B56B02532382A9B6005E22B8 /* AppUserInfoPwdApi.m */; };
 		B56B02572382F2D0005E22B8 /* UserMobileBindWithSignApi.m in Sources */ = {isa = PBXBuildFile; fileRef = B56B02562382F2D0005E22B8 /* UserMobileBindWithSignApi.m */; };
 		B56B025D23830DCA005E22B8 /* MAXLauchVideoViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = B56B025C23830DCA005E22B8 /* MAXLauchVideoViewController.m */; };
+		B570FDCE2497562400445598 /* README.txt in Resources */ = {isa = PBXBuildFile; fileRef = B570FDCB2497562400445598 /* README.txt */; };
+		B570FDCF2497562400445598 /* libWeChatSDK.a in Frameworks */ = {isa = PBXBuildFile; fileRef = B570FDCD2497562400445598 /* libWeChatSDK.a */; };
+		B570FDD224979D8500445598 /* apple-app-site-association in Sources */ = {isa = PBXBuildFile; fileRef = B570FDD124979D8500445598 /* apple-app-site-association */; };
 		B58A17E7244D5B61006A7BEA /* PwdChangeVerifyByPasswordApi.m in Sources */ = {isa = PBXBuildFile; fileRef = B58A17E6244D5B61006A7BEA /* PwdChangeVerifyByPasswordApi.m */; };
 		B58A17EA244D5EFC006A7BEA /* PwdChangeVerifyByMobileApi.m in Sources */ = {isa = PBXBuildFile; fileRef = B58A17E9244D5EFC006A7BEA /* PwdChangeVerifyByMobileApi.m */; };
 		B58A17ED244D5FF9006A7BEA /* PwdChangeApi.m in Sources */ = {isa = PBXBuildFile; fileRef = B58A17EC244D5FF9006A7BEA /* PwdChangeApi.m */; };
 		B593DFC722D59B99008AF2E2 /* libopencore-amrwb.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 4832592821CE74870061D47F /* libopencore-amrwb.a */; };
 		B593DFCA22D5C03A008AF2E2 /* RosterListViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = B593DFC922D5C03A008AF2E2 /* RosterListViewController.m */; };
+		B595932A249B184B00A307B3 /* MobileRTCResources.bundle in Resources */ = {isa = PBXBuildFile; fileRef = B5959328249B184B00A307B3 /* MobileRTCResources.bundle */; };
+		B599F26D247E4AA200051480 /* SupportManager.m in Sources */ = {isa = PBXBuildFile; fileRef = B599F26C247E4AA200051480 /* SupportManager.m */; };
 		B5A3D37622059D53009BAF12 /* DeviceTableViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = B5A3D37522059D53009BAF12 /* DeviceTableViewCell.m */; };
 		B5A7882B2387DDDC00A3730D /* AppWechatUnbindApi.m in Sources */ = {isa = PBXBuildFile; fileRef = B5A7882A2387DDDC00A3730D /* AppWechatUnbindApi.m */; };
 		B5A7882E2389352400A3730D /* UserMobileChangeApi.m in Sources */ = {isa = PBXBuildFile; fileRef = B5A7882D2389352400A3730D /* UserMobileChangeApi.m */; };
@@ -265,12 +273,12 @@
 		B5AFB30C227989EC00C23559 /* BindOpenIdApi.m in Sources */ = {isa = PBXBuildFile; fileRef = B5AFB30B227989EC00C23559 /* BindOpenIdApi.m */; };
 		B5B4F7E121D8762500997882 /* TitleSwitchTableViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = B5B4F7DF21D8762500997882 /* TitleSwitchTableViewCell.m */; };
 		B5B85F1A2204468600B76D9A /* DeviceManagmentViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = B5B85F192204468600B76D9A /* DeviceManagmentViewController.m */; };
+		B5B8C9872484DAF500404E3F /* ZoomMeetingsApi.m in Sources */ = {isa = PBXBuildFile; fileRef = B5B8C9862484DAF500404E3F /* ZoomMeetingsApi.m */; };
 		B5BBCAC022F05C0B00ABADFC /* UIResponder+Router.m in Sources */ = {isa = PBXBuildFile; fileRef = B5BBCABF22F05C0A00ABADFC /* UIResponder+Router.m */; };
 		B5BD462221E6935D009FDB59 /* SearchContentViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = B5BD462121E6935D009FDB59 /* SearchContentViewController.m */; };
-		B5BD4D2622C22B8700B971A7 /* README.txt in Resources */ = {isa = PBXBuildFile; fileRef = B5BD4D2322C22B8700B971A7 /* README.txt */; };
-		B5BD4D2722C22B8700B971A7 /* libWeChatSDK.a in Frameworks */ = {isa = PBXBuildFile; fileRef = B5BD4D2522C22B8700B971A7 /* libWeChatSDK.a */; };
 		B5BD4D2922C22F6E00B971A7 /* CoreTelephony.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B5BD4D2822C22F6E00B971A7 /* CoreTelephony.framework */; };
 		B5BD85D823162D37007E2BBC /* TransformContactViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = B5BD85D723162D36007E2BBC /* TransformContactViewController.m */; };
+		B5C2C0F524F51A1100BC65B9 /* AppDelegate+PushService.m in Sources */ = {isa = PBXBuildFile; fileRef = B5C2C0F424F51A1100BC65B9 /* AppDelegate+PushService.m */; };
 		B5CA74192265B88800EBF04D /* LoginCodeImageViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = B5CA74182265B88800EBF04D /* LoginCodeImageViewController.m */; };
 		B5CA741C2265BC0200EBF04D /* LoginQRCodeInfoApi.m in Sources */ = {isa = PBXBuildFile; fileRef = B5CA741B2265BC0200EBF04D /* LoginQRCodeInfoApi.m */; };
 		B5CDA8A7224485BD00BF04BE /* ScanViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = B5CDA8A6224485BD00BF04BE /* ScanViewController.m */; };
@@ -278,7 +286,6 @@
 		B5CDA8AF2244C37700BF04BE /* searchDetailProfiledetail.json in Resources */ = {isa = PBXBuildFile; fileRef = B5CDA8AE2244C37700BF04BE /* searchDetailProfiledetail.json */; };
 		B5CDA8BB224CA82600BF04BE /* BubbleViewAlertView.m in Sources */ = {isa = PBXBuildFile; fileRef = B5CDA8BA224CA82600BF04BE /* BubbleViewAlertView.m */; };
 		B5D09C3B23191F2100CFD13F /* AboutUsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = B5D09C3A23191F2100CFD13F /* AboutUsViewController.m */; };
-		B5D9EA6A2473869A00492947 /* floo-ios.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B5D9EA692473869A00492947 /* floo-ios.framework */; };
 		B5D9F45921D649A800B31AC3 /* ProfileSettingViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = B5D9F45821D649A800B31AC3 /* ProfileSettingViewController.m */; };
 		B5D9F45C21D64A8C00B31AC3 /* ProfileTableViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = B5D9F45B21D64A8C00B31AC3 /* ProfileTableViewCell.m */; };
 		B5D9F46821D74E5700B31AC3 /* HQLoadingAnimation.m in Sources */ = {isa = PBXBuildFile; fileRef = B5D9F46521D74E5700B31AC3 /* HQLoadingAnimation.m */; };
@@ -345,12 +352,20 @@
 			name = "Embed Frameworks";
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		B54BBA81247C0C3200862CE2 /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
 		0817B35A699F1BD1DD697481 /* libPods-MaxIM.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-MaxIM.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		1F3A27BD130E6EF806486957 /* libPods-MaxIMUITests.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-MaxIMUITests.a"; sourceTree = BUILT_PRODUCTS_DIR; };
-		4815430721E28D4D0082E38D /* libcrypto.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libcrypto.a; path = crypto/libcrypto.a; sourceTree = "<group>"; };
 		4815430F21E290790082E38D /* UIButton+Extention.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = "UIButton+Extention.m"; path = "Class/Catergory/UIButton+Extention.m"; sourceTree = SOURCE_ROOT; };
 		4815431021E290790082E38D /* UIButton+Extention.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "UIButton+Extention.h"; path = "Class/Catergory/UIButton+Extention.h"; sourceTree = SOURCE_ROOT; };
 		4815431521E7AD520082E38D /* TransterViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = TransterViewController.h; sourceTree = "<group>"; };
@@ -404,6 +419,7 @@
 		48FBBC6321A5863300DB875A /* libz.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libz.tbd; path = usr/lib/libz.tbd; sourceTree = SDKROOT; };
 		4C72A080A991AA6F34E3B973 /* Pods-MaxIMTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-MaxIMTests.debug.xcconfig"; path = "Pods/Target Support Files/Pods-MaxIMTests/Pods-MaxIMTests.debug.xcconfig"; sourceTree = "<group>"; };
 		684CB1224A07B8DA99E852E9 /* Pods-MaxIMUITests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-MaxIMUITests.release.xcconfig"; path = "Pods/Target Support Files/Pods-MaxIMUITests/Pods-MaxIMUITests.release.xcconfig"; sourceTree = "<group>"; };
+		AFF48A6C25CF1FE300634E80 /* MobileRTC.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = MobileRTC.framework; sourceTree = "<group>"; };
 		B500050521D508DA00CD1CF8 /* RecentConversaionTableViewCell.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = RecentConversaionTableViewCell.h; sourceTree = "<group>"; };
 		B500050621D508DA00CD1CF8 /* RecentConversaionTableViewCell.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = RecentConversaionTableViewCell.m; sourceTree = "<group>"; };
 		B500050A21D5493500CD1CF8 /* LHChatFileBubbleView.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = LHChatFileBubbleView.h; sourceTree = "<group>"; };
@@ -511,6 +527,10 @@
 		B535A5E221BFE677002FBECD /* BaseTableViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BaseTableViewController.h; sourceTree = "<group>"; };
 		B535A5E321BFE677002FBECD /* SettingTableView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SettingTableView.h; sourceTree = "<group>"; };
 		B535A5E421BFE677002FBECD /* SettingViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SettingViewController.m; sourceTree = "<group>"; };
+		B539139524ADB3EB00EB0A4C /* PrivacyWebView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PrivacyWebView.m; sourceTree = "<group>"; };
+		B539139624ADB3EB00EB0A4C /* PrivacyView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PrivacyView.h; sourceTree = "<group>"; };
+		B539139724ADB3EB00EB0A4C /* PrivacyView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PrivacyView.m; sourceTree = "<group>"; };
+		B539139824ADB3EB00EB0A4C /* PrivacyWebView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PrivacyWebView.h; sourceTree = "<group>"; };
 		B539D63E21BFDD370011D30E /* XSBrowserTransition.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XSBrowserTransition.m; sourceTree = "<group>"; };
 		B539D63F21BFDD370011D30E /* LHTools.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LHTools.m; sourceTree = "<group>"; };
 		B539D64021BFDD370011D30E /* XSBrowserAnimateDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XSBrowserAnimateDelegate.h; sourceTree = "<group>"; };
@@ -608,6 +628,8 @@
 		B5433A6E21C4F96C0062E141 /* RosterDetailViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = RosterDetailViewController.m; sourceTree = "<group>"; };
 		B5433A7021C523C80062E141 /* ApplyNotificationContainer.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ApplyNotificationContainer.h; sourceTree = "<group>"; };
 		B5433A7121C523C80062E141 /* ApplyNotificationContainer.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ApplyNotificationContainer.m; sourceTree = "<group>"; };
+		B54BBA77247BE98B00862CE2 /* JoinMeetingView.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = JoinMeetingView.h; sourceTree = "<group>"; };
+		B54BBA78247BE98B00862CE2 /* JoinMeetingView.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = JoinMeetingView.m; sourceTree = "<group>"; };
 		B556B2EA21DE113A0051FCEB /* chatdetailproiledetail.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = chatdetailproiledetail.json; sourceTree = "<group>"; };
 		B5577C9723BF2E6600ED76E6 /* DropdownListView.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = DropdownListView.h; sourceTree = "<group>"; };
 		B5577C9823BF2E6600ED76E6 /* DropdownListView.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = DropdownListView.m; sourceTree = "<group>"; };
@@ -798,6 +820,13 @@
 		B56B02562382F2D0005E22B8 /* UserMobileBindWithSignApi.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = UserMobileBindWithSignApi.m; sourceTree = "<group>"; };
 		B56B025B23830DCA005E22B8 /* MAXLauchVideoViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MAXLauchVideoViewController.h; sourceTree = "<group>"; };
 		B56B025C23830DCA005E22B8 /* MAXLauchVideoViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MAXLauchVideoViewController.m; sourceTree = "<group>"; };
+		B570FDC92497562400445598 /* WXApi.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = WXApi.h; sourceTree = "<group>"; };
+		B570FDCA2497562400445598 /* WXApiObject.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = WXApiObject.h; sourceTree = "<group>"; };
+		B570FDCB2497562400445598 /* README.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = README.txt; sourceTree = "<group>"; };
+		B570FDCC2497562400445598 /* WechatAuthSDK.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = WechatAuthSDK.h; sourceTree = "<group>"; };
+		B570FDCD2497562400445598 /* libWeChatSDK.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libWeChatSDK.a; sourceTree = "<group>"; };
+		B570FDD0249769B600445598 /* MaxIMDebug.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = MaxIMDebug.entitlements; sourceTree = "<group>"; };
+		B570FDD124979D8500445598 /* apple-app-site-association */ = {isa = PBXFileReference; lastKnownFileType = text; path = "apple-app-site-association"; sourceTree = "<group>"; };
 		B58A17E5244D5B61006A7BEA /* PwdChangeVerifyByPasswordApi.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = PwdChangeVerifyByPasswordApi.h; sourceTree = "<group>"; };
 		B58A17E6244D5B61006A7BEA /* PwdChangeVerifyByPasswordApi.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = PwdChangeVerifyByPasswordApi.m; sourceTree = "<group>"; };
 		B58A17E8244D5EFC006A7BEA /* PwdChangeVerifyByMobileApi.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = PwdChangeVerifyByMobileApi.h; sourceTree = "<group>"; };
@@ -807,6 +836,9 @@
 		B593DFC822D5C03A008AF2E2 /* RosterListViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RosterListViewController.h; sourceTree = "<group>"; };
 		B593DFC922D5C03A008AF2E2 /* RosterListViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RosterListViewController.m; sourceTree = "<group>"; };
 		B593DFD222D5D8EC008AF2E2 /* Single.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Single.h; sourceTree = "<group>"; };
+		B5959328249B184B00A307B3 /* MobileRTCResources.bundle */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.plug-in"; path = MobileRTCResources.bundle; sourceTree = "<group>"; };
+		B599F26B247E4AA200051480 /* SupportManager.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SupportManager.h; sourceTree = "<group>"; };
+		B599F26C247E4AA200051480 /* SupportManager.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = SupportManager.m; sourceTree = "<group>"; };
 		B5A3D37422059D53009BAF12 /* DeviceTableViewCell.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = DeviceTableViewCell.h; sourceTree = "<group>"; };
 		B5A3D37522059D53009BAF12 /* DeviceTableViewCell.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = DeviceTableViewCell.m; sourceTree = "<group>"; };
 		B5A788292387DDDC00A3730D /* AppWechatUnbindApi.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppWechatUnbindApi.h; sourceTree = "<group>"; };
@@ -837,17 +869,16 @@
 		B5B4F7E021D8762500997882 /* TitleSwitchTableViewCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TitleSwitchTableViewCell.h; sourceTree = "<group>"; };
 		B5B85F182204468600B76D9A /* DeviceManagmentViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = DeviceManagmentViewController.h; sourceTree = "<group>"; };
 		B5B85F192204468600B76D9A /* DeviceManagmentViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = DeviceManagmentViewController.m; sourceTree = "<group>"; };
+		B5B8C9852484DAF500404E3F /* ZoomMeetingsApi.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ZoomMeetingsApi.h; sourceTree = "<group>"; };
+		B5B8C9862484DAF500404E3F /* ZoomMeetingsApi.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ZoomMeetingsApi.m; sourceTree = "<group>"; };
 		B5BBCABF22F05C0A00ABADFC /* UIResponder+Router.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "UIResponder+Router.m"; sourceTree = "<group>"; };
 		B5BD462021E6935D009FDB59 /* SearchContentViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SearchContentViewController.h; sourceTree = "<group>"; };
 		B5BD462121E6935D009FDB59 /* SearchContentViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = SearchContentViewController.m; sourceTree = "<group>"; };
-		B5BD4D2122C22B8700B971A7 /* WXApi.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = WXApi.h; sourceTree = "<group>"; };
-		B5BD4D2222C22B8700B971A7 /* WXApiObject.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = WXApiObject.h; sourceTree = "<group>"; };
-		B5BD4D2322C22B8700B971A7 /* README.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = README.txt; sourceTree = "<group>"; };
-		B5BD4D2422C22B8700B971A7 /* WechatAuthSDK.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = WechatAuthSDK.h; sourceTree = "<group>"; };
-		B5BD4D2522C22B8700B971A7 /* libWeChatSDK.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libWeChatSDK.a; sourceTree = "<group>"; };
 		B5BD4D2822C22F6E00B971A7 /* CoreTelephony.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreTelephony.framework; path = System/Library/Frameworks/CoreTelephony.framework; sourceTree = SDKROOT; };
 		B5BD85D623162D36007E2BBC /* TransformContactViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TransformContactViewController.h; sourceTree = "<group>"; };
 		B5BD85D723162D36007E2BBC /* TransformContactViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TransformContactViewController.m; sourceTree = "<group>"; };
+		B5C2C0F324F51A1100BC65B9 /* AppDelegate+PushService.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "AppDelegate+PushService.h"; sourceTree = "<group>"; };
+		B5C2C0F424F51A1100BC65B9 /* AppDelegate+PushService.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = "AppDelegate+PushService.m"; sourceTree = "<group>"; };
 		B5CA74172265B88800EBF04D /* LoginCodeImageViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = LoginCodeImageViewController.h; sourceTree = "<group>"; };
 		B5CA74182265B88800EBF04D /* LoginCodeImageViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = LoginCodeImageViewController.m; sourceTree = "<group>"; };
 		B5CA741A2265BC0200EBF04D /* LoginQRCodeInfoApi.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = LoginQRCodeInfoApi.h; sourceTree = "<group>"; };
@@ -862,7 +893,6 @@
 		B5D09C3923191F2100CFD13F /* AboutUsViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AboutUsViewController.h; sourceTree = "<group>"; };
 		B5D09C3A23191F2100CFD13F /* AboutUsViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AboutUsViewController.m; sourceTree = "<group>"; };
 		B5D12FA522C34A2500D2C4BF /* UIResponder+Router.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "UIResponder+Router.h"; sourceTree = "<group>"; };
-		B5D9EA692473869A00492947 /* floo-ios.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = "floo-ios.framework"; sourceTree = "<group>"; };
 		B5D9F45721D649A800B31AC3 /* ProfileSettingViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ProfileSettingViewController.h; sourceTree = "<group>"; };
 		B5D9F45821D649A800B31AC3 /* ProfileSettingViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ProfileSettingViewController.m; sourceTree = "<group>"; };
 		B5D9F45A21D64A8C00B31AC3 /* ProfileTableViewCell.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ProfileTableViewCell.h; sourceTree = "<group>"; };
@@ -908,7 +938,7 @@
 			files = (
 				4832593321CE74870061D47F /* libopencore-amrnb.a in Frameworks */,
 				B5BD4D2922C22F6E00B971A7 /* CoreTelephony.framework in Frameworks */,
-				B5BD4D2722C22B8700B971A7 /* libWeChatSDK.a in Frameworks */,
+				B570FDCF2497562400445598 /* libWeChatSDK.a in Frameworks */,
 				B5AFB2F32274374700C23559 /* libsqlite3.tbd in Frameworks */,
 				B593DFC722D59B99008AF2E2 /* libopencore-amrwb.a in Frameworks */,
 				B55FFC7B2240E79500DF0BAB /* UIKit.framework in Frameworks */,
@@ -919,15 +949,14 @@
 				B55FFC712240E4C500DF0BAB /* CoreMedia.framework in Frameworks */,
 				B55FFC6F2240E3FF00DF0BAB /* CoreGraphics.framework in Frameworks */,
 				B55FFC6D2240E3F500DF0BAB /* AVFoundation.framework in Frameworks */,
-				4815430821E28D4D0082E38D /* libcrypto.a in Frameworks */,
 				B5142F2321CF74510013DBBD /* UserNotificationsUI.framework in Frameworks */,
 				B5142F2121CF744B0013DBBD /* UserNotifications.framework in Frameworks */,
+				AFF48A7425CF21D000634E80 /* MobileRTC.framework in Frameworks */,
 				B5FF65E021C8CDAA00BAD31C /* libresolv.tbd in Frameworks */,
 				B535A5E921C008E6002FBECD /* libz.tbd in Frameworks */,
 				B535A5E821C00893002FBECD /* libc++.tbd in Frameworks */,
 				48FBBC6121A5852E00DB875A /* AssetsLibrary.framework in Frameworks */,
 				488665E621A577F5003110D4 /* CoreFoundation.framework in Frameworks */,
-				B5D9EA6A2473869A00492947 /* floo-ios.framework in Frameworks */,
 				B321D07F2B7F3BE8404603F6 /* libPods-MaxIM.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -1037,6 +1066,8 @@
 			children = (
 				4849CD2621A52C36006CB41D /* AppDelegate.h */,
 				4849CD6D21A52C36006CB41D /* AppDelegate.m */,
+				B5C2C0F324F51A1100BC65B9 /* AppDelegate+PushService.h */,
+				B5C2C0F424F51A1100BC65B9 /* AppDelegate+PushService.m */,
 				4849CD6821A52C36006CB41D /* MAXTabBarController.h */,
 				4849CD2B21A52C36006CB41D /* MAXTabBarController.m */,
 				B56B025B23830DCA005E22B8 /* MAXLauchVideoViewController.h */,
@@ -1088,6 +1119,7 @@
 				B5CDA8AE2244C37700BF04BE /* searchDetailProfiledetail.json */,
 				B5FFEEDA21E5AFF10062A223 /* messageconfig.json */,
 				B52F82C7235DA03A00E5D779 /* SystemRosterProfile.json */,
+				B570FDD124979D8500445598 /* apple-app-site-association */,
 			);
 			path = Resource;
 			sourceTree = "<group>";
@@ -1117,12 +1149,12 @@
 		48FB3E642193F4FC007740F4 = {
 			isa = PBXGroup;
 			children = (
-				B5D9EA692473869A00492947 /* floo-ios.framework */,
+				B570FDD0249769B600445598 /* MaxIMDebug.entitlements */,
 				B5142F1F21CF73530013DBBD /* MaxIM.entitlements */,
+				4877EB0321A58D37000F2FF5 /* Base.lproj */,
 				4849CD2521A52C36006CB41D /* Class */,
 				4849CD8B21A52CBC006CB41D /* Info.plist */,
 				4849CD8A21A52CBC006CB41D /* main.m */,
-				4877EB0321A58D37000F2FF5 /* Base.lproj */,
 				48FB3E882193F4FD007740F4 /* MaxIMTests */,
 				48FB3E932193F4FD007740F4 /* MaxIMUITests */,
 				B5116841228E9817001B2AE7 /* MaxIMShare */,
@@ -1261,6 +1293,8 @@
 				B58A17E6244D5B61006A7BEA /* PwdChangeVerifyByPasswordApi.m */,
 				B58A17E8244D5EFC006A7BEA /* PwdChangeVerifyByMobileApi.h */,
 				B58A17E9244D5EFC006A7BEA /* PwdChangeVerifyByMobileApi.m */,
+				B5B8C9852484DAF500404E3F /* ZoomMeetingsApi.h */,
+				B5B8C9862484DAF500404E3F /* ZoomMeetingsApi.m */,
 			);
 			path = Api;
 			sourceTree = "<group>";
@@ -1387,9 +1421,21 @@
 			path = EditPassword;
 			sourceTree = "<group>";
 		};
+		B539139424ADB3C100EB0A4C /* PrivateView */ = {
+			isa = PBXGroup;
+			children = (
+				B539139624ADB3EB00EB0A4C /* PrivacyView.h */,
+				B539139724ADB3EB00EB0A4C /* PrivacyView.m */,
+				B539139824ADB3EB00EB0A4C /* PrivacyWebView.h */,
+				B539139524ADB3EB00EB0A4C /* PrivacyWebView.m */,
+			);
+			path = PrivateView;
+			sourceTree = "<group>";
+		};
 		B539D58421BFA41C0011D30E /* Login */ = {
 			isa = PBXGroup;
 			children = (
+				B539139424ADB3C100EB0A4C /* PrivateView */,
 				B539D58521BFA41C0011D30E /* View */,
 				B539D58A21BFA41C0011D30E /* ViewController */,
 			);
@@ -1495,6 +1541,8 @@
 				4815431621E7AD520082E38D /* TransterViewController.m */,
 				B5F21D3F230EACB600F6CA4B /* GroupAlreadyReadListViewController.h */,
 				B5F21D40230EACB600F6CA4B /* GroupAlreadyReadListViewController.m */,
+				B599F26B247E4AA200051480 /* SupportManager.h */,
+				B599F26C247E4AA200051480 /* SupportManager.m */,
 			);
 			path = Controller;
 			sourceTree = "<group>";
@@ -1527,6 +1575,8 @@
 				B539D66D21BFDD370011D30E /* LHChatViewCell.m */,
 				B5CDA8B9224CA82500BF04BE /* BubbleViewAlertView.h */,
 				B5CDA8BA224CA82600BF04BE /* BubbleViewAlertView.m */,
+				B54BBA77247BE98B00862CE2 /* JoinMeetingView.h */,
+				B54BBA78247BE98B00862CE2 /* JoinMeetingView.m */,
 			);
 			path = View;
 			sourceTree = "<group>";
@@ -1962,10 +2012,23 @@
 			path = LaunchVideo;
 			sourceTree = "<group>";
 		};
+		B570FDC82497562400445598 /* OpenSDK1.8.7.1_NoPay */ = {
+			isa = PBXGroup;
+			children = (
+				B570FDC92497562400445598 /* WXApi.h */,
+				B570FDCA2497562400445598 /* WXApiObject.h */,
+				B570FDCB2497562400445598 /* README.txt */,
+				B570FDCC2497562400445598 /* WechatAuthSDK.h */,
+				B570FDCD2497562400445598 /* libWeChatSDK.a */,
+			);
+			path = OpenSDK1.8.7.1_NoPay;
+			sourceTree = "<group>";
+		};
 		B5738D927166D01AB0CE4043 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
 				B5BD4D2822C22F6E00B971A7 /* CoreTelephony.framework */,
+				AFF48A6C25CF1FE300634E80 /* MobileRTC.framework */,
 				B55FFC7A2240E79500DF0BAB /* UIKit.framework */,
 				B55FFC782240E78300DF0BAB /* QuartzCore.framework */,
 				B55FFC762240E4EB00DF0BAB /* ImageIO.framework */,
@@ -1974,7 +2037,6 @@
 				B55FFC702240E4C500DF0BAB /* CoreMedia.framework */,
 				B55FFC6E2240E3FF00DF0BAB /* CoreGraphics.framework */,
 				B55FFC6C2240E3F500DF0BAB /* AVFoundation.framework */,
-				4815430721E28D4D0082E38D /* libcrypto.a */,
 				B5142F2221CF74510013DBBD /* UserNotificationsUI.framework */,
 				B5142F2021CF744B0013DBBD /* UserNotifications.framework */,
 				B5FF65DF21C8CDAA00BAD31C /* libresolv.tbd */,
@@ -2041,26 +2103,31 @@
 			path = Search;
 			sourceTree = "<group>";
 		};
+		B5959326249B184B00A307B3 /* zoom */ = {
+			isa = PBXGroup;
+			children = (
+				B5959327249B184B00A307B3 /* lib */,
+			);
+			path = zoom;
+			sourceTree = "<group>";
+		};
+		B5959327249B184B00A307B3 /* lib */ = {
+			isa = PBXGroup;
+			children = (
+				B5959328249B184B00A307B3 /* MobileRTCResources.bundle */,
+			);
+			path = lib;
+			sourceTree = "<group>";
+		};
 		B5BD4D1F22C22B6900B971A7 /* Vendor */ = {
 			isa = PBXGroup;
 			children = (
+				B5959326249B184B00A307B3 /* zoom */,
+				B570FDC82497562400445598 /* OpenSDK1.8.7.1_NoPay */,
 				4832592221CE74870061D47F /* VoiceConvert */,
 				B559FFEB22D0A64B003FDA76 /* YYKit */,
-				B5BD4D2022C22B8700B971A7 /* WeChatSDK1.8.4_NoPay */,
 			);
 			path = Vendor;
-			sourceTree = "<group>";
-		};
-		B5BD4D2022C22B8700B971A7 /* WeChatSDK1.8.4_NoPay */ = {
-			isa = PBXGroup;
-			children = (
-				B5BD4D2122C22B8700B971A7 /* WXApi.h */,
-				B5BD4D2222C22B8700B971A7 /* WXApiObject.h */,
-				B5BD4D2322C22B8700B971A7 /* README.txt */,
-				B5BD4D2422C22B8700B971A7 /* WechatAuthSDK.h */,
-				B5BD4D2522C22B8700B971A7 /* libWeChatSDK.a */,
-			);
-			path = WeChatSDK1.8.4_NoPay;
 			sourceTree = "<group>";
 		};
 		B5D12F9B22C347E800D2C4BF /* Video */ = {
@@ -2148,6 +2215,7 @@
 				996B9906F676BBCF0988783D /* [CP] Copy Pods Resources */,
 				B532178721C15C2E0042F403 /* Embed Frameworks */,
 				B511684F228E9817001B2AE7 /* Embed App Extensions */,
+				B54BBA81247C0C3200862CE2 /* CopyFiles */,
 			);
 			buildRules = (
 			);
@@ -2267,6 +2335,12 @@
 				en,
 				Base,
 				English,
+				de,
+				"zh-Hans",
+				ja,
+				es,
+				"zh-Hant",
+				fr,
 			);
 			mainGroup = 48FB3E642193F4FC007740F4;
 			productRefGroup = 48FB3E6E2193F4FC007740F4 /* Products */;
@@ -2296,13 +2370,14 @@
 				48DB6F9121A694C700CE9A53 /* group.json in Resources */,
 				B5AAD8F9238E4EA50000C7FA /* lauchVideo_1125.mp4 in Resources */,
 				48DB6F9321A6AA8400CE9A53 /* setting.json in Resources */,
+				B570FDCE2497562400445598 /* README.txt in Resources */,
 				B5D9F46B21D76A7E00B31AC3 /* profilesetting.json in Resources */,
 				B5AAD901238E58570000C7FA /* 1124x632.gif in Resources */,
 				B539D6DA21BFDD370011D30E /* emoticons.plist in Resources */,
 				B556B2EB21DE113A0051FCEB /* chatdetailproiledetail.json in Resources */,
+				B595932A249B184B00A307B3 /* MobileRTCResources.bundle in Resources */,
 				B5AAD8F7238E4EA50000C7FA /* lauchVideo_374.mp4 in Resources */,
 				B52F82C8235DA03A00E5D779 /* SystemRosterProfile.json in Resources */,
-				B5BD4D2622C22B8700B971A7 /* README.txt in Resources */,
 				B539D6D321BFDD370011D30E /* Keyboard_gradient_mask@3x.png in Resources */,
 				4877EB0921A58D37000F2FF5 /* Main.storyboard in Resources */,
 				B559003722D0A64B003FDA76 /* Animated image support.txt in Resources */,
@@ -2512,6 +2587,7 @@
 				4849CD7121A52C36006CB41D /* MAXTabBarController.m in Sources */,
 				B50BEAD92255E6B200B0753D /* NetworkStatusMonitor.m in Sources */,
 				B559004322D0A64B003FDA76 /* YYTextLayout.m in Sources */,
+				B599F26D247E4AA200051480 /* SupportManager.m in Sources */,
 				B559003C22D0A64B003FDA76 /* NSBundle+YYAdd.m in Sources */,
 				B559FF9222D0A60B003FDA76 /* UIView+BMXframe.m in Sources */,
 				48BE996D21CFE2870042A535 /* ICDocumentViewController.m in Sources */,
@@ -2569,6 +2645,7 @@
 				B559004F22D0A64B003FDA76 /* NSParagraphStyle+YYText.m in Sources */,
 				B539D6D421BFDD370011D30E /* KeyboardVC.m in Sources */,
 				B5AFB3032276F98B00C23559 /* WechatLoginApi.m in Sources */,
+				B570FDD224979D8500445598 /* apple-app-site-association in Sources */,
 				B50BEADD2255F6A200B0753D /* NSString+URLEncoding.m in Sources */,
 				48BE996C21CFE2870042A535 /* ICDocumentCell.m in Sources */,
 				B561638C2293E602005F18BC /* NSString+Extention.m in Sources */,
@@ -2592,6 +2669,7 @@
 				B539D6C121BFDD370011D30E /* LHChatViewBaseCell.m in Sources */,
 				B557D49A2451AB4E0035D60E /* QRCoodeFactor.m in Sources */,
 				B53FB37822C5F57B002A4B1F /* NotifierUploadPushInfoApi.m in Sources */,
+				B54BBA79247BE98B00862CE2 /* JoinMeetingView.m in Sources */,
 				B5119BC02397F259005F68A0 /* BindPhoneView.m in Sources */,
 				B55DF4B323A75D6700AF1BF9 /* UserMobilePrechangeByPasswordApi.m in Sources */,
 				B5D9F45C21D64A8C00B31AC3 /* ProfileTableViewCell.m in Sources */,
@@ -2613,6 +2691,7 @@
 				B55900AC22D0A7A1003FDA76 /* GorupLittleCell.m in Sources */,
 				B559005622D0A64B003FDA76 /* NSString+YYAdd.m in Sources */,
 				B507248723605D6C003909F1 /* SystemNotificationViewController.m in Sources */,
+				B5B8C9872484DAF500404E3F /* ZoomMeetingsApi.m in Sources */,
 				B559004B22D0A64B003FDA76 /* YYTextAttribute.m in Sources */,
 				B50BEAF32256067E00B0753D /* BaseApi.m in Sources */,
 				B539D6C521BFDD370011D30E /* LHChatBaseBubbleView.m in Sources */,
@@ -2621,6 +2700,7 @@
 				B5433A6F21C4F96C0062E141 /* RosterDetailViewController.m in Sources */,
 				B56B0251238293A8005E22B8 /* UserMobileBindApi.m in Sources */,
 				B559003922D0A64B003FDA76 /* YYImageCoder.m in Sources */,
+				B5C2C0F524F51A1100BC65B9 /* AppDelegate+PushService.m in Sources */,
 				B5AFB30C227989EC00C23559 /* BindOpenIdApi.m in Sources */,
 				B50AE51F22CDE91900D82476 /* VideoTool.m in Sources */,
 				4832593121CE74870061D47F /* VoiceConverter.mm in Sources */,
@@ -2638,6 +2718,7 @@
 				B559009F22D0A7A1003FDA76 /* GroupDetailListViewController.m in Sources */,
 				B5144F1623509A9500CF163E /* SupportStaffApi.m in Sources */,
 				B559003622D0A64B003FDA76 /* YYSpriteSheetImage.m in Sources */,
+				B539139A24ADB3EB00EB0A4C /* PrivacyView.m in Sources */,
 				48BE996E21CFE2870042A535 /* ICFileScanController.m in Sources */,
 				4832592021CE5C8A0061D47F /* BMXVoiceHud.m in Sources */,
 				B55900A322D0A7A1003FDA76 /* GroupMemberViewController.m in Sources */,
@@ -2647,6 +2728,7 @@
 				B55900C522D0A7E3003FDA76 /* HQCustomToast.m in Sources */,
 				B58A17E7244D5B61006A7BEA /* PwdChangeVerifyByPasswordApi.m in Sources */,
 				B5CDA8A7224485BD00BF04BE /* ScanViewController.m in Sources */,
+				B539139924ADB3EB00EB0A4C /* PrivacyWebView.m in Sources */,
 				B56B02542382A9B6005E22B8 /* AppUserInfoPwdApi.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -2838,14 +2920,17 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
-				CODE_SIGN_ENTITLEMENTS = MaxIM.entitlements;
+				CODE_SIGN_ENTITLEMENTS = MaxIMDebug.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = W99996QAJ5;
+				CURRENT_PROJECT_VERSION = 2;
+				DEVELOPMENT_TEAM = 963BX74UXU;
 				ENABLE_BITCODE = NO;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)",
+					"$(PROJECT_DIR)/Class/zoom/lib",
+					"$(PROJECT_DIR)/Class/Vendor/zoom/lib",
 				);
 				GCC_INCREASE_PRECOMPILED_HEADER_SHARING = YES;
 				GCC_INPUT_FILETYPE = automatic;
@@ -2885,9 +2970,10 @@
 					"$(PROJECT_DIR)/Class/vendor/WeChatSDK1.8.4_NoPay",
 					"$(PROJECT_DIR)/Class/Vendor/crypto",
 					"$(PROJECT_DIR)/Class/Vendor/VoiceConvert/lib",
+					"$(PROJECT_DIR)/Class/Vendor/OpenSDK1.8.7.1_NoPay",
 				);
 				MACH_O_TYPE = mh_execute;
-				MARKETING_VERSION = 2.0.4;
+				MARKETING_VERSION = 3.1;
 				OTHER_LDFLAGS = (
 					"$(inherited)",
 					"-ObjC",
@@ -2904,11 +2990,11 @@
 					"\"CoreGraphics\"",
 					"-all_load",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = top.maxim.MaxIM;
+				PRODUCT_BUNDLE_IDENTIFIER = com.maximtop.MaxIM;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				TARGETED_DEVICE_FAMILY = 1;
-				VALID_ARCHS = "arm64 arm64e armv7 armv7s i386";
+				VALID_ARCHS = "arm64 arm64e armv7 armv7s i386 x86_64";
 			};
 			name = Debug;
 		};
@@ -2921,11 +3007,14 @@
 				CODE_SIGN_ENTITLEMENTS = MaxIM.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = W99996QAJ5;
+				CURRENT_PROJECT_VERSION = 2;
+				DEVELOPMENT_TEAM = 963BX74UXU;
 				ENABLE_BITCODE = NO;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)",
+					"$(PROJECT_DIR)/Class/zoom/lib",
+					"$(PROJECT_DIR)/Class/Vendor/zoom/lib",
 				);
 				GCC_INCREASE_PRECOMPILED_HEADER_SHARING = YES;
 				GCC_INPUT_FILETYPE = automatic;
@@ -2965,9 +3054,10 @@
 					"$(PROJECT_DIR)/Class/vendor/WeChatSDK1.8.4_NoPay",
 					"$(PROJECT_DIR)/Class/Vendor/crypto",
 					"$(PROJECT_DIR)/Class/Vendor/VoiceConvert/lib",
+					"$(PROJECT_DIR)/Class/Vendor/OpenSDK1.8.7.1_NoPay",
 				);
 				MACH_O_TYPE = mh_execute;
-				MARKETING_VERSION = 2.0.4;
+				MARKETING_VERSION = 3.1;
 				OTHER_LDFLAGS = (
 					"$(inherited)",
 					"-ObjC",
@@ -2984,11 +3074,11 @@
 					"\"CoreGraphics\"",
 					"-all_load",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = top.maxim.MaxIM;
+				PRODUCT_BUNDLE_IDENTIFIER = com.maximtop.MaxIM;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				TARGETED_DEVICE_FAMILY = 1;
-				VALID_ARCHS = "arm64 arm64e armv7 armv7s i386";
+				VALID_ARCHS = "arm64 arm64e armv7 armv7s i386 x86_64";
 			};
 			name = Release;
 		};
@@ -3075,10 +3165,10 @@
 			buildSettings = {
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
 				CODE_SIGN_ENTITLEMENTS = MaxIMShare/MaxIMShare.entitlements;
-				CODE_SIGN_IDENTITY = "iPhone Developer";
+				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 0;
-				DEVELOPMENT_TEAM = W99996QAJ5;
+				CURRENT_PROJECT_VERSION = 2;
+				DEVELOPMENT_TEAM = 963BX74UXU;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)/MaxIMShare",
@@ -3098,10 +3188,10 @@
 					"$(inherited)",
 					"$(PROJECT_DIR)/MaxIMShare/floolib",
 				);
-				MARKETING_VERSION = 1.2.5;
+				MARKETING_VERSION = 3.1;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
-				PRODUCT_BUNDLE_IDENTIFIER = top.maxim.MaxIM.MaxIMShare;
+				PRODUCT_BUNDLE_IDENTIFIER = com.maximtop.MaxIM.ShareExtention;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SKIP_INSTALL = YES;
@@ -3114,10 +3204,10 @@
 			buildSettings = {
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
 				CODE_SIGN_ENTITLEMENTS = MaxIMShare/MaxIMShare.entitlements;
-				CODE_SIGN_IDENTITY = "iPhone Developer";
+				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 0;
-				DEVELOPMENT_TEAM = W99996QAJ5;
+				CURRENT_PROJECT_VERSION = 2;
+				DEVELOPMENT_TEAM = 963BX74UXU;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)/MaxIMShare",
@@ -3133,9 +3223,9 @@
 					"$(inherited)",
 					"$(PROJECT_DIR)/MaxIMShare/floolib",
 				);
-				MARKETING_VERSION = 1.2.5;
+				MARKETING_VERSION = 3.1;
 				MTL_FAST_MATH = YES;
-				PRODUCT_BUNDLE_IDENTIFIER = top.maxim.MaxIM.MaxIMShare;
+				PRODUCT_BUNDLE_IDENTIFIER = com.maximtop.MaxIM.ShareExtention;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SKIP_INSTALL = YES;

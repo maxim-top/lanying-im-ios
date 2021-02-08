@@ -99,13 +99,13 @@ NSString * connectingIPhoneNetworkNotifation = @"connectingIPhoneNetworkNotifati
     [self setHeader];
     cache = false;
     
-    NSURLSessionDataTask *task = [self.manager POST:URLString parameters:params progress:^(NSProgress * _Nonnull uploadProgress) {
+    NSURLSessionDataTask *task = [self.manager POST:URLString parameters:params headers:nil progress:^(NSProgress * _Nonnull uploadProgress) {
         
     } success:^(NSURLSessionDataTask * _Nonnull task, id  _Nullable responseObject) {
-                           successBlock(responseObject);
+        successBlock(responseObject);
 
     } failure:^(NSURLSessionDataTask * _Nullable task, NSError * _Nonnull error) {
-                           failerrorBlock(error);
+        failerrorBlock(error);
 
     }];
     return  task;
@@ -140,14 +140,15 @@ NSString * connectingIPhoneNetworkNotifation = @"connectingIPhoneNetworkNotifati
     
     [self setHeader];
     URLString = [self normalizedURL:URLString WithQueryString:params];
-    return [self.manager GET:URLString
-                  parameters:nil
-                    progress:^(NSProgress * _Nonnull downloadProgress) {
-                    } success:^(NSURLSessionDataTask * _Nonnull task, id  _Nullable responseObject) {
-                        successBlock(responseObject);
-                    } failure:^(NSURLSessionDataTask * _Nullable task, NSError * _Nonnull error) {
-                        failerrorBlock(error);
-                    }];
+    return [self.manager GET:URLString parameters:nil headers:nil progress:^(NSProgress * _Nonnull downloadProgress) {
+        
+    } success:^(NSURLSessionDataTask * _Nonnull task, id  _Nullable responseObject) {
+        successBlock(responseObject);
+
+    } failure:^(NSURLSessionDataTask * _Nullable task, NSError * _Nonnull error) {
+        failerrorBlock(error);
+
+    }];
 }
 
 #pragma mark - Tool

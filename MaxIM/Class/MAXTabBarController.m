@@ -243,9 +243,25 @@ typedef enum : NSUInteger {
     MAXLog(@"已经收到消息 %@", [messages firstObject]);
 }
 
+/**
+ * 用户在其他设备上登出
+ **/
 - (void)userOtherDeviceDidSignOut:(NSInteger)deviceSN {
     MAXLog(@"用户");
 }
+
+/**
+ * 用户在其他设备上登陆
+ **/
+- (void)userOtherDeviceDidSignIn:(NSInteger)deviceSN {
+    MAXLog(@"用户在其他设备上登陆");
+
+}
+
+- (void)userSignOut:(BMXError *)error userId:(long long)userId {
+    MAXLog(@"用户登出");
+}
+
 
 - (void)userInfoDidUpdated:(BMXUserProfile *)userProflie {
     MAXLog(@"用户信息改变");

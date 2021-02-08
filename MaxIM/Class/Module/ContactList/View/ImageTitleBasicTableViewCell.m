@@ -184,7 +184,7 @@ static NSString *cellID = @"ImageTitleBasicTableViewCell";
 
         self.avatarImg.clipsToBounds = YES;
         self.avatarImg.layer.cornerRadius = image.size.width / 2.0;
-        [self addSubview:_avatarImg];
+        [self.contentView addSubview:_avatarImg];
         [_avatarImg sizeToFit];
     }
     return _avatarImg;
@@ -196,7 +196,7 @@ static NSString *cellID = @"ImageTitleBasicTableViewCell";
 
         _nicknameLabel.font = [UIFont fontWithName:@"PingFangSC-Semibold" size:16];
         _nicknameLabel.textColor = [UIColor colorWithRed:51/255.0 green:51/255.0 blue:51/255.0 alpha:1/1.0];
-        [self addSubview:_nicknameLabel];
+        [self.contentView addSubview:_nicknameLabel];
         [_nicknameLabel sizeToFit];
     }
     return _nicknameLabel;
@@ -206,7 +206,7 @@ static NSString *cellID = @"ImageTitleBasicTableViewCell";
 - (UIView *)line {
     if (!_line) {
         _line = [[UIView alloc] init];
-        [self addSubview:_line];
+        [self.contentView addSubview:_line];
         _line.backgroundColor = kColorC4_5;
     }
     return _line;

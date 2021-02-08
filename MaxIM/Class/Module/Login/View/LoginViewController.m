@@ -34,7 +34,9 @@
 
 #import <floo-ios/BMXHostConfig.h>
 
-@interface LoginViewController ()<LoginViewConfigProtocol, SDKConfigViewControllerProtocl>
+#import "PrivacyView.h"
+
+@interface LoginViewController ()<LoginViewConfigProtocol, SDKConfigViewControllerProtocl, PrivacyProtocol>
 
 @property (nonatomic, strong) LoginViewConfig *config;
 @property (nonatomic,copy) NSString *scanConsuleUserName;
@@ -61,10 +63,8 @@
         [self setupUI];
     }
     return self;
-    
+
 }
-
-
 
 - (void)setupUI {
     
@@ -81,12 +81,22 @@
     [super viewDidLoad];
     self.view.backgroundColor = [UIColor whiteColor];
     
+    
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(wechatSuccessloginIM) name:@"wechatloginsuccess" object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(jumpToRegistVC:) name:@"wechatloginsuccess_newuser" object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(inputUserTextFeild:) name:@"ScanConsule" object:nil];
     
     [self.config setAppid:[AppIDManager sharedManager].appid.appId];
-//    [self.config showErrorText:@"用户名或密码不对"];
+
+    UIWindow *keyWindow;
+    if (@available(iOS 13.0, *)) {
+        keyWindow = [UIApplication sharedApplication].windows.firstObject;
+    }else {
+        keyWindow = [UIApplication sharedApplication].keyWindow;
+    }
+    [PrivacyView showPrivacyWithMaxTimeInterval:-1 view:self.view staticKey:@"maxim_privacy" privacyUrl:@"https://www.maximtop.com/privacy" delegate:self];
+
+    
 }
 
 #pragma mark - delegate
@@ -149,7 +159,9 @@
         req.scope = @"snsapi_userinfo";
         req.state = @"login";
         //向微信终端发起SendAuthReq消息
-        [WXApi sendReq:req];
+        [WXApi sendReq:req completion:^(BOOL success) {
+            
+        }];
     } else {
         [HQCustomToast showDialog:@"请安装微信客户端"];
         MAXLog(@"安装微信客户端");

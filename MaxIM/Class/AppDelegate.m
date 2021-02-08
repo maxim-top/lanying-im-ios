@@ -30,9 +30,13 @@
 #import <Bugly/Bugly.h>
 #import "HostConfigManager.h"
 
+#import <MobileRTC/MobileRTC.h>
 
+#import <floo-ios/BMXPushManager.h>
+#import <floo-ios/BMXPushServiceProtocol.h>
+#import "AppDelegate+PushService.h"
 
-@interface AppDelegate ()<UNUserNotificationCenterDelegate, BMXUserServiceProtocol, WXApiDelegate>
+@interface AppDelegate ()<UNUserNotificationCenterDelegate, BMXUserServiceProtocol, WXApiDelegate, MobileRTCAuthDelegate, BMXPushServiceProtocol>
 
 @property (nonatomic, strong) MAXTabBarController *maintabController;
 @end
@@ -42,19 +46,45 @@
     
     [NSThread sleepForTimeInterval:2];
     
+    [self configapnsWithapplication:application didFinishLaunchingWithOptions:launchOptions];
     [self configProperties];
     [self initializeBMX];
+    [self registerAPNs];
     [self initBugly];
+    [self initTingYunApp];
     [self initialWechat];
     [self setupMainViewController];
     
     [self autologin];
-    [self configapnsWithapplication:application didFinishLaunchingWithOptions:launchOptions];
   
+    [self configZoom];
 //    if (application.applicationIconBadgeNumber > 0) {
 //        application.applicationIconBadgeNumber = 0;
 //    }
     return YES;
+}
+
+- (void)initTingYunApp {
+    [NBSAppAgent startWithAppID:@"abe2265adc9144bf810f056610e621ab"];
+}
+
+- (void)configZoom {
+    MobileRTCSDKInitContext *context = [[MobileRTCSDKInitContext alloc] init];
+       context.enableLog = YES;
+       context.domain = @"zoom.us";
+       
+       [[MobileRTC sharedRTC] initialize:context];
+       
+       MobileRTCAuthService *authService = [[MobileRTC sharedRTC] getAuthService];
+         if (authService)
+         {
+             authService.delegate = self;
+             authService.clientKey = @"fwFvS1VOVkucaqLtnWFSsqBPt6aFheTwaIRs";
+             authService.clientSecret = @"bb8f24VTFncmirpoMb1eB3Y0b3ZlXvNLDVGD";
+             [authService sdkAuth];
+         }
+       [authService sdkAuth];
+       
 }
 
 - (void)initBugly  {
@@ -62,7 +92,7 @@
 }
 
 - (void)initialWechat {
-    [WXApi registerApp:@"wx96edf8b1e48af083"];
+    [WXApi registerApp:@"wx96edf8b1e48af083" universalLink:@"https://package.maximtop.com/apple-app-site-association/"];
 }
 
 
@@ -139,63 +169,75 @@
 }
 
 - (void)configapnsWithapplication:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
-    if (@available(iOS 10.0, *)) {
-        UNUserNotificationCenter * center = [UNUserNotificationCenter currentNotificationCenter];
-        [center setDelegate:self];
-        UNAuthorizationOptions type = UNAuthorizationOptionBadge|UNAuthorizationOptionSound|UNAuthorizationOptionAlert;
-        [center requestAuthorizationWithOptions:type completionHandler:^(BOOL granted, NSError * _Nullable error) {
-            if (granted) {
-                MAXLog(@"注册成功");
-
-            }else{
-                MAXLog(@"注册失败");
+    
+    if ([[UIDevice currentDevice].systemVersion floatValue] >= 10.0){
+            if (@available(iOS 10.0, *)) {
+                UNUserNotificationCenter *center = [UNUserNotificationCenter currentNotificationCenter];
+                [center requestAuthorizationWithOptions:(UNAuthorizationOptionAlert | UNAuthorizationOptionBadge | UNAuthorizationOptionSound) completionHandler:^(BOOL granted, NSError * _Nullable error) {
+                    if (granted) {
+                        [center getNotificationSettingsWithCompletionHandler:^(UNNotificationSettings * _Nonnull settings) {
+                            if (settings.authorizationStatus == UNAuthorizationStatusAuthorized){
+                                dispatch_async(dispatch_get_main_queue(), ^{
+                                    [[UIApplication sharedApplication] registerForRemoteNotifications];
+                                });
+                            }
+                        }];
+                    }
+                }];
             }
-            
-            
-            dispatch_async(dispatch_get_main_queue(), ^{
-                // 注册获得device Token
-                [application registerForRemoteNotifications];
-                
-            });
-            
-
-        }];
-    }else if (@available(iOS 8.0, *)){
-        UIUserNotificationType notificationTypes = UIUserNotificationTypeBadge |
-        UIUserNotificationTypeSound |
-        UIUserNotificationTypeAlert;
-        UIUserNotificationSettings *settings = [UIUserNotificationSettings settingsForTypes:notificationTypes categories:nil];
-        [application registerUserNotificationSettings:settings];
-        
-        // 注册获得device Token
-        [application registerForRemoteNotifications];
-    }
-    
+        } else if ([[UIDevice currentDevice].systemVersion floatValue] >= 8.0){
+            if (@available(iOS 8.0, *)) {
+                if ([[UIApplication sharedApplication] respondsToSelector:@selector(registerUserNotificationSettings:)]) {
+                    UIUserNotificationSettings* notificationSettings = [UIUserNotificationSettings settingsForTypes:UIUserNotificationTypeAlert | UIUserNotificationTypeBadge | UIUserNotificationTypeSound categories:nil];
+                    [[UIApplication sharedApplication] registerUserNotificationSettings:notificationSettings];
+                    [[UIApplication sharedApplication] registerForRemoteNotifications];
+                } else {
+                    [[UIApplication sharedApplication] registerForRemoteNotificationTypes: (UIRemoteNotificationTypeBadge | UIRemoteNotificationTypeSound | UIRemoteNotificationTypeAlert)];
+                }
+            }
+        }
 }
 
-- (void)application:(UIApplication *)application didFailToRegisterForRemoteNotificationsWithError:(NSError *)error API_AVAILABLE(ios(3.0)) {
+- (void)application:(UIApplication *)application didFailToRegisterForRemoteNotificationsWithError:(nonnull NSError *)error {
     MAXLog(@"%@", error);
+    
 }
 
 
-- (void)application:(UIApplication *)application didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)deviceToken {
+- (void)application:(UIApplication *)application didRegisterForRemoteNotificationsWithDeviceToken:(nonnull NSData *)deviceToken {
+    //Xcode11打的包，iOS13获取Token有变化
+    if ([[[UIDevice currentDevice] systemVersion] floatValue] >= 13) {
+        if (![deviceToken isKindOfClass:[NSData class]]) {
+            //记录获取token失败的描述
+            return;
+        }
+        const unsigned *tokenBytes = (const unsigned *)[deviceToken bytes];
+        NSString *strToken = [NSString stringWithFormat:@"%08x%08x%08x%08x%08x%08x%08x%08x",
+                              ntohl(tokenBytes[0]), ntohl(tokenBytes[1]), ntohl(tokenBytes[2]),
+                              ntohl(tokenBytes[3]), ntohl(tokenBytes[4]), ntohl(tokenBytes[5]),
+                              ntohl(tokenBytes[6]), ntohl(tokenBytes[7])];
+        NSLog(@"deviceToken1:%@", strToken);
+        [[NSUserDefaults standardUserDefaults] setObject:strToken forKey:@"deviceToken"];
+
+        return;
+    } else {
+        NSString *token = [NSString
+                       stringWithFormat:@"%@",deviceToken];
+        token = [token stringByReplacingOccurrencesOfString:@"<" withString:@""];
+        token = [token stringByReplacingOccurrencesOfString:@">" withString:@""];
+        token = [token stringByReplacingOccurrencesOfString:@" " withString:@""];
+        NSLog(@"deviceToken2 is: %@", token);
+        [[NSUserDefaults standardUserDefaults] setObject:token forKey:@"deviceToken"];
+
+    }
+
+
+}
+
+
+- (BOOL)application:(UIApplication *)application continueUserActivity:(NSUserActivity *)userActivity restorationHandler:(void (^)(NSArray<id<UIUserActivityRestoring>> * _Nullable))restorationHandler {
     
-    if (![deviceToken isKindOfClass:[NSData class]]) return;
-    const unsigned *tokenBytes = [deviceToken bytes];
-    NSString *hexToken = [NSString stringWithFormat:@"%08x%08x%08x%08x%08x%08x%08x%08x",
-                          ntohl(tokenBytes[0]), ntohl(tokenBytes[1]), ntohl(tokenBytes[2]),
-                          ntohl(tokenBytes[3]), ntohl(tokenBytes[4]), ntohl(tokenBytes[5]),
-                          ntohl(tokenBytes[6]), ntohl(tokenBytes[7])];
-    MAXLog(@"deviceToken:%@", hexToken);
-    
-    
-//    NSString *deviceTokenStr = [[[[deviceToken description]
-//                                  stringByReplacingOccurrencesOfString:@"<" withString:@""]
-//                                 stringByReplacingOccurrencesOfString:@">" withString:@""]
-//                                stringByReplacingOccurrencesOfString:@" " withString:@""];
-//    MAXLog(@"deviceTokenStr:\n%@",deviceTokenStr);
-    [[NSUserDefaults standardUserDefaults] setObject:hexToken forKey:@"deviceToken"];
-    
+    return [WXApi handleOpenUniversalLink:userActivity delegate:self];
 }
 
 - (void)addNotification {
@@ -229,8 +271,9 @@
     NSString* phoneVersion = [[UIDevice currentDevice] systemVersion];
   
     NSString *phone = [NSString stringWithFormat:@"设备名称:%@;%@;%@;%@", phoneName,localizedModel,systemName,phoneVersion];
-    BMXSDKConfig *config  = [[BMXSDKConfig alloc] initConfigWithDataDir:dataDir cacheDir:cacheDir pushCertName:@"NotiCer_Product" userAgent:phone];
+    BMXSDKConfig *config  = [[BMXSDKConfig alloc] initConfigWithDataDir:dataDir cacheDir:cacheDir pushCertName:@"apns_maximtop_distribution_2020" userAgent:phone];
     config.appID = [AppIDManager sharedManager].appid.appId;
+    config.appSecret = @"47B13PBIAPDARZKD";
     config.loadAllServerConversations = YES;
     
     IMAcount *accout = [IMAcountInfoStorage loadObject];
@@ -248,6 +291,8 @@
         config.enableDNS = YES;
 
     }
+    
+    config.verifyCertificate = NO;
     [[BMXClient sharedClient] registerWithSDKConfig:config];
 }
 
@@ -302,17 +347,9 @@
     [[NSNotificationCenter defaultCenter] removeObserver:self name:@"LauchVideoPlayeFinish" object:nil];
 }
 
-- (BOOL)application:(UIApplication *)application openURL:(NSURL *)url sourceApplication:(NSString *)sourceApplication annotation:(id)annotation {
-    return [WXApi handleOpenURL:url delegate:self];
-}
-
-- (BOOL)application:(UIApplication *)application handleOpenURL:(NSURL *)url{
-    return [WXApi handleOpenURL:url delegate:self];
-}
-
 - (BOOL)application:(UIApplication *)app openURL:(NSURL *)url options:(NSDictionary<UIApplicationOpenURLOptionsKey,id> *)options {
     
-    if ([options[UIApplicationOpenURLOptionsSourceApplicationKey] isEqualToString:@"com.tencent.xin"] && [url.absoluteString containsString:@"login"]) {
+    if ([url.absoluteString containsString:@"login"]) {
         [WXApi handleOpenURL:url delegate:self];
     }else{
         if ([url.absoluteString hasPrefix:@"MaxIMExtension://Roster"]) {

@@ -39,7 +39,7 @@
         _scrollView.delaysContentTouches = NO;
         _scrollView.canCancelContentTouches = YES;
         _scrollView.alwaysBounceVertical = NO;
-        [self addSubview:_scrollView];
+        [self.contentView addSubview:_scrollView];
         
         _imageContainerView = [[UIView alloc] init];
         _imageContainerView.clipsToBounds = YES;

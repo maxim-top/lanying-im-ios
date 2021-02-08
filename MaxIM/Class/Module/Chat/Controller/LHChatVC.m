@@ -61,9 +61,10 @@
 #import <CoreLocation/CoreLocation.h>
 #import "UIViewController+CustomNavigationBar.h"
 #import <floo-ios/BMXMessageConfig.h>
-
+#import "JoinMeetingView.h"
+#import "SupportManager.h"
 //#import <floo-ios/BMXGroupMember.h>
-
+#import "ZoomMeetingsApi.h"
 NSString *const kTableViewOffset = @"contentOffset";
 NSString *const kTableViewFrame = @"frame";
 
@@ -198,6 +199,34 @@ CLLocationManagerDelegate>
     
     [self p_configNotification];
     [self p_configEditMessage];
+    [self showJoinmeetingView];
+}
+
+- (void)showJoinmeetingView {
+    
+    ZoomMeetingsApi *api = [[ZoomMeetingsApi alloc] init];
+    [api startWithSuccessBlock:^(ApiResult * _Nullable result) {
+        if (result.isOK ) {
+            NSArray *array = [NSArray arrayWithArray:result.resultData];
+            if (array.count > 0) {
+                
+                if (self.messageType == BMXMessageTypeSingle) {
+                    [[SupportManager sharedSupportManager] checkCurrentRoster:self.currentRoster isSupport:^(BOOL isSupport) {
+                        if (isSupport == YES) {
+                            JoinMeetingView *view = [JoinMeetingView joinMeetingViewWithUserID:[NSString stringWithFormat:@"%lld", self.currentRoster.rosterId]
+                                                                                     meetingID:array[0]];
+                            [self.view addSubview:view];
+                        }
+                    }];
+                }
+                
+            }
+        }
+        
+    } failureBlock:^(NSError * _Nullable error) {
+    
+    }];
+    
 }
 
 - (void)p_configNotification {
@@ -485,7 +514,7 @@ CLLocationManagerDelegate>
         dbMessageModel.content = videoAtt.displayName ? videoAtt.displayName : @"video";
         dbMessageModel.type = MessageBodyType_Video;
         
-        MAXLog(@"%f, %f", videoAtt.size.width, videoAtt.size.height)
+//        MAXLog(@"%f, %f", videoAtt.size.width, videoAtt.size.height)
         dbMessageModel.width = videoAtt.videoSize.width;
         dbMessageModel.height = videoAtt.videoSize.height;
         dbMessageModel.imageRemoteURL = videoAtt.thumbnailPath;
@@ -495,7 +524,7 @@ CLLocationManagerDelegate>
             [[[BMXClient sharedClient] chatService] downloadThumbnail:message strategy:ThirdpartyServerCreate];
             
         }else {
-            MAXLog(@"存在");
+//            MAXLog(@"存在");
         }
         
         [self.dataSource insertObject:dbMessageModel atIndex:0];
@@ -846,7 +875,7 @@ CLLocationManagerDelegate>
     self.browserAnimateDelegate.index = 0;
     self.browserAnimateDelegate.im = YES;
     photoPreview.transitioningDelegate = self.browserAnimateDelegate;
-    photoPreview.modalPresentationStyle = UIModalPresentationCustom;
+    photoPreview.modalPresentationStyle = UIModalPresentationFullScreen;
     [self presentViewController:photoPreview animated:YES completion:nil];
     
 }
@@ -1290,7 +1319,7 @@ CLLocationManagerDelegate>
     long long firstMessageId = firstMessage? firstMessage.msgId : 0;
     
     [[[BMXClient sharedClient] chatService] retrieveHistoryBMXconversation:self.conversation msgId:firstMessageId size:10 completion:^(NSArray *messageListms, BMXError *error) {
-        MAXLog(@"retrieveHistoryBMXconversation:%lulld", (unsigned long)messageListms.count);
+        MAXLog(@"retrieveHistoryBMXconversation:%lu", (unsigned long)messageListms.count);
         messageListms =  [messageListms sortedArrayUsingComparator:^NSComparisonResult(BMXMessageObject *message1, BMXMessageObject *message2) {
             return message1.serverTimestamp < message2.serverTimestamp;
         }];
@@ -1486,7 +1515,7 @@ CLLocationManagerDelegate>
         }
     }
     
-    if (percent == 100 && !error ) {
+    if (percent == 101 && !error ) {
 
         NSString *date =  [NSString stringWithFormat:@"%lld",  message.serverTimestamp];
         LHMessageModel *dbMessageModel = [[LHIMDBManager shareManager] searchModel:[LHMessageModel class] keyValues:@{@"date" : date}];
@@ -1551,7 +1580,7 @@ CLLocationManagerDelegate>
             }
         });
     } else {
-        MAXLog(@"%@", error.errorMessage);
+//        MAXLog(@"%@", error.errorMessage);
     }
 }
 

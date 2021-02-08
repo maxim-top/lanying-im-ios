@@ -38,7 +38,7 @@
 #import "UIControl+Category.h"
 #import <floo-ios/BMXChatManager.h>
 
-
+#import <floo-ios/BMXPushManager.h>
 @interface MainViewController ()<UITableViewDelegate, UITableViewDataSource, UITextFieldDelegate, ChatVCDelegate, BMXChatServiceProtocol>
 
 @property (nonatomic, strong) NSMutableArray<BMXConversation *> *conversatonList;
@@ -68,6 +68,12 @@
     [[[BMXClient sharedClient] chatService] getAllConversationsUnreadCountWithCompletion:^(int count) {
         [self showUnReadNumber:count];
     }];
+    //
+//    [[[BMXClient sharedClient] pushService] sendMessage:@"pushmessagetest3"];
+    
+//    [[[BMXClient sharedClient] pushService] setPushTimeStartHour:8 endHour:20];
+    
+//    [[[BMXClient sharedClient] pushService] setSlienceTimeStartHour:8 endHour:20];
 }
 
 - (void)p_addObserver {
@@ -123,6 +129,7 @@
          self.tableview.tableHeaderView = nil;
         MAXLog(@"WIFI");
     }
+    
 }
 
 - (void)pushTosearhViewController {
@@ -483,7 +490,7 @@
                 cell.dotLabel.hidden = YES;
             }
         }
-    } else {
+    } else if (conversation.type == BMXConversationSingle){
         BMXRoster *roster = self.profileArray[indexPath.row];
         if ([NSStringFromClass(roster.class) isEqualToString:@"BMXRoster"]) {
             
@@ -502,10 +509,20 @@
 //                MAXLog(@" %ld" ,(long)conversation.unreadNumber);
             }
         }else {
-            cell.dotLabel.hidden = YES;
-            cell.dotView.hidden = YES;
-            cell.dotLabel.text  = @"";
+            
+            cell.dotLabel.hidden = [conversation unreadNumber] == 0;
+                   cell.dotView.hidden = YES;
+                   cell.dotLabel.text  = [NSString stringWithFormat:@"%ld",(long)[conversation unreadNumber]];
+//            cell.dotLabel.hidden = YES;
+//            cell.dotView.hidden = YES;
+//            cell.dotLabel.text  = @"";
         }
+    } else {
+        
+        cell.dotLabel.hidden = [conversation unreadNumber] == 0;
+        cell.dotView.hidden = YES;
+        cell.dotLabel.text  = [NSString stringWithFormat:@"%ld",(long)[conversation unreadNumber]];
+        
     }
     
     return cell;
@@ -588,6 +605,16 @@ forRowAtIndexPath:(NSIndexPath *)indexPath {
         [self.navigationController pushViewController:chatVC animated:YES];
     } else if ([self.profileArray[indexPath.row] isKindOfClass:[NSDictionary class]]) {
         BMXConversation *conversation = self.conversatonList[indexPath.row];
+        if (conversation.unreadNumber > 0) {
+            
+            if (conversation.lastMessage) {
+                [[[BMXClient sharedClient] chatService] readAllMessage:conversation.lastMessage];
+            }
+            [[[BMXClient sharedClient] chatService] readAllMessage:conversation.lastMessage];
+            RecentConversaionTableViewCell *cell = [tableView cellForRowAtIndexPath:indexPath];
+            cell.dotLabel.hidden = YES;
+        }
+        
         SystemNotificationViewController *vc = [[SystemNotificationViewController alloc] init];
         vc.hidesBottomBarWhenPushed = YES;
         vc.conversation = conversation;

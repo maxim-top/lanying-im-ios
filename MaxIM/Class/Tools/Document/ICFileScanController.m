@@ -10,7 +10,7 @@
 #import <QuickLook/QuickLook.h>
 #import <WebKit/WebKit.h>
 
-@interface ICFileScanController ()<QLPreviewControllerDataSource,QLPreviewControllerDelegate,WKUIDelegate,UIDocumentInteractionControllerDelegate>
+@interface ICFileScanController ()<QLPreviewControllerDataSource,QLPreviewControllerDelegate,WKUIDelegate,UIDocumentInteractionControllerDelegate, WKNavigationDelegate>
 
 @property (nonatomic, weak) WKWebView *webView;
 @property (nonatomic, strong) QLPreviewController *previewController;
@@ -58,6 +58,7 @@
         //        webView.scalesPageToFit = YES;
         [self.view addSubview:webView];
         _webView           = webView;
+        webView.navigationDelegate = self;
         webView.scrollView.backgroundColor = [UIColor whiteColor];
         [self webViewLoadData:type];
     }else if ([type isEqualToString:@"pdf"]||[type isEqualToString:@"doc"]||[type isEqualToString:@"docx"]||[type isEqualToString:@"xls"]||[type isEqualToString:@"xlsx"]||[type isEqualToString:@"ppt"]||[type isEqualToString:@"pptx"]||[type isEqualToString:@"txt"]){
@@ -155,25 +156,44 @@
 
 #pragma mark - webViewDelegate
 
--(void)webViewDidFinishLoad:(UIWebView *)webView
+-(void)webView:(WKWebView *)webView didFinishNavigation:(WKNavigation *)navigation
 {
-    [webView stringByEvaluatingJavaScriptFromString:
-     @"var script = document.createElement('script');"
-     "script.type = 'text/javascript';"
-     "script.text = \"function ResizeImages() { "
-     "var myimg,oldwidth;"
-     "var maxwidth=350;"
-     "for(i=0;i <document.images.length;i++){"
-     "myimg = document.images[i];"
-     "if(myimg.width > maxwidth){"
-     "oldwidth = myimg.width;"
-     "myimg.width = maxwidth;"
-     "myimg.height = maxwidth * (myimg.height/oldwidth);"
-     "}"
-     "}"
-     "}\";"
-     "document.getElementsByTagName('head')[0].appendChild(script);"];
-    [webView stringByEvaluatingJavaScriptFromString:@"ResizeImages();"];
+    
+   [webView evaluateJavaScript: @"var script = document.createElement('script');"
+        "script.type = 'text/javascript';"
+        "script.text = \"function ResizeImages() { "
+        "var myimg,oldwidth;"
+        "var maxwidth=350;"
+        "for(i=0;i <document.images.length;i++){"
+        "myimg = document.images[i];"
+        "if(myimg.width > maxwidth){"
+        "oldwidth = myimg.width;"
+        "myimg.width = maxwidth;"
+        "myimg.height = maxwidth * (myimg.height/oldwidth);"
+        "}"
+        "}"
+        "}\";"
+    "document.getElementsByTagName('head')[0].appendChild(script);" completionHandler:^(id _Nullable param, NSError * _Nullable error) {
+        
+    }];
+    
+//    [webView stringByEvaluatingJavaScriptFromString:
+//     @"var script = document.createElement('script');"
+//     "script.type = 'text/javascript';"
+//     "script.text = \"function ResizeImages() { "
+//     "var myimg,oldwidth;"
+//     "var maxwidth=350;"
+//     "for(i=0;i <document.images.length;i++){"
+//     "myimg = document.images[i];"
+//     "if(myimg.width > maxwidth){"
+//     "oldwidth = myimg.width;"
+//     "myimg.width = maxwidth;"
+//     "myimg.height = maxwidth * (myimg.height/oldwidth);"
+//     "}"
+//     "}"
+//     "}\";"
+//     "document.getElementsByTagName('head')[0].appendChild(script);"];
+//    [webView stringByEvaluatingJavaScriptFromString:@"ResizeImages();"];
 }
 
 

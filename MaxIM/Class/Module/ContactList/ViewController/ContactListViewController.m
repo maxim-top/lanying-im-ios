@@ -27,15 +27,21 @@
 #import "MenuViewManager.h"
 #import "MaxEmptyTipView.h"
 #import "AppIDManager.h"
+#import "ZoomMeetingsApi.h"
+#import <MobileRTC/MobileRTC.h>
+#import "IMAcountInfoStorage.h"
+#import "IMAcount.h"
 
 @interface ContactListViewController ()<UITableViewDelegate,
                                         UITableViewDataSource,
                                         BMXRosterServiceProtocol,
-                                        MenuViewDeleagte>
+                                        MenuViewDeleagte,
+                                        MobileRTCMeetingServiceDelegate>
 
 @property (nonatomic, strong) UITableView *rosterListTableView;
 @property (nonatomic, strong) UITableView *groupListTableView;
 @property (nonatomic, strong) UITableView *supportListTableView;
+@property (nonatomic, strong) UITableView *meetingsTableView;
 
 @property (nonatomic, strong) NSArray<BMXGroup *> *groupArray;
 @property (nonatomic, strong) NSArray *groupTableviewCellArray;
@@ -50,6 +56,7 @@
 @property (nonatomic, strong) UIView *navSepLine;
 
 @property (nonatomic, strong) NSArray *supportArray;
+@property (nonatomic, strong) NSArray *meetingArray;
 @property (nonatomic, strong) MenuViewManager *menuViewManager;
 
 @property (nonatomic, strong) MaxEmptyTipView *tipView;
@@ -69,6 +76,7 @@
     
     
     [self configSupportData];
+    [self getMeettings];
     
     [[[BMXClient sharedClient] rosterService] addRosterListener:self];
     
@@ -95,6 +103,20 @@
     return NO;
 }
 
+- (void)getMeettings {
+    ZoomMeetingsApi *api  = [[ZoomMeetingsApi alloc] init];
+    [api startWithSuccessBlock:^(ApiResult * _Nullable result) {
+        if (result.isOK ) {
+            NSArray *array = [NSArray arrayWithArray:result.resultData];
+            self.meetingArray = array;
+            [self.meetingsTableView reloadData];
+        }
+    } failureBlock:^(NSError * _Nullable error) {
+        [HQCustomToast showNetworkError];
+
+    }];
+}
+
 - (void)getSupportData {
     SupportStaffApi *api  = [[SupportStaffApi alloc] init];
     [api startWithSuccessBlock:^(ApiResult * _Nullable result) {
@@ -109,7 +131,7 @@
             MAXLog(@"bbbbbb");
         }
     } failureBlock:^(NSError * _Nullable error) {
-        
+        [HQCustomToast showNetworkError];
     }];
 }
 
@@ -287,8 +309,10 @@
         } else {
             return self.groupArray.count ? self.groupArray.count : 0;
         }
-    } else {
+    } else if (self.tag == 2) {
         return self.supportArray.count ? self.supportArray.count : 0;
+    } else {
+        return self.meetingArray.count ? self.meetingArray.count : 0;
     }
     return 0;
 }
@@ -322,9 +346,12 @@
             BMXGroup *group = self.groupArray[indexPath.row];
             [cell refreshByGroup:group];
         }
-    } else {
+    } else if (self.tag == 2){
         BMXRoster *roster = self.supportArray[indexPath.row];
         [cell refreshSupportRoster:roster];
+    } else {
+//        NSString *titleStr = [NSString stringWithFormat:@"%@", self.actionArray[indexPath.row]];
+        [cell refreshByTitle:[NSString stringWithFormat:@"会议室ID:%@", self.meetingArray[indexPath.row]]];
     }
 
     return cell;
@@ -374,11 +401,34 @@
             vc.hidesBottomBarWhenPushed = YES;
             [self.navigationController pushViewController:vc animated:YES];
         }
-    } else {
+    } else if (self.tag == 2) {
         BMXRoster *roster = self.supportArray[indexPath.row];
         LHChatVC *vc = [[LHChatVC alloc] initWithRoster:roster messageType:BMXMessageTypeSingle];
         vc.hidesBottomBarWhenPushed = YES;
         [self.navigationController pushViewController:vc animated:YES];
+    } else {
+        
+        IMAcount *acount = [IMAcountInfoStorage loadObject];
+        
+        NSNumber *number = self.meetingArray[indexPath.row];
+        MobileRTCMeetingService *ms = [[MobileRTC sharedRTC] getMeetingService];
+              ms.delegate = self;
+              NSDictionary *paramDict = @{
+                                          kMeetingParam_Username: acount.usedId,
+                                          kMeetingParam_MeetingNumber:[number stringValue],
+                                          };
+        
+        MobileRTCMeetError ret = [ms joinMeetingWithDictionary:paramDict];
+        
+        if (ret == MobileRTCMeetError_Success) {
+            NSString *messageTest = [NSString stringWithFormat:@"%@ 加入会议室", acount.usedId];
+            BMXMessageObject *message = [[BMXMessageObject alloc] initWithBMXMessageText:messageTest
+                                                                                  fromId:[acount.usedId longLongValue]
+                                                                                    toId:6597373638528 type:BMXMessageTypeSingle
+                                                                          conversationId:6597373638528];
+            [[[BMXClient sharedClient] chatService] sendMessage:message];
+        }
+        
     }
 }
 
@@ -430,7 +480,8 @@
             [self.groupListTableView setHidden:YES];
             [self.rosterListTableView setHidden:NO];
             [self.supportListTableView setHidden:YES];
-            
+            [self.meetingsTableView setHidden:YES];
+
             [self selectViewAnimationWithTag:self.tag];
             [self.rosterListTableView reloadData];
 
@@ -445,6 +496,7 @@
             [self.groupListTableView setHidden:NO];
             [self.rosterListTableView setHidden:YES];
             [self.supportListTableView setHidden:YES];
+            [self.meetingsTableView setHidden:YES];
 
             
             [self getGroupTableViewDatasource];
@@ -455,7 +507,7 @@
         case 2: {
             sender.selectedSegmentIndex = 2;
             self.tag = 2;
-            
+            [self.meetingsTableView setHidden:YES];
             [self.groupListTableView setHidden:YES];
             [self.rosterListTableView setHidden:YES];
             [self.supportListTableView setHidden:NO];
@@ -471,16 +523,32 @@
                 [self.view insertSubview:self.tipView aboveSubview:self.supportListTableView];
             } else {
                 [self.tipView removeFromSuperview];
-//                if (self.supportArray.count <= 0) {
-//                    [self getSupportData];
-//                } else {
-//                    [self.supportListTableView reloadData];
-//                }
             }
             
             break;
             
         }
+            
+        case 3: {
+            sender.selectedSegmentIndex = 3;
+            self.tag = 3;
+            [self.groupListTableView setHidden:YES];
+            [self.rosterListTableView setHidden:YES];
+            [self.supportListTableView setHidden:YES];
+            [self.meetingsTableView setHidden:NO];
+
+            [self selectViewAnimationWithTag:self.tag];
+            [self getMeettings];
+            [self.meetingsTableView reloadData];
+            if (![self isShowSupportData]) {
+                [self.view insertSubview:self.tipView aboveSubview:self.supportListTableView];
+            } else {
+                [self.tipView removeFromSuperview];
+            }
+                            
+            break;
+        }
+    
             
             
         default:
@@ -512,9 +580,13 @@
         [UIView animateWithDuration:0.2 animations:^{
             self.selectView.x = 17 + (23 + 40) ;
         }];
-    } else {
+    } else if(tag == 2){
         [UIView animateWithDuration:0.2 animations:^{
             self.selectView.x = 17 + (23 + 40) *2;
+        }];
+    } else {
+        [UIView animateWithDuration:0.2 animations:^{
+            self.selectView.x = 17 + (23 + 40) *3;
         }];
     }
 }
@@ -583,6 +655,27 @@
     
 }
 
+- (UITableView *)meetingsTableView {
+    if (!_meetingsTableView) {
+        _meetingsTableView = [[UITableView alloc] initWithFrame:CGRectMake(0, NavHeight, MAXScreenW, MAXScreenH
+                                                                            - NavHeight- 64) style:UITableViewStylePlain];
+        _meetingsTableView.bounces = NO;
+        _meetingsTableView.delegate = self;
+        _meetingsTableView.dataSource = self;
+        _meetingsTableView.separatorStyle = UITableViewCellSeparatorStyleNone;
+
+        UIView *view =  [[UIView alloc] init];
+        _meetingsTableView.tableHeaderView = view;
+        view.backgroundColor  = BMXCOLOR_HEX(0xf8f8f8);
+        _meetingsTableView.tableHeaderView.height = 10;
+        
+        [_meetingsTableView registerClass:[ImageTitleBasicTableViewCell class] forCellReuseIdentifier:@"ImageTitleBasicTableViewCell"];
+        [self.view addSubview:_meetingsTableView];
+    }
+    return _meetingsTableView;
+    
+}
+
 - (UIView *)selectView {
     if (!_selectView) {
         _selectView = [[UIView alloc] init];
@@ -622,6 +715,14 @@
     }
     return _groupArray;
 }
+
+- (NSArray *)meetingArray {
+    if (!_meetingArray) {
+        _meetingArray = [NSArray array];
+        
+    }
+    return _meetingArray;
+}
 + (UIImage *)imageWithColor:(UIColor *)color {
     CGRect rect = CGRectMake(0, 0, 1, 1);
     UIGraphicsBeginImageContext(rect.size);
@@ -650,7 +751,7 @@
     self.navigationBar = navigationBar;
     
     
-    UISegmentedControl *control = [[UISegmentedControl alloc] initWithItems: @[@"好友", @"群组", @"支持"]];
+    UISegmentedControl *control = [[UISegmentedControl alloc] initWithItems: @[@"好友", @"群组", @"支持",@"会议室"]];
 //                                   initWithFrame:CGRectMake(16, 10, 32 * 3, 30)];
 //    
     [control setBackgroundImage:[self imageWithColor:[UIColor clearColor]] forState:UIControlStateNormal barMetrics:UIBarMetricsDefault];
@@ -660,11 +761,11 @@
             [control setDividerImage:_dividerImage forLeftSegmentState:UIControlStateNormal rightSegmentState:UIControlStateNormal barMetrics:UIBarMetricsDefault];
   
   
-    control.frame = CGRectMake(5, MAXIsFullScreen ? 28 + 26 :  28 , 190, 25);
+    control.frame = CGRectMake(5, MAXIsFullScreen ? 28 + 26 :  28 ,( 190/3.0 )*4.0, 25);
     control.tintColor = [UIColor whiteColor];
     
-    [control setTitleTextAttributes:@{NSFontAttributeName:[UIFont fontWithName:@"PingFangSC-Medium" size:T3_34PX], NSForegroundColorAttributeName:[UIColor blackColor]} forState:UIControlStateNormal];
-    [control setTitleTextAttributes:@{NSFontAttributeName:[UIFont fontWithName:@"PingFangSC-Medium" size:T3_34PX], NSForegroundColorAttributeName:[UIColor blackColor]} forState:UIControlStateSelected];
+    [control setTitleTextAttributes:@{NSFontAttributeName:[UIFont fontWithName:@"PingFangSC-Medium" size:T5_30PX], NSForegroundColorAttributeName:[UIColor blackColor]} forState:UIControlStateNormal];
+    [control setTitleTextAttributes:@{NSFontAttributeName:[UIFont fontWithName:@"PingFangSC-Medium" size:T5_30PX], NSForegroundColorAttributeName:[UIColor blackColor]} forState:UIControlStateSelected];
     control.layer.borderColor = [UIColor whiteColor].CGColor;
     control.selectedSegmentIndex = 0;
     [control addTarget:self action:@selector(indexDidChangeForSegmentedControl:) forControlEvents:UIControlEventValueChanged];

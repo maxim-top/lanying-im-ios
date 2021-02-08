@@ -106,7 +106,7 @@
 }
 
 - (UIImage *)getImage {
-    NSString *suitName = @"group.top.maxim.MaxIM.MaxIMShare";
+    NSString *suitName = @"group.com.maximtop.MaxIM.ShareExtention";
 
         NSURL *groupURL = [[NSFileManager defaultManager] containerURLForSecurityApplicationGroupIdentifier:suitName];
         NSURL *fileURL = [groupURL URLByAppendingPathComponent:@"incomingShared"];

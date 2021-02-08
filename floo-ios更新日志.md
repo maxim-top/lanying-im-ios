@@ -2,46 +2,65 @@
 
 
 
+## v3.0 - 2020/11/21
+
+
+新增：
+
+1. 推送服务功能，详情见官网
+
+2. 新增用户退出接口，该接口不需要提供UserID。
+
+   目前退出登录以下两种方式可供选择：
+
+	```
+	
+	/**
+	 * 退出登录, 需要提供userID
+ 	**/
+ 	
+	- (void)signOutID:(NSInteger)userID
+	ignoreUnbindDevice:(BOOL)ignoreUnbindDevice
+   			 completion:(void(^)(BMXError *error))aCompletionBlock;
+
+	/**
+	 * 退出登录
+ 	**/
+
+	- (void)signOutignoreUnbindDevice:(BOOL)ignoreUnbindDevice
+   								completion:(void(^)(BMXError *error))aCompletionBlock;
+   
+	```
+	 
+    
 ## v2.2.3 - 2020/05/19
 
 新增：
 
 1. 新增BMXVoiceAttachment的通过二进制流初始化attachment方法
-
+		
 	```
+
 	/// 初始化BMXFileAttachment
 	/// @param aData 音频Data
 	/// @param displayName 显示名称
 	/// @param duration 时长
 	/// @param conversationId 会话Id
 	- (instancetype)initWithData:(NSData *)aData
-                 displayName:(NSString *)displayName
-                  fileLength:(NSInteger)fileLength
-                    duration:(NSInteger)duration
-              conversationId:(NSString *)conversationId;
+                     displayName:(NSString *)displayName
+                      fileLength:(NSInteger)fileLength
+                        duration:(NSInteger)duration
+                  conversationId:(NSString *)conversationId;
 
 	```
+
 
 变更：
 
 1. 变更BMXVoiceAttachment的通过路径初始化attachment方法， 新增conversationId参数
 
-	```
-	/**
- 初始化BMXFileAttachment
 
- @param path 音频路径
- @param displayName 显示
- @param duration 时长
- @return BMXFileAttachment
- */
-- (instancetype)initWithPath:(NSString *)path
-                 displayName:(NSString *)displayName
-                    duration:(NSInteger)duration
-              conversationId:(NSString *)conversationId;
-
-	```
-	
+               
 
 
 ## v2.2.2 - 2020/05/07
@@ -51,13 +70,16 @@
 1. 新增BMXHostConfig的属性setter方法
 
 	```
-@property (nonatomic,copy) NSString *imHost;    
-@property (nonatomic,assign) int mPort;
-@property (nonatomic,copy) NSString *restHost;
+
+	@property (nonatomic,copy) NSString *imHost;    
+	@property (nonatomic,assign) int mPort;
+	@property (nonatomic,copy) NSString *restHost;
 
 	- (instancetype)initWithRestHostConfig:(NSString *)restHost imPort:(int)imPort imHost:(NSString *)imHost;
 
 	```
+
+
 
 
 ## v2.1.1 - 2020/03/27

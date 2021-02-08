@@ -338,7 +338,7 @@ CGFloat const kChatBatItemWH = 26.0f;
             [alertView show];
             return;
         }
-        
+        picker.modalPresentationStyle = UIModalPresentationFullScreen;
         [self.viewController presentViewController:picker animated:YES completion:nil];
     }
 }
@@ -356,6 +356,7 @@ CGFloat const kChatBatItemWH = 26.0f;
     imagePickerVc.allowPickingVideo = NO;
     imagePickerVc.allowTakePicture = NO;
     imagePickerVc.allowPickingOriginalPhoto = NO;
+    imagePickerVc.modalPresentationStyle = UIModalPresentationFullScreen;
     [self.viewController presentViewController:imagePickerVc animated:YES completion:nil];
 }
 
@@ -386,6 +387,7 @@ CGFloat const kChatBatItemWH = 26.0f;
         }
         docVC.filePath = filePath;
         UINavigationController *nav = [[UINavigationController alloc] initWithRootViewController:docVC];
+        nav.modalPresentationStyle = UIModalPresentationFullScreen;
         [self.viewController presentViewController:nav animated:YES completion:nil];
     }
 }
@@ -430,6 +432,7 @@ CGFloat const kChatBatItemWH = 26.0f;
 //    UINavigationController *nav = [[UINavigationController alloc] initWithRootViewController:vc];
 
     vc.delegate = self;
+    vc.modalPresentationStyle = UIModalPresentationFullScreen;
     [self.viewController presentViewController:vc animated:YES completion:nil];}
 
 #pragma mark - UITextViewDelegate
