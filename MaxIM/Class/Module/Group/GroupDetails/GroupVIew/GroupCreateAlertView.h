@@ -21,7 +21,7 @@
 
 - (instancetype)initWithFrame:(CGRect)frame
                          Text:(NSString*) text
-                           OK: (void (^)(NSString* title, NSString* description, NSString* message))ok
+                           OK: (void (^)(NSString* title, NSString* description, NSString* message, BOOL))ok
                        Cancel: (void(^)()) cancel;
 
 @end

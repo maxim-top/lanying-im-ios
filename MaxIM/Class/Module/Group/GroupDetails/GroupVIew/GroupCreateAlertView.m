@@ -19,11 +19,12 @@
 
 @interface GroupCreateAlertView()<UITextFieldDelegate>
 
-@property (nonatomic, copy) void (^okHandler)(NSString* title, NSString* description, NSString* message);
+@property (nonatomic, copy) void (^okHandler)(NSString* title, NSString* description, NSString* message, BOOL isChatroom);
 @property (nonatomic, copy) void (^cancelHandler)();
 
 @property (nonatomic, strong) UITextField* titleField;
 @property (nonatomic, strong) UITextView* descriptionField;
+@property (nonatomic, strong) UISwitch* isChatroomField;
 @property (nonatomic, strong) UITextField* messageField;
 @property (nonatomic, strong) UIView *warnLine;
 
@@ -32,7 +33,7 @@
 
 @implementation GroupCreateAlertView
 
--(instancetype) initWithFrame:(CGRect)frame Text:(NSString *)text OK:(void (^)(NSString *, NSString *, NSString *))ok Cancel:(void (^)())cancel
+-(instancetype) initWithFrame:(CGRect)frame Text:(NSString *)text OK:(void (^)(NSString *, NSString *, NSString *, BOOL))ok Cancel:(void (^)())cancel
 {
     self = [super initWithFrame:frame];
     self.okHandler = ok;
@@ -83,9 +84,19 @@
     [self.sframe addSubview:textTitle];
     [self.sframe addSubview:self.descriptionField];
     
+    UILabel* textIsChatroom = [[UILabel alloc] initWithFrame:CGRectMake(15, 225, MAXScreenW-80, 25)];
+    textIsChatroom.text = @"是否创建聊天室";
+    textIsChatroom.font = [UIFont fontWithName:@".AppleSystemUIFont" size:12];
+    textIsChatroom.textColor = [UIColor colorWithRed:82/255.0 green:82/255.0 blue:82/255.0 alpha:1/1.0];
+    [self.sframe addSubview:textIsChatroom];
+
+    [self.sframe addSubview:self.isChatroomField];
+    
+
     UIView* line3 = [[UIView alloc] initWithFrame:CGRectMake(0, 265, MAXScreenW-50, 0.5)];
     line3.backgroundColor = [UIColor colorWithRed:223/255.0 green:223/255.0 blue:223/255.0 alpha:1/1.0];
     [self.sframe addSubview:line3];
+
     
     UIButton* okBtn = [UIButton buttonWithType:UIButtonTypeSystem];
     //        [_leaveBtn setTitle:@"删除并退出" forState:UIControlStateNormal];
@@ -124,8 +135,9 @@
         }
         NSString* description = self.descriptionField.text;
         NSString* message = self.messageField.text;
+        BOOL isChatroom = self.isChatroomField.on;
         if(self.okHandler) {
-            self.okHandler(title, description, message);
+            self.okHandler(title, description, message, isChatroom);
         }
     }
     [self hide];
@@ -164,7 +176,7 @@
 -(UITextView*) descriptionField
 {
     if(!_descriptionField) {
-        _descriptionField = [[UITextView alloc] initWithFrame:CGRectMake(10, 180, MAXScreenW-70, 70)];
+        _descriptionField = [[UITextView alloc] initWithFrame:CGRectMake(10, 180, MAXScreenW-70, 40)];
         _descriptionField.layer.masksToBounds = YES;
         _descriptionField.layer.cornerRadius = 3.0f;
         _descriptionField.layer.borderWidth = 0.5;
@@ -172,6 +184,14 @@
         _descriptionField.layer.borderColor = [UIColor lh_colorWithHex:0xdfdfdf].CGColor;
     }
     return _descriptionField;
+}
+
+-(UISwitch*) isChatroomField
+{
+    if(!_isChatroomField) {
+        _isChatroomField = [[UISwitch alloc] initWithFrame:CGRectMake(185, 225, MAXScreenW-80, 25)];
+    }
+    return _isChatroomField;
 }
 
 

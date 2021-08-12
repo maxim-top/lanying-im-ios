@@ -13,6 +13,7 @@
 @interface LogViewController ()
 
 @property (nonatomic, strong) UITextView *logTextView;
+@property (nonatomic, strong) NSString * logPath;
 
 @end
 
@@ -25,13 +26,26 @@
     [self.view addSubview:self.logTextView];
     
 //
-    NSString * logPath =  [NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES).firstObject stringByAppendingPathComponent:[NSString stringWithFormat:@"ChatData/%@/flooLog/floo.log", [BMXClient sharedClient].sdkConfig.appID]];
-    self.logTextView.text = [NSString stringWithContentsOfFile:logPath encoding:NSUTF8StringEncoding error:nil] ;
-    
+    self.logPath =  [NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES).firstObject stringByAppendingPathComponent:[NSString stringWithFormat:@"ChatData/%@/flooLog/floo.log", [BMXClient sharedClient].sdkConfig.appID]];
+    self.logTextView.text = [NSString stringWithContentsOfFile:self.logPath encoding:NSUTF8StringEncoding error:nil] ;
+//    [self.logTextView selectAll:nil];
 }
 
 - (void)setUpNavItem{
     [self setNavigationBarTitle:@"日志" navLeftButtonIcon:@"blackback"];
+    
+    UIImage *moreImage = [UIImage imageNamed:@"file"];
+    UIButton *moreButton = [UIButton buttonWithType:UIButtonTypeCustom];
+    [self.navigationBar addSubview:moreButton];
+    [moreButton setImage:moreImage forState:UIControlStateNormal];
+    moreButton.frame = CGRectMake(MAXScreenW - 10 - 30 - 5, NavHeight - 5 -30, 30, 30);
+    [moreButton addTarget:self action:@selector(clickMoreButton:) forControlEvents:UIControlEventTouchUpInside];
+}
+
+- (void)clickMoreButton:(UIButton *)button {
+    UIPasteboard* pasteboard = [UIPasteboard generalPasteboard];
+    [pasteboard setString:[NSString stringWithContentsOfFile:self.logPath encoding:NSUTF8StringEncoding error:nil]];
+    [HQCustomToast showDialog:@"日志已全部复制到剪贴板"];
 }
 
 

@@ -372,7 +372,6 @@
 //            [HQCustomToast showDialog:@"登录成功"];
             [[MAXGlobalTool share].rootViewController addIMListener];
             
-            [self uploadAppIdIfNeededWithUserName:userName];
             
         }else {
             [HQCustomToast showDialog:[NSString stringWithFormat:@"%@",error.errorMessage]];
@@ -441,40 +440,6 @@
     [self.config showWechatButton:[AppIDManager isDefaultAppID]];
 }
 
-- (void)uploadAppIdIfNeededWithUserName:(NSString *)userName {
-    if (!self.scanConsuleResultDic) {
-        MAXLog(@"scanConsuleResultDic为空，异常");
-        return;
-    }
-    if ([self.scanConsuleUserName isEqualToString:userName]) {
-        
-        NSString *deviceToken = [[NSUserDefaults standardUserDefaults] valueForKey:@"deviceToken"];
-        
-        NSString *appid = self.scanConsuleResultDic[@"appId"];
-        NSString *userid = self.scanConsuleResultDic[@"uid"];
-        
-        
-        if ([deviceToken length]) {
-            NotifierBindApi *api = [[NotifierBindApi alloc] initWithAppID:appid
-                                                              deviceToken:deviceToken
-                                                             notifierName:@"NotiCer"
-                                                                   userID:userid];
-            
-            [api startWithSuccessBlock:^(ApiResult * _Nullable result) {
-                if (result.isOK) {
-                    MAXLog(@"bind success");
-                                    }
-                
-            } failureBlock:^(NSError * _Nullable error) {
-                MAXLog(@"consule绑定失败");
-            }];
-            
-        } else {
-            
-        }
-        
-    }
-}
 
 - (void)saveIMAcountName:(NSString *)name password:(NSString *)password {
     
@@ -633,7 +598,6 @@
         [HQCustomToast hideWating];
         if (!error) {
             MAXLog(@"登录成功 username = %@ , password = %@",name, password);
-            [self uploadAppIdIfNeededWithUserName:name];
 
             [self saveLastLoginAppid];
             
@@ -683,7 +647,6 @@
         if (!error) {
             MAXLog(@"登录成功 username = %@ , password = %@",name, password);
             
-            [self uploadAppIdIfNeededWithUserName:name];
             
             [self saveLastLoginAppid];
 
@@ -717,7 +680,6 @@
         
         if (!error) {
             MAXLog(@"登录成功 username = %@ , password = %@",name, password);
-            [self uploadAppIdIfNeededWithUserName:name];
             
             [self saveLastLoginAppid];
             

@@ -215,10 +215,11 @@
 }
 
 -(void) createGroupWithIds:(NSArray*)ids {
-    [[GroupCreateAlertView alloc] initWithFrame:CGRectZero Text:@"创建信息" OK:^(NSString *title, NSString *description, NSString *message) {
+    [[GroupCreateAlertView alloc] initWithFrame:CGRectZero Text:@"创建信息" OK:^(NSString *title, NSString *description, NSString *message, BOOL isChatroom) {
         BMXCreatGroupOption *option = [[BMXCreatGroupOption alloc] initWithGroupName:title groupDescription:description isPublic:YES];
         option.message = message;
         option.members = ids;
+        option.isChatroom = isChatroom;
         [[[BMXClient sharedClient] groupService] creatGroupWithCreateGroupOption:option completion:^(BMXGroup *group, BMXError *error) {
             if (!error) {
                 [[NSNotificationCenter defaultCenter] postNotificationName:@"KGroupListModified" object:nil];

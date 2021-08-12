@@ -14,29 +14,33 @@ PODS:
   - AFNetworking/Serialization (4.0.1)
   - AFNetworking/UIKit (4.0.1):
     - AFNetworking/NSURLSession
-  - Bugly (2.5.71)
+  - Bugly (2.5.90)
   - floo-ios (3.2)
-  - FMDB (2.7.5):
-    - FMDB/standard (= 2.7.5)
-  - FMDB/standard (2.7.5)
+  - FMDB/SQLCipher (2.7.5):
+    - SQLCipher
   - M80AttributedLabel (1.9.9)
   - Masonry (1.1.0)
   - MBProgressHUD (1.2.0)
-  - MJExtension (3.2.4)
-  - MJRefresh (3.5.0)
-  - SDWebImage (5.10.4):
-    - SDWebImage/Core (= 5.10.4)
-  - SDWebImage/Core (5.10.4)
-  - tingyunApp (2.15.4)
+  - MJExtension (3.3.0)
+  - MJRefresh (3.7.2)
+  - SDWebImage (5.11.1):
+    - SDWebImage/Core (= 5.11.1)
+  - SDWebImage/Core (5.11.1)
+  - SQLCipher (4.4.3):
+    - SQLCipher/standard (= 4.4.3)
+  - SQLCipher/common (4.4.3)
+  - SQLCipher/standard (4.4.3):
+    - SQLCipher/common
+  - tingyunApp (2.15.8)
   - Toast (4.0.0)
   - TSActionAlertView (1.0.1)
-  - TZImagePickerController (3.5.8)
+  - TZImagePickerController (3.6.4)
 
 DEPENDENCIES:
   - AFNetworking
   - Bugly
   - floo-ios
-  - FMDB
+  - FMDB/SQLCipher
   - M80AttributedLabel
   - Masonry
   - MBProgressHUD
@@ -60,6 +64,7 @@ SPEC REPOS:
     - MJExtension
     - MJRefresh
     - SDWebImage
+    - SQLCipher
     - tingyunApp
     - Toast
     - TSActionAlertView
@@ -67,20 +72,21 @@ SPEC REPOS:
 
 SPEC CHECKSUMS:
   AFNetworking: 7864c38297c79aaca1500c33288e429c3451fdce
-  Bugly: fd066c75c4a0eca1440f9b6a84bd37d51bfc85ac
+  Bugly: 88bc32c0acc6fef7b74d610f0319ee7560d6b9fe
   floo-ios: 4da3ba6649134838734fbaf7113fe0d8616f49a1
   FMDB: 2ce00b547f966261cd18927a3ddb07cb6f3db82a
   M80AttributedLabel: 77fedfe63804c989a6de0fa4d400ea8cad3ab441
   Masonry: 678fab65091a9290e40e2832a55e7ab731aad201
   MBProgressHUD: 3ee5efcc380f6a79a7cc9b363dd669c5e1ae7406
-  MJExtension: 88e0900751b6cac8de1cf724ca9838a0b28d5acb
-  MJRefresh: 6afc955813966afb08305477dd7a0d9ad5e79a16
-  SDWebImage: c666b97e1fa9c64b4909816a903322018f0a9c84
-  tingyunApp: e77d85ce4beca951e10bb00460daba0fd1d9c5b7
+  MJExtension: 01704cca2b60a214c10761b6491eab74069d68a9
+  MJRefresh: 30997d30b347c8e9508a4db11e3a690da0c9b85a
+  SDWebImage: a7f831e1a65eb5e285e3fb046a23fcfbf08e696d
+  SQLCipher: 155ffeafc9ac102e5c9b68e3e9a1297a98a27096
+  tingyunApp: 50a453a1081aa9d86d3a985073d3ff67d732d135
   Toast: 91b396c56ee72a5790816f40d3a94dd357abc196
   TSActionAlertView: c366d2c278a1ebf3e0d81db5a17c2c9f894779c8
-  TZImagePickerController: 7fd9702897ef8c0b7c951e5463f4bcf398296f9e
+  TZImagePickerController: 1cc39ec0454d6e94d0397418953164d7aa631719
 
-PODFILE CHECKSUM: 96d71078644a376bbf874301f772522f10c3938e
+PODFILE CHECKSUM: a3b2485413d9178097ada8aecf0fed9aa6f5696a
 
-COCOAPODS: 1.10.0
+COCOAPODS: 1.10.1
