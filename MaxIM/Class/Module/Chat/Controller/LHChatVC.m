@@ -107,6 +107,7 @@ CLLocationManagerDelegate>
 @property (nonatomic, strong) NSMutableArray *dataSource;
 @property (nonatomic, strong) NSMutableArray *messages;
 @property (nonatomic, strong) NSMutableArray *recallMessages;
+@property (atomic, strong) NSMutableSet *deliveringMsgClientIds;
 
 @property (nonatomic, strong) NSCache *rowHeight;
 
@@ -316,7 +317,7 @@ CLLocationManagerDelegate>
 - (void)dealWithidTyping:(BOOL)istyping {
     MAXLog(@"对方正在输入%d", istyping);
     if (istyping == YES) {
-        self.title = @"正在输入...";
+        self.title = NSLocalizedString(@"Typing", @"正在输入...");
     } else {
         self.title = [self.currentRoster.nickName length] ? self.currentRoster.nickName : self.currentRoster.userName;
     }
@@ -368,7 +369,7 @@ CLLocationManagerDelegate>
         
         UIImage *image = [UIImage imageWithContentsOfFile:self.currentRoster.avatarThumbnailPath];
         if (!image) {
-            [[[BMXClient sharedClient] rosterService] downloadAvatarWithRoster:self.currentRoster progress:^(int progress, BMXError *error) {
+            [[[BMXClient sharedClient] rosterService] downloadAvatarWithRoster:self.currentRoster isThumbnail:YES progress:^(int progress, BMXError *error) {
             }  completion:^(BMXRoster *rosterObjc, BMXError *error) {
                 if (!error) {
                     UIImage *image = [UIImage imageWithContentsOfFile:rosterObjc.avatarThumbnailPath];
@@ -493,7 +494,7 @@ CLLocationManagerDelegate>
         
     }else if (message.contentType == BMXContentTypeLocation) {
         BMXLocationAttachment *locationAttach = (BMXLocationAttachment *)message.attachment;
-        dbMessageModel.content = [NSString stringWithFormat:@"当前位置：%@",locationAttach.address];
+        dbMessageModel.content = [NSString stringWithFormat:NSLocalizedString(@"Current_location", @"当前位置：%@"),locationAttach.address];
         dbMessageModel.status = MessageDeliveryState_Delivered;
         dbMessageModel.type = MessageBodyType_Location;
         [self.dataSource insertObject:dbMessageModel atIndex:0];
@@ -647,7 +648,7 @@ CLLocationManagerDelegate>
                     ctrl.conversation = self.conversation;
                     [self.navigationController pushViewController:ctrl animated:YES];
                 } else {
-                    [HQCustomToast showDialog:@"该群已解散"];
+                    [HQCustomToast showDialog:NSLocalizedString(@"This_group_has_been_dismissed", @"该群已解散")];
                 }
             }
             break;
@@ -761,10 +762,10 @@ CLLocationManagerDelegate>
 #pragma mark - Delegate LocationDelegate
 - (void)locationManager:(CLLocationManager *)manager didFailWithError:(NSError *)error {
     [HQCustomToast hideWating];
-    UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"提示" message:@"您还未开启定位服务，是否需要开启？" preferredStyle:UIAlertControllerStyleAlert];
-    UIAlertAction *cancel = [UIAlertAction actionWithTitle:@"取消" style:UIAlertActionStyleCancel handler:^(UIAlertAction * _Nonnull action) {
+    UIAlertController *alert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Alert", @"提示") message:NSLocalizedString(@"location_service_need_to_turn_it_on", @"您还未开启定位服务，是否需要开启？") preferredStyle:UIAlertControllerStyleAlert];
+    UIAlertAction *cancel = [UIAlertAction actionWithTitle:NSLocalizedString(@"Cancel", @"取消") style:UIAlertActionStyleCancel handler:^(UIAlertAction * _Nonnull action) {
     }];
-    UIAlertAction *queren = [UIAlertAction actionWithTitle:@"确定" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+    UIAlertAction *queren = [UIAlertAction actionWithTitle:NSLocalizedString(@"Confirm", @"确定") style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
         NSURL *setingsURL = [NSURL URLWithString:UIApplicationOpenSettingsURLString];
         [[UIApplication sharedApplication]openURL:setingsURL];
     }];
@@ -797,7 +798,7 @@ CLLocationManagerDelegate>
             CLPlacemark *placeMark = placemarks[0];
             NSString *city = placeMark.locality;
             if (!city) {
-                self.currentCity = @"⟳定位获取失败,点击重试";
+                self.currentCity = NSLocalizedString(@"Failed_to_locate_click_to_retry", @"⟳定位获取失败,点击重试");
             } else {
                 self.currentCity = placeMark.locality ;//获取当前城市
                 
@@ -805,10 +806,10 @@ CLLocationManagerDelegate>
             
             NSString *addr = [NSString stringWithFormat:@"%@%@%@", placeMark.subLocality,placeMark.thoroughfare,placeMark.name];
             
-            UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"确定发送？" message:addr preferredStyle:UIAlertControllerStyleAlert];
-            UIAlertAction *cancel = [UIAlertAction actionWithTitle:@"取消" style:UIAlertActionStyleCancel handler:^(UIAlertAction * _Nonnull action) {
+            UIAlertController *alert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Confirm_to_send", @"确定发送？") message:addr preferredStyle:UIAlertControllerStyleAlert];
+            UIAlertAction *cancel = [UIAlertAction actionWithTitle:NSLocalizedString(@"Cancel", @"取消") style:UIAlertActionStyleCancel handler:^(UIAlertAction * _Nonnull action) {
             }];
-            UIAlertAction *queren = [UIAlertAction actionWithTitle:@"确定" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+            UIAlertAction *queren = [UIAlertAction actionWithTitle:NSLocalizedString(@"Confirm", @"确定") style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
                            [self p_configsendMessage:@{@"latitude" : lait, @"longitude" :longt, @"address" : addr } type:MessageBodyType_Location duartion:0];
 
             }];
@@ -822,7 +823,7 @@ CLLocationManagerDelegate>
             
         } else if (error == nil && placemarks.count == 0 ) {
         } else if (error) {
-            self.currentCity = @"⟳定位获取失败,点击重试";
+            self.currentCity = NSLocalizedString(@"Failed_to_locate_click_to_retry", @"⟳定位获取失败,点击重试");
             [HQCustomToast showDialog:self.currentCity];
         }
         // 还原Device 的语言
@@ -913,9 +914,9 @@ CLLocationManagerDelegate>
 }
 
 - (void)chatBubbleLongPressedfachu:(LHMessageModel *)message {
-    UIAlertController* alert = [UIAlertController alertControllerWithTitle:@"操作" message:nil preferredStyle:UIAlertControllerStyleActionSheet];
+    UIAlertController* alert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Action", @"操作") message:nil preferredStyle:UIAlertControllerStyleActionSheet];
     
-    UIAlertAction* action1 = [UIAlertAction actionWithTitle:@"转发" style:UIAlertActionStyleDefault
+    UIAlertAction* action1 = [UIAlertAction actionWithTitle:NSLocalizedString(@"Forward", @"转发") style:UIAlertActionStyleDefault
                                                     handler:^(UIAlertAction * action) {
                                                         //响应事件
                                                         TransterViewController *vc = [[TransterViewController alloc] init];
@@ -926,7 +927,7 @@ CLLocationManagerDelegate>
                                                         //
                                                         
                                                     }];
-    UIAlertAction* action2 = [UIAlertAction actionWithTitle:@"设置为未读" style:UIAlertActionStyleDefault
+    UIAlertAction* action2 = [UIAlertAction actionWithTitle:NSLocalizedString(@"Set_to_unread", @"设置为未读") style:UIAlertActionStyleDefault
                                                     handler:^(UIAlertAction * action) {
                                                         if (message.messageObjc) {
                                                             //
@@ -937,7 +938,7 @@ CLLocationManagerDelegate>
     
     [alert addAction:action1];
     [alert addAction:action2];
-    [alert addAction:[UIAlertAction actionWithTitle:@"取消" style:UIAlertActionStyleCancel handler:nil]];
+    [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Cancel", @"取消") style:UIAlertActionStyleCancel handler:nil]];
     [self presentViewController:alert animated:YES completion:nil];
     
    
@@ -991,23 +992,23 @@ CLLocationManagerDelegate>
     
     if (messageModel.type == MessageBodyType_Text) {
         if (_copyMenuItem == nil) {
-            _copyMenuItem = [[UIMenuItem alloc] initWithTitle:@"复制" action:@selector(copyMessage)];
+            _copyMenuItem = [[UIMenuItem alloc] initWithTitle:NSLocalizedString(@"Copy", @"复制") action:@selector(copyMessage)];
         }
     }
     
     if (_forwardMenuItem == nil) {
-        _forwardMenuItem = [[UIMenuItem alloc] initWithTitle:@"转发" action:@selector(forwardMessage)];
+        _forwardMenuItem = [[UIMenuItem alloc] initWithTitle:NSLocalizedString(@"Forward", @"转发") action:@selector(forwardMessage)];
     }
     
     
     if (_deleteMenuItem == nil) {
-        _deleteMenuItem = [[UIMenuItem alloc] initWithTitle:@"删除" action:@selector(deleteMessage)];
+        _deleteMenuItem = [[UIMenuItem alloc] initWithTitle:NSLocalizedString(@"Delete", @"删除") action:@selector(deleteMessage)];
     }
     
     if (messageModel.isSender) {
         
         if (_recallMenuItem == nil) {
-            _recallMenuItem = [[UIMenuItem alloc] initWithTitle:@"撤回" action:@selector(recallMessage)];
+            _recallMenuItem = [[UIMenuItem alloc] initWithTitle:NSLocalizedString(@"Recall", @"撤回") action:@selector(recallMessage)];
         }
         
         if (messageModel.type == MessageBodyType_Text) {
@@ -1021,7 +1022,7 @@ CLLocationManagerDelegate>
         
     } else {
         if (_unreadMenuItem == nil) {
-            _unreadMenuItem = [[UIMenuItem alloc] initWithTitle:@"设置未读" action:@selector(setUnread)];
+            _unreadMenuItem = [[UIMenuItem alloc] initWithTitle:NSLocalizedString(@"Set_unread", @"设置未读") action:@selector(setUnread)];
         }
         if (messageModel.type == MessageBodyType_Text) {
             [[UIMenuController sharedMenuController] setMenuItems:@[_copyMenuItem,_forwardMenuItem,_unreadMenuItem,_deleteMenuItem]];
@@ -1077,17 +1078,19 @@ CLLocationManagerDelegate>
     
     if (messageModel.isSender) {
         [messageCell setAvaratImage:self.selfImage];
-        
+        if (![self.deliveringMsgClientIds containsObject:[NSNumber numberWithLong:(long)messageModel.clientMsgId]]){
+            messageCell.messageModel.status = MessageDeliveryState_Delivered;
+        }
         if (self.messageType == BMXMessageTypeSingle) {
             // 配置是否已读
             if (messageModel.messageObjc.isReadAcked == YES) {
-                messageCell.readStatusLabel.text = @"已读";
+                messageCell.readStatusLabel.text = NSLocalizedString(@"Read", @"已读");
             } else {
-                messageCell.readStatusLabel.text = @"未读";
+                messageCell.readStatusLabel.text = NSLocalizedString(@"Unread", @"未读");
             }
         } else {
 //            if (messageModel.messageObjct.enableGroupAck == YES) {
-                messageCell.readStatusLabel.text = [NSString stringWithFormat:@"%d人已读", messageModel.messageObjc.groupAckCount];
+                messageCell.readStatusLabel.text = [NSString stringWithFormat:NSLocalizedString(@"npersons_have_read", @"%d人已读"), messageModel.messageObjc.groupAckCount];
 //            } else {
 //                messageCell.readStatusLabel.text = @"";
 //
@@ -1103,7 +1106,7 @@ CLLocationManagerDelegate>
                     [weakCell setAvaratImage:avarat];
                 }else {
                     
-                    [[[BMXClient sharedClient] rosterService] downloadAvatarWithRoster:roster progress:^(int progress, BMXError *error) {
+                    [[[BMXClient sharedClient] rosterService] downloadAvatarWithRoster:roster isThumbnail:YES progress:^(int progress, BMXError *error) {
                         
                     } completion:^(BMXRoster *roster, BMXError *error) {
                         if (!error) {
@@ -1354,46 +1357,50 @@ CLLocationManagerDelegate>
         //如果是扩展信息（现在的扩展信息，是不展示消息，）所以return不做UI处理
         return;
     } else {
-        
-        NSString *date = [NSString stringWithFormat:@"%lld",  message.clientTimestamp];
-        __block LHMessageModel *messageModel;
-        __block LHChatViewCell *messagecell;
-        NSArray *cells = [self.tableView visibleCells];
-        [cells enumerateObjectsUsingBlock:^(id obj, NSUInteger idx, BOOL * _Nonnull stop) {
-            if ([obj isKindOfClass:[LHChatViewCell class]]) {
-                LHChatViewCell *cell = (LHChatViewCell *)obj;
-                if ([cell.messageModel.date isEqualToString:date]) {
-                    messageModel = cell.messageModel;
-                    messagecell = cell;
-                    *stop = YES;
+        [self.deliveringMsgClientIds removeObject:[NSNumber numberWithLong:(long) message.clientMsgId]];
+        for (LHMessageModel *viewmodel in self.dataSource) {
+            if ([viewmodel isKindOfClass:[LHMessageModel class]] && viewmodel.messageObjc.clientMsgId  == message.clientMsgId) {
+                NSInteger index = [self.dataSource indexOfObject:viewmodel];
+                __block LHChatViewCell *messageCell = (LHChatViewCell *) [self.tableView cellForRowAtIndexPath:[NSIndexPath indexPathForRow:index inSection:0]];
+                if (messageCell == nil) {
+                    NSArray *cells = [self.tableView visibleCells];
+                    [cells enumerateObjectsUsingBlock:^(id obj, NSUInteger idx, BOOL * _Nonnull stop) {
+                        if ([obj isKindOfClass:[LHChatViewCell class]]) {
+                            LHChatViewCell *cell = (LHChatViewCell *)obj;
+                            if (cell.messageModel.clientMsgId == message.clientMsgId) {
+                                messageCell = cell;
+                                *stop = YES;
+                            }
+                        }
+                    }];
+
                 }
+                viewmodel.messageObjc.deliverystatus = message.deliverystatus;
+
+                switch ( message.deliverystatus) {
+                    case BMXDeliveryStatusNew:
+                        messageCell.messageModel.status = MessageDeliveryState_Pending;
+                        break;
+                    case BMXDeliveryStatusDelivering:
+                        messageCell.messageModel.status = MessageDeliveryState_Delivering;
+                        break;
+                    case BMXDeliveryStatusDeliveried:
+                        messageCell.messageModel.status = MessageDeliveryState_Delivered;
+                        break;
+                    case BMXDeliveryStatusFailed:
+                        messageCell.messageModel.status = MessageDeliveryState_Failure;
+                        break;
+                    case BMXDeliveryStatusRecalled:
+                        messageCell.messageModel.status = MessageDeliveryState_Pending;
+                        break;
+    
+                    default:
+                        break;
+                }
+                
+                [messageCell layoutSubviews];
+                break;
             }
-        }];
-        MAXLog(@"%u",message.deliverystatus);
-        if (messageModel) {
-            switch ( message.deliverystatus) {
-                case BMXDeliveryStatusNew:
-                    messageModel.status = MessageDeliveryState_Pending;
-                    break;
-                case BMXDeliveryStatusDelivering:
-                    messageModel.status = MessageDeliveryState_Delivering;
-                    break;
-                case BMXDeliveryStatusDeliveried:
-                    messageModel.status = MessageDeliveryState_Delivered;
-                    break;
-                case BMXDeliveryStatusFailed:
-                    messageModel.status = MessageDeliveryState_Failure;
-                    break;
-                case BMXDeliveryStatusRecalled:
-                    messageModel.status = MessageDeliveryState_Pending;
-                    break;
-                    
-                default:
-                    break;
-            }
-            
-            MAXLog(@"%d",message.deliverystatus);
-            [messagecell layoutSubviews];
         }
     }
 }
@@ -1479,7 +1486,7 @@ CLLocationManagerDelegate>
             
         } else if (message.contentType == BMXContentTypeLocation) {
             BMXLocationAttachment *locationAttach = (BMXLocationAttachment *)message.attachment;
-            dbMessageModel.content = [NSString stringWithFormat:@"当前位置：%@",locationAttach.address];
+            dbMessageModel.content = [NSString stringWithFormat:NSLocalizedString(@"Current_location", @"当前位置：%@"),locationAttach.address];
             dbMessageModel.status = MessageDeliveryState_Delivered;
             dbMessageModel.isSender = NO;
             dbMessageModel.type = MessageBodyType_Location;
@@ -1633,10 +1640,10 @@ CLLocationManagerDelegate>
         if (lhModel.messageObjc.msgId == messageObjec.msgId) {
             
             //更新撤回的信息的显示内容
-            lhModel.content = @"对方已撤回";
+            lhModel.content = NSLocalizedString(@"Withdrawn_by_the_other_party", @"对方已撤回");
             lhModel.type = MessageBodyType_Text;
             messageObjec.contentType = BMXContentTypeText;
-            messageObjec.content = @"对方已撤回";
+            messageObjec.content = NSLocalizedString(@"Withdrawn_by_the_other_party", @"对方已撤回");
             
             [self.tableView reloadData];
         }
@@ -1660,7 +1667,7 @@ CLLocationManagerDelegate>
                     NSInteger index = [self.dataSource indexOfObject:viewmodel];
                     LHChatViewCell *messageCell = (LHChatViewCell *) [self.tableView cellForRowAtIndexPath:[NSIndexPath indexPathForRow:index inSection:0]];
                     viewmodel.messageObjc.isReadAcked = YES;
-                    messageCell.readStatusLabel.text = @"已读";
+                    messageCell.readStatusLabel.text = NSLocalizedString(@"Read", @"已读");
                 }
             }
         }
@@ -1671,7 +1678,7 @@ CLLocationManagerDelegate>
                         NSInteger index = [self.dataSource indexOfObject:viewmodel];
                         LHChatViewCell *messageCell = (LHChatViewCell *) [self.tableView cellForRowAtIndexPath:[NSIndexPath indexPathForRow:index inSection:0]];
                         viewmodel.messageObjc.isReadAcked = YES;
-                        messageCell.readStatusLabel.text = [NSString stringWithFormat:@"%d人已读",message.groupAckCount];
+                        messageCell.readStatusLabel.text = [NSString stringWithFormat:NSLocalizedString(@"npersons_have_read", @"%d人已读"),message.groupAckCount];
 
                     }
                 }
@@ -1722,8 +1729,8 @@ CLLocationManagerDelegate>
         if (error) {
             if (error.code == 201) {
                 
-                UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"无法录音" message:@"请在iPhone的“设置-隐私-麦克风”选项中，允许BMX访问你的手机麦克风。" preferredStyle:UIAlertControllerStyleAlert];
-                UIAlertAction *action = [UIAlertAction actionWithTitle:@"确定" style:UIAlertActionStyleCancel handler:nil];
+                UIAlertController *alert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Unable_to_record", @"无法录音") message:NSLocalizedString(@"allow_BMX_to_access_your_microphone", @"请在iPhone的设置-隐私-麦克风选项中，允许BMX访问你的手机麦克风。") preferredStyle:UIAlertControllerStyleAlert];
+                UIAlertAction *action = [UIAlertAction actionWithTitle:NSLocalizedString(@"Confirm", @"确定") style:UIAlertActionStyleCancel handler:nil];
                 [alert addAction:action];
                 [self presentViewController:alert animated:NO completion:nil];
             }
@@ -1871,7 +1878,7 @@ CLLocationManagerDelegate>
             BMXLocationAttachment *locationment = [[BMXLocationAttachment alloc] initWithLatitude:latitude longitude:longitude address:address];
             messageObject = [self configMessage:locationment];
             messageObject.contentType = BMXContentTypeLocation;
-            messageModel.content = [NSString stringWithFormat:@"当前位置：%@",locationment.address];
+            messageModel.content = [NSString stringWithFormat:NSLocalizedString(@"Current_location", @"当前位置：%@"),locationment.address];
             break;
         }
         case MessageBodyType_File: {
@@ -1912,7 +1919,10 @@ CLLocationManagerDelegate>
     
     messageModel.date = [NSString stringWithFormat:@"%lld", messageObject.clientTimestamp];
     messageModel.id = messageModel.date;
+    messageModel.clientMsgId = messageObject.clientMsgId;
     messageModel.messageObjc = messageObject;
+    [self.deliveringMsgClientIds addObject:[NSNumber numberWithLong:(long) messageModel.clientMsgId]];
+
     [[LHIMDBManager shareManager] insertModel:messageModel];
     NSString *time = [LHTools processingTimeWithDate:[NSString stringWithFormat:@"%f",messageModel.messageObjc.serverTimestamp * 0.001]];
     if (messageModel.messageObjc.serverTimestamp * 0.001 - self.lastTime.doubleValue > 3 * 60) {
@@ -1951,10 +1961,10 @@ CLLocationManagerDelegate>
         case kCLAuthorizationStatusRestricted:
         case kCLAuthorizationStatusDenied:{
             
-            UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"提示" message:@"您还未开启定位服务，是否需要开启？" preferredStyle:UIAlertControllerStyleAlert];
-            UIAlertAction *cancel = [UIAlertAction actionWithTitle:@"取消" style:UIAlertActionStyleCancel handler:^(UIAlertAction * _Nonnull action) {
+            UIAlertController *alert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Alert", @"提示") message:NSLocalizedString(@"location_service_need_to_turn_it_on", @"您还未开启定位服务，是否需要开启？") preferredStyle:UIAlertControllerStyleAlert];
+            UIAlertAction *cancel = [UIAlertAction actionWithTitle:NSLocalizedString(@"Cancel", @"取消") style:UIAlertActionStyleCancel handler:^(UIAlertAction * _Nonnull action) {
             }];
-            UIAlertAction *queren = [UIAlertAction actionWithTitle:@"确定" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+            UIAlertAction *queren = [UIAlertAction actionWithTitle:NSLocalizedString(@"Confirm", @"确定") style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
                 NSURL *setingsURL = [NSURL URLWithString:UIApplicationOpenSettingsURLString];
                 [[UIApplication sharedApplication]openURL:setingsURL];
             }];

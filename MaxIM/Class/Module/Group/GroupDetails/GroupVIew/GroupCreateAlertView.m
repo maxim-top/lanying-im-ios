@@ -49,14 +49,14 @@
     self.sframe.layer.cornerRadius = 5.0f;
     
     UILabel* titleLabel = [[UILabel alloc] initWithFrame:CGRectMake(15, 15, MAXScreenW-80, 30)];
-    titleLabel.text = @"请填写群信息";
+    titleLabel.text = NSLocalizedString(@"enter_group_info", @"请填写群信息");
     titleLabel.font = [UIFont fontWithName:@"PingFangSC-Medium" size:17];
     titleLabel.textColor = [UIColor colorWithRed:51/255.0 green:51/255.0 blue:51/255.0 alpha:1/1.0];
     titleLabel.textAlignment = NSTextAlignmentCenter;
     [self.sframe addSubview:titleLabel];
     
-    UILabel* titleLeft = [[UILabel alloc] initWithFrame:CGRectMake(15, 65, 55, 40)];
-    titleLeft.text = @"群名称*";
+    UILabel* titleLeft = [[UILabel alloc] initWithFrame:CGRectMake(15, 65, 90, 40)];
+    titleLeft.text = NSLocalizedString(@"Group_name_ast", @"群名称*");
     titleLeft.font = [UIFont fontWithName:@".AppleSystemUIFont" size:14];
     titleLeft.textColor = [UIColor colorWithRed:82/255.0 green:82/255.0 blue:82/255.0 alpha:1/1.0];
     [self.sframe addSubview: titleLeft];
@@ -66,8 +66,8 @@
     self.warnLine.backgroundColor = [UIColor colorWithRed:223/255.0 green:223/255.0 blue:223/255.0 alpha:1/1.0];
     [self.sframe addSubview:self.warnLine];
     
-    UILabel* messageLeft = [[UILabel alloc] initWithFrame:CGRectMake(15, 115, 55, 40)];
-    messageLeft.text = @"消息";
+    UILabel* messageLeft = [[UILabel alloc] initWithFrame:CGRectMake(15, 115, 90, 40)];
+    messageLeft.text = NSLocalizedString(@"Message", @"消息");
     messageLeft.font = [UIFont fontWithName:@".AppleSystemUIFont" size:14];
     messageLeft.textColor = [UIColor colorWithRed:82/255.0 green:82/255.0 blue:82/255.0 alpha:1/1.0];
     [self.sframe addSubview: messageLeft];
@@ -78,14 +78,14 @@
     [self.sframe addSubview:line2];
     
     UILabel* textTitle = [[UILabel alloc] initWithFrame:CGRectMake(15, 155, MAXScreenW-80, 25)];
-    textTitle.text = @"群描述";
+    textTitle.text = NSLocalizedString(@"Group_description", @"群描述");
     textTitle.font = [UIFont fontWithName:@".AppleSystemUIFont" size:12];
     textTitle.textColor = [UIColor colorWithRed:82/255.0 green:82/255.0 blue:82/255.0 alpha:1/1.0];
     [self.sframe addSubview:textTitle];
     [self.sframe addSubview:self.descriptionField];
     
     UILabel* textIsChatroom = [[UILabel alloc] initWithFrame:CGRectMake(15, 225, MAXScreenW-80, 25)];
-    textIsChatroom.text = @"是否创建聊天室";
+    textIsChatroom.text = NSLocalizedString(@"Whether_to_create_a_chatroom", @"是否创建聊天室");
     textIsChatroom.font = [UIFont fontWithName:@".AppleSystemUIFont" size:12];
     textIsChatroom.textColor = [UIColor colorWithRed:82/255.0 green:82/255.0 blue:82/255.0 alpha:1/1.0];
     [self.sframe addSubview:textIsChatroom];
@@ -99,11 +99,11 @@
 
     
     UIButton* okBtn = [UIButton buttonWithType:UIButtonTypeSystem];
-    //        [_leaveBtn setTitle:@"删除并退出" forState:UIControlStateNormal];
+    //        [_leaveBtn setTitle:NSLocalizedString(@"Delete_and_quit", @"删除并退出") forState:UIControlStateNormal];
     
     [okBtn setFrame:CGRectMake(MAXScreenW/2 - 29, 265, MAXScreenW/2-29, 40)];
     [okBtn setTintColor:[UIColor whiteColor]];
-    [okBtn setTitle:@"确定" forState:UIControlStateNormal];
+    [okBtn setTitle:NSLocalizedString(@"Confirm", @"确定") forState:UIControlStateNormal];
 //    [okBtn setBackgroundColor:[UIColor lh_colorWithHexString:@"#EA6A57"]];
     [okBtn setTintColor: [UIColor colorWithRed:235/255.0 green:145/255.0 blue:25/255.0 alpha:1/1.0]];
     [okBtn addTarget:self action:@selector(touchedOk) forControlEvents:UIControlEventTouchUpInside];
@@ -114,10 +114,10 @@
     [self.sframe addSubview:line4];
     
     UIButton* cancelBtn = [UIButton buttonWithType:UIButtonTypeSystem];
-    //        [_leaveBtn setTitle:@"删除并退出" forState:UIControlStateNormal];
+    //        [_leaveBtn setTitle:NSLocalizedString(@"Delete_and_quit", @"删除并退出") forState:UIControlStateNormal];
     [cancelBtn setFrame:CGRectMake(0, 265, MAXScreenW/2-30, 40)];
     [cancelBtn setTintColor:[UIColor whiteColor]];
-    [cancelBtn setTitle:@"取消" forState:UIControlStateNormal];
+    [cancelBtn setTitle:NSLocalizedString(@"Cancel", @"取消") forState:UIControlStateNormal];
     [cancelBtn setTintColor: [UIColor colorWithRed:51/255.0 green:51/255.0 blue:51/255.0 alpha:1/1.0]];
 //    [cancelBtn setBackgroundColor:[UIColor lh_colorWithHexString:@"#EA6A57"]];
     [cancelBtn addTarget:self action:@selector(touchedCancel) forControlEvents:UIControlEventTouchUpInside];
@@ -156,9 +156,9 @@
 -(UITextField*) titleField
 {
     if(!_titleField) {
-        _titleField = [[UITextField alloc] initWithFrame:CGRectMake(70, 65, MAXScreenW-120 - 55, 40)];
+        _titleField = [[UITextField alloc] initWithFrame:CGRectMake(120, 65, MAXScreenW-120 - 55, 40)];
         _titleField.font =  [UIFont fontWithName:@".AppleSystemUIFont" size:12];
-        _titleField.placeholder = @"请输入群名称";
+        _titleField.placeholder = NSLocalizedString(@"enter_group_name", @"请输入群名称");
     }
     return _titleField;
 }
@@ -166,9 +166,9 @@
 -(UITextField*) messageField
 {
     if(!_messageField) {
-        _messageField = [[UITextField alloc] initWithFrame:CGRectMake(70, 115, MAXScreenW-120 - 55, 40)];
+        _messageField = [[UITextField alloc] initWithFrame:CGRectMake(120, 115, MAXScreenW-120 - 55, 40)];
         _messageField.font =  [UIFont fontWithName:@".AppleSystemUIFont" size:12];
-        _messageField.placeholder = @"请输入群邀请信息";
+        _messageField.placeholder = NSLocalizedString(@"enter_group_invitation_info", @"请输入群邀请信息");
     }
     return _messageField;
 }

@@ -83,7 +83,7 @@
     [sv addSubview:sl];
     sl.font = [UIFont fontWithName:@"PingFangSC-Medium" size:14];
     sl.textColor = [UIColor colorWithRed:155/255.0 green:155/255.0 blue:169/255.0 alpha:1/1.0];
-    sl.text = section == 1 ? @"普通用户" : @"管理员";
+    sl.text = section == 1 ? NSLocalizedString(@"Ordinary_user", @"普通用户") : NSLocalizedString(@"Admin", @"管理员");
     return sv;
 }
 
@@ -111,8 +111,10 @@
         }
         avatar = roster.avatarUrl;
     }
-    [cell setAvatarUrl:avatar RosterName:name Selected:NO];
-    [cell setDlownAvatar:roster Selected:NO];
+    if([@"" isEqualToString: avatar]){
+        [cell setAvatarUrl:avatar RosterName:name Selected:NO];
+        [cell setDlownAvatar:roster Selected:NO];
+    }
     return cell;
 }
 
@@ -129,7 +131,7 @@
     if(section == 0) {// 取消管理
         NSString* uid = [self.adminUidArray objectAtIndex:row];
         NSNumber *uidnumber = [NSNumber numberWithLongLong:[uid longLongValue]];
-        [[[BMXClient sharedClient] groupService] removeAdmins:self.group admins:@[uidnumber] reason:@"添加管理" completion:^(BMXError *error) {
+        [[[BMXClient sharedClient] groupService] removeAdmins:self.group admins:@[uidnumber] reason:NSLocalizedString(@"Add_admin", @"添加管理") completion:^(BMXError *error) {
             if(!error) {
                 [self.adminUidArray removeObject:uid];
                 [self.normalUidArray addObject:uid];
@@ -141,7 +143,7 @@
         }];
     }else { //添加管理
         NSNumber* uid = [NSNumber numberWithLongLong:[[self.normalUidArray objectAtIndex:row] longLongValue]];
-        [[[BMXClient sharedClient] groupService] addAdmins:self.group admins:@[uid] message:@"取消管理" completion:^(BMXError *error) {
+        [[[BMXClient sharedClient] groupService] addAdmins:self.group admins:@[uid] message:NSLocalizedString(@"Cancellation_management", @"取消管理") completion:^(BMXError *error) {
             if(!error) {
                 [self.normalUidArray removeObject:uid];
                 [self.adminUidArray addObject:uid];
@@ -166,7 +168,7 @@
 }
 
 - (void)setUpNavItem {
-    [self setNavigationBarTitle:@"群管理员" navLeftButtonIcon:@"blackback"];
+    [self setNavigationBarTitle:NSLocalizedString(@"Group_admin", @"群管理员") navLeftButtonIcon:@"blackback"];
     
 //    UIButton *moreBtn = [UIButton buttonWithType:UIButtonTypeSystem];
 //    [moreBtn setTitle:@"Save" forState:UIControlStateNormal];

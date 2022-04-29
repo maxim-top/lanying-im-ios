@@ -38,7 +38,7 @@
     label1.font = [UIFont systemFontOfSize:14];
     NSDictionary *infoDictionary = [[NSBundle mainBundle] infoDictionary];
     NSString *app_Version = [infoDictionary objectForKey:@"CFBundleShortVersionString"];
-    label1.text = [NSString stringWithFormat:@"美信拓扑IM  v%@", app_Version];
+    label1.text = [NSString stringWithFormat:NSLocalizedString(@"Maximtop_IM__v", @"美信拓扑IM v%@"), app_Version];
     [self.view addSubview:label1];
 
     
@@ -53,14 +53,14 @@
     
     
     UILabel *label3 = [[UILabel alloc] init];
-    label3.text = @"一键启用多云架构的即时通讯云服务";
+    label3.text = NSLocalizedString(@"One-Click_Multi-Cloud_Architecture", @"一键启用多云架构的即时通讯云服务");
     label3.textAlignment = NSTextAlignmentCenter;
     label3.numberOfLines = 0;
     label3.font = [UIFont systemFontOfSize:16];
     [self.view addSubview:label3];
     
     UILabel *label5 = [[UILabel alloc] init];
-    label5.text = @"官网 https://www.maximtop.com";
+    label5.text = NSLocalizedString(@"Official_Website", @"官网 https://www.maximtop.com");
     label5.textAlignment = NSTextAlignmentCenter;
     label5.numberOfLines = 0;
     label5.font = [UIFont systemFontOfSize:15];
@@ -71,7 +71,7 @@
     [label5 addGestureRecognizer:urlTap];
 
     UILabel *label7 = [[UILabel alloc] init];
-    label7.text = @"联系商务 400-666-0162";
+    label7.text = NSLocalizedString(@"Contact_business", @"联系商务 400-666-0162");
     label7.textAlignment = NSTextAlignmentCenter;
     label7.numberOfLines = 0;
     label7.font = [UIFont systemFontOfSize:15];
@@ -82,7 +82,7 @@
     [label7 addGestureRecognizer:phoneTap];
     
     UILabel *bottom_label= [[UILabel alloc] init];
-    bottom_label.text = @"© 2020 美信拓扑";
+    bottom_label.text = NSLocalizedString(@"copyright_Maximtop", @"© 2020 美信拓扑");
     bottom_label.textAlignment = NSTextAlignmentCenter;
     bottom_label.numberOfLines = 0;
     bottom_label.font = [UIFont systemFontOfSize:15];
@@ -127,7 +127,7 @@
 }
 
 - (void)setUpNavItem{
-    [self setNavigationBarTitle:@"关于我们" navLeftButtonIcon:@"blackback"];
+    [self setNavigationBarTitle:NSLocalizedString(@"About_Us", @"关于我们") navLeftButtonIcon:@"blackback"];
 }
 
 - (void)openUrl {

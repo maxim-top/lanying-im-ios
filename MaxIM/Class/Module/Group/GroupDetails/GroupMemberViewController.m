@@ -108,20 +108,20 @@
 
 - (NSArray*)tableView:(UITableView *)tableView editActionsForRowAtIndexPath:(nonnull NSIndexPath *)indexPath
 {
-    UITableViewRowAction *deleteAction = [UITableViewRowAction rowActionWithStyle:UITableViewRowActionStyleNormal title:@"删除" handler:^(UITableViewRowAction *action, NSIndexPath *indexPath)
+    UITableViewRowAction *deleteAction = [UITableViewRowAction rowActionWithStyle:UITableViewRowActionStyleNormal title:NSLocalizedString(@"Delete", @"删除") handler:^(UITableViewRowAction *action, NSIndexPath *indexPath)
                                          {
                                              [tableView setEditing:NO animated:YES];
                                              BMXRoster* roster = self.memberList [indexPath.row];
                                              [self deleteR:roster];
                                          }];
     
-    UITableViewRowAction *blackAction = [UITableViewRowAction rowActionWithStyle:UITableViewRowActionStyleNormal title:@"加黑" handler:^(UITableViewRowAction *action, NSIndexPath *indexPath)
+    UITableViewRowAction *blackAction = [UITableViewRowAction rowActionWithStyle:UITableViewRowActionStyleNormal title:NSLocalizedString(@"Add_to_blacklist", @"加入黑名单") handler:^(UITableViewRowAction *action, NSIndexPath *indexPath)
     {
         [tableView setEditing:NO animated:YES];
         [self blackMember:indexPath.row];
     }];
     // 创建action
-    UITableViewRowAction *muteAction = [UITableViewRowAction rowActionWithStyle:UITableViewRowActionStyleNormal title:@"禁言" handler:^(UITableViewRowAction *action, NSIndexPath *indexPath)
+    UITableViewRowAction *muteAction = [UITableViewRowAction rowActionWithStyle:UITableViewRowActionStyleNormal title:NSLocalizedString(@"Ban", @"禁言") handler:^(UITableViewRowAction *action, NSIndexPath *indexPath)
     {
         [tableView setEditing:NO animated:YES];
         [self muteMember:indexPath.row];
@@ -131,8 +131,8 @@
 
 - (void) blackMember:(NSInteger) index
 {
-    UIAlertController* alert = [UIAlertController alertControllerWithTitle:@"警告" message:@"确定加入黑名单？" preferredStyle:UIAlertControllerStyleAlert];
-    UIAlertAction* okAction = [UIAlertAction actionWithTitle:@"确定" style:UIAlertActionStyleDefault handler:^(UIAlertAction * action) {
+    UIAlertController* alert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Warning", @"警告") message:NSLocalizedString(@"Confirm_to_blacklist", @"确定加入黑名单？") preferredStyle:UIAlertControllerStyleAlert];
+    UIAlertAction* okAction = [UIAlertAction actionWithTitle:NSLocalizedString(@"Confirm", @"确定") style:UIAlertActionStyleDefault handler:^(UIAlertAction * action) {
         BMXRoster* roster = [self.memberList objectAtIndex:index];
         NSNumber *rosterId = [NSNumber numberWithLongLong:roster.rosterId];
         [[[BMXClient sharedClient] groupService] blockMembers:self.group members:@[rosterId] completion:^(BMXError *error) {
@@ -142,20 +142,20 @@
             }
         }];
     }];
-    UIAlertAction* cancelAction = [UIAlertAction actionWithTitle:@"取消" style:UIAlertActionStyleCancel handler:^(UIAlertAction * action) {}];
+    UIAlertAction* cancelAction = [UIAlertAction actionWithTitle:NSLocalizedString(@"Cancel", @"取消") style:UIAlertActionStyleCancel handler:^(UIAlertAction * action) {}];
     [alert addAction:okAction];
     [alert addAction:cancelAction];
     [self presentViewController:alert animated:YES completion:nil];
 }
 - (void) muteMember:(NSInteger) index
 {
-    UIAlertController* alert = [UIAlertController alertControllerWithTitle:@"警告" message:@"确定要禁言吗？" preferredStyle:UIAlertControllerStyleAlert];
-    UIAlertAction* okAction = [UIAlertAction actionWithTitle:@"确定" style:UIAlertActionStyleDefault handler:^(UIAlertAction * action) {
+    UIAlertController* alert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Warning", @"警告") message:NSLocalizedString(@"Confirm_to_ban", @"确定要禁言吗？") preferredStyle:UIAlertControllerStyleAlert];
+    UIAlertAction* okAction = [UIAlertAction actionWithTitle:NSLocalizedString(@"Confirm", @"确定") style:UIAlertActionStyleDefault handler:^(UIAlertAction * action) {
         BMXRoster* roster = [self.memberList objectAtIndex:index];
         NSNumber* rosterId = [NSNumber numberWithLongLong:roster.rosterId];
         NSString* muteDurationStr = [alert.textFields objectAtIndex:0].text;
         NSInteger duration = [muteDurationStr longLongValue];
-        [[[BMXClient sharedClient] groupService] banMembers:@[rosterId] group:self.group reason:@"禁言" duration:duration completion:^(BMXError *error) {
+        [[[BMXClient sharedClient] groupService] banMembers:@[rosterId] group:self.group reason:NSLocalizedString(@"Ban", @"禁言") duration:duration completion:^(BMXError *error) {
             if (error) {
                 MAXLog(@"mute member error, code: %ld", error.errorCode);
                 
@@ -165,9 +165,9 @@
             }
         }];
     }];
-    UIAlertAction* cancelAction = [UIAlertAction actionWithTitle:@"取消" style:UIAlertActionStyleCancel handler:^(UIAlertAction * action) {  }];
+    UIAlertAction* cancelAction = [UIAlertAction actionWithTitle:NSLocalizedString(@"Cancel", @"取消") style:UIAlertActionStyleCancel handler:^(UIAlertAction * action) {  }];
     [alert addTextFieldWithConfigurationHandler:^(UITextField *textField) {
-        textField.placeholder = @"请输入禁言时间";
+        textField.placeholder = NSLocalizedString(@"enter_the_ban_time", @"请输入禁言时间");
     }];
     [alert addAction:okAction];
     [alert addAction:cancelAction];
@@ -188,8 +188,8 @@
 }
 
 - (void)setUpNavItem {
-    self.navigationItem.title = @"群成员";
-    [self setNavigationBarTitle:@"群成员" navLeftButtonIcon:@"blackback"];
+    self.navigationItem.title = NSLocalizedString(@"Group_members", @"群成员");
+    [self setNavigationBarTitle:NSLocalizedString(@"Group_members", @"群成员") navLeftButtonIcon:@"blackback"];
     
 }
 
@@ -197,7 +197,7 @@
     NSNumber *s= [NSNumber numberWithLongLong: roster.rosterId];
     [[[BMXClient sharedClient] groupService]removeMembersWithGroup:self.group memberlist:@[s] reason:@"" completion:^(BMXError *error) {
         if (!error) {
-            [HQCustomToast showDialog:@"删除成功"];
+            [HQCustomToast showDialog:NSLocalizedString(@"Delete_successfully", @"删除成功")];
             [[NSNotificationCenter defaultCenter] postNotificationName:@"KEY_NOTIFICATION_GROUP_MEMBER_UPDATED" object:nil];
             [self getMembers];
         } else {

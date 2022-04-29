@@ -45,7 +45,7 @@ const NSInteger INSETS = 8;
     
     UILabel *label = [[UILabel alloc] initWithFrame:CGRectMake(insets, CGRectGetMaxY(_photoButton.frame) + 10, CHAT_BUTTON_SIZE, 12)];
     label.font = [UIFont systemFontOfSize:12];
-    label.text = @"照片";
+    label.text = NSLocalizedString(@"Photos", @"照片");
     label.textAlignment = NSTextAlignmentCenter;
     [self addSubview:label];
     
@@ -59,7 +59,7 @@ const NSInteger INSETS = 8;
     
     UILabel *label2 = [[UILabel alloc] initWithFrame:CGRectMake(insets*2+ CHAT_BUTTON_SIZE, CGRectGetMaxY(_takePicButton.frame) + 10, CHAT_BUTTON_SIZE, 12)];
     label2.font = [UIFont systemFontOfSize:12];
-    label2.text = @"拍照";
+    label2.text = NSLocalizedString(@"Snap", @"拍照");
     label2.textAlignment = NSTextAlignmentCenter;
     [self addSubview:label2];
     
@@ -74,7 +74,7 @@ const NSInteger INSETS = 8;
     
     UILabel *label3 = [[UILabel alloc] initWithFrame:CGRectMake(insets*3 + CHAT_BUTTON_SIZE * 2 , CGRectGetMaxY(_takePicButton.frame) + 10, CHAT_BUTTON_SIZE, 12)];
     label3.font = [UIFont systemFontOfSize:12];
-    label3.text = @"位置";
+    label3.text = NSLocalizedString(@"Location", @"位置");
     label3.textAlignment = NSTextAlignmentCenter;
     [self addSubview:label3];
     
@@ -88,7 +88,7 @@ const NSInteger INSETS = 8;
     
     UILabel *label4 = [[UILabel alloc] initWithFrame:CGRectMake(insets*4+ CHAT_BUTTON_SIZE  * 3, CGRectGetMaxY(_takePicButton.frame) + 10, CHAT_BUTTON_SIZE, 12)];
     label4.font = [UIFont systemFontOfSize:12];
-    label4.text = @"文件";
+    label4.text = NSLocalizedString(@"File", @"文件");
     label4.textAlignment = NSTextAlignmentCenter;
     [self addSubview:label4];
     
@@ -102,7 +102,7 @@ const NSInteger INSETS = 8;
     
     UILabel *label5 = [[UILabel alloc] initWithFrame:CGRectMake(insets, CGRectGetMaxY(_videoButton.frame) + 10, CHAT_BUTTON_SIZE, 12)];
     label5.font = [UIFont systemFontOfSize:12];
-    label5.text = @"小视频";
+    label5.text = NSLocalizedString(@"Short_video", @"小视频");
     label5.textAlignment = NSTextAlignmentCenter;
     [self addSubview:label5];
     

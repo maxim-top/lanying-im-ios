@@ -39,6 +39,6 @@
 }
 
 + (NSArray *)tableViewCellArray {
-    return @[@"群聊系统消息"];
+    return @[NSLocalizedString(@"System_message_of_group_chat", @"群聊系统消息")];
 }
 @end

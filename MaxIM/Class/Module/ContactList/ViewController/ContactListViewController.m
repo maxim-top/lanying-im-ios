@@ -276,9 +276,9 @@
 #pragma mark - delegate
 
 - (void)menuViewDidSelectbutton:(UIButton *)button {
-    if ([button.orderTags isEqualToString:@"添加好友"]) {
+    if ([button.orderTags isEqualToString:NSLocalizedString(@"Add_friend", @"添加好友")]) {
         [self addFriend];
-    } else if ([button.orderTags isEqualToString:@"创建群组"]) {
+    } else if ([button.orderTags isEqualToString:NSLocalizedString(@"Create_group", @"创建群组")]) {
         [self jumpToCreateGroup];
     } else {
         [self jumpToScanVC];
@@ -339,7 +339,7 @@
         if (indexPath.section == 0) {
             NSString *titleStr = [NSString stringWithFormat:@"%@", self.groupTableviewCellArray[indexPath.row]];
             [cell refreshByTitle:titleStr];
-            if ([titleStr isEqualToString:@"群申请列表"] || [titleStr isEqualToString: @"群聊系统消息"]) {
+            if ([titleStr isEqualToString:NSLocalizedString(@"Group_application_list", @"群申请列表")] || [titleStr isEqualToString: NSLocalizedString(@"System_message_of_group_chat", @"群聊系统消息")]) {
                 cell.avatarImg.image = [UIImage imageNamed: [NSString stringWithFormat:@"group_application"]];
             }
         } else {
@@ -351,7 +351,7 @@
         [cell refreshSupportRoster:roster];
     } else {
 //        NSString *titleStr = [NSString stringWithFormat:@"%@", self.actionArray[indexPath.row]];
-        [cell refreshByTitle:[NSString stringWithFormat:@"会议室ID:%@", self.meetingArray[indexPath.row]]];
+        [cell refreshByTitle:[NSString stringWithFormat:NSLocalizedString(@"Chamber_ID", @"会议室ID:%@"), self.meetingArray[indexPath.row]]];
     }
 
     return cell;
@@ -363,7 +363,7 @@
     if (self.tag == 0) {
         if (indexPath.section == 0) {
             NSString *string = self.actionArray[indexPath.row];
-            if ([string isEqualToString:@"好友申请与通知"]) {
+            if ([string isEqualToString:NSLocalizedString(@"Friend_request_and_notification", @"好友申请与通知")]) {
                 RosterDetailViewController *vc = [[RosterDetailViewController alloc] init];
                 vc.hidesBottomBarWhenPushed = YES;
                 [self.navigationController pushViewController:vc animated:YES];
@@ -421,7 +421,7 @@
         MobileRTCMeetError ret = [ms joinMeetingWithDictionary:paramDict];
         
         if (ret == MobileRTCMeetError_Success) {
-            NSString *messageTest = [NSString stringWithFormat:@"%@ 加入会议室", acount.usedId];
+            NSString *messageTest = [NSString stringWithFormat:NSLocalizedString(@"joined_chamber", @"%@ 加入会议室"), acount.usedId];
             BMXMessageObject *message = [[BMXMessageObject alloc] initWithBMXMessageText:messageTest
                                                                                   fromId:[acount.usedId longLongValue]
                                                                                     toId:6597373638528 type:BMXMessageTypeSingle
@@ -441,7 +441,7 @@
 
 - (NSArray<UITableViewRowAction *> *)tableView:(UITableView *)tableView editActionsForRowAtIndexPath:(NSIndexPath *)indexPath {
     // 添加一个删除按钮
-    UITableViewRowAction *deleteRowAction = [UITableViewRowAction rowActionWithStyle:UITableViewRowActionStyleDestructive title:@"删除"handler:^(UITableViewRowAction *action, NSIndexPath *indexPath) {
+    UITableViewRowAction *deleteRowAction = [UITableViewRowAction rowActionWithStyle:UITableViewRowActionStyleDestructive title:NSLocalizedString(@"Delete", @"删除")handler:^(UITableViewRowAction *action, NSIndexPath *indexPath) {
         MAXLog(@"点击了删除");
         BMXRoster *roster = self.rosterArray[indexPath.row];
         [self removeRoster:roster.rosterId];
@@ -450,7 +450,7 @@
        
     }];
     // 删除一个置顶按钮
-    UITableViewRowAction *topRowAction = [UITableViewRowAction rowActionWithStyle:UITableViewRowActionStyleDefault title:@"加入黑名单"handler:^(UITableViewRowAction *action, NSIndexPath *indexPath) {
+    UITableViewRowAction *topRowAction = [UITableViewRowAction rowActionWithStyle:UITableViewRowActionStyleDefault title:NSLocalizedString(@"Add_to_blacklist", @"加入黑名单")handler:^(UITableViewRowAction *action, NSIndexPath *indexPath) {
         MAXLog(@"点击了点入黑名单");
         BMXRoster *roster = self.rosterArray[indexPath.row];
 
@@ -462,7 +462,7 @@
 }
 
 - (NSString *)tableView:(UITableView *)tableView titleForDeleteConfirmationButtonForRowAtIndexPath:(NSIndexPath *)indexPath {
-    return @"删除";
+    return NSLocalizedString(@"Delete", @"删除");
 }
 
 -(void)indexDidChangeForSegmentedControl:(UISegmentedControl *)sender {
@@ -592,7 +592,7 @@
 }
 
 - (NSArray *)actionArray {
-    return @[@"好友申请与通知"];
+    return @[NSLocalizedString(@"Friend_request_and_notification", @"好友申请与通知")];
 }
 
 - (UITableView *)rosterListTableView {
@@ -679,7 +679,7 @@
 - (UIView *)selectView {
     if (!_selectView) {
         _selectView = [[UIView alloc] init];
-        _selectView.frame = CGRectMake(17, NavHeight - 2 , 40, 2);
+        _selectView.frame = CGRectMake(5, NavHeight - 2 , 80, 2);
         _selectView.backgroundColor = BMXCOLOR_HEX(0x009FE8);
         _selectView.layer.cornerRadius = 2;
         _selectView.layer.masksToBounds = YES;
@@ -750,8 +750,13 @@
     [self.view addSubview:navigationBar];
     self.navigationBar = navigationBar;
     
-    
-    UISegmentedControl *control = [[UISegmentedControl alloc] initWithItems: @[@"好友", @"群组", @"支持",@"会议室"]];
+    NSArray * items = [NSArray arrayWithObjects:NSLocalizedString(@"Friend", @"好友"), NSLocalizedString(@"Group", @"群组"), NSLocalizedString(@"Support", @"支持"),NSLocalizedString(@"Chamber", @"会议室"), nil];
+    UISegmentedControl *control = [[UISegmentedControl alloc] initWithItems: items];
+    for (int i=0; i< items.count-1; i++){
+        [control setWidth:70.0 forSegmentAtIndex:i];
+    }
+    [control setWidth:90.0 forSegmentAtIndex:items.count-1];
+
 //                                   initWithFrame:CGRectMake(16, 10, 32 * 3, 30)];
 //    
     [control setBackgroundImage:[self imageWithColor:[UIColor clearColor]] forState:UIControlStateNormal barMetrics:UIBarMetricsDefault];
@@ -761,7 +766,7 @@
             [control setDividerImage:_dividerImage forLeftSegmentState:UIControlStateNormal rightSegmentState:UIControlStateNormal barMetrics:UIBarMetricsDefault];
   
   
-    control.frame = CGRectMake(5, MAXIsFullScreen ? 28 + 26 :  28 ,( 190/3.0 )*4.0, 25);
+    control.frame = CGRectMake(5, MAXIsFullScreen ? 28 + 26 :  28 ,( 260/3.0 )*4.0, 25);
     control.tintColor = [UIColor whiteColor];
     
     [control setTitleTextAttributes:@{NSFontAttributeName:[UIFont fontWithName:@"PingFangSC-Medium" size:T5_30PX], NSForegroundColorAttributeName:[UIColor blackColor]} forState:UIControlStateNormal];

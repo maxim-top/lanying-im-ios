@@ -1,0 +1,47 @@
+{
+    "type": "settingconfig",
+    "cells":
+    [{
+        "type": "Switch account",
+        "control": "0"
+    },{
+        "type": "Accept new message notification",
+        "control": "1"
+    },
+    {
+        "type": "Sound notification",
+        "control": "1"
+    },
+    {
+        "type": "Vibrate notification",
+        "control": "1"
+    },
+    {
+        "type": "Enable push details",
+        "control": "1"
+    },
+    {
+        "type": "Download thumbnail automatically",
+        "control": "1"
+    },
+    {
+        "type": "Accept group invitation automatically",
+        "control": "1"
+    },
+    {
+        "type": "Blacklist",
+        "control": "0"
+        
+    },
+    {
+        "type": "About Us",
+        "control": "0"
+    },
+    {
+        "type": "Device management",
+        "control": "0"
+    }
+    ]
+    
+}
+    

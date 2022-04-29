@@ -66,7 +66,7 @@
 - (void)deviceTableViewCelldidClickButtonWithDevice:(BMXDevice *)device {
     [[[BMXClient sharedClient] userService] deleteDeviceByDeviceSN:device.deviceSN completion:^(BMXError *error) {
         if (!error) {
-            [HQCustomToast showDialog:@"删除成功"];
+            [HQCustomToast showDialog:NSLocalizedString(@"Delete_successfully", @"删除成功")];
             [self getDeviceList];
         }
     }];
@@ -102,13 +102,13 @@
         decStr = @"web";
     }
     
-    cell.titleLabel.text = [NSString stringWithFormat:@"设备序列号：%d", device.deviceSN];
+    cell.titleLabel.text = [NSString stringWithFormat:NSLocalizedString(@"Device_serial_numberN", @"设备序列号：%d"), device.deviceSN];
     cell.contentLabel.text = device.userAgent;
     return cell;
 }
 
 - (void)setUpNavItem{
-    [self setNavigationBarTitle:@"设备列表" navLeftButtonIcon:@"blackback"];
+    [self setNavigationBarTitle:NSLocalizedString(@"Device_list", @"设备列表") navLeftButtonIcon:@"blackback"];
 }
 
 - (UITableView *)tableView {

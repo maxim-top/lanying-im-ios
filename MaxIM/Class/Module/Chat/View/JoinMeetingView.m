@@ -63,7 +63,7 @@
     if (ret == MobileRTCMeetError_Success) {
         
         // 给商务发消息
-        NSString *messageTest = [NSString stringWithFormat:@"%@ 加入会议室（id: %@）", account.usedId, self.meetingID];
+        NSString *messageTest = [NSString stringWithFormat:NSLocalizedString(@"joined_chamber_id", @"%@ 加入会议室（id: %@）"), account.usedId, self.meetingID];
                 
         BMXMessageObject *message = [[BMXMessageObject alloc] initWithBMXMessageText:messageTest
                                                                               fromId:[account.usedId integerValue]
@@ -78,7 +78,7 @@
     if (_button == nil) {
         _button = [UIButton buttonWithType:UIButtonTypeCustom];
         _button.frame = CGRectMake(MAXScreenW - 80 - 10, 5, 80, 30);
-        [_button setTitle:@"立即加入" forState:UIControlStateNormal];
+        [_button setTitle:NSLocalizedString(@"Join_now", @"立即加入") forState:UIControlStateNormal];
         _button.backgroundColor = [UIColor colorWithRed:79/255.0 green:160/255.0 blue:255/255.0 alpha:0.75];
         _button.titleLabel.font = [UIFont systemFontOfSize:12];
         [_button addTarget:self action:@selector(clickButton:) forControlEvents:UIControlEventTouchUpInside];
@@ -93,7 +93,7 @@
 - (UILabel *)tipLabel {
     if (_tipLabel == nil) {
         _tipLabel= [[UILabel alloc] initWithFrame:CGRectMake(10, 5, MAXScreenW - 50-20, 30)];
-        _tipLabel.text = @"欢迎体验视频支持服务";
+        _tipLabel.text = NSLocalizedString(@"Welcome_to_experience_the_video", @"欢迎体验视频支持服务");
         _tipLabel.font = [UIFont systemFontOfSize:14];
 
         [self addSubview:_tipLabel];

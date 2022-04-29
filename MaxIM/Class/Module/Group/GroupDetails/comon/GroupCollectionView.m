@@ -62,7 +62,7 @@
     }else {
         UIImage* image = [UIImage imageWithContentsOfFile:roster.avatarThumbnailPath];
         if(!image){
-            [[[BMXClient sharedClient] rosterService] downloadAvatarWithRoster:roster progress:^(int progress, BMXError *error) {
+            [[[BMXClient sharedClient] rosterService] downloadAvatarWithRoster:roster isThumbnail:YES progress:^(int progress, BMXError *error) {
                 
             } completion:^(BMXRoster *aroster, BMXError *error) {
                 if(!error) {

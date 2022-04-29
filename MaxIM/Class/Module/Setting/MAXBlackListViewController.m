@@ -33,19 +33,19 @@
 }
 
 - (void)setUpNavItem{
-    [self setNavigationBarTitle: @"黑名单" navLeftButtonIcon:@"blackback"];
+    [self setNavigationBarTitle: NSLocalizedString(@"Blacklist", @"黑名单") navLeftButtonIcon:@"blackback"];
 }
 
 - (void)addBlack:(UIButton *)button {
     UIAlertController *alertController = [UIAlertController alertControllerWithTitle:nil
-                                                                             message:@"添加黑名单"
+                                                                             message:NSLocalizedString(@"Add_to_blacklist", @"加入黑名单")
                                                                       preferredStyle:UIAlertControllerStyleAlert];
     
-    [alertController addAction:[UIAlertAction actionWithTitle:@"取消"
+    [alertController addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Cancel", @"取消")
                                                         style:UIAlertActionStyleDefault
                                                       handler:^(UIAlertAction * _Nonnull action) {
     }]];
-    [alertController addAction:[UIAlertAction actionWithTitle:@"添加"
+    [alertController addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Add", @"添加")
                                                         style:UIAlertActionStyleDefault
                                                       handler:^(UIAlertAction * _Nonnull action) {
         UITextField *userNameTextField = alertController.textFields.firstObject;
@@ -54,7 +54,7 @@
     }]];
     
     [alertController addTextFieldWithConfigurationHandler:^(UITextField * _Nonnull textField) {
-        textField.placeholder = @"请输入对方的userid";
+        textField.placeholder = NSLocalizedString(@"enter_the_userid_of_the_other_party", @"请输入对方的userid");
     }];
     
     [self presentViewController:alertController animated:true completion:nil];
@@ -143,7 +143,7 @@ forRowAtIndexPath:(NSIndexPath *)indexPath {
 }
 
 -(NSString *)tableView:(UITableView *)tableView titleForDeleteConfirmationButtonForRowAtIndexPath:(NSIndexPath *)indexPath {
-    return @"删除";
+    return NSLocalizedString(@"Delete", @"删除");
 }
 
 

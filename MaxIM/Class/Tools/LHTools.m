@@ -51,7 +51,7 @@
         formatter.dateFormat = @"HH:mm";
         createdAtString = [formatter stringFromDate:sinceDate];
         if (sinceDate.lh_isInYesterday) { // 是昨天
-            createdAtString = [NSString stringWithFormat:@"昨天 %@", [formatter stringFromDate:sinceDate]];
+            createdAtString = [NSString stringWithFormat:NSLocalizedString(@"Yesterday_at", @"昨天 %@"), [formatter stringFromDate:sinceDate]];
         }
         else if (!sinceDate.lh_isInToDay) {
             [formatter setDateFormat:@"MM.dd HH:mm"];

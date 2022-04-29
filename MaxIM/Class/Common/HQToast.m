@@ -34,7 +34,7 @@ bool isBottom;
     
     isBottom = YES;
     
-    [self showDialog:@"网络正在开小差，请稍后重试" inView:window];
+    [self showDialog:NSLocalizedString(@"Network_does_not_work_retry_later", @"网络正在开小差，请稍后重试") inView:window];
 }
 
 + (void)showDialog:(NSString *)content inView:(UIView *)view {

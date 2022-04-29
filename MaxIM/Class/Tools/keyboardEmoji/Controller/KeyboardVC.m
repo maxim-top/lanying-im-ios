@@ -144,7 +144,7 @@
         UIButton *sendButotn = [UIButton buttonWithType:UIButtonTypeCustom];
         sendButotn.translatesAutoresizingMaskIntoConstraints = NO;
         sendButotn.titleLabel.font = [UIFont systemFontOfSize:15];
-        [sendButotn setTitle:@"发送" forState:UIControlStateNormal];
+        [sendButotn setTitle:NSLocalizedString(@"Send", @"发送") forState:UIControlStateNormal];
         [sendButotn setTitleColor:[UIColor lh_colorWithHex:0xffffff] forState:UIControlStateNormal];
         [sendButotn setBackgroundImage:[UIImage lh_imageWithColor:[UIColor lh_colorWithHex:0x4285f4 alpha:0.3]] forState:UIControlStateHighlighted];
         [sendButotn setBackgroundImage:[UIImage lh_imageWithColor:[UIColor lh_colorWithHex:0x4285f4]] forState:UIControlStateNormal];

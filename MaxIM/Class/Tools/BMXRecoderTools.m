@@ -50,7 +50,7 @@ typedef void(^RecordFinishBlock)(NSString *recordPath, int duration);
     if (![[BMXRecoderTools shareManager] canRecord]) {
         
         if (completion) {
-            error = [NSError errorWithDomain:NSLocalizedString(@"error", @"没权限") code:201 userInfo:nil];
+            error = [NSError errorWithDomain:NSLocalizedString(@"error", NSLocalizedString(@"No_permission", @"没权限")) code:201 userInfo:nil];
             completion(error);
         }
         return;

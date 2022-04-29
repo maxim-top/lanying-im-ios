@@ -15,8 +15,6 @@
 #import <Foundation/Foundation.h>
 #import <UIKit/UIKit.h>
 
-extern NSString *const NetworkErrorToastStr;
-
 typedef void(^WaitingBlock)();
 
 @interface HQCustomToast : NSObject

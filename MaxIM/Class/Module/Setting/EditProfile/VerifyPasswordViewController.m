@@ -49,7 +49,7 @@
 }
 
 - (void)setUpNavItem {
-    [self setNavigationBarTitle:@"验证密码" navLeftButtonIcon:@"blackback"];
+    [self setNavigationBarTitle:NSLocalizedString(@"Verify_with_password", @"验证密码") navLeftButtonIcon:@"blackback"];
 }
 
 
@@ -102,7 +102,7 @@
 - (VerifyPasswordView *)contentView {
     
     if (!_contentView) {
-        _contentView = [[VerifyPasswordView alloc] initWithFrame:CGRectMake(0, NavHeight, MAXScreenW, MAXScreenH - NavHeight) titleText:@"登录密码验证身份" continueButtonName:@"继续"];
+        _contentView = [[VerifyPasswordView alloc] initWithFrame:CGRectMake(0, NavHeight, MAXScreenW, MAXScreenH - NavHeight) titleText:NSLocalizedString(@"Login_with_password_to_verify", @"登录密码验证身份") continueButtonName:NSLocalizedString(@"Continue", @"继续")];
         _contentView.delegate = self;
     }
     return _contentView;

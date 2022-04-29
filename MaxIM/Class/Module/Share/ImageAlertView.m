@@ -80,7 +80,7 @@
     
     
     UILabel *titleLabel = [[UILabel alloc] initWithFrame:CGRectMake(20, 10, width - 40, 30)];
-    titleLabel.text = @"发送给:";
+    titleLabel.text = NSLocalizedString(@"Sendto", @"发送给:");
     [whiteView addSubview:titleLabel];
     
     
@@ -97,14 +97,14 @@
     UIButton *cancel = [UIButton buttonWithType:UIButtonTypeCustom];
     [cancel addTarget:self action:@selector(removeFromSuperview) forControlEvents:UIControlEventTouchUpInside];
     [cancel setTitleColor:[UIColor blackColor] forState:UIControlStateNormal];
-    [cancel setTitle:@"取消" forState:UIControlStateNormal];
+    [cancel setTitle:NSLocalizedString(@"Cancel", @"取消") forState:UIControlStateNormal];
     cancel.frame = CGRectMake(0, MAXScreenH / 2 - 40, width / 2, 40);
     [whiteView addSubview:cancel];
     
     
     UIButton *send = [UIButton buttonWithType:UIButtonTypeCustom];
     [send addTarget:self action:@selector(sendBtnClick) forControlEvents:UIControlEventTouchUpInside];
-    [send setTitle:@"发送" forState:UIControlStateNormal];
+    [send setTitle:NSLocalizedString(@"Send", @"发送") forState:UIControlStateNormal];
     [send setTitleColor:[UIColor blackColor] forState:UIControlStateNormal];
     send.frame = CGRectMake(width / 2, MAXScreenH / 2 - 40, width / 2, 40);
     [whiteView addSubview:send];

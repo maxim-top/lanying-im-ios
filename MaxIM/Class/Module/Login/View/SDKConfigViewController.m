@@ -36,7 +36,7 @@
     [super viewDidLoad];
     // Do any additional setup after loading the view.
     self.view.backgroundColor = [UIColor whiteColor];
-    [self setNavigationBarTitle:@"配置" navLeftButtonIcon:@"blackback" navRightButtonTitle:@"保存"];
+    [self setNavigationBarTitle:NSLocalizedString(@"Configure", @"配置") navLeftButtonIcon:@"blackback" navRightButtonTitle:NSLocalizedString(@"Save", @"保存")];
     [self removeNavLeftButtonDefaultEvent];
     [self.navRightButton addTarget:self action:@selector(clickNavRightButton) forControlEvents:UIControlEventTouchUpInside];
     [self.navLeftButton addTarget:self action:@selector(clickNavleftButton) forControlEvents:UIControlEventTouchUpInside];
@@ -53,9 +53,9 @@
     
 //    self.isUserServer = [HostConfigManager sharedManager].isUserServer;
         
-        self.IMServer = [HostConfigManager sharedManager].IMServer.length > 0 ? [HostConfigManager sharedManager].IMServer : @"默认";
-        self.IMPort = [HostConfigManager sharedManager].IMPort.length > 0 ? [HostConfigManager sharedManager].IMPort :@"默认";
-        self.restServer = [HostConfigManager sharedManager].restServer.length > 0 ? [HostConfigManager sharedManager].restServer : @"默认";
+        self.IMServer = [HostConfigManager sharedManager].IMServer.length > 0 ? [HostConfigManager sharedManager].IMServer : NSLocalizedString(@"Default", @"默认");
+        self.IMPort = [HostConfigManager sharedManager].IMPort.length > 0 ? [HostConfigManager sharedManager].IMPort :NSLocalizedString(@"Default", @"默认");
+        self.restServer = [HostConfigManager sharedManager].restServer.length > 0 ? [HostConfigManager sharedManager].restServer : NSLocalizedString(@"Default", @"默认");
         self.isUserServer = ([HostConfigManager sharedManager].IMServer.length > 0 || [HostConfigManager sharedManager].IMPort.length > 0 || [HostConfigManager sharedManager].restServer.length > 0);
 
     
@@ -82,7 +82,7 @@
     } else {
         
         BOOL hasChanged = NO;
-        if (![self.IMServer isEqualToString:@"默认"] && ![self.restServer isEqualToString:@"默认"] && ![self.IMPort isEqualToString:@"默认"]) {
+        if (![self.IMServer isEqualToString:NSLocalizedString(@"Default", @"默认")] && ![self.restServer isEqualToString:NSLocalizedString(@"Default", @"默认")] && ![self.IMPort isEqualToString:NSLocalizedString(@"Default", @"默认")]) {
             if (self.IMServer.length > 0 || [self.IMPort intValue] > 0 || self.restServer.length > 0) {
                 [HostConfigManager sharedManager].IMServer =  self.IMServer;
                 [HostConfigManager sharedManager].restServer =  self.restServer;
@@ -92,10 +92,10 @@
             }
         }
         if (hasChanged) {
-            [HQCustomToast showDialog:@"保存成功"];
+            [HQCustomToast showDialog:NSLocalizedString(@"Save_successfully", @"保存成功")];
         }else {
             
-            [HQCustomToast showDialog:@"请填写三项完整信息"];
+            [HQCustomToast showDialog:NSLocalizedString(@"complete_the_3_pieces_of_info", @"请填写三项完整信息")];
             [HostConfigManager sharedManager].IMServer = @"";
             [HostConfigManager sharedManager].IMPort = @"";
             [HostConfigManager sharedManager].restServer = @"";
@@ -113,24 +113,24 @@
     
     if (![title isEqualToString:@"AppID"] && !self.isUserServer) {
         
-        [HQCustomToast showDialog:@"尚未启动自定义服务"];
+        [HQCustomToast showDialog:NSLocalizedString(@"Custom_services_not_launched_yet", @"尚未启动自定义服务")];
         return;
     }
     
-    UIAlertController *alertController = [UIAlertController alertControllerWithTitle:@"" message:[NSString stringWithFormat:@"修改%@",title] preferredStyle:UIAlertControllerStyleAlert];
+    UIAlertController *alertController = [UIAlertController alertControllerWithTitle:@"" message:[NSString stringWithFormat:NSLocalizedString(@"Modify_at", @"修改%@"),title] preferredStyle:UIAlertControllerStyleAlert];
     
-     [alertController addAction:[UIAlertAction actionWithTitle:@"确定" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+     [alertController addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Confirm", @"确定") style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
          UITextField *textField = alertController.textFields.firstObject;
          NSString *newValue = textField.text;
          if (newValue.length == 0 ) {
-             [HQCustomToast showDialog:@"输入不能为空"];
+             [HQCustomToast showDialog:NSLocalizedString(@"Input_cannot_be_empty", @"输入不能为空")];
              return;
          }
          [self changeValue:newValue Type:title];
       
     }]];
     
-    [alertController addAction:[UIAlertAction actionWithTitle:@"取消" style:UIAlertActionStyleDefault handler:nil]];
+    [alertController addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Cancel", @"取消") style:UIAlertActionStyleDefault handler:nil]];
     [alertController addTextFieldWithConfigurationHandler:^(UITextField * _Nonnull textField) {
       textField.text = content;
     }];
@@ -150,7 +150,7 @@
         if (port > 0) {
             self.IMPort = value;
         }else {
-            [HQCustomToast showDialog:@"格式不正确"];
+            [HQCustomToast showDialog:NSLocalizedString(@"Incorrect_format", @"格式不正确")];
         }
     }else if ([type isEqualToString:@"Rest Server"]) {
         self.restServer = value;
@@ -223,12 +223,12 @@
     
     if (!mswtich.isOn && (self.IMServer.length > 0 || [self.IMPort intValue] > 0 || self.restServer.length > 0)) {
         
-        UIAlertController *alertController = [UIAlertController alertControllerWithTitle:nil message:@"您确认要关闭自定义服务吗" preferredStyle:UIAlertControllerStyleAlert];
-        [alertController addAction:[UIAlertAction actionWithTitle:@"取消" style:UIAlertActionStyleCancel handler:^(UIAlertAction * _Nonnull action) {
+        UIAlertController *alertController = [UIAlertController alertControllerWithTitle:nil message:NSLocalizedString(@"sure_to_turn_off_the_custom_services", @"您确认要关闭自定义服务吗") preferredStyle:UIAlertControllerStyleAlert];
+        [alertController addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Cancel", @"取消") style:UIAlertActionStyleCancel handler:^(UIAlertAction * _Nonnull action) {
             [mswtich setOn:YES];
             self.isUserServer = YES;
         }]];
-           [alertController addAction:[UIAlertAction actionWithTitle:@"确定" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+           [alertController addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Confirm", @"确定") style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
                self.isUserServer = NO;
                [self clickNavRightButton];
            }]];

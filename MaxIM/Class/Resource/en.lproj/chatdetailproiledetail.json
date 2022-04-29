@@ -1,0 +1,25 @@
+{
+    "type": "profile",
+    "cells": [
+        {
+            "type": "User name",
+            "control": "0"
+        },
+        {
+            "type": "Public info",
+            "control": "0"
+        },
+        {
+            "type": "Set alias",
+            "control": "0"
+        },
+        {
+            "type": "Set extension info",
+            "control": "0"
+        },
+        {
+            "type": "set Do-Not-Disturb",
+            "control": "1"
+        }
+    ]
+}

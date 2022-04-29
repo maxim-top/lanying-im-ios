@@ -215,7 +215,7 @@
 }
 
 -(void) createGroupWithIds:(NSArray*)ids {
-    [[GroupCreateAlertView alloc] initWithFrame:CGRectZero Text:@"创建信息" OK:^(NSString *title, NSString *description, NSString *message, BOOL isChatroom) {
+    [[GroupCreateAlertView alloc] initWithFrame:CGRectZero Text:NSLocalizedString(@"Create_message", @"创建信息") OK:^(NSString *title, NSString *description, NSString *message, BOOL isChatroom) {
         BMXCreatGroupOption *option = [[BMXCreatGroupOption alloc] initWithGroupName:title groupDescription:description isPublic:YES];
         option.message = message;
         option.members = ids;
@@ -234,10 +234,10 @@
 - (void)setUpNavItem {
     
     if (self.isAt == YES) {
-        [self setNavigationBarTitle:@"选择提醒的人" navLeftButtonIcon:@"blackback" navRightButtonTitle:@"保存"];
+        [self setNavigationBarTitle:NSLocalizedString(@"Select_who_to_alert", @"选择提醒的人") navLeftButtonIcon:@"blackback" navRightButtonTitle:NSLocalizedString(@"Save", @"保存")];
         [self.navRightButton addTarget:self action:@selector(touchedRightBar) forControlEvents:UIControlEventTouchUpInside];
     } else {
-        [self setNavigationBarTitle:@"创建群组" navLeftButtonIcon:@"blackback" navRightButtonTitle:@"保存"];
+        [self setNavigationBarTitle:NSLocalizedString(@"Create_group", @"创建群组") navLeftButtonIcon:@"blackback" navRightButtonTitle:NSLocalizedString(@"Save", @"保存")];
         [self.navRightButton addTarget:self action:@selector(touchedRightBar) forControlEvents:UIControlEventTouchUpInside];
     }
    

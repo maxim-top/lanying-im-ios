@@ -81,7 +81,7 @@
 
 - (void)configGrouopCodeAndContent {
     self.idLabel.text = [NSString stringWithFormat:@"id : %lld", self.group.groupId];
-    self.nameLabel.text = [NSString stringWithFormat:@"昵称 : %@", self.group.name];
+    self.nameLabel.text = [NSString stringWithFormat:NSLocalizedString(@"Nickname_name", @"昵称 : %@"), self.group.name];
     
     self.avatarImageView.image = [UIImage imageNamed:@"group_placeHo"];
     
@@ -151,14 +151,14 @@
     NSError *err;
     NSData *data = [NSJSONSerialization dataWithJSONObject:dic options:NSJSONWritingPrettyPrinted error:&err];
     if (err) {
-        return @"字典转JSON出错";
+        return NSLocalizedString(@"Dictionary_to_JSON_error", @"字典转JSON出错");
     }
     return [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
 }
 
 - (void)configUserCodeAndContent {
     self.idLabel.text = [NSString stringWithFormat:@"id : %lld", self.profile.userId];
-    self.nameLabel.text = [NSString stringWithFormat:@"昵称 : %@", self.profile.userName];
+    self.nameLabel.text = [NSString stringWithFormat:NSLocalizedString(@"Nickname_name", @"昵称 : %@"), self.profile.userName];
     
     self.avatarImageView.image = [UIImage imageNamed:@"profileavatar"];
     
@@ -194,7 +194,7 @@
     AppWechatUnbindApi *api = [[AppWechatUnbindApi alloc] init];
     [api startWithSuccessBlock:^(ApiResult * _Nullable result) {
         if (result.isOK) {
-            [HQCustomToast showDialog:@"解绑成功"];
+            [HQCustomToast showDialog:NSLocalizedString(@"Unbind_successfully", @"解绑成功")];
         }
         
     } failureBlock:^(NSError * _Nullable error) {
@@ -232,7 +232,7 @@
         _nameLabel.bmx_left = 80;
         _nameLabel.bmx_size = CGSizeMake(200, 40);
         _nameLabel.font = [UIFont systemFontOfSize:17];
-        _nameLabel.text = @"张三";
+        _nameLabel.text = NSLocalizedString(@"Anybody", @"张三");
         [self.cardView addSubview:_nameLabel];
     }
     return _nameLabel;
@@ -244,7 +244,7 @@
         _idLabel.bmx_top = _nameLabel.bmx_bottom + 5;
         _idLabel.bmx_left = 80;
         _idLabel.bmx_size = CGSizeMake(200, 30);
-        _idLabel.text = @"我的id";
+        _idLabel.text = NSLocalizedString(@"My_id", @"我的id");
         _idLabel.font = [UIFont systemFontOfSize:14];
         [self.cardView addSubview:_idLabel];
     }
@@ -291,7 +291,7 @@
 }
 
 - (void)setUpNavItem {
-    [self setNavigationBarTitle:@"我的二维码" navLeftButtonIcon:@"blackback"];
+    [self setNavigationBarTitle:NSLocalizedString(@"My_QR_Code", @"我的二维码") navLeftButtonIcon:@"blackback"];
 }
 
 @end

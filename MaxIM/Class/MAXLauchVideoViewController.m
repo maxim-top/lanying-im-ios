@@ -104,7 +104,7 @@
     enterMainButton.layer.borderWidth = 1;
     enterMainButton.layer.cornerRadius = 24;
     enterMainButton.layer.borderColor = [UIColor blueColor].CGColor;
-    [enterMainButton setTitle:@"进入应用" forState:UIControlStateNormal];
+    [enterMainButton setTitle:NSLocalizedString(@"Go_to_app", @"进入应用") forState:UIControlStateNormal];
     [enterMainButton setTitleColor:[UIColor blueColor] forState:UIControlStateNormal];
     enterMainButton.alpha = 0.0;
     

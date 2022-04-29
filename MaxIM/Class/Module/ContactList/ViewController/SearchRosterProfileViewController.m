@@ -48,7 +48,7 @@
             joinBtn.frame = CGRectMake(MAXScreenW - 30 - 30, NavHeight - 5 -30, 30, 30);
             [joinBtn addTarget:self action:@selector(joinBtnClick:) forControlEvents:UIControlEventTouchUpInside];
             [joinBtn setTitleColor:[UIColor blackColor] forState:UIControlStateNormal];
-            [joinBtn setTitle:@"添加" forState:UIControlStateNormal];
+            [joinBtn setTitle:NSLocalizedString(@"Add", @"添加") forState:UIControlStateNormal];
             [joinBtn sizeToFit];
             [self.navigationBar addSubview:joinBtn];
         }
@@ -70,7 +70,7 @@
     [[[BMXClient sharedClient] rosterService] applyAddRoster:rosterId reason:reason completion:^(BMXRoster *roster, BMXError *error) {
         MAXLog(@"%@", roster);
         if (!error) {
-            [HQCustomToast showDialog:@"已发出请求"];
+            [HQCustomToast showDialog:NSLocalizedString(@"Request_sent", @"已发出请求")];
             [self.navigationController popToRootViewControllerAnimated:YES];
             
         } else if (error.errorCode == BMXCurrentUserIsInRoster){

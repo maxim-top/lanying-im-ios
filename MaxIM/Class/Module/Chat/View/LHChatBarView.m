@@ -321,10 +321,10 @@ CGFloat const kChatBatItemWH = 26.0f;
 #pragma mark - LHChatBarMoreViewDelegate
 - (void)moreViewTakePicAction:(LHChatBarMoreView *)moreView {
     if (![UIImagePickerController isSourceTypeAvailable:UIImagePickerControllerSourceTypeCamera]) {
-        UIAlertView *alertView = [[UIAlertView alloc] initWithTitle:@"错误"
-                                                            message:@"设备没有摄像头"
+        UIAlertView *alertView = [[UIAlertView alloc] initWithTitle:NSLocalizedString(@"Error", @"错误")
+                                                            message:NSLocalizedString(@"No_camera_on_device", @"设备没有摄像头")
                                                            delegate:nil
-                                                  cancelButtonTitle:@"好的"
+                                                  cancelButtonTitle:NSLocalizedString(@"OK", @"好的")
                                                   otherButtonTitles: nil];
         [alertView show];
     } else {
@@ -334,7 +334,7 @@ CGFloat const kChatBatItemWH = 26.0f;
         picker.sourceType = UIImagePickerControllerSourceTypeCamera;
         
         if (![LHTools cameraLimit]) {
-            UIAlertView * alertView = [[UIAlertView alloc]initWithTitle:nil message:@"请在iPhone的\"设置-隐私-相机\"选项中,允许LHChatUI访问你的相机" delegate:nil cancelButtonTitle:@"确定" otherButtonTitles:nil, nil];
+            UIAlertView * alertView = [[UIAlertView alloc]initWithTitle:nil message:NSLocalizedString(@"allow_LHChatUI_to_access_your_camera", @"请在iPhone的设置-隐私-相机选项中,允许LHChatUI访问你的相机") delegate:nil cancelButtonTitle:NSLocalizedString(@"Confirm", @"确定") otherButtonTitles:nil, nil];
             [alertView show];
             return;
         }
@@ -346,7 +346,7 @@ CGFloat const kChatBatItemWH = 26.0f;
 
 - (void)moreViewPhotoAction:(LHChatBarMoreView *)moreVie {
     if (![LHTools photoLimit]) {
-        UIAlertView * alertView = [[UIAlertView alloc] initWithTitle:nil message:@"请在iPhone的\"设置-隐私-照片\"选项中,允许LHChatUI访问你的照片" delegate:nil cancelButtonTitle:@"确定" otherButtonTitles:nil, nil];
+        UIAlertView * alertView = [[UIAlertView alloc] initWithTitle:nil message:NSLocalizedString(@"allow_LHChatUI_to_access_your_photos", @"请在iPhone的设置-隐私-照片选项中,允许LHChatUI访问你的照片") delegate:nil cancelButtonTitle:NSLocalizedString(@"Confirm", @"确定") otherButtonTitles:nil, nil];
         [alertView show];
         return;
     }
@@ -398,7 +398,7 @@ CGFloat const kChatBatItemWH = 26.0f;
     
     [self resignFirstResponder];
     if (![[VideoManager shareManager] canRecordViedo]) {
-        UIAlertView *alert = [[UIAlertView alloc]initWithTitle:@"请在iPhone的“设置-隐私”选项中，允许MaxIM访问你的摄像头和麦克风。" message:nil delegate:nil cancelButtonTitle:@"确定" otherButtonTitles:nil, nil];
+        UIAlertView *alert = [[UIAlertView alloc]initWithTitle:NSLocalizedString(@"allow_MaxIM_to_access_your_camera_and_microphone", @"请在iPhone的设置-隐私选项中，允许MaxIM访问你的摄像头和麦克风。") message:nil delegate:nil cancelButtonTitle:NSLocalizedString(@"Confirm", @"确定") otherButtonTitles:nil, nil];
         [alert show];
     } else {
         [NSTimer scheduledTimerWithTimeInterval:0.3 target:self selector:@selector(videoViewWillAppear) userInfo:nil repeats:NO]; // 待动画完成
@@ -612,8 +612,8 @@ CGFloat const kChatBatItemWH = 26.0f;
 - (UIButton *)talkButton {
     if (_talkButton == nil) {
         _talkButton = [[UIButton alloc] init];
-        [_talkButton setTitle:@"按住 说话" forState:UIControlStateNormal];
-        [_talkButton setTitle:@"松开 结束" forState:UIControlStateHighlighted];
+        [_talkButton setTitle:NSLocalizedString(@"Press_to_speak", @"按住 说话") forState:UIControlStateNormal];
+        [_talkButton setTitle:NSLocalizedString(@"Release_to_end", @"松开 结束") forState:UIControlStateHighlighted];
         [_talkButton setTitleColor:[UIColor colorWithRed:0.3 green:0.3 blue:0.3 alpha:1.0] forState:UIControlStateNormal];
         [_talkButton.titleLabel setFont:[UIFont boldSystemFontOfSize:16.0f]];
         [_talkButton.layer setMasksToBounds:YES];

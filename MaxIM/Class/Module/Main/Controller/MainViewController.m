@@ -116,7 +116,7 @@
         imageview.image = [UIImage imageNamed:@"button_retry_comment"];
         [header addSubview:imageview];
         self.headerLabel = [[UILabel alloc] initWithFrame:CGRectMake(60, 0, MAXScreenW -  80, 44)];
-        self.headerLabel.text = @"当前网络不可用，请检查你的网络设置";
+        self.headerLabel.text = NSLocalizedString(@"network_is_not_available", @"当前网络不可用，请检查你的网络设置");
         self.headerLabel.font = [UIFont systemFontOfSize:13];
         [header addSubview:self.headerLabel];
         self.tableview.tableHeaderView = header;
@@ -187,7 +187,7 @@
                                 [tempProfileArray addObject:roster];
                             }else {
                                 // 获取不到资料时，新建一个对象占位
-                                [tempProfileArray addObject:@"无法获取资料"];
+                                [tempProfileArray addObject:NSLocalizedString(@"Unable_to_access_profile", @"无法获取资料")];
                             }
                         }];
                     }
@@ -201,7 +201,7 @@
                             [tempProfileArray addObject:group];
                         }else {
                              // 获取不到资料时，新建一个对象占位
-                            [tempProfileArray addObject:@"无法获取资料"];
+                            [tempProfileArray addObject:NSLocalizedString(@"Unable_to_access_profile", @"无法获取资料")];
                         }
                     }];
                      dispatch_semaphore_wait(semaphore, DISPATCH_TIME_FOREVER);
@@ -371,7 +371,7 @@
             cell.avatarImageView.image = [UIImage imageNamed:@"contact_placeholder"];
             UIImage *image = [UIImage imageWithContentsOfFile:roster.avatarThumbnailPath];
             if (!image) {
-                [[[BMXClient sharedClient] rosterService] downloadAvatarWithRoster:roster progress:^(int progress, BMXError *error) {
+                [[[BMXClient sharedClient] rosterService] downloadAvatarWithRoster:roster isThumbnail:YES progress:^(int progress, BMXError *error) {
                     
                 }  completion:^(BMXRoster *roster, BMXError *error) {
                     if (!error) {
@@ -397,7 +397,7 @@
         BMXGroup *group = self.profileArray[indexPath.row];
         if (group.groupId == conversation.conversationId) {
             
-            cell.titleLabel.text = group.name != nil ? group.name : @"暂无名字";
+            cell.titleLabel.text = group.name != nil ? group.name : NSLocalizedString(@"No_name_for_now", @"暂无名字");
             cell.avatarImageView.image = [UIImage imageNamed:@"group_placeHo"];
             
             if (group.avatarThumbnailPath > 0 && [[NSFileManager defaultManager] fileExistsAtPath:group.avatarThumbnailPath]) {
@@ -543,7 +543,7 @@ forRowAtIndexPath:(NSIndexPath *)indexPath {
 }
 
 - (NSString *)tableView:(UITableView *)tableView titleForDeleteConfirmationButtonForRowAtIndexPath:(NSIndexPath *)indexPath {
-    return @"删除";
+    return NSLocalizedString(@"Delete", @"删除");
 }
 
 - (void)removeconversation:(BMXConversation *)conversation {
@@ -622,7 +622,7 @@ forRowAtIndexPath:(NSIndexPath *)indexPath {
 
         
     } else {
-        [HQCustomToast showDialog:@"无法获取会话资料" time:1.0f];
+        [HQCustomToast showDialog:NSLocalizedString(@"Unable_to_access_conversation_profile", @"无法获取会话资料") time:1.0f];
     }
 }
 
@@ -655,7 +655,7 @@ forRowAtIndexPath:(NSIndexPath *)indexPath {
 }
 
 - (void)setUpNavItem{
-    [self setMainNavigationBarTitle:@"美信拓扑"];
+    [self setMainNavigationBarTitle:NSLocalizedString(@"Maximtop", @"美信拓扑")];
     
     UIImage *scanImage = [UIImage imageNamed:@"scanbutton"];
     UIButton *scanButton = [UIButton buttonWithType:UIButtonTypeCustom];
@@ -698,9 +698,9 @@ forRowAtIndexPath:(NSIndexPath *)indexPath {
     long temp = 0;
     NSString *result;
     if (timeInterval < 60) {
-        result = [NSString stringWithFormat:@"刚刚"];
+        result = [NSString stringWithFormat:NSLocalizedString(@"Just_now", @"刚刚")];
     }else if((temp = timeInterval/60) < 60){
-        result = [NSString stringWithFormat:@"%ld分钟前",temp];
+        result = [NSString stringWithFormat:NSLocalizedString(@"nminutes_ago", @"%ld分钟前"),temp];
     }else if((temp = temp/60) < 24){
         
         NSDate *messageDate = [NSDate dateWithTimeIntervalSince1970:comepareDate];

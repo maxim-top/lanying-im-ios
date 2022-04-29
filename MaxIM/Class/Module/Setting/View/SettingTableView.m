@@ -105,10 +105,10 @@
     AppDelegate *appDelegate = [UIApplication sharedApplication].delegate;
     [appDelegate reloadAppID:BMXAppID];
     
-    [HQCustomToast showDialog:@"退出成功"];
+    [HQCustomToast showDialog:NSLocalizedString(@"Quit_successfully", @"退出成功")];
     
     [self.avatarImageView sd_setImageWithURL:nil placeholderImage:[UIImage imageNamed:@"profileavatar"]];
-    self.nameLabel.text = @"请登录";
+    self.nameLabel.text = NSLocalizedString(@"login_pls", @"请登录");
     [self reloadData];
     [IMAcountInfoStorage clearObject];
     
@@ -143,8 +143,8 @@
 - (void)refeshProfile:(BMXUserProfile *)profile {
     self.profile = profile;
     [self reloadData];
-    self.nameLabel.text = [profile.nickName length] ? [NSString stringWithFormat:@"%@", profile.nickName] : @"点击设置昵称";
-    self.nickNameLabel.text = [NSString stringWithFormat:@"用户名：%@", profile.userName];
+    self.nameLabel.text = [profile.nickName length] ? [NSString stringWithFormat:@"%@", profile.nickName] : NSLocalizedString(@"Click_to_set_nickname", @"点击设置昵称");
+    self.nickNameLabel.text = [NSString stringWithFormat:NSLocalizedString(@"Username_name", @"用户名：%@"), profile.userName];
     [self.nickNameLabel sizeToFit];
 
     self.idLabel.text = [NSString stringWithFormat:@"ID: %lld", profile.userId];
@@ -201,21 +201,21 @@
         [cell.mswitch setHidden:NO];
         cell.accessoryType = UITableViewCellAccessoryNone;
     }
-    if ([cell.titleLabel.text isEqualToString:@"接受新消息通知"]) {
+    if ([cell.titleLabel.text isEqualToString:NSLocalizedString(@"Accept_new_message_notification", @"接受新消息通知")]) {
         [cell.mswitch setOn:self.profile.messageSetting.mPushEnabled];
-    } else if ([cell.titleLabel.text isEqualToString:@"震动"]) {
+    } else if ([cell.titleLabel.text isEqualToString:NSLocalizedString(@"Vibrate", @"震动")]) {
         [cell.mswitch setOn:self.profile.messageSetting.mNotificationVibrate];
-    } else if ([cell.titleLabel.text isEqualToString:@"声音"]) {
+    } else if ([cell.titleLabel.text isEqualToString:NSLocalizedString(@"Sound", @"声音")]) {
         [cell.mswitch setOn:self.profile.messageSetting.mNotificationSound];
-    } else if ([cell.titleLabel.text isEqualToString:@"是否自动下载缩略图附件"]) {
+    } else if ([cell.titleLabel.text isEqualToString:NSLocalizedString(@"Whether_to_download_thumbnail_attachments_automatically", @"是否自动下载缩略图附件")]) {
         [cell.mswitch setOn:self.profile.messageSetting.mAutoDownloadAttachment];
-    } else if ([cell.titleLabel.text isEqualToString:@"是否自动接受群邀请"]) {
+    } else if ([cell.titleLabel.text isEqualToString:NSLocalizedString(@"Whether_to_accept_group_invitation_automatically", @"是否自动接受群邀请")]) {
         [cell.mswitch setOn:self.profile.isAutoAcceptGroupInvite];
-    } else if ([cell.titleLabel.text isEqualToString:@"是否推送详情"]) {
+    } else if ([cell.titleLabel.text isEqualToString:NSLocalizedString(@"Whether_to_push_details", @"是否推送详情")]) {
         [cell.mswitch setOn:self.profile.messageSetting.mPushDetail];
-    } else if ([cell.titleLabel.text isEqualToString:@"关于我们"]) {
+    } else if ([cell.titleLabel.text isEqualToString:NSLocalizedString(@"About_Us", @"关于我们")]) {
         cell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
-    } else if ([cell.titleLabel.text isEqualToString:@"设置推送昵称"]) {
+    } else if ([cell.titleLabel.text isEqualToString:NSLocalizedString(@"Set_push_nickname", @"设置推送昵称")]) {
         cell.contentLabel.text = self.profile.messageSetting.pushNickname;
         cell.contentLabel.right = MAXScreenW - 50;
     }
@@ -228,40 +228,40 @@
     NSString *str = dic[@"type"];
     BOOL state = mswtich.on ? YES : NO;
     
-   if ([str isEqualToString:@"接受新消息通知"]) {
+   if ([str isEqualToString:NSLocalizedString(@"Accept_new_message_notification", @"接受新消息通知")]) {
         [[[BMXClient sharedClient] userService] setEnablePushStatus:state completion:^(BMXError *error) {
             if (!error) {
-                [HQCustomToast showDialog:@"设置成功"];
+                [HQCustomToast showDialog:NSLocalizedString(@"Set_successfully", @"设置成功")];
             }
         }];
-    } else if ([str isEqualToString:@"震动"]) {
+    } else if ([str isEqualToString:NSLocalizedString(@"Vibrate", @"震动")]) {
         [[[BMXClient sharedClient] userService] setNotificationVibrate:state completion:^(BMXError *error) {
             if (!error) {
-                [HQCustomToast showDialog:@"设置成功"];
+                [HQCustomToast showDialog:NSLocalizedString(@"Set_successfully", @"设置成功")];
             }
         }];
-    } else if ([str isEqualToString:@"声音"]) {
+    } else if ([str isEqualToString:NSLocalizedString(@"Sound", @"声音")]) {
         [[[BMXClient sharedClient] userService] setNotificationSound:state completion:^(BMXError *error) {
             if (!error) {
-                [HQCustomToast showDialog:@"设置成功"];
+                [HQCustomToast showDialog:NSLocalizedString(@"Set_successfully", @"设置成功")];
             }
         }];
-    } else if ([str isEqualToString:@"是否推送详情"]) {
+    } else if ([str isEqualToString:NSLocalizedString(@"Whether_to_push_details", @"是否推送详情")]) {
         [[[BMXClient sharedClient] userService] setEnablePushDetail:state completion:^(BMXError *error) {
             if (!error) {
-                [HQCustomToast showDialog:@"设置成功"];
+                [HQCustomToast showDialog:NSLocalizedString(@"Set_successfully", @"设置成功")];
             }
         }];
-    } else if ([str isEqualToString:@"是否自动下载缩略图附件"]) {
+    } else if ([str isEqualToString:NSLocalizedString(@"Whether_to_download_thumbnail_attachments_automatically", @"是否自动下载缩略图附件")]) {
         [[[BMXClient sharedClient] userService] setAutoDownloadAttachment:state completion:^(BMXError *error) {
             if (!error) {
-                [HQCustomToast showDialog:@"设置成功"];
+                [HQCustomToast showDialog:NSLocalizedString(@"Set_successfully", @"设置成功")];
             }
         }];
-    } else if ([str isEqualToString:@"是否自动接受群邀请"]) {
+    } else if ([str isEqualToString:NSLocalizedString(@"Whether_to_accept_group_invitation_automatically", @"是否自动接受群邀请")]) {
         [[[BMXClient sharedClient] userService] setAutoAcceptGroupInvite:state completion:^(BMXError *error) {
             if (!error) {
-                [HQCustomToast showDialog:@"设置成功"];
+                [HQCustomToast showDialog:NSLocalizedString(@"Set_successfully", @"设置成功")];
             }
         }];
     }
@@ -288,19 +288,19 @@
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
     NSDictionary *dic = self.cellDataArray[indexPath.row];
     NSString *str = [NSString stringWithFormat:@"%@", dic[@"type"]];
-    if ([str isEqualToString:@"切换账号"]) {
+    if ([str isEqualToString:NSLocalizedString(@"Switch_account", @"切换账号")]) {
         AccountMangementViewController *vc = [[AccountMangementViewController alloc] init];
         vc.hidesBottomBarWhenPushed = YES;
         [self.currentViewController.navigationController pushViewController:vc animated:YES];
-    } else if ([str isEqualToString:@"黑名单列表"]) {
+    } else if ([str isEqualToString:NSLocalizedString(@"List_of_blacklists", @"黑名单列表")]) {
         MAXBlackListViewController *vc = [[MAXBlackListViewController alloc] init];
         vc.hidesBottomBarWhenPushed = YES;
         [self.currentViewController.navigationController pushViewController:vc animated:YES];
-    } else if ([str isEqualToString:@"设备管理"]){
+    } else if ([str isEqualToString:NSLocalizedString(@"Device_management", @"设备管理")]){
         DeviceManagmentViewController *vc = [[DeviceManagmentViewController alloc] init];
         vc.hidesBottomBarWhenPushed = YES;
         [self.currentViewController.navigationController pushViewController:vc animated:YES];
-    } else if ([str isEqualToString:@"关于我们"]) {
+    } else if ([str isEqualToString:NSLocalizedString(@"About_Us", @"关于我们")]) {
         AboutUsViewController *vc = [[AboutUsViewController alloc] init];
         vc.hidesBottomBarWhenPushed = YES;
         [self.currentViewController.navigationController pushViewController:vc animated:YES];
@@ -382,7 +382,7 @@
         _logoutButton = [UIButton buttonWithType:UIButtonTypeCustom];
         [_logoutButton addTarget:self action:@selector(logoutclick) forControlEvents:UIControlEventTouchUpInside];
         [self.footView addSubview:_logoutButton];
-        [_logoutButton setTitle:@"退出" forState:UIControlStateNormal];
+        [_logoutButton setTitle:NSLocalizedString(@"Quit", @"退出") forState:UIControlStateNormal];
         [_logoutButton setTitleColor:BMXCOLOR_HEX(0xff475a) forState:UIControlStateNormal];
         _logoutButton.titleLabel.font =  [UIFont fontWithName:@"PingFangSC-Regular" size:17];
         _logoutButton.bmx_size = CGSizeMake(80, 50);

@@ -73,7 +73,7 @@
     
     UIImage *image = [UIImage imageWithContentsOfFile:roster.avatarThumbnailPath];
     if (!image) {
-        [[[BMXClient sharedClient] rosterService] downloadAvatarWithRoster:roster progress:^(int progress, BMXError *error) {
+        [[[BMXClient sharedClient] rosterService] downloadAvatarWithRoster:roster isThumbnail:YES progress:^(int progress, BMXError *error) {
             
         }  completion:^(BMXRoster *rosterObjc, BMXError *error) {
             if (!error) {
@@ -102,7 +102,7 @@
     [_selectionImage setHidden:!isSelected];
     UIImage *image = [UIImage imageWithContentsOfFile:roster.avatarThumbnailPath];
     if (!image) {
-        [[[BMXClient sharedClient] rosterService] downloadAvatarWithRoster:roster progress:^(int progress, BMXError *error) {
+        [[[BMXClient sharedClient] rosterService] downloadAvatarWithRoster:roster isThumbnail:YES progress:^(int progress, BMXError *error) {
             
         }  completion:^(BMXRoster *rosterObjc, BMXError *error) {
             if (!error) {

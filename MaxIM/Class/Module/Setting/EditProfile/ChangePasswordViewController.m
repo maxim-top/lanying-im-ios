@@ -37,7 +37,7 @@
 }
 
 - (void)setUpNavItem {
-    [self setNavigationBarTitle:@"修改密码" navLeftButtonIcon:@"blackback"];
+    [self setNavigationBarTitle:NSLocalizedString(@"Modify_password", @"修改密码") navLeftButtonIcon:@"blackback"];
 }
 
 - (void)changePasswordApi:(NSString *)newPassword {

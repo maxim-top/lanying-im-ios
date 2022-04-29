@@ -36,7 +36,7 @@
 }
 
 - (void)setUpNavItem {
-    [self setNavigationBarTitle:@"绑定手机号" navLeftButtonIcon:@"blackback"];
+    [self setNavigationBarTitle:NSLocalizedString(@"Bind_phone_number", @"绑定手机号") navLeftButtonIcon:@"blackback"];
 }
 
 - (void)sendChaptchaWithPhone:(NSString *)phone {
@@ -62,7 +62,7 @@
     [api startWithSuccessBlock:^(ApiResult * _Nullable result) {
         if (result.isOK) {
             [self.navigationController popViewControllerAnimated:YES];
-            [HQCustomToast showDialog:@"绑定成功"];
+            [HQCustomToast showDialog:NSLocalizedString(@"Bind_successfully", @"绑定成功")];
         } else {
             [HQCustomToast showDialog:result.errmsg];
         }

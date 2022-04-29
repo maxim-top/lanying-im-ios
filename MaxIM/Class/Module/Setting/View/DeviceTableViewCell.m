@@ -116,7 +116,7 @@
         _button.layer.borderWidth = 1.0f;//设置边框颜色
         _button.titleLabel.font = [UIFont systemFontOfSize:11];
         [_button setTitleColor:[UIColor blackColor] forState:UIControlStateNormal];
-        [_button setTitle:@"删除设备" forState:UIControlStateNormal];
+        [_button setTitle:NSLocalizedString(@"Delete_device", @"删除设备") forState:UIControlStateNormal];
         [_button addTarget:self action:@selector(deleteDevice:) forControlEvents:UIControlEventTouchUpInside];
         [self.contentView addSubview:_button];
         [_button sizeToFit];

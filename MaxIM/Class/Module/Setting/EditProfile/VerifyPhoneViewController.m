@@ -54,7 +54,7 @@
 
 - (void)setUpNavItem {
     
-    [self setNavigationBarTitle:@"验证手机号" navLeftButtonIcon:@"blackback"];
+    [self setNavigationBarTitle:NSLocalizedString(@"Verify_with_phone_number", @"验证手机号") navLeftButtonIcon:@"blackback"];
 }
 
 - (void)sendChaptchaWithPhone:(NSString *)phone {
@@ -139,7 +139,7 @@
 - (BindPhoneView *)contentView {
     
     if (!_contentView) {
-        _contentView = [[BindPhoneView alloc] initWithFrame:CGRectMake(0, NavHeight, MAXScreenW, MAXScreenH - NavHeight) needTitle:YES titleText:@"已绑定手机号验证身份"];
+        _contentView = [[BindPhoneView alloc] initWithFrame:CGRectMake(0, NavHeight, MAXScreenW, MAXScreenH - NavHeight) needTitle:YES titleText:NSLocalizedString(@"Verify_identity_with_bound_phone_number", @"已绑定手机号验证身份")];
         _contentView.delegate = self;
     }
     return _contentView;

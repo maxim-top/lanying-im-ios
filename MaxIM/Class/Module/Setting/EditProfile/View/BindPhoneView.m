@@ -134,7 +134,7 @@
     
     NSString *phoneNum = self.phoneTextfield.text;
     if (phoneNum.length < 11) {
-        [HQCustomToast showDialog:@"请输入正确手机号"];
+        [HQCustomToast showDialog:NSLocalizedString(@"enter_a_correct_phone_number", @"请输入正确手机号")];
         return;
     }
     
@@ -185,11 +185,11 @@
     }
     if (isStart) {
         [self.codeTimerManager beginTimeWithTotalTime:60];
-        [self.sendButton setTitle:@"60秒后重发" forState:UIControlStateNormal];
+        [self.sendButton setTitle:NSLocalizedString(@"sixtysec_later_to_resend", @"60秒后重发") forState:UIControlStateNormal];
         [self.sendButton setTitleColor:kColorC3_7 forState:UIControlStateNormal];
         self.sendButton.enabled = NO;
     } else {
-        [self.sendButton setTitle:@"获取验证码" forState:UIControlStateNormal];
+        [self.sendButton setTitle:NSLocalizedString(@"Get_captcha", @"获取验证码") forState:UIControlStateNormal];
         
         if ([self.phoneTextfield.text length]) {
             [self.sendButton setTitleColor:BMXCOLOR_HEX(0x4a90e2) forState:UIControlStateNormal];
@@ -207,7 +207,7 @@
 }
 
 - (void)timeLast:(NSTimeInterval)lastTime {
-    [self.sendButton setTitle:[NSString stringWithFormat:@"%.0f秒后重发", lastTime] forState:UIControlStateNormal];
+    [self.sendButton setTitle:[NSString stringWithFormat:NSLocalizedString(@"nsec_later_to_resend", @"%.0f秒后重发"), lastTime] forState:UIControlStateNormal];
 }
 
 - (void)textFieldDidChange:(UITextField *)textField {
@@ -228,7 +228,7 @@
         _phoneTextfield = [[UITextField alloc] init];
         _phoneTextfield.keyboardType = UIKeyboardTypePhonePad;
         _phoneTextfield.font = [UIFont systemFontOfSize:14];
-        _phoneTextfield.placeholder = @"手机号";
+        _phoneTextfield.placeholder = NSLocalizedString(@"Phone_number", @"手机号");
         [self addSubview:_phoneTextfield];
         [_phoneTextfield addTarget:self action:@selector(textFieldDidChange:) forControlEvents:UIControlEventEditingChanged];
         
@@ -242,7 +242,7 @@
         _chptchaTextfield = [[UITextField alloc] init];
         _chptchaTextfield.keyboardType = UIKeyboardTypePhonePad;
         _chptchaTextfield.font = [UIFont systemFontOfSize:14];
-        _chptchaTextfield.placeholder = @"验证码";
+        _chptchaTextfield.placeholder = NSLocalizedString(@"Captcha", @"验证码");
         [self addSubview:_chptchaTextfield];
         [_chptchaTextfield addTarget:self action:@selector(textFieldDidChange:) forControlEvents:UIControlEventEditingChanged];
     }
@@ -253,7 +253,7 @@
     if (!_sendButton) {
         _sendButton = [UIButton buttonWithType:UIButtonTypeCustom];
         _sendButton.titleLabel.font = [UIFont systemFontOfSize:14];
-        [_sendButton setTitle:@"获取验证码" forState:UIControlStateNormal];
+        [_sendButton setTitle:NSLocalizedString(@"Get_captcha", @"获取验证码") forState:UIControlStateNormal];
         [_sendButton setTitleColor:BMXCOLOR_HEX(0x4A90E2) forState:UIControlStateNormal];
         [_sendButton addTarget:self action:@selector(sendButtonClick) forControlEvents:UIControlEventTouchUpInside];
         [self addSubview:_sendButton];
@@ -273,8 +273,8 @@
         _continueButton.titleLabel.font = [UIFont systemFontOfSize:16];
         _continueButton.layer.masksToBounds = YES;
         _continueButton.layer.cornerRadius = 12;
-        [_continueButton setTitle:@"继续" forState:UIControlStateDisabled];
-        [_continueButton setTitle:@"继续" forState:UIControlStateNormal];
+        [_continueButton setTitle:NSLocalizedString(@"Continue", @"继续") forState:UIControlStateDisabled];
+        [_continueButton setTitle:NSLocalizedString(@"Continue", @"继续") forState:UIControlStateNormal];
         [_continueButton setTitleColor:[BMXCOLOR_HEX(0x333333) colorWithAlphaComponent:0.4] forState:UIControlStateDisabled];
         _continueButton.backgroundColor = [BMXCOLOR_HEX(0x00A1E9) colorWithAlphaComponent:0.2];
         [_continueButton addTarget:self action:@selector(continueButtonClick) forControlEvents:UIControlEventTouchUpInside];

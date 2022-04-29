@@ -19,7 +19,7 @@ target 'MaxIM' do
   pod 'Masonry'
   pod 'Bugly'
   pod 'tingyunApp'
-  pod 'FMDB/SQLCipher'
+  pod 'FMDB'
   
   pod 'floo-ios'
 

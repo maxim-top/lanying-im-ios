@@ -1,0 +1,25 @@
+{
+    "type": "profile",
+    "cells": [
+        {
+            "type": "id",
+            "control": "0"
+        },
+        {
+            "type": "nickname",
+            "control": "0"
+        },
+        {
+            "type": "Public info",
+            "control": "0"
+        },
+        {
+            "type": "set alias",
+            "control": "0"
+        },
+        {
+            "type": "Set extension info",
+            "control": "0"
+        }
+    ]
+}

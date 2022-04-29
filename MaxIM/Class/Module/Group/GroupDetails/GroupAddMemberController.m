@@ -161,9 +161,9 @@
 }
 
 -(void) showAlertWithIds:(NSArray*) ids {
-    UIAlertController *alertController = [UIAlertController alertControllerWithTitle:nil message:@"请输入邀请消息" preferredStyle:UIAlertControllerStyleAlert];
-    [alertController addAction:[UIAlertAction actionWithTitle:@"取消" style:UIAlertActionStyleCancel handler:nil]];
-    [alertController addAction:[UIAlertAction actionWithTitle:@"确定" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+    UIAlertController *alertController = [UIAlertController alertControllerWithTitle:nil message:NSLocalizedString(@"enter_your_invitation_message", @"请输入邀请消息") preferredStyle:UIAlertControllerStyleAlert];
+    [alertController addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Cancel", @"取消") style:UIAlertActionStyleCancel handler:nil]];
+    [alertController addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Confirm", @"确定") style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
         UITextField* tfield = alertController.textFields.firstObject;
         NSString* message = tfield.text;
         [[[BMXClient sharedClient] groupService] addMembersToGroup:self.group memberIdlist:ids message:message completion:^(BMXError *error) {
@@ -172,14 +172,14 @@
         }];
     }]];
     [alertController addTextFieldWithConfigurationHandler:^(UITextField* textField) {
-        textField.placeholder=@"请输入邀请消息";
+        textField.placeholder=NSLocalizedString(@"enter_your_invitation_message", @"请输入邀请消息");
     }];
     [self presentViewController:alertController animated:YES completion:nil];
     
 }
 
 - (void)setUpNavItem {
-    [self setNavigationBarTitle: @"设置群组成员" navLeftButtonIcon:@"blackback" navRightButtonTitle:@"保存"];
+    [self setNavigationBarTitle: NSLocalizedString(@"Set_group_members", @"设置群组成员") navLeftButtonIcon:@"blackback" navRightButtonTitle:NSLocalizedString(@"Save", @"保存")];
     [self.navRightButton addTarget:self action:@selector(touchedRightBar) forControlEvents:UIControlEventTouchUpInside];
 }
 

@@ -180,7 +180,7 @@
 
 - (void)setUpNavItem{
     self.navigationController.navigationBar.barTintColor = BMXColorNavBar;
-    self.navigationItem.title = @"群组";
+    self.navigationItem.title = NSLocalizedString(@"Group", @"群组");
 }
 
 - (NSArray *)groupArray {

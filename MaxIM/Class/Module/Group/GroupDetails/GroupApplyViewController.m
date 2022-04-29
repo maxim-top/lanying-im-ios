@@ -115,7 +115,7 @@
 }
 
 - (void)setUpNavItem{
-    [self setNavigationBarTitle:@"入群申请" navLeftButtonIcon:@"blackback"];
+    [self setNavigationBarTitle:NSLocalizedString(@"Join_group_application", @"入群申请") navLeftButtonIcon:@"blackback"];
 }
 
 - (UITableView *)tableView {

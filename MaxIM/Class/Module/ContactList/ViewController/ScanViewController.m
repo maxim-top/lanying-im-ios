@@ -81,18 +81,18 @@
 
     UILabel *label = [[UILabel alloc] initWithFrame:CGRectMake(40/3.0, 114/3.0, 300, 20)];
     label.font = [UIFont systemFontOfSize:17];
-    label.text = @"请扫描二维码";
+    label.text = NSLocalizedString(@"scan_QR_Code", @"请扫描二维码");
     label.textColor = [UIColor whiteColor];
     [self.bgroundimageview addSubview:label];
     
     UILabel *label3 = [[UILabel alloc] initWithFrame:CGRectMake(MAXScreenW /2.0 - 230/2,460, 230, 30) ];
-    label3.text = @"请将二维码置于框内，即可自动扫描";
+    label3.text = NSLocalizedString(@"the_QR_Code_in_box_to_scan_it_automatically", @"请将二维码置于框内，即可自动扫描");
     label3.font = [UIFont systemFontOfSize:14];
     label3.textColor = [UIColor whiteColor];
     [self.bgroundimageview addSubview:label3];
     
     UIButton *btn = [[UIButton alloc] initWithFrame:CGRectMake(MAXScreenW - 42/3.0-50, 30, 50, 30)];
-    [btn setTitle:@"关闭" forState:UIControlStateNormal];
+    [btn setTitle:NSLocalizedString(@"Close", @"关闭") forState:UIControlStateNormal];
     [btn addTarget:self action:@selector(closwBtnClick) forControlEvents:UIControlEventTouchUpInside];
     [self.bgroundimageview addSubview:btn];
 }
@@ -126,7 +126,7 @@
         [self searcGroupById:[groupID integerValue] WithInfo:dic[@"info"]];
         
     } else {
-        [HQCustomToast showDialog:@"请使用正确设备扫描"];
+        [HQCustomToast showDialog:NSLocalizedString(@"use_the_correct_device_to_scan", @"请使用正确设备扫描")];
         [self.navigationController popToRootViewControllerAnimated:YES];
     }
 }
@@ -154,17 +154,17 @@
         [self closwBtnClick];
         
     } else {
-        [HQCustomToast showDialog:@"未识别该二维码"];
+        [HQCustomToast showDialog:NSLocalizedString(@"QR_Code_is_not_recognized", @"未识别该二维码")];
         [self.navigationController popToRootViewControllerAnimated:YES];
     }
 }
 
 -(void)showAlertWithAction:(NSString *)actionString infoDic:(NSDictionary *)dic {
-    UIAlertController *alertController = [UIAlertController alertControllerWithTitle:@"是否切换AppID?" message:@"切换AppID，需要退出当前账号" preferredStyle:UIAlertControllerStyleAlert];
-    [alertController addAction:[UIAlertAction actionWithTitle:@"取消" style:UIAlertActionStyleCancel handler:^(UIAlertAction * _Nonnull action) {
+    UIAlertController *alertController = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Whether_to_switch_AppID", @"是否切换AppID?") message:NSLocalizedString(@"quit_current_account_to_switch_AppID", @"切换AppID，需要退出当前账号") preferredStyle:UIAlertControllerStyleAlert];
+    [alertController addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Cancel", @"取消") style:UIAlertActionStyleCancel handler:^(UIAlertAction * _Nonnull action) {
         [self.navigationController popToRootViewControllerAnimated:YES];
     }]];
-    [alertController addAction:[UIAlertAction actionWithTitle:@"确定" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+    [alertController addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Confirm", @"确定") style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
         
         if ([actionString isEqualToString:@"login"]) {
             NSString *appId = [NSString stringWithFormat:@"%@", dic[@"app_id"]];
@@ -194,10 +194,10 @@
     NSString *mediaType = AVMediaTypeVideo;
     AVAuthorizationStatus authStatus = [AVCaptureDevice authorizationStatusForMediaType:mediaType];
     if(authStatus == AVAuthorizationStatusRestricted || authStatus ==AVAuthorizationStatusDenied){
-        // @"请在iPhone的“设置-隐私-相机”选项中，允许微信访问你的相机"
+        // @"请在iPhone的设置-隐私-相机选项中，允许微信访问你的相机"
         
-        UIAlertController *alertVC = [UIAlertController alertControllerWithTitle:nil message:@"请在iPhone的“设置-隐私-相机”选项中，允许美信拓扑访问你的相机" preferredStyle:UIAlertControllerStyleAlert];
-        [alertVC addAction:[UIAlertAction actionWithTitle:@"好" style:UIAlertActionStyleCancel handler:^(UIAlertAction * _Nonnull action) {
+        UIAlertController *alertVC = [UIAlertController alertControllerWithTitle:nil message:NSLocalizedString(@"allow_Maximtop_to_access_your_camera", @"请在iPhone的设置-隐私-相机选项中，允许美信拓扑访问你的相机") preferredStyle:UIAlertControllerStyleAlert];
+        [alertVC addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Good", @"好") style:UIAlertActionStyleCancel handler:^(UIAlertAction * _Nonnull action) {
             
         }]];
         [self.navigationController presentViewController:alertVC animated:true completion:nil];
@@ -399,16 +399,16 @@
         NotifierUploadPushInfoApi *api = [[NotifierUploadPushInfoApi alloc] initWithDeviceToken:deviceToken uuid:random];
         [api startWithSuccessBlock:^(ApiResult * _Nullable result) {
             MAXLog(@"上传成功");
-            [HQCustomToast showDialog:@"上传成功"];
+            [HQCustomToast showDialog:NSLocalizedString(@"Upload_successfully", @"上传成功")];
             [self.navigationController popToRootViewControllerAnimated:YES];
 
         } failureBlock:^(NSError * _Nullable error) {
-            [HQCustomToast showDialog:@"上传失败"];
+            [HQCustomToast showDialog:NSLocalizedString(@"Upload_falied", @"上传失败")];
             [self.navigationController popToRootViewControllerAnimated:YES];
         }];
         
     } else {
-        [HQCustomToast showDialog:@"请使用正确设备扫描"];
+        [HQCustomToast showDialog:NSLocalizedString(@"use_the_correct_device_to_scan", @"请使用正确设备扫描")];
         [self.navigationController popToRootViewControllerAnimated:YES];
     }
     

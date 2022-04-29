@@ -120,15 +120,15 @@
     NSString* ownerIdStr = [NSString stringWithFormat:@"%ld", self.group.ownerId];
     NSString* rosterIdStr = [NSString stringWithFormat:@"%lld", roster.rosterId];
     if([ownerIdStr isEqualToString:rosterIdStr] || _selectedIndex == -1) {
-        UIAlertController* alert = [UIAlertController alertControllerWithTitle:@"警告" message:@"您选的群主没有改变" preferredStyle:UIAlertControllerStyleAlert];
-        [alert addAction:[UIAlertAction actionWithTitle:@"确定" style:UIAlertActionStyleDefault handler:nil]];
+        UIAlertController* alert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Warning", @"警告") message:NSLocalizedString(@"The_group_owner_you_selected_has_no_changed", @"您选的群主没有改变") preferredStyle:UIAlertControllerStyleAlert];
+        [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Confirm", @"确定") style:UIAlertActionStyleDefault handler:nil]];
         [self presentViewController:alert animated:YES completion:nil];
     }else {
-        UIAlertController* alert = [UIAlertController alertControllerWithTitle:@"警告" message:@"确定要转让群主么？" preferredStyle:UIAlertControllerStyleAlert];
-        [alert addAction:[UIAlertAction actionWithTitle:@"确定" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+        UIAlertController* alert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Warning", @"警告") message:NSLocalizedString(@"Confirm_to_transfer_the_group_owner", @"确定要转让群主么？") preferredStyle:UIAlertControllerStyleAlert];
+        [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Confirm", @"确定") style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
             [self transferOwner];
         }]];
-        [alert addAction:[UIAlertAction actionWithTitle:@"取消" style:UIAlertActionStyleCancel handler:nil]];
+        [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Cancel", @"取消") style:UIAlertActionStyleCancel handler:nil]];
         [self presentViewController:alert animated:YES completion:nil];
     }
 }
@@ -146,7 +146,7 @@
 }
 
 - (void)setUpNavItem {
-    [self setNavigationBarTitle:@"群主转让" navLeftButtonIcon:@"blackback" navRightButtonTitle:@"保存"];
+    [self setNavigationBarTitle:NSLocalizedString(@"Group_owner_transferred", @"群主转让") navLeftButtonIcon:@"blackback" navRightButtonTitle:NSLocalizedString(@"Save", @"保存")];
     [self.navRightButton addTarget:self action:@selector(touchedRightBar) forControlEvents:UIControlEventTouchUpInside];
 }
 

@@ -125,7 +125,7 @@
 }
 
 - (NSArray *)actionArray {
-    return @[@"群组"];
+    return @[NSLocalizedString(@"Group", @"群组")];
 }
 
 - (UITableView *)tableView {
@@ -147,7 +147,7 @@
 }
 
 - (void)setUpNavItem {
-    [self setNavigationBarTitle:@"选择要转发的人" navLeftButtonIcon:@"blackback"];
+    [self setNavigationBarTitle:NSLocalizedString(@"Select_who_to_forward", @"选择要转发的人") navLeftButtonIcon:@"blackback"];
 }
 
 /*

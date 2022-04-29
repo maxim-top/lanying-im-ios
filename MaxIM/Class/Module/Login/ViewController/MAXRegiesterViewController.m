@@ -76,8 +76,8 @@
     }];
 
     if (self.openId.length > 0) {
-        [self.contentView changeCommitBtnName:@"注册并绑定" confirmButtonName:@"" closeBtnName:@"账号登录"];
-        [self.contentView addWechatTransformButtonWithTitle:@"已有账号" buttonClick:^{
+        [self.contentView changeCommitBtnName:NSLocalizedString(@"Register_and_bind", @"注册并绑定") confirmButtonName:@"" closeBtnName:NSLocalizedString(@"Login_with_account", @"账号登录")];
+        [self.contentView addWechatTransformButtonWithTitle:NSLocalizedString(@"Already_have_an_account", @"已有账号") buttonClick:^{
             MAXLoginViewController *loginVC = [[MAXLoginViewController alloc] init];
             loginVC.openId = weakSelf.openId;
             [weakSelf presentViewController:loginVC animated:YES completion:nil];
@@ -88,18 +88,18 @@
 - (MAXLoginView *)contentView {
     
     if (!_contentView) {
-        _contentView = [MAXLoginView createLoginVieWithTitle:@"注册" buttonClick:nil];
+        _contentView = [MAXLoginView createLoginVieWithTitle:NSLocalizedString(@"Register", @"注册") buttonClick:nil];
         [self.view addSubview:_contentView];
     }
     return _contentView;
 }
 
 - (void)showAppIDEditAlert {
-    UIAlertController* alert = [UIAlertController alertControllerWithTitle:@"修改AppID"
-                                                                   message:@"如果需要更改需要重启客户端"
+    UIAlertController* alert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Modify_AppID", @"修改AppID")
+                                                                   message:NSLocalizedString(@"restart_the_client_to_make_the_change", @"如果需要更改需要重启客户端")
                                                             preferredStyle:UIAlertControllerStyleAlert];
     
-    UIAlertAction* okAction = [UIAlertAction actionWithTitle:@"确定" style:UIAlertActionStyleDefault
+    UIAlertAction* okAction = [UIAlertAction actionWithTitle:NSLocalizedString(@"Confirm", @"确定") style:UIAlertActionStyleDefault
                                                      handler:^(UIAlertAction * action) {
                                                          //响应事件
                                                          //得到文本信息
@@ -113,13 +113,13 @@
                                                              
                                                          }
                                                      }];
-    UIAlertAction* cancelAction = [UIAlertAction actionWithTitle:@"取消" style:UIAlertActionStyleCancel
+    UIAlertAction* cancelAction = [UIAlertAction actionWithTitle:NSLocalizedString(@"Cancel", @"取消") style:UIAlertActionStyleCancel
                                                          handler:^(UIAlertAction * action) {
                                                              //响应事件
                                                              MAXLog(@"action = %@", alert.textFields);
                                                          }];
     [alert addTextFieldWithConfigurationHandler:^(UITextField *textField) {
-        textField.placeholder = @"请输入AppID";
+        textField.placeholder = NSLocalizedString(@"enter_AppID", @"请输入AppID");
     }];
     
     [alert addAction:okAction];
@@ -134,7 +134,7 @@
                   vertifyCode:(NSString *)vertifyCode {
     
     if (mobile.length == 0) {
-        MAXLog(@"请输入手机号");
+        MAXLog(NSLocalizedString(@"enter_phone_number", @"请输入手机号"));
         return;
     }
     if (password.length == 0) {
@@ -142,7 +142,7 @@
         return;
     }
     if (vertifyCode.length == 0) {
-        MAXLog(@"请输入验证码");
+        MAXLog(NSLocalizedString(@"enter_your_captcha", @"请输入验证码"));
         return;
     }
     
@@ -177,9 +177,9 @@
 - (void)bindWechat {
     BindOpenIdApi *api = [[BindOpenIdApi alloc] initWithopenId:self.openId];
     [api startWithSuccessBlock:^(ApiResult * _Nullable result) {
-          [HQCustomToast showDialog:@"绑定成功"];
+          [HQCustomToast showDialog:NSLocalizedString(@"Bind_successfully", @"绑定成功")];
     } failureBlock:^(NSError * _Nullable error) {
-          [HQCustomToast showDialog:@"绑定失败"];
+          [HQCustomToast showDialog:NSLocalizedString(@"Failed_to_bind", @"绑定失败")];
     }];
 }
 - (void)reloadAppID:(NSString *)appid {

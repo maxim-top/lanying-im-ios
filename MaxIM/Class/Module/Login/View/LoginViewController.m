@@ -124,12 +124,12 @@
 }
 
 - (void)showUserPrivacy {
-    PravitcyViewController *vc =  [[PravitcyViewController alloc] initWithTitle:@"用户隐私协议" url:@"https://www.maximtop.com/privacy"];
+    PravitcyViewController *vc =  [[PravitcyViewController alloc] initWithTitle:NSLocalizedString(@"User_Privacy_Agreement", @"用户隐私协议") url:@"https://www.maximtop.com/privacy"];
     [self.navigationController pushViewController:vc animated:YES];
 }
 
 - (void)showUserTerms {
-    PravitcyViewController *vc =  [[PravitcyViewController alloc] initWithTitle:@"用户服务条款" url:@"https://www.maximtop.com/terms/"];
+    PravitcyViewController *vc =  [[PravitcyViewController alloc] initWithTitle:NSLocalizedString(@"User_Services_Agreement", @"用户服务条款") url:@"https://www.maximtop.com/terms/"];
     [self.navigationController pushViewController:vc animated:YES];
 }
 
@@ -163,7 +163,7 @@
             
         }];
     } else {
-        [HQCustomToast showDialog:@"请安装微信客户端"];
+        [HQCustomToast showDialog:NSLocalizedString(@"install_WeChat_client", @"请安装微信客户端")];
         MAXLog(@"安装微信客户端");
     }
 }
@@ -194,7 +194,7 @@
             }
             
         } else if ([result.code isEqualToString:@"10001"]) {
-            [HQCustomToast showDialog:@"验证码不正确"];
+            [HQCustomToast showDialog:NSLocalizedString(@"Captcha_incorrect", @"验证码不正确")];
         }        
     } failureBlock:^(NSError * _Nullable error) {
         [HQCustomToast showNetworkError];
@@ -210,7 +210,7 @@
         if (!error) {
             [self registerLoginByName:name password:password];
         } else if (error.errorCode == BMXUserAlreadyExist){
-            [self.config showErrorText:@"该用户名已存在"];
+            [self.config showErrorText:NSLocalizedString(@"This_username_already_exists", @"该用户名已存在")];
         } else {
             [HQCustomToast showDialog:error.errorMessage];
         }
@@ -237,7 +237,7 @@
             // 登录
             [self registerLoginBindByName:userName password:password];
         } else if (error.errorCode == BMXUserAlreadyExist){
-            [self.config showErrorText:@"该用户名已存在"];
+            [self.config showErrorText:NSLocalizedString(@"This_username_already_exists", @"该用户名已存在")];
         }
     }];
 }
@@ -257,7 +257,7 @@
             // 登录
             [self registerLoginBindByName:name password:password];
         } else if (error.errorCode == BMXUserAlreadyExist){
-            [self.config showErrorText:@"该用户名已存在"];
+            [self.config showErrorText:NSLocalizedString(@"This_username_already_exists", @"该用户名已存在")];
         } else {
             [HQCustomToast showDialog:error.errorMessage];
         }
@@ -279,9 +279,9 @@
         if (result.isOK) {
             
         } else if([result.code isEqualToString:@"10015"]) {
-            [HQCustomToast showDialog:@"该手机号已绑定"];
+            [HQCustomToast showDialog:NSLocalizedString(@"This_phone_number_has_been_bound", @"该手机号已绑定")];
         } else if([result.code isEqualToString:@"10001"]) {
-            [HQCustomToast showDialog:@"验证码不匹配"];
+            [HQCustomToast showDialog:NSLocalizedString(@"Captcha_does_not_match", @"验证码不匹配")];
         }
     } failureBlock:^(NSError * _Nullable error) {
         [HQCustomToast showNetworkError];
@@ -402,11 +402,11 @@
 }
 
 - (void)showAppIDEditAlert {
-    UIAlertController* alert = [UIAlertController alertControllerWithTitle:@"修改AppID"
-                                                                   message:@"如果需要更改需要重启客户端"
+    UIAlertController* alert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Modify_AppID", @"修改AppID")
+                                                                   message:NSLocalizedString(@"restart_the_client_to_make_the_change", @"如果需要更改需要重启客户端")
                                                             preferredStyle:UIAlertControllerStyleAlert];
     
-    UIAlertAction* okAction = [UIAlertAction actionWithTitle:@"确定" style:UIAlertActionStyleDefault
+    UIAlertAction* okAction = [UIAlertAction actionWithTitle:NSLocalizedString(@"Confirm", @"确定") style:UIAlertActionStyleDefault
                                                      handler:^(UIAlertAction * action) {
                                                          //响应事件
                                                          //得到文本信息
@@ -417,13 +417,13 @@
                                                              
                                                          }
                                                      }];
-    UIAlertAction* cancelAction = [UIAlertAction actionWithTitle:@"取消" style:UIAlertActionStyleCancel
+    UIAlertAction* cancelAction = [UIAlertAction actionWithTitle:NSLocalizedString(@"Cancel", @"取消") style:UIAlertActionStyleCancel
                                                          handler:^(UIAlertAction * action) {
                                                              //响应事件
                                                              MAXLog(@"action = %@", alert.textFields);
                                                          }];
     [alert addTextFieldWithConfigurationHandler:^(UITextField *textField) {
-        textField.placeholder = @"请输入AppID";
+        textField.placeholder = NSLocalizedString(@"enter_AppID", @"请输入AppID");
         textField.text = [AppIDManager sharedManager].appid.appId;
     }];
     
@@ -560,12 +560,12 @@
     BindOpenIdApi *api = [[BindOpenIdApi alloc] initWithopenId:self.config.wechatOpenId];
     [api startWithSuccessBlock:^(ApiResult * _Nullable result) {
         if (result.isOK) {
-            [HQCustomToast showDialog:@"绑定成功"];
+            [HQCustomToast showDialog:NSLocalizedString(@"Bind_successfully", @"绑定成功")];
         } else {
             [HQCustomToast showDialog:result.errmsg];
         }
     } failureBlock:^(NSError * _Nullable error) {
-        [HQCustomToast showDialog:@"绑定失败"];
+        [HQCustomToast showDialog:NSLocalizedString(@"Failed_to_bind", @"绑定失败")];
     }];
 }
 

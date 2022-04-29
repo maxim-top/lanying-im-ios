@@ -66,7 +66,7 @@
             
         }];
         
-        [self.contentView addTransformButtonWithTitle:@"注册" buttonClick:^{
+        [self.contentView addTransformButtonWithTitle:NSLocalizedString(@"Register", @"注册") buttonClick:^{
             MAXRegiesterViewController *regiesterViewController = [[MAXRegiesterViewController alloc] init];
             [weakSelf presentViewController:regiesterViewController animated:YES completion:nil];
         }];
@@ -74,7 +74,7 @@
         
         
         if ([WXApi isWXAppInstalled]) {
-            [self.contentView addOtherLoginButtonWithTitle:@"微信登录" buttonClick:^{
+            [self.contentView addOtherLoginButtonWithTitle:NSLocalizedString(@"Login_with_WeChat_account", @"微信登录") buttonClick:^{
                 [weakSelf weChatLogin];
             }];
         }
@@ -85,7 +85,7 @@
         }];
         
 //
-//        [self.contentView addscanLoginButtonWithTitle:@"扫描二维码登录" buttonClick:^{
+//        [self.contentView addscanLoginButtonWithTitle:NSLocalizedString(@"Scan_QR_Code_to_login", @"扫描二维码登录") buttonClick:^{
 //            [weakSelf presentViewController:[LoginCodeImageViewController alloc] animated:YES completion:nil];
 //        }];
         
@@ -94,7 +94,7 @@
         [self.contentView addCloseButtonWithbuttonClick:^{
             [weakSelf dismissViewControllerAnimated:YES completion:nil];
         }];
-        [self.contentView changeCommitBtnName:@"" confirmButtonName:@"登录并绑定" closeBtnName:@"注册新账号"];
+        [self.contentView changeCommitBtnName:@"" confirmButtonName:NSLocalizedString(@"Login_and_bind", @"登录并绑定") closeBtnName:NSLocalizedString(@"Register_a_new_account", @"注册新账号")];
         
     }
 }
@@ -155,7 +155,7 @@
     NSString* systemName = [[UIDevice currentDevice] systemName];
     NSString* phoneVersion = [[UIDevice currentDevice] systemVersion];
     
-    NSString *phone = [NSString stringWithFormat:@"设备名称:%@;%@;%@;%@", phoneName,localizedModel,systemName,phoneVersion];
+    NSString *phone = [NSString stringWithFormat:NSLocalizedString(@"Device_name_name", @"设备名称:%@;%@;%@;%@"), phoneName,localizedModel,systemName,phoneVersion];
     BMXSDKConfig *config  = [[BMXSDKConfig alloc] initConfigWithDataDir:dataDir cacheDir:cacheDir pushCertName:@"NotiCer_Product" userAgent:phone];
     
     
@@ -168,12 +168,12 @@
     }
     config.loadAllServerConversations = YES;
     [[BMXClient sharedClient] registerWithSDKConfig:config];
-    [HQCustomToast showDialog:@"切换成功"];
+    [HQCustomToast showDialog:NSLocalizedString(@"Switch_successfully", @"切换成功")];
 }
 
 - (MAXLoginView *)contentView {
     if (!_contentView) {
-        _contentView = [MAXLoginView createLoginVieWithTitle:@"密码登录" buttonClick:^(NSString *username,NSString *password){
+        _contentView = [MAXLoginView createLoginVieWithTitle:NSLocalizedString(@"Login_with_password", @"密码登录") buttonClick:^(NSString *username,NSString *password){
             [self signByName:username password:password];
         }];
         [self.view addSubview:_contentView];
@@ -287,7 +287,7 @@
 //
 //
 //                                                    }];
-//    UIAlertAction* cancelAction = [UIAlertAction actionWithTitle:@"取消" style:UIAlertActionStyleCancel
+//    UIAlertAction* cancelAction = [UIAlertAction actionWithTitle:NSLocalizedString(@"Cancel", @"取消") style:UIAlertActionStyleCancel
 //                                                         handler:^(UIAlertAction * action) {
 //
 //
@@ -306,7 +306,7 @@
     if (_configButton == nil) {
         _configButton = [UIButton buttonWithType:UIButtonTypeCustom];
         _configButton.frame = CGRectMake(60, 60, 50, 50);
-        _configButton.titleLabel.text = @"切换环境";
+        _configButton.titleLabel.text = NSLocalizedString(@"Switch_environment", @"切换环境");
         
         [_configButton addTarget:self action:@selector(showAlert) forControlEvents:UIControlEventTouchUpInside];
         [self.contentView addSubview:_configButton];
@@ -319,13 +319,13 @@
     BindOpenIdApi *api = [[BindOpenIdApi alloc] initWithopenId:self.openId];
     [api startWithSuccessBlock:^(ApiResult * _Nullable result) {
         if (result.isOK) {
-//            [HQCustomToast showDialog:@"绑定成功"];
+//            [HQCustomToast showDialog:NSLocalizedString(@"Bind_successfully", @"绑定成功")];
         } else {
-            [HQCustomToast showDialog:@"绑定失败"];
+            [HQCustomToast showDialog:NSLocalizedString(@"Failed_to_bind", @"绑定失败")];
 
         }
     } failureBlock:^(NSError * _Nullable error) {
-        [HQCustomToast showDialog:@"绑定失败"];
+        [HQCustomToast showDialog:NSLocalizedString(@"Failed_to_bind", @"绑定失败")];
     }];
 }
 

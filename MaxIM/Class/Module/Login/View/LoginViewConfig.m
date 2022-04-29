@@ -34,10 +34,10 @@
     LoginView *loginView;
     switch (self.viewType) {
         case LoginVCTypePasswordLogin:{
-            loginView = [LoginView createLoginVieWithTitle:@"密码登录"];
-            [loginView setPlaceHoderWithText:@"用户名/手机号" SecondText:@"密码"];
-            [loginView setConfirmButtonTitle:@"登录"];
-            [loginView addJumpButtonLeftButton:@"验证码登录" rightButton:@"注册"];
+            loginView = [LoginView createLoginVieWithTitle:NSLocalizedString(@"Login_with_password", @"密码登录")];
+            [loginView setPlaceHoderWithText:NSLocalizedString(@"Username_Phone_number", @"用户名/手机号") SecondText:NSLocalizedString(@"Password", @"密码")];
+            [loginView setConfirmButtonTitle:NSLocalizedString(@"Login", @"登录")];
+            [loginView addJumpButtonLeftButton:NSLocalizedString(@"Login_with_captcha", @"验证码登录") rightButton:NSLocalizedString(@"Register", @"注册")];
             if ([WXApi isWXAppInstalled] && [AppIDManager isDefaultAppID]) {
                 [loginView addWechatButton];
             }
@@ -50,20 +50,20 @@
             break;
             
         case LoginVCTypeRegister:{
-            loginView = [LoginView createLoginVieWithTitle:@"注册"];
-            [loginView setPlaceHoderWithText:@"用户名" SecondText:@"密码"];
-            [loginView setConfirmButtonTitle:@"继续"];
+            loginView = [LoginView createLoginVieWithTitle:NSLocalizedString(@"Register", @"注册")];
+            [loginView setPlaceHoderWithText:NSLocalizedString(@"Username", @"用户名") SecondText:NSLocalizedString(@"Password", @"密码")];
+            [loginView setConfirmButtonTitle:NSLocalizedString(@"Continue", @"继续")];
             [loginView addPrivacyLabel];
-            [loginView addJumpButtonLeftButton:@"已有账号，去登录" rightButton:@""];
+            [loginView addJumpButtonLeftButton:NSLocalizedString(@"Already_have_an_account_login", @"已有账号，去登录") rightButton:@""];
         }
             
             break;
             
         case LoginVCTypeCaptchLogin:{
-            loginView = [LoginView createLoginVieWithTitle:@"验证码登录"];
-            [loginView setPlaceHoderWithText:@"手机号" SecondText:@"验证码"];
-            [loginView addJumpButtonLeftButton:@"密码登录" rightButton:@"注册"];
-            [loginView setConfirmButtonTitle:@"继续"];
+            loginView = [LoginView createLoginVieWithTitle:NSLocalizedString(@"Login_with_captcha", @"验证码登录")];
+            [loginView setPlaceHoderWithText:NSLocalizedString(@"Phone_number", @"手机号") SecondText:NSLocalizedString(@"Captcha", @"验证码")];
+            [loginView addJumpButtonLeftButton:NSLocalizedString(@"Login_with_password", @"密码登录") rightButton:NSLocalizedString(@"Register", @"注册")];
+            [loginView setConfirmButtonTitle:NSLocalizedString(@"Continue", @"继续")];
             [loginView showCaptchButton];
             if ([WXApi isWXAppInstalled] && [AppIDManager isDefaultAppID]) {
                 [loginView addWechatButton];
@@ -75,28 +75,28 @@
             
         case LoginVCTypeRegisterAndBindPhone:
         case LoginVCTypeRegisterAndBindWechat: {
-            loginView = [LoginView createLoginVieWithTitle:@"注册并绑定用户"];
-             [loginView setPlaceHoderWithText:@"用户名" SecondText:@"密码"];
-             [loginView setConfirmButtonTitle:@"继续"];
-             [loginView addJumpButtonLeftButton:@"已有账号，直接绑定" rightButton:@""];
+            loginView = [LoginView createLoginVieWithTitle:NSLocalizedString(@"Register_and_bind_a_user", @"注册并绑定用户")];
+             [loginView setPlaceHoderWithText:NSLocalizedString(@"Username", @"用户名") SecondText:NSLocalizedString(@"Password", @"密码")];
+             [loginView setConfirmButtonTitle:NSLocalizedString(@"Continue", @"继续")];
+             [loginView addJumpButtonLeftButton:NSLocalizedString(@"Already_have_an_account_bind", @"已有账号，直接绑定") rightButton:@""];
         }
             
             break;
             
         case LoginVCTypeBindUserWithPhone:
         case LoginVCTypeBindUserWithWechat:{
-            loginView = [LoginView createLoginVieWithTitle:@"绑定已有用户"];
-             [loginView setPlaceHoderWithText:@"用户名" SecondText:@"密码"];
-             [loginView setConfirmButtonTitle:@"继续"];
-            [loginView addJumpButtonLeftButton:@"暂无账号，点击创建" rightButton:@""];
+            loginView = [LoginView createLoginVieWithTitle:NSLocalizedString(@"Bund_existing_user", @"绑定已有用户")];
+             [loginView setPlaceHoderWithText:NSLocalizedString(@"Username", @"用户名") SecondText:NSLocalizedString(@"Password", @"密码")];
+             [loginView setConfirmButtonTitle:NSLocalizedString(@"Continue", @"继续")];
+            [loginView addJumpButtonLeftButton:NSLocalizedString(@"No_account_for_now_click_to_create", @"暂无账号，点击创建") rightButton:@""];
         }
             
             break;
             
         case LoginVCTypeBindPhone:{
-            loginView = [LoginView createLoginVieWithTitle:@"绑定手机号"];
-             [loginView setPlaceHoderWithText:@"手机号" SecondText:@"验证码"];
-             [loginView setConfirmButtonTitle:@"继续"];
+            loginView = [LoginView createLoginVieWithTitle:NSLocalizedString(@"Bind_phone_number", @"绑定手机号")];
+             [loginView setPlaceHoderWithText:NSLocalizedString(@"Phone_number", @"手机号") SecondText:NSLocalizedString(@"Captcha", @"验证码")];
+             [loginView setConfirmButtonTitle:NSLocalizedString(@"Continue", @"继续")];
              [loginView showCaptchButton];
             [loginView addSkipButton];
         }

@@ -94,7 +94,7 @@
     self.backgroundColor = [UIColor whiteColor];
     
     self.titleLabel.bmx_top = NavHeight + 60;
-    self.titleLabel.bmx_size = CGSizeMake(200, 40);
+    self.titleLabel.bmx_size = CGSizeMake(280, 40);
     self.titleLabel.bmx_left = 48;
     
     self.usernameTextField.bmx_top = self.titleLabel.bmx_bottom + 24;
@@ -164,7 +164,7 @@
     NSString *phoneNum = self.usernameTextField.text;
     if (phoneNum.length <= 0) {
         
-        [HQCustomToast showDialog:@"请输入手机号"];
+        [HQCustomToast showDialog:NSLocalizedString(@"enter_phone_number", @"请输入手机号")];
         return;
     }
     
@@ -191,11 +191,11 @@
     }
     if (isStart) {
         [self.codeTimerManager beginTimeWithTotalTime:60];
-        [self.captchButton setTitle:@"60秒后重发" forState:UIControlStateNormal];
+        [self.captchButton setTitle:NSLocalizedString(@"sixtysec_later_to_resend", @"60秒后重发") forState:UIControlStateNormal];
         [self.captchButton setTitleColor:kColorC3_7 forState:UIControlStateNormal];
         self.captchButton.enabled = NO;
     } else {
-        [self.captchButton setTitle:@"获取验证码" forState:UIControlStateNormal];
+        [self.captchButton setTitle:NSLocalizedString(@"Get_captcha", @"获取验证码") forState:UIControlStateNormal];
         
         if ([self.usernameTextField.text length]) {
             [self.captchButton setTitleColor:BMXCOLOR_HEX(0x4a90e2) forState:UIControlStateNormal];
@@ -223,7 +223,7 @@
 }
 
 - (void)timeLast:(NSTimeInterval)lastTime {
-    [self.captchButton setTitle:[NSString stringWithFormat:@"%.0f秒后重发", lastTime] forState:UIControlStateNormal];
+    [self.captchButton setTitle:[NSString stringWithFormat:NSLocalizedString(@"nsec_later_to_resend", @"%.0f秒后重发"), lastTime] forState:UIControlStateNormal];
 }
 
 - (void)timeFinish {
@@ -287,7 +287,7 @@
         [leftButton setTitle:leftButtonName forState:UIControlStateNormal];
         [leftButton addTarget:self action:@selector(leftJumpButtonClick) forControlEvents:UIControlEventTouchUpInside];
         [leftButton setTitleColor:BMXCOLOR_HEX(0x576B95) forState:UIControlStateNormal];
-        leftButton.frame = CGRectMake(0, 0, 200, 20);
+        leftButton.frame = CGRectMake(0, 0, 150, 20);
         leftButton.titleLabel.textAlignment = NSTextAlignmentCenter;
         [self addSubview:leftButton];
         leftButton.bmx_top = self.confirmButton.bmx_bottom + 18;
@@ -300,7 +300,7 @@
         [leftButton setTitle:leftButtonName forState:UIControlStateNormal];
         [leftButton addTarget:self action:@selector(leftJumpButtonClick) forControlEvents:UIControlEventTouchUpInside];
         [leftButton setTitleColor:BMXCOLOR_HEX(0x576B95) forState:UIControlStateNormal];
-        leftButton.frame = CGRectMake(0, 0, 120, 20);
+        leftButton.frame = CGRectMake(0, 0, 150, 20);
         leftButton.titleLabel.textAlignment = NSTextAlignmentRight;
         leftButton.titleLabel.font = [UIFont systemFontOfSize:14.0];
 
@@ -343,7 +343,7 @@
     self.otherLoginButton.bmx_height = image.size.height;
     
     self.wechatLine.bmx_left = 11;
-    self.wechatLine.bmx_width = MAXScreenW / 2.0 - 11 * 2 - 25;
+    self.wechatLine.bmx_width = MAXScreenW / 2.0 - 11 * 2 - 40;
     self.wechatLine.bmx_top =  self.otherLoginButton.bmx_origin.y - 30;
     self.wechatLine.bmx_height = 0.5;
     
@@ -353,7 +353,7 @@
     self.wechatLine1.bmx_top = self.otherLoginButton.bmx_origin.y - 30;
     
     self.wechatLabel.bmx_height = 22;
-    self.wechatLabel.bmx_width = 60;
+    self.wechatLabel.bmx_width = 90;
     self.wechatLabel.bmx_centerX = self.centerX;
     self.wechatLabel.bmx_centerY = self.wechatLine.bmx_centerY;
 }
@@ -390,7 +390,7 @@
     [button addTarget:self action:@selector(skipButtonClick) forControlEvents:UIControlEventTouchUpInside];
     button.frame = CGRectMake(0, 0, 35, 25);
     button.titleLabel.font = [UIFont systemFontOfSize:16];
-    [button setTitle:@"跳过" forState:UIControlStateNormal];
+    [button setTitle:NSLocalizedString(@"Skip", @"跳过") forState:UIControlStateNormal];
     [button setTitleColor:BMXCOLOR_HEX(0x333333) forState:UIControlStateNormal];
     [self addSubview:button];
 
@@ -553,7 +553,7 @@
         _privacyLabel.frame = CGRectMake(0, 0, 100, 18);
         _privacyLabel.font = [UIFont systemFontOfSize:12];
         _privacyLabel.textColor = BMXCOLOR_HEX(0x4A4A4A);
-        _privacyLabel.text = @"注册即代表您同意";
+        _privacyLabel.text = NSLocalizedString(@"Registration_signifies_your_acceptance", @"注册即代表您同意");
         [self addSubview:_privacyLabel];
     
     }
@@ -568,7 +568,7 @@
         _privacyButton.frame = CGRectMake(0, 0, 115, 18);
         _privacyButton.titleLabel.font = [UIFont systemFontOfSize:12];
         _privacyButton.titleLabel.textAlignment = NSTextAlignmentLeft;
-        [_privacyButton setTitle:@"《用户隐私协议》" forState:UIControlStateNormal];
+        [_privacyButton setTitle:NSLocalizedString(@"Doc_User_Privacy_Agreement", @"《用户隐私协议》") forState:UIControlStateNormal];
         [_privacyButton setTitleColor:BMXCOLOR_HEX(0x4A90E2) forState:UIControlStateNormal];
         [_privacyButton addTarget:self action:@selector(privacyButtonClick) forControlEvents:UIControlEventTouchUpInside];
         [_privacyButton sizeToFit];
@@ -584,7 +584,7 @@
         _termsButton.frame = CGRectMake(0, 0, 115, 18);
         _termsButton.titleLabel.font = [UIFont systemFontOfSize:12];
         _termsButton.titleLabel.textAlignment = NSTextAlignmentLeft;
-        [_termsButton setTitle:@"《用户服务条款》" forState:UIControlStateNormal];
+        [_termsButton setTitle:NSLocalizedString(@"User_Services_Agreement_bookname", @"《用户服务条款》") forState:UIControlStateNormal];
         [_termsButton setTitleColor:BMXCOLOR_HEX(0x4A90E2) forState:UIControlStateNormal];
         [_termsButton addTarget:self action:@selector(termsButtonClick) forControlEvents:UIControlEventTouchUpInside];
         [_termsButton sizeToFit];
@@ -624,7 +624,7 @@
 - (UIButton *)logButton {
     if (!_logButton) {
         _logButton = [UIButton buttonWithType:UIButtonTypeCustom];
-        [_logButton setTitle:@"查看日志" forState:UIControlStateNormal];;
+        [_logButton setTitle:NSLocalizedString(@"View_log", @"查看日志") forState:UIControlStateNormal];;
         [_logButton setTitleColor:BMXCOLOR_HEX(0x333333) forState:UIControlStateNormal];
         [_logButton addTarget:self action:@selector(logButtonClicked) forControlEvents:UIControlEventTouchUpInside];
         _logButton.layer.masksToBounds = YES;
@@ -640,7 +640,7 @@
     if (!_usernameTextField) {
         _usernameTextField = [[UITextField alloc] init];
         _usernameTextField.tag = kUsernameTextFieldTag;
-        _usernameTextField.placeholder = @"请输入用户名";
+        _usernameTextField.placeholder = NSLocalizedString(@"enter_username", @"请输入用户名");
         _usernameTextField.font = [UIFont systemFontOfSize:14];
         _usernameTextField.leftViewMode = UITextFieldViewModeAlways;
         _usernameTextField.layer.masksToBounds = YES;
@@ -658,7 +658,7 @@
     if (!_passwordTextField) {
         _passwordTextField = [[UITextField alloc] init];
         _passwordTextField.tag = kPasswordTextFieldTag;
-        _passwordTextField.placeholder = @"请输输入密码";
+        _passwordTextField.placeholder = NSLocalizedString(@"enter_password", @"请输输入密码");
         _passwordTextField.font = [UIFont systemFontOfSize:14];
         _passwordTextField.leftViewMode = UITextFieldViewModeAlways;
         _passwordTextField.layer.masksToBounds = YES;
@@ -723,7 +723,7 @@
         _captchButton = [UIButton buttonWithType:UIButtonTypeCustom];
         _captchButton.frame = CGRectMake(0, 0, 120, 40);
         [_captchButton addTarget:self action:@selector(smsButtonClicked:) forControlEvents:UIControlEventTouchUpInside];
-        [_captchButton setTitle:@"获取验证码" forState:UIControlStateNormal];
+        [_captchButton setTitle:NSLocalizedString(@"Get_captcha", @"获取验证码") forState:UIControlStateNormal];
         [_captchButton setTitleColor:[BMXCOLOR_HEX(0x333333) colorWithAlphaComponent:0.4] forState:UIControlStateDisabled];
         [_captchButton setTitleColor:BMXCOLOR_HEX(0x4a90e2) forState:UIControlStateNormal];
         _captchButton.enabled = NO;
@@ -763,7 +763,7 @@
 //        _smsTextField = [[UITextField alloc] init];
 //        _smsTextField.tag = kSmsTextFieldTag;
 //        //        _smsTextField.backgroundColor = [BMXCOLOR_HEX(0x999999) colorWithAlphaComponent:0.1];
-//        _smsTextField.placeholder = @"请输入验证码";
+//        _smsTextField.placeholder = NSLocalizedString(@"enter_your_captcha", @"请输入验证码");
 //        _smsTextField.font = [UIFont systemFontOfSize:14];
 //        //        _smsTextField.leftView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 20, 20)];
 //        _smsTextField.leftViewMode = UITextFieldViewModeAlways;
@@ -778,7 +778,7 @@
 //    
 //    if (!_getSmsButton) {
 //        _getSmsButton = [UIButton buttonWithType:UIButtonTypeCustom];
-//        [_getSmsButton setTitle:@"获取验证码" forState:UIControlStateNormal];
+//        [_getSmsButton setTitle:NSLocalizedString(@"Get_captcha", @"获取验证码") forState:UIControlStateNormal];
 //        _getSmsButton.titleLabel.font = [UIFont systemFontOfSize:12];
 //        
 //        //        _getSmsButton.backgroundColor = [BMXCOLOR_HEX(0x0079F4) colorWithAlphaComponent:0.1];
@@ -822,7 +822,7 @@
         _wechatLabel = [[UILabel alloc] init];
         _wechatLabel.textColor = BMXCOLOR_HEX(0xAFAFAF);
         _wechatLabel.font = [UIFont systemFontOfSize:14];
-        _wechatLabel.text = @"快捷登录";
+        _wechatLabel.text = NSLocalizedString(@"Quick_login", @"快捷登录");
         [self addSubview:_wechatLabel];
     }
     return _wechatLabel;

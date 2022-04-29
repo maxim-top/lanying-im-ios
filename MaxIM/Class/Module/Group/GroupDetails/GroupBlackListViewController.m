@@ -110,15 +110,15 @@
         }
     }
     if (xids.count <=0) {
-        UIAlertController* alert = [UIAlertController alertControllerWithTitle:@"警告" message:@"您没有选中成员" preferredStyle:UIAlertControllerStyleAlert];
-        [alert addAction:[UIAlertAction actionWithTitle:@"确定" style:UIAlertActionStyleDefault handler:nil]];
+        UIAlertController* alert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Warning", @"警告") message:NSLocalizedString(@"You_have_no_members_selected", @"您没有选中成员") preferredStyle:UIAlertControllerStyleAlert];
+        [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Confirm", @"确定") style:UIAlertActionStyleDefault handler:nil]];
         [self presentViewController:alert animated:YES completion:nil];
     }else {
-        UIAlertController* alert = [UIAlertController alertControllerWithTitle:@"警告" message:@"确定要解除黑名单吗？" preferredStyle:UIAlertControllerStyleAlert];
-        [alert addAction:[UIAlertAction actionWithTitle:@"确定" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+        UIAlertController* alert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Warning", @"警告") message:NSLocalizedString(@"Confirm_to_unblacklist", @"确定要解除黑名单吗？") preferredStyle:UIAlertControllerStyleAlert];
+        [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Confirm", @"确定") style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
             [self removeBlackList:xids];
         }]];
-        [alert addAction:[UIAlertAction actionWithTitle:@"取消" style:UIAlertActionStyleCancel handler:nil]];
+        [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Cancel", @"取消") style:UIAlertActionStyleCancel handler:nil]];
         [self presentViewController:alert animated:YES completion:nil];
     }
 }
@@ -138,7 +138,7 @@
 }
 
 - (void)setUpNavItem {
-    [self setNavigationBarTitle: @"群黑名单" navLeftButtonIcon:@"blackback" navRightButtonTitle:@"解除"];
+    [self setNavigationBarTitle: NSLocalizedString(@"Group_blacklist", @"群黑名单") navLeftButtonIcon:@"blackback" navRightButtonTitle:NSLocalizedString(@"Unbind", @"解除")];
     [self.navRightButton addTarget:self action:@selector(touchedRightBar) forControlEvents:UIControlEventTouchUpInside];
 }
 

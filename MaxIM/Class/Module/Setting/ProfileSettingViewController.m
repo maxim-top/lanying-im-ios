@@ -166,7 +166,7 @@
     [[[BMXClient sharedClient] userService] setNickname:nickname completion:^(BMXError *error) {
         [HQCustomToast hideWating];
         if (!error) {
-            [HQCustomToast showDialog:@"设置成功"];
+            [HQCustomToast showDialog:NSLocalizedString(@"Set_successfully", @"设置成功")];
             MAXLog(@"%@", error);
             [self getprofile];
         }
@@ -179,7 +179,7 @@
     [[[BMXClient sharedClient] userService] setPublicInfo:info completion:^(BMXError *error) {
         [HQCustomToast hideWating];
         if (!error) {
-            [HQCustomToast showDialog:@"设置成功"];
+            [HQCustomToast showDialog:NSLocalizedString(@"Set_successfully", @"设置成功")];
             MAXLog(@"%@", error);
             [self getprofile];
         }
@@ -191,7 +191,7 @@
     [[[BMXClient sharedClient] userService] setPrivateInfo:info completion:^(BMXError *error) {
         [HQCustomToast hideWating];
         if (!error) {
-            [HQCustomToast showDialog:@"设置成功"];
+            [HQCustomToast showDialog:NSLocalizedString(@"Set_successfully", @"设置成功")];
             MAXLog(@"%@", error);
             [self getprofile];
         }
@@ -202,7 +202,7 @@
 - (void)setAddFriendAuth:(BMXAddFriendAuthMode)mode {
     [[[BMXClient sharedClient] userService] setAddFriendAuthMode:mode completion:^(BMXError *error) {
         if (!error) {
-            [HQCustomToast showDialog:@"设置成功"];
+            [HQCustomToast showDialog:NSLocalizedString(@"Set_successfully", @"设置成功")];
             [self getprofile];
         }
     }];
@@ -215,7 +215,7 @@
     
     [[[BMXClient sharedClient] userService] setAuthQuestion:qustionModel completion:^(BMXError *error) {
         if (!error) {
-            [HQCustomToast showDialog:@"设置成功"];
+            [HQCustomToast showDialog:NSLocalizedString(@"Set_successfully", @"设置成功")];
             [self getprofile];
         }
     }];
@@ -234,11 +234,11 @@
 
 - (void)showSetMobileAlert {
     
-            UIAlertController* alert = [UIAlertController alertControllerWithTitle:@"修改手机号"
+            UIAlertController* alert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Modify_phone_number", @"修改手机号")
                                                                            message:@""
                                                                     preferredStyle:UIAlertControllerStyleAlert];
     
-            UIAlertAction* okAction = [UIAlertAction actionWithTitle:@"确定" style:UIAlertActionStyleDefault
+            UIAlertAction* okAction = [UIAlertAction actionWithTitle:NSLocalizedString(@"Confirm", @"确定") style:UIAlertActionStyleDefault
                                                              handler:^(UIAlertAction * action) {
                                                                  //响应事件
                                                                  //得到文本信息
@@ -247,13 +247,13 @@
     //                                                                 [self modifyPhone:text.text];
                                                                  }
                                                              }];
-            UIAlertAction* cancelAction = [UIAlertAction actionWithTitle:@"取消" style:UIAlertActionStyleCancel
+            UIAlertAction* cancelAction = [UIAlertAction actionWithTitle:NSLocalizedString(@"Cancel", @"取消") style:UIAlertActionStyleCancel
                                                                  handler:^(UIAlertAction * action) {
                                                                      //响应事件
                                                                      MAXLog(@"action = %@", alert.textFields);
                                                                  }];
             [alert addTextFieldWithConfigurationHandler:^(UITextField *textField) {
-                textField.placeholder = @"请输入手机号";
+                textField.placeholder = NSLocalizedString(@"enter_phone_number", @"请输入手机号");
             }];
     
             [alert addAction:okAction];
@@ -331,7 +331,7 @@
     AppWechatUnbindApi *api = [[AppWechatUnbindApi alloc] init];
     [api startWithSuccessBlock:^(ApiResult * _Nullable result) {
         if (result.isOK) {
-            [HQCustomToast showDialog:@"解绑成功"];
+            [HQCustomToast showDialog:NSLocalizedString(@"Unbind_successfully", @"解绑成功")];
         }
         
         [self checkWechatBind];
@@ -358,40 +358,40 @@
     
     if ([dic[@"type"] isEqualToString:@"ID"]) {
         cell.contentLabel.text = [NSString stringWithFormat:@"%lld", self.profile.userId];
-    } else if ([dic[@"type"] isEqualToString:@"昵称"]) {
-        NSString *aString = [self.profile.nickName length] ? self.profile.nickName : @"请设置昵称";
+    } else if ([dic[@"type"] isEqualToString:NSLocalizedString(@"Nickname", @"昵称")]) {
+        NSString *aString = [self.profile.nickName length] ? self.profile.nickName : NSLocalizedString(@"set_nickname", @"请设置昵称");
         cell.contentLabel.text = aString;
-    } else if ([dic[@"type"] isEqualToString:@"手机号"]) {
-        NSString *aString = [self.profile.mobilePhone length] ? self.profile.mobilePhone : @"去绑定";
+    } else if ([dic[@"type"] isEqualToString:NSLocalizedString(@"Phone_number", @"手机号")]) {
+        NSString *aString = [self.profile.mobilePhone length] ? self.profile.mobilePhone : NSLocalizedString(@"Go_to_bind", @"去绑定");
         cell.contentLabel.text = aString;
-    }else if ([dic[@"type"] isEqualToString:@"修改密码"]) {
+    }else if ([dic[@"type"] isEqualToString:NSLocalizedString(@"Modify_password", @"修改密码")]) {
         NSString *aString = @"";
         cell.contentLabel.text = aString;
-    } else if ([dic[@"type"] isEqualToString:@"微信"]) {
-        NSString *aString = self.isbindWechat ? @"解绑" : @"未绑定";
+    } else if ([dic[@"type"] isEqualToString:NSLocalizedString(@"WeChat", @"微信")]) {
+        NSString *aString = self.isbindWechat ? NSLocalizedString(@"Unbind", @"解绑") : NSLocalizedString(@"Unbound", @"未绑定");
         cell.contentLabel.text = aString;
-    } else if ([dic[@"type"] isEqualToString:@"公开信息"]) {
+    } else if ([dic[@"type"] isEqualToString:NSLocalizedString(@"Public_info", @"公开信息")]) {
         cell.contentLabel.text = [NSString stringWithFormat:@"%@", self.profile.publicInfoJson];
-    } else if ([dic[@"type"] isEqualToString:@"私密信息"]) {
+    } else if ([dic[@"type"] isEqualToString:NSLocalizedString(@"Private_profile", @"私密信息")]) {
         cell.contentLabel.text = [NSString stringWithFormat:@"%@", self.profile.privateInfoJson];
-    } else if ([dic[@"type"] isEqualToString:@"好友验证"]) {
+    } else if ([dic[@"type"] isEqualToString:NSLocalizedString(@"Friend_verification", @"好友验证")]) {
         switch (self.profile.addFriendAuthMode) {
             case BMXAddFriendAuthModeOpen:
-                cell.contentLabel.text = [NSString stringWithFormat:@"公开"];
+                cell.contentLabel.text = [NSString stringWithFormat:NSLocalizedString(@"Public", @"公开")];
                 break;
             case BMXAddFriendAuthModeNeedApproval:
-                cell.contentLabel.text = [NSString stringWithFormat:@"需要同意"];
+                cell.contentLabel.text = [NSString stringWithFormat:NSLocalizedString(@"Consent_required", @"需要同意")];
                 break;
             case BMXAddFriendAuthModeAnswerQuestion:
-                cell.contentLabel.text = [NSString stringWithFormat:@"需要回答问题"];
+                cell.contentLabel.text = [NSString stringWithFormat:NSLocalizedString(@"Require_to_answer_questions", @"需要回答问题")];
                 break;
             case BMXAddFriendAuthModeRejectAll:
-                cell.contentLabel.text = [NSString stringWithFormat:@"拒绝所有人"];
+                cell.contentLabel.text = [NSString stringWithFormat:NSLocalizedString(@"Reject_all", @"拒绝所有人")];
                 break;
             default:
                 break;
         }
-    } else if ([dic[@"type"] isEqualToString:@"好友验证问题"]) {
+    } else if ([dic[@"type"] isEqualToString:NSLocalizedString(@"Friend_verification_question", @"好友验证问题")]) {
         cell.contentLabel.text = self.profile.authQuestion.mQuestion ? [NSString stringWithFormat:@"%@", self.profile.authQuestion.mQuestion] : @"";
         
     }
@@ -410,18 +410,18 @@
     NSDictionary *dic = self.dataArray[indexPath.row];
     [tableView deselectRowAtIndexPath:indexPath animated:YES];
 
-    if ([dic[@"type"] isEqualToString:@"头像"]) {
+    if ([dic[@"type"] isEqualToString:NSLocalizedString(@"Avatar", @"头像")]) {
         [self choiseImage];
     } else if ([dic[@"type"] isEqualToString:@"ID"]) {
         
         LogViewController *logvc = [[LogViewController alloc] init];
         [self.navigationController pushViewController:logvc animated:YES];
-    } else if ([dic[@"type"] isEqualToString:@"昵称"]) {
-        UIAlertController* alert = [UIAlertController alertControllerWithTitle:@"修改昵称"
+    } else if ([dic[@"type"] isEqualToString:NSLocalizedString(@"Nickname", @"昵称")]) {
+        UIAlertController* alert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Modify_nickname", @"修改昵称")
                                                                        message:@""
                                                                 preferredStyle:UIAlertControllerStyleAlert];
         
-        UIAlertAction* okAction = [UIAlertAction actionWithTitle:@"确定" style:UIAlertActionStyleDefault
+        UIAlertAction* okAction = [UIAlertAction actionWithTitle:NSLocalizedString(@"Confirm", @"确定") style:UIAlertActionStyleDefault
                                                          handler:^(UIAlertAction * action) {
                                                              //响应事件
                                                              //得到文本信息
@@ -430,13 +430,13 @@
                                                                  [self modifyNickname:text.text];
                                                              }
                                                          }];
-        UIAlertAction* cancelAction = [UIAlertAction actionWithTitle:@"取消" style:UIAlertActionStyleCancel
+        UIAlertAction* cancelAction = [UIAlertAction actionWithTitle:NSLocalizedString(@"Cancel", @"取消") style:UIAlertActionStyleCancel
                                                              handler:^(UIAlertAction * action) {
                                                                  //响应事件
                                                                  MAXLog(@"action = %@", alert.textFields);
                                                              }];
         [alert addTextFieldWithConfigurationHandler:^(UITextField *textField) {
-            textField.placeholder = @"请输入昵称";
+            textField.placeholder = NSLocalizedString(@"enter_nickname", @"请输入昵称");
         }];
         
         [alert addAction:okAction];
@@ -444,9 +444,9 @@
         [self presentViewController:alert animated:YES completion:nil];
         
         
-    } else if ([dic[@"type"] isEqualToString:@"手机号"]) {
+    } else if ([dic[@"type"] isEqualToString:NSLocalizedString(@"Phone_number", @"手机号")]) {
         if ([self.profile.mobilePhone length]) {
-            self.alert = [ChangeMobileAlert alertWithTitle:@"更改绑定手机号" Phone:self.profile.mobilePhone];
+            self.alert = [ChangeMobileAlert alertWithTitle:NSLocalizedString(@"Change_the_bound_phone_number", @"更改绑定手机号") Phone:self.profile.mobilePhone];
             self.alert.tag = 1000;
             self.alert.delegate = self;
             [self.alert show];
@@ -454,22 +454,22 @@
             [self gotoBindPhone];
         }
 
-    }else if ([dic[@"type"] isEqualToString:@"修改密码"]) {
+    }else if ([dic[@"type"] isEqualToString:NSLocalizedString(@"Modify_password", @"修改密码")]) {
         if ([self.profile.mobilePhone length]) {
-            self.alert = [ChangeMobileAlert alertWithTitle:@"更改密码" Phone:self.profile.mobilePhone];
+            self.alert = [ChangeMobileAlert alertWithTitle:NSLocalizedString(@"Change_password", @"更改密码") Phone:self.profile.mobilePhone];
             self.alert.tag = 1001;
             self.alert.delegate = self;
             [self.alert show];
         } else {
             [self gotoBindPhone];
         }
-    } else if ([dic[@"type"] isEqualToString:@"微信"]) {
+    } else if ([dic[@"type"] isEqualToString:NSLocalizedString(@"WeChat", @"微信")]) {
         
-        UIAlertController* alert = [UIAlertController alertControllerWithTitle:@"提醒"
-                                                                       message:@"确定解绑微信？"
+        UIAlertController* alert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Remind", @"提醒")
+                                                                       message:NSLocalizedString(@"Confirm_to_unbind_the_WeChat_account", @"确定解绑微信？")
                                                                 preferredStyle:UIAlertControllerStyleAlert];
         
-        UIAlertAction* okAction = [UIAlertAction actionWithTitle:@"确定" style:UIAlertActionStyleDefault
+        UIAlertAction* okAction = [UIAlertAction actionWithTitle:NSLocalizedString(@"Confirm", @"确定") style:UIAlertActionStyleDefault
                                                          handler:^(UIAlertAction * action) {
                                                              //响应事件
                                                              //得到文本信息
@@ -477,7 +477,7 @@
                                                              [self clickunbindWechat];
                                                              
                                                          }];
-        UIAlertAction* cancelAction = [UIAlertAction actionWithTitle:@"取消" style:UIAlertActionStyleCancel
+        UIAlertAction* cancelAction = [UIAlertAction actionWithTitle:NSLocalizedString(@"Cancel", @"取消") style:UIAlertActionStyleCancel
                                                              handler:^(UIAlertAction * action) {
                                                                  //响应事件
                                                                  MAXLog(@"action = %@", alert.textFields);
@@ -488,12 +488,12 @@
         [self presentViewController:alert animated:YES completion:nil];
 
         
-    } else if ([dic[@"type"] isEqualToString:@"设置公开信息"]) {
-        UIAlertController* alert = [UIAlertController alertControllerWithTitle:@"设置公开信息"
+    } else if ([dic[@"type"] isEqualToString:NSLocalizedString(@"Set_public_profile", @"设置公开信息")]) {
+        UIAlertController* alert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Set_public_profile", @"设置公开信息")
                                                                        message:@""
                                                                 preferredStyle:UIAlertControllerStyleAlert];
         
-        UIAlertAction* okAction = [UIAlertAction actionWithTitle:@"确定" style:UIAlertActionStyleDefault
+        UIAlertAction* okAction = [UIAlertAction actionWithTitle:NSLocalizedString(@"Confirm", @"确定") style:UIAlertActionStyleDefault
                                                          handler:^(UIAlertAction * action) {
                                                              //响应事件
                                                              //得到文本信息
@@ -502,25 +502,25 @@
                                                                  [self setpublicInfo:text.text];
                                                              }
                                                          }];
-        UIAlertAction* cancelAction = [UIAlertAction actionWithTitle:@"取消" style:UIAlertActionStyleCancel
+        UIAlertAction* cancelAction = [UIAlertAction actionWithTitle:NSLocalizedString(@"Cancel", @"取消") style:UIAlertActionStyleCancel
                                                              handler:^(UIAlertAction * action) {
                                                                  //响应事件
                                                                  MAXLog(@"action = %@", alert.textFields);
                                                              }];
         [alert addTextFieldWithConfigurationHandler:^(UITextField *textField) {
-            textField.placeholder = @"请输入公开信息";
+            textField.placeholder = NSLocalizedString(@"enter_public_profile", @"请输入公开信息");
         }];
         
         [alert addAction:okAction];
         [alert addAction:cancelAction];
         [self presentViewController:alert animated:YES completion:nil];
         
-    } else if ([dic[@"type"] isEqualToString:@"设置私密信息"]) {
-        UIAlertController* alert = [UIAlertController alertControllerWithTitle:@"设置私密信息"
+    } else if ([dic[@"type"] isEqualToString:NSLocalizedString(@"Set_private_profile", @"设置私密信息")]) {
+        UIAlertController* alert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Set_private_profile", @"设置私密信息")
                                                                        message:@""
                                                                 preferredStyle:UIAlertControllerStyleAlert];
         
-        UIAlertAction* okAction = [UIAlertAction actionWithTitle:@"确定" style:UIAlertActionStyleDefault
+        UIAlertAction* okAction = [UIAlertAction actionWithTitle:NSLocalizedString(@"Confirm", @"确定") style:UIAlertActionStyleDefault
                                                          handler:^(UIAlertAction * action) {
                                                              //响应事件
                                                              //得到文本信息
@@ -530,47 +530,47 @@
                                                                  
                                                              }
                                                          }];
-        UIAlertAction* cancelAction = [UIAlertAction actionWithTitle:@"取消" style:UIAlertActionStyleCancel
+        UIAlertAction* cancelAction = [UIAlertAction actionWithTitle:NSLocalizedString(@"Cancel", @"取消") style:UIAlertActionStyleCancel
                                                              handler:^(UIAlertAction * action) {
                                                                  //响应事件
                                                                  MAXLog(@"action = %@", alert.textFields);
                                                              }];
         [alert addTextFieldWithConfigurationHandler:^(UITextField *textField) {
-            textField.placeholder = @"请输入私密信息";
+            textField.placeholder = NSLocalizedString(@"enter_private_profile", @"请输入私密信息");
         }];
         
         [alert addAction:okAction];
         [alert addAction:cancelAction];
         [self presentViewController:alert animated:YES completion:nil];
-    } else if ([dic[@"type"] isEqualToString:@"好友验证类型"]) {
-        UIAlertController* alert = [UIAlertController alertControllerWithTitle:@"请选择好友验证类型" message:nil preferredStyle:UIAlertControllerStyleActionSheet];
+    } else if ([dic[@"type"] isEqualToString:NSLocalizedString(@"Friend_verification", @"好友验证类型")]) {
+        UIAlertController* alert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"select_your_Friend_verification_type", @"请选择好友验证类型") message:nil preferredStyle:UIAlertControllerStyleActionSheet];
        
-        UIAlertAction* action1 = [UIAlertAction actionWithTitle:@"公开" style:UIAlertActionStyleDefault
+        UIAlertAction* action1 = [UIAlertAction actionWithTitle:NSLocalizedString(@"Public", @"公开") style:UIAlertActionStyleDefault
                                                         handler:^(UIAlertAction * action) {
                                                             //响应事件
                                                             [self setAddFriendAuth:BMXAddFriendAuthModeOpen];
                                                             
                                                         
                                                         }];
-        UIAlertAction* action2 = [UIAlertAction actionWithTitle:@"需要同意" style:UIAlertActionStyleDefault
+        UIAlertAction* action2 = [UIAlertAction actionWithTitle:NSLocalizedString(@"Consent_required", @"需要同意") style:UIAlertActionStyleDefault
                                                              handler:^(UIAlertAction * action) {
                                                                  //响应事件
                                                                  [self setAddFriendAuth:BMXAddFriendAuthModeNeedApproval];
 
                                                              }];
-        UIAlertAction* action3 = [UIAlertAction actionWithTitle:@"需要回答问题" style:UIAlertActionStyleDefault
+        UIAlertAction* action3 = [UIAlertAction actionWithTitle:NSLocalizedString(@"Require_to_answer_questions", @"需要回答问题") style:UIAlertActionStyleDefault
                                                              handler:^(UIAlertAction * action) {
                                                                  //响应事件
                                                                  [self setAddFriendAuth:BMXAddFriendAuthModeAnswerQuestion];
 
                                                              }];
-        UIAlertAction* action4 = [UIAlertAction actionWithTitle:@"拒绝所有人" style:UIAlertActionStyleDefault
+        UIAlertAction* action4 = [UIAlertAction actionWithTitle:NSLocalizedString(@"Reject_all", @"拒绝所有人") style:UIAlertActionStyleDefault
                                                            handler:^(UIAlertAction * action) {
                                                                //响应事件
                                                                [self setAddFriendAuth:BMXAddFriendAuthModeRejectAll];
 
                                                            }];
-        UIAlertAction* cancelAction = [UIAlertAction actionWithTitle:@"取消" style:UIAlertActionStyleCancel
+        UIAlertAction* cancelAction = [UIAlertAction actionWithTitle:NSLocalizedString(@"Cancel", @"取消") style:UIAlertActionStyleCancel
                                                              handler:^(UIAlertAction * action) {
                                                                  //响应事件
                                                                  //
@@ -583,13 +583,13 @@
         [alert addAction:cancelAction];
         [self presentViewController:alert animated:YES completion:nil];
         
-    }else if ([dic[@"type"] isEqualToString:@"好友验证问题"]) {
+    }else if ([dic[@"type"] isEqualToString:NSLocalizedString(@"Friend_verification_question", @"好友验证问题")]) {
         
-        UIAlertController* alert = [UIAlertController alertControllerWithTitle:@"好友验证问题"
+        UIAlertController* alert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Friend_verification_question", @"好友验证问题")
                                                                        message:@""
                                                                 preferredStyle:UIAlertControllerStyleAlert];
         
-        UIAlertAction* okAction = [UIAlertAction actionWithTitle:@"确定" style:UIAlertActionStyleDefault
+        UIAlertAction* okAction = [UIAlertAction actionWithTitle:NSLocalizedString(@"Confirm", @"确定") style:UIAlertActionStyleDefault
                                                          handler:^(UIAlertAction * action) {
                                                              //响应事件
                                                              //得到文本信息
@@ -609,7 +609,7 @@
                                                              
                                                              
                                                          }];
-        UIAlertAction* cancelAction = [UIAlertAction actionWithTitle:@"取消" style:UIAlertActionStyleCancel
+        UIAlertAction* cancelAction = [UIAlertAction actionWithTitle:NSLocalizedString(@"Cancel", @"取消") style:UIAlertActionStyleCancel
                                                              handler:^(UIAlertAction * action) {
                                                                  //响应事件
                                                                  MAXLog(@"action = %@", alert.textFields);
@@ -618,7 +618,7 @@
             if ([self.profile.authQuestion.mQuestion length]) {
                 textField.text = self.profile.authQuestion.mQuestion;
             } else {
-                textField.placeholder = @"请输入问题";
+                textField.placeholder = NSLocalizedString(@"enter_question", @"请输入问题");
             }
             
             textField.tag = 1000;
@@ -628,7 +628,7 @@
             if ([self.profile.authQuestion.mAnswer length]) {
                 textField.text = self.profile.authQuestion.mAnswer;
             } else {
-                textField.placeholder = @"请输入答案";
+                textField.placeholder = NSLocalizedString(@"enter_answer", @"请输入答案");
             }
             textField.tag = 1001;
         }];
@@ -661,7 +661,7 @@
         [[[BMXClient sharedClient] userService] uploadAvatarWithData:imageData progress:^(int progress, BMXError *error) {
             MAXLog(@"%d == %@",progress, error);
             if (!error && progress == 100) {
-                [HQCustomToast showDialog:@"上传成功"];
+                [HQCustomToast showDialog:NSLocalizedString(@"Upload_successfully", @"上传成功")];
             }
         }];
     }];
@@ -669,7 +669,7 @@
 }
 
 - (void)setUpNavItem{
-    [self setNavigationBarTitle:@"个人资料" navLeftButtonIcon:@"blackback"];
+    [self setNavigationBarTitle:NSLocalizedString(@"Personal_profile", @"个人资料") navLeftButtonIcon:@"blackback"];
 }
 
 

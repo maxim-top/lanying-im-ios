@@ -52,7 +52,7 @@
 -(void) touchedRightBar {
     [[[BMXClient sharedClient] groupService] setGroupName:self.group name:_textField.text completion:^(BMXGroup *group, BMXError *error) {
         if (!error) {
-            [HQCustomToast showDialog:@"设置成功"];
+            [HQCustomToast showDialog:NSLocalizedString(@"Set_successfully", @"设置成功")];
             [self.navigationController popViewControllerAnimated:YES];
         } else {
             [HQCustomToast showDialog:[NSString stringWithFormat:@"%@", error.errorMessage]];
@@ -61,7 +61,7 @@
 }
 
 - (void)setUpNavItem {
-    [self setNavigationBarTitle: @"修改群名称" navLeftButtonIcon:@"blackback" navRightButtonTitle:@"保存"];
+    [self setNavigationBarTitle: NSLocalizedString(@"Modify_group_name", @"修改群名称") navLeftButtonIcon:@"blackback" navRightButtonTitle:NSLocalizedString(@"Save", @"保存")];
     [self.navRightButton addTarget:self action:@selector(touchedRightBar) forControlEvents:UIControlEventTouchUpInside];
 }
 

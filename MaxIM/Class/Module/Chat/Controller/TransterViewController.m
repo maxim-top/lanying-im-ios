@@ -148,9 +148,9 @@
 
 - (void)setUpNavItem{
 //    self.navigationController.navigationBar.barTintColor = BMXColorNavBar;
-//    self.navigationItem.title = @"选择联系人";
+//    self.navigationItem.title = NSLocalizedString(@"Select_contact", @"选择联系人");
     
-    [self setNavigationBarTitle: @"选择联系人" navLeftButtonIcon:@"blackback"];
+    [self setNavigationBarTitle: NSLocalizedString(@"Select_contact", @"选择联系人") navLeftButtonIcon:@"blackback"];
     
 }
 

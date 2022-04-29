@@ -32,7 +32,7 @@
 }
 
 - (void)setUpNavItem{
-    [self setNavigationBarTitle:@"日志" navLeftButtonIcon:@"blackback"];
+    [self setNavigationBarTitle:NSLocalizedString(@"Log", @"日志") navLeftButtonIcon:@"blackback"];
     
     UIImage *moreImage = [UIImage imageNamed:@"file"];
     UIButton *moreButton = [UIButton buttonWithType:UIButtonTypeCustom];
@@ -45,7 +45,7 @@
 - (void)clickMoreButton:(UIButton *)button {
     UIPasteboard* pasteboard = [UIPasteboard generalPasteboard];
     [pasteboard setString:[NSString stringWithContentsOfFile:self.logPath encoding:NSUTF8StringEncoding error:nil]];
-    [HQCustomToast showDialog:@"日志已全部复制到剪贴板"];
+    [HQCustomToast showDialog:NSLocalizedString(@"All_logs_have_been_copied_to_clipboard", @"日志已全部复制到剪贴板")];
 }
 
 

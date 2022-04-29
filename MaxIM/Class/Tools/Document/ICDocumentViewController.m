@@ -39,10 +39,10 @@
 - (void)setupNav
 {
     self.view.backgroundColor = [UIColor whiteColor];
-    self.title = @"本机文件";
+    self.title = NSLocalizedString(@"Local_file", @"本机文件");
     
     UIButton *rightButton = [[UIButton alloc] initWithFrame:CGRectMake(0, 0, 50, 25)];
-    [rightButton setTitle:@"发送" forState:UIControlStateNormal];
+    [rightButton setTitle:NSLocalizedString(@"Send", @"发送") forState:UIControlStateNormal];
     rightButton.titleLabel.font = [UIFont systemFontOfSize:17];
     [rightButton addTarget:self action:@selector(rightBarButtonClicked)forControlEvents:UIControlEventTouchUpInside];
     self.navigationItem.rightBarButtonItem = [[UIBarButtonItem alloc]initWithCustomView:rightButton];
@@ -52,7 +52,7 @@
     self.rightBtn = rightButton;
     
     UIButton *leftButton = [[UIButton alloc] initWithFrame:CGRectMake(0, 0, 50, 25)];
-    [leftButton setTitle:@"取消" forState:UIControlStateNormal];
+    [leftButton setTitle:NSLocalizedString(@"Cancel", @"取消") forState:UIControlStateNormal];
     [leftButton addTarget:self action:@selector(leftBarButtonClicked)forControlEvents:UIControlEventTouchUpInside];
     [leftButton setTitleColor:[UIColor grayColor] forState:UIControlStateNormal];
     leftButton.titleLabel.font = [UIFont systemFontOfSize:17];

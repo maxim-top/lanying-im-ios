@@ -106,21 +106,21 @@
     if (application.applicationStatus == BMXApplicationStatusAccepted) {
         [cell.button setHidden:YES];
         [cell.contentLabel setHidden:NO];
-        cell.contentLabel.text = @"已添加为好友";
+        cell.contentLabel.text = NSLocalizedString(@"Added_as_Friend", @"已添加为好友");
     } else if (application.applicationStatus == BMXApplicationStatusPending) {
         [cell.button setHidden:NO];
         [cell.contentLabel setHidden:YES];
-        [cell.button setTitle:@"同意" forState:UIControlStateNormal];
+        [cell.button setTitle:NSLocalizedString(@"Agree", @"同意") forState:UIControlStateNormal];
     } else {
         [cell.button setHidden:YES];
         [cell.contentLabel setHidden:NO];
-        cell.contentLabel.text = @"已拒绝";
+        cell.contentLabel.text = NSLocalizedString(@"Rejected", @"已拒绝");
     }
     return cell;
 }
 
 - (void)setUpNavItem{
-    [self setNavigationBarTitle:@"申请与通知" navLeftButtonIcon:@"blackback"];
+    [self setNavigationBarTitle:NSLocalizedString(@"Application_and_notification", @"申请与通知") navLeftButtonIcon:@"blackback"];
 }
 
 - (UITableView *)tableView {

@@ -47,7 +47,7 @@
 -(void) initViews {
     UILabel* titleLabel = [[UILabel alloc] initWithFrame:CGRectMake(15, 15 + NavHeight, MAXScreenW-30, 15)];
     [self.view addSubview:titleLabel];
-    titleLabel.text = @"标题";
+    titleLabel.text = NSLocalizedString(@"Tittle", @"标题");
     titleLabel.font = [UIFont fontWithName:@"PingFangSC-Medium" size:12];
     titleLabel.textColor = [UIColor colorWithRed:155/255.0 green:155/255.0 blue:169/255.0 alpha:1/1.0];
     [self.view addSubview:self.titleField];
@@ -55,7 +55,7 @@
     
     UILabel* contentLabel = [[UILabel alloc] initWithFrame:CGRectMake(15, 65 + NavHeight, MAXScreenW-30, 15)];
     [self.view addSubview:contentLabel];
-    contentLabel.text = @"内容";
+    contentLabel.text = NSLocalizedString(@"Content", @"内容");
     contentLabel.font = [UIFont fontWithName:@"PingFangSC-Medium" size:12];
     contentLabel.textColor = [UIColor colorWithRed:155/255.0 green:155/255.0 blue:169/255.0 alpha:1/1.0];
     
@@ -102,7 +102,7 @@
     MAXLog(@"发布群公告...");
     [[[BMXClient sharedClient] groupService] editGroupAnnouncement:self.group title:_titleField.text content:_textView.text completion:^(BMXGroup *group, BMXError *error) {
         if (!error) {
-            [HQCustomToast showDialog:@"发布成功"];
+            [HQCustomToast showDialog:NSLocalizedString(@"Publish_successfully", @"发布成功")];
             [self.navigationController popViewControllerAnimated:YES];
         } else {
             [HQCustomToast showDialog:[NSString stringWithFormat:@"%@", error.errorMessage]];
@@ -111,7 +111,7 @@
 }
 
 - (void)setUpNavItem {
-    [self setNavigationBarTitle:@"群公告" navLeftButtonIcon:@"blackback" navRightButtonTitle:@"保存"];
+    [self setNavigationBarTitle:NSLocalizedString(@"Group_announcement", @"群公告") navLeftButtonIcon:@"blackback" navRightButtonTitle:NSLocalizedString(@"Save", @"保存")];
     [self.navRightButton addTarget:self action:@selector(touchedRightBar) forControlEvents:UIControlEventTouchUpInside];
 }
 

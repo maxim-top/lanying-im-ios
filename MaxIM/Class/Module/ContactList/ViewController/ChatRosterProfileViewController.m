@@ -72,7 +72,7 @@
 - (void)setalis:(NSString *)name {
     [[[BMXClient sharedClient] rosterService] updateItemAliasByRoster:self.currentRoster aliasJson:name completion:^(BMXRoster *roster, BMXError *error) {
         if (!error) {
-            [HQCustomToast showDialog:@"设置成功"];
+            [HQCustomToast showDialog:NSLocalizedString(@"Set_successfully", @"设置成功")];
             [[[BMXClient sharedClient] rosterService] searchByRosterId:self.currentRoster.rosterId forceRefresh:YES completion:^(BMXRoster *roster, BMXError *error) {
                 if (!error) {
                     self.currentRoster = roster;
@@ -118,18 +118,20 @@
 //    if ([dic[@"type"] isEqualToString:@"ID"]) {
 //        cell.contentLabel.text = [NSString stringWithFormat:@"%lld", self.currentRoster.rosterId];
 //    } else
-    if ([dic[@"type"] isEqualToString:@"公有信息"]) {
+    if ([dic[@"type"] isEqualToString:NSLocalizedString(@"Common_info", @"公有信息")]) {
         cell.contentLabel.text = [NSString stringWithFormat:@"%@", self.currentRoster.json_PublicInfo];
-    } else if ([dic[@"type"] isEqualToString:@"用户名"]) {
+        cell.accessoryType = UITableViewCellAccessoryNone;
+    } else if ([dic[@"type"] isEqualToString:NSLocalizedString(@"Username", @"用户名")]) {
         cell.contentLabel.text = [NSString stringWithFormat:@"%@", self.currentRoster.userName];
-    } else if ([dic[@"type"] isEqualToString:@"设置扩展信息"]) {
+    } else if ([dic[@"type"] isEqualToString:NSLocalizedString(@"Set_extension_info", @"设置扩展信息")]) {
         cell.contentLabel.text = [NSString stringWithFormat:@"%@", self.currentRoster.json_ext];
         cell.accessoryType = UITableViewCellAccessoryDisclosureIndicator; //显示最右边的箭头
-    }  else  if ([dic[@"type"] isEqualToString:@"设置别名"]) {
+    }  else  if ([dic[@"type"] isEqualToString:NSLocalizedString(@"Set_alias", @"设置别名")]) {
         cell.accessoryType = UITableViewCellAccessoryDisclosureIndicator; //显示最右边的箭头
         cell.contentLabel.text = [NSString stringWithFormat:@"%@", self.currentRoster.json_alias];
 
-    }  else if ([dic[@"type"] isEqualToString:@"消息免打扰"]) {
+    }  else if ([dic[@"type"] isEqualToString:NSLocalizedString(@"Do-Not-Disturb", @"消息免打扰")]) {
+        cell.contentLabel.text = @"";
         if ([dic[@"control"] isEqualToString:@"0"]) {
             cell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
             [cell.mswitch setHidden:YES];
@@ -147,11 +149,11 @@
     NSDictionary *dic = self.cellDataArray[indexPath.row];
     NSString *str = dic[@"type"];
     BOOL state = mswtich.on ? YES : NO;
-    if ([str isEqualToString:@"消息免打扰"]) {
+    if ([str isEqualToString:NSLocalizedString(@"Do-Not-Disturb", @"消息免打扰")]) {
         [[[BMXClient sharedClient] rosterService] muteNotificationByRoster:self.currentRoster muteNotificationStatus:state completion:^(BMXRoster *roster, BMXError *error) {
             if (!error) {
                 MAXLog(@"设置成功");
-                [HQCustomToast showDialog:@"设置成功"];
+                [HQCustomToast showDialog:NSLocalizedString(@"Set_successfully", @"设置成功")];
                
             } else {
                 MAXLog(@"设置失败");
@@ -174,12 +176,12 @@
 
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
     NSDictionary *dic = self.cellDataArray[indexPath.row];
-    if ([dic[@"type"] isEqualToString:@"设置别名"]) {
-        UIAlertController* alert = [UIAlertController alertControllerWithTitle:@"设置别名"
+    if ([dic[@"type"] isEqualToString:NSLocalizedString(@"Set_alias", @"设置别名")]) {
+        UIAlertController* alert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Set_alias", @"设置别名")
                                                                        message:@""
                                                                 preferredStyle:UIAlertControllerStyleAlert];
         
-        UIAlertAction* okAction = [UIAlertAction actionWithTitle:@"确定" style:UIAlertActionStyleDefault
+        UIAlertAction* okAction = [UIAlertAction actionWithTitle:NSLocalizedString(@"Confirm", @"确定") style:UIAlertActionStyleDefault
                                                          handler:^(UIAlertAction * action) {
                                                              //响应事件
                                                              //得到文本信息
@@ -189,13 +191,13 @@
                                                                  
                                                              }
                                                          }];
-        UIAlertAction* cancelAction = [UIAlertAction actionWithTitle:@"取消" style:UIAlertActionStyleCancel
+        UIAlertAction* cancelAction = [UIAlertAction actionWithTitle:NSLocalizedString(@"Cancel", @"取消") style:UIAlertActionStyleCancel
                                                              handler:^(UIAlertAction * action) {
                                                                  //响应事件
                                                                  MAXLog(@"action = %@", alert.textFields);
                                                              }];
         [alert addTextFieldWithConfigurationHandler:^(UITextField *textField) {
-            textField.placeholder = @"请输入昵称";
+            textField.placeholder = NSLocalizedString(@"enter_nickname", @"请输入昵称");
         }];
         
         [alert addAction:okAction];

@@ -151,7 +151,7 @@
     if (!cell.longPressGestureBlock) {
         LHWeakSelf;
         cell.longPressGestureBlock = ^(UIImage *image) {
-            [UIActionSheet showInView:self.view withTitle:@"保存图片到相册" cancelButtonTitle:@"取消" destructiveButtonTitle:nil otherButtonTitles:@[@"保存"] tapBlock:^(UIActionSheet * _Nonnull actionSheet, NSInteger buttonIndex) {
+            [UIActionSheet showInView:self.view withTitle:NSLocalizedString(@"Save_image_to_album", @"保存图片到相册") cancelButtonTitle:NSLocalizedString(@"Cancel", @"取消") destructiveButtonTitle:nil otherButtonTitles:@[NSLocalizedString(@"Save", @"保存")] tapBlock:^(UIActionSheet * _Nonnull actionSheet, NSInteger buttonIndex) {
                 if (!buttonIndex) {
                     dispatch_async(dispatch_get_global_queue(0, 0), ^{
                         NSData *data = UIImageJPEGRepresentation(image, 1.0);
@@ -164,12 +164,12 @@
                             }
                         } completionHandler:^(BOOL success, NSError * _Nullable error) {
                             if (success) {
-                                [weakSelf showReminderWithContent:@"图片已保存到相册"];
+                                [weakSelf showReminderWithContent:NSLocalizedString(@"Image_saved_to_album", @"图片已保存到相册")];
                             }
                         }];
 //                        UIImageWriteToSavedPhotosAlbum(image, nil, nil,nil);
                         dispatch_sync(dispatch_get_main_queue(), ^{
-                            [weakSelf showReminderWithContent:@"图片已保存到相册"];
+                            [weakSelf showReminderWithContent:NSLocalizedString(@"Image_saved_to_album", @"图片已保存到相册")];
                         });
                     });
                     

@@ -92,16 +92,16 @@
     self.memberList = [NSArray array];
     _isAdmin = NO;
     _settingDict = @[
-                     @{@"title":@"群ID", @"detail":@"11122233"},
-                     @{@"title":@"我在群里的昵称", @"detail":@"11122233"},
-                     @{@"title":@"群二维码", @"detail":@""},
-                     @{@"title":@"搜索聊天记录", @"detail":@""},
-                     @{@"title":@"群管理", @"detail":@""},
-                     @{@"title":@"修改群名称", @"detail":@""},
-                     @{@"title":@"管理员列表", @"detail":@""},
-                     @{@"title":@"群公告", @"detail":@""},
-                     @{@"title":@"群扩展信息", @"detail":@""},
-                     @{@"title":@"群共享列表", @"detail":@""},
+                     @{@"title":NSLocalizedString(@"Group_ID", @"群ID"), @"detail":@"11122233"},
+                     @{@"title":NSLocalizedString(@"My_nickname_in_group", @"我在群里的昵称"), @"detail":@"11122233"},
+                     @{@"title":NSLocalizedString(@"Group_QR_Code", @"群二维码"), @"detail":@""},
+                     @{@"title":NSLocalizedString(@"Search_chat_history", @"搜索聊天记录"), @"detail":@""},
+                     @{@"title":NSLocalizedString(@"Group_management", @"群管理"), @"detail":@""},
+                     @{@"title":NSLocalizedString(@"Modify_group_name", @"修改群名称"), @"detail":@""},
+                     @{@"title":NSLocalizedString(@"Admin_list", @"管理员列表"), @"detail":@""},
+                     @{@"title":NSLocalizedString(@"Group_announcement", @"群公告"), @"detail":@""},
+                     @{@"title":NSLocalizedString(@"Group_extension_info", @"群扩展信息"), @"detail":@""},
+                     @{@"title":NSLocalizedString(@"List_of_group_shared_list", @"群共享列表"), @"detail":@""},
                      ];
     [self.view addSubview:self.tableView];
     [self registeNotifications];
@@ -248,11 +248,11 @@
 -(UIView*) tableView:(UITableView *)tableView viewForHeaderInSection:(NSInteger)section
 {
     if(section == 0) {
-        return [self sectionHeaderViewWithTitle:@"群成员" moreClic:@selector(touchedMoreMembers)];
+        return [self sectionHeaderViewWithTitle:NSLocalizedString(@"Group_members", @"群成员") moreClic:@selector(touchedMoreMembers)];
     }else{
-        return [self sectionHeaderViewWithTitle:@"群设置" moreClic:nil];
+        return [self sectionHeaderViewWithTitle:NSLocalizedString(@"Group_settings", @"群设置") moreClic:nil];
     }
-//    return [self sectionHeaderViewWithTitle:@"群成员" moreClic:nil];
+//    return [self sectionHeaderViewWithTitle:NSLocalizedString(@"Group_members", @"群成员") moreClic:nil];
 }
 -(UITableViewCell*) tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
     NSInteger row = indexPath.row;
@@ -270,27 +270,27 @@
             cell = [[GroupCommonCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:@"GroupCommonCell"];
         }
         if(row == 0) {
-            [cell setMainText:@"群ID" detailText:[NSString stringWithFormat:@"%lld", self.group.groupId] switcherFlag:NO switcherTarget:nil switcherSelector:nil];
+            [cell setMainText:NSLocalizedString(@"Group_ID", @"群ID") detailText:[NSString stringWithFormat:@"%lld", self.group.groupId] switcherFlag:NO switcherTarget:nil switcherSelector:nil];
         }else if(row == 1) {
-            [cell setMainText:@"我在群里的昵称" detailText:self.group.myNickName switcherFlag:NO switcherTarget:nil switcherSelector:nil];
+            [cell setMainText:NSLocalizedString(@"My_nickname_in_group", @"我在群里的昵称") detailText:self.group.myNickName switcherFlag:NO switcherTarget:nil switcherSelector:nil];
             [cell showAccesor:YES];
         }else if(row == 2) {
-            [cell setMainText:@"二维码" detailText:@"" switcherFlag:NO switcherTarget:nil switcherSelector:nil];
+            [cell setMainText:NSLocalizedString(@"QR_Code", @"二维码") detailText:@"" switcherFlag:NO switcherTarget:nil switcherSelector:nil];
             [cell showAccesor:YES];
         }else if(row == 3) {
-            [cell setMainText:@"搜索聊天记录" detailText:@"" switcherFlag:NO switcherTarget:nil switcherSelector:nil];
+            [cell setMainText:NSLocalizedString(@"Search_chat_history", @"搜索聊天记录") detailText:@"" switcherFlag:NO switcherTarget:nil switcherSelector:nil];
             [cell showAccesor:YES];
         } else if(row == 4) {
-            [cell setMainText:@"群公告" detailText:@"" switcherFlag:NO switcherTarget:nil switcherSelector:nil];
+            [cell setMainText:NSLocalizedString(@"Group_announcement", @"群公告") detailText:@"" switcherFlag:NO switcherTarget:nil switcherSelector:nil];
             [cell showAccesor:YES];
         }else if(row == 5) {
-            [cell setMainText:@"修改群名称" detailText:@"" switcherFlag:NO switcherTarget:nil switcherSelector:nil];
+            [cell setMainText:NSLocalizedString(@"Modify_group_name", @"修改群名称") detailText:@"" switcherFlag:NO switcherTarget:nil switcherSelector:nil];
             [cell showAccesor:YES];
         } else if(row == 6) {
-            [cell setMainText:@"群管理" detailText:@"" switcherFlag:NO switcherTarget:nil switcherSelector:nil];
+            [cell setMainText:NSLocalizedString(@"Group_management", @"群管理") detailText:@"" switcherFlag:NO switcherTarget:nil switcherSelector:nil];
             [cell showAccesor:YES];
         } else if(row == 7) {
-            [cell setMainText:@"管理员列表" detailText:@"" switcherFlag:NO switcherTarget:nil switcherSelector:nil];
+            [cell setMainText:NSLocalizedString(@"Admin_list", @"管理员列表") detailText:@"" switcherFlag:NO switcherTarget:nil switcherSelector:nil];
             [cell showAccesor:YES];
             [cell showSepLine:NO];
         }
@@ -299,10 +299,10 @@
 }
 
 /**
- @{@"title":@"管理员列表", @"detail":@""},
- @{@"title":@"群公告", @"detail":@""},
- @{@"title":@"群扩展信息", @"detail":@""},
- @{@"title":@"群共享列表", @"detail":@""},
+ @{@"title":NSLocalizedString(@"Admin_list", @"管理员列表"), @"detail":@""},
+ @{@"title":NSLocalizedString(@"Group_announcement", @"群公告"), @"detail":@""},
+ @{@"title":NSLocalizedString(@"Group_extension_info", @"群扩展信息"), @"detail":@""},
+ @{@"title":NSLocalizedString(@"List_of_group_shared_list", @"群共享列表"), @"detail":@""},
  **/
 
 -(void) tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
@@ -340,7 +340,7 @@
                 [self.navigationController pushViewController:vc animated:YES];
                 return;
             }else {
-                [HQCustomToast showDialog:@"请联系管理员开通二维码"];
+                [HQCustomToast showDialog:NSLocalizedString(@"contact_Admin_to_enable_QR_Code", @"请联系管理员开通二维码")];
                 return;
             }
         }
@@ -356,29 +356,29 @@
 
 
 - (void)showalert {
-    UIAlertController* alert = [UIAlertController alertControllerWithTitle:@"我在群里的昵称"
+    UIAlertController* alert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"My_nickname_in_group", @"我在群里的昵称")
                                                                    message:nil
                                                             preferredStyle:UIAlertControllerStyleAlert];
     
-    UIAlertAction* okAction = [UIAlertAction actionWithTitle:@"确定" style:UIAlertActionStyleDefault
+    UIAlertAction* okAction = [UIAlertAction actionWithTitle:NSLocalizedString(@"Confirm", @"确定") style:UIAlertActionStyleDefault
                                                      handler:^(UIAlertAction * action) {
                                                          //响应事件
                                                          //得到文本信息
                                                          for(UITextField *text in alert.textFields){
                                                              MAXLog(@"text = %@", text.text);
                                                              [[[BMXClient sharedClient] groupService] setMyNicknameWithGroup:self.group nickName:text.text completion:^(BMXError *error) {
-                                                                 [HQCustomToast showDialog:@"设置成功"];
+                                                                 [HQCustomToast showDialog:NSLocalizedString(@"Set_successfully", @"设置成功")];
                                                                  [self.tableView reloadData];
                                                              }];
                                                          }
                                                      }];
-    UIAlertAction* cancelAction = [UIAlertAction actionWithTitle:@"取消" style:UIAlertActionStyleCancel
+    UIAlertAction* cancelAction = [UIAlertAction actionWithTitle:NSLocalizedString(@"Cancel", @"取消") style:UIAlertActionStyleCancel
                                                          handler:^(UIAlertAction * action) {
                                                              //响应事件
                                                              MAXLog(@"action = %@", alert.textFields);
                                                          }];
     [alert addTextFieldWithConfigurationHandler:^(UITextField *textField) {
-        textField.placeholder = @"请输入昵称";
+        textField.placeholder = NSLocalizedString(@"enter_nickname", @"请输入昵称");
     }];
     
     [alert addAction:okAction];
@@ -402,18 +402,18 @@
 -(void)touchedLeaveGroup {
     
     BOOL isowner = [self isOwner];
-    NSString* title = isowner ? @"解散群" : @"离开群";
-    NSString* message = isowner ? @"确定解散群？" : @"确定离开群？";
+    NSString* title = isowner ? NSLocalizedString(@"Dismiss_group", @"解散群") : NSLocalizedString(@"Quit_group", @"离开群");
+    NSString* message = isowner ? NSLocalizedString(@"Confirm_to_dismiss_the_group", @"确定解散群？") : NSLocalizedString(@"Confirm_to_quit_the_group", @"确定离开群？");
     
     UIAlertController *alertController = [UIAlertController alertControllerWithTitle:title message:message preferredStyle:UIAlertControllerStyleAlert];
-    [alertController addAction:[UIAlertAction actionWithTitle:@"确定" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+    [alertController addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Confirm", @"确定") style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
         if (isowner) { // dismiss group
             [self destroyGroup];
         }else {
             [self leaveGroup];
         }
     }]];
-    [alertController addAction:[UIAlertAction actionWithTitle:@"取消" style:UIAlertActionStyleCancel handler:^(UIAlertAction * _Nonnull action) {
+    [alertController addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Cancel", @"取消") style:UIAlertActionStyleCancel handler:^(UIAlertAction * _Nonnull action) {
         //
     }]];
     [self presentViewController:alertController animated:YES completion:nil];
@@ -427,7 +427,7 @@
     sline.backgroundColor = [UIColor lh_colorWithHexString:@"dfdfdf"];
     [bottom addSubview:sline];
     [bottom addSubview:self.leaveBtn];
-    NSString* btnTitle = [self isOwner] ? @"解散群" : @"删除并退出";
+    NSString* btnTitle = [self isOwner] ? NSLocalizedString(@"Dismiss_group", @"解散群") : NSLocalizedString(@"Delete_and_quit", @"删除并退出");
     [self.leaveBtn setTitle:btnTitle forState:UIControlStateNormal];
     [self.view addSubview:bottom];
 }
@@ -448,7 +448,7 @@
 {
     if(_leaveBtn == nil) {
         _leaveBtn = [UIButton buttonWithType:UIButtonTypeSystem];
-        //        [_leaveBtn setTitle:@"删除并退出" forState:UIControlStateNormal];
+        //        [_leaveBtn setTitle:NSLocalizedString(@"Delete_and_quit", @"删除并退出") forState:UIControlStateNormal];
         [_leaveBtn setFrame:CGRectMake(15, 5, MAXScreenW-30, 44)];
         _leaveBtn.layer.masksToBounds = YES;
         _leaveBtn.layer.cornerRadius = 3.0f;

@@ -207,12 +207,12 @@
 }
 
 - (void)setUpNavItem {
-    [self setNavigationBarTitle:@"消息接收人列表" navLeftButtonIcon:@"blackback"];
+    [self setNavigationBarTitle:NSLocalizedString(@"List_of_message_receivers", @"消息接收人列表") navLeftButtonIcon:@"blackback"];
 }
 
 - (UISegmentedControl *)segment {
     if (!_segment) {
-        _segment = [[UISegmentedControl alloc] initWithItems:@[@"已读列表", @"未读列表"]];
+        _segment = [[UISegmentedControl alloc] initWithItems:@[NSLocalizedString(@"List_of_read_messages", @"已读列表"), NSLocalizedString(@"List_of_unread_messages", @"未读列表")]];
         _segment.frame = CGRectMake(0, NavHeight, self.view.width, 50);
         _segment.tintColor = [UIColor whiteColor];
         [_segment setTitleTextAttributes:@{NSFontAttributeName:[UIFont systemFontOfSize:13], NSForegroundColorAttributeName:[UIColor blackColor]} forState:UIControlStateNormal];

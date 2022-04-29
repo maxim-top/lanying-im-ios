@@ -104,7 +104,7 @@
     label.font = [UIFont systemFontOfSize:14.0];
     label.textColor = [UIColor blackColor];
     label.textAlignment = NSTextAlignmentCenter;
-    label.text = @"该文件暂不支持本地浏览，请使用其他应用打开";
+    label.text = NSLocalizedString(@"file_not_support_local_browsing", @"该文件暂不支持本地浏览，请使用其他应用打开");
     [label sizeToFit];
     label.centerX = MAXScreenW * 0.5;
     UIButton *openBtn = [UIButton buttonWithType:UIButtonTypeCustom];
@@ -114,7 +114,7 @@
     openBtn.layer.masksToBounds = YES;
     [openBtn setBackgroundImage:[UIImage imageNamed:@"beijign"] forState:UIControlStateNormal];
     [openBtn setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
-    [openBtn setTitle:@"使用其他应用打开" forState:UIControlStateNormal];
+    [openBtn setTitle:NSLocalizedString(@"Opon_with_another_app", @"使用其他应用打开") forState:UIControlStateNormal];
     [openBtn addTarget:self action:@selector(otherApplicationOpen) forControlEvents:UIControlEventTouchUpInside];
 }
 

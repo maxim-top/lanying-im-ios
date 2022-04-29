@@ -45,11 +45,11 @@
 
 #pragma mark location代理
 -(void)locationManager:(CLLocationManager *)manager didFailWithError:(NSError *)error {
-    [HQCustomToast showDialog:@"定位失败,设置-定位开启服务"];
-//    UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"提示" message:@"您还未开启定位服务，是否需要开启？" preferredStyle:UIAlertControllerStyleAlert];
-//    UIAlertAction *cancel = [UIAlertAction actionWithTitle:@"取消" style:UIAlertActionStyleCancel handler:^(UIAlertAction * _Nonnull action) {
+    [HQCustomToast showDialog:NSLocalizedString(@"Failed_to_locate_", @"定位失败,设置-定位开启服务")];
+//    UIAlertController *alert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Alert", @"提示") message:NSLocalizedString(@"location_service_need_to_turn_it_on", @"您还未开启定位服务，是否需要开启？") preferredStyle:UIAlertControllerStyleAlert];
+//    UIAlertAction *cancel = [UIAlertAction actionWithTitle:NSLocalizedString(@"Cancel", @"取消") style:UIAlertActionStyleCancel handler:^(UIAlertAction * _Nonnull action) {
 //    }];
-//    UIAlertAction *queren = [UIAlertAction actionWithTitle:@"确定" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+//    UIAlertAction *queren = [UIAlertAction actionWithTitle:NSLocalizedString(@"Confirm", @"确定") style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
 //        NSURL *setingsURL = [NSURL URLWithString:UIApplicationOpenSettingsURLString];
 //        [[UIApplication sharedApplication]openURL:setingsURL];
 //    }];
@@ -73,7 +73,7 @@
             CLPlacemark *placeMark = placemarks[0];
             NSString *city = placeMark.locality;
             if (!city) {
-                self.currentCity = @"⟳定位获取失败,点击重试";
+                self.currentCity = NSLocalizedString(@"Failed_to_locate_click_to_retry", @"⟳定位获取失败,点击重试");
             } else {
                 self.currentCity = placeMark.locality ;//获取当前城市
                 
@@ -81,7 +81,7 @@
             
         } else if (error == nil && placemarks.count == 0 ) {
         } else if (error) {
-            self.currentCity = @"⟳定位获取失败,点击重试";
+            self.currentCity = NSLocalizedString(@"Failed_to_locate_click_to_retry", @"⟳定位获取失败,点击重试");
         }
         // 还原Device 的语言
         [[NSUserDefaults

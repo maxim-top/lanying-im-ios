@@ -143,7 +143,7 @@
 }
 
 - (void)setUpNavItem{
-    [self setNavigationBarTitle:@"入群邀请" navLeftButtonIcon:@"blackback"];
+    [self setNavigationBarTitle:NSLocalizedString(@"Join_group_invitation", @"入群邀请") navLeftButtonIcon:@"blackback"];
 
 }
 

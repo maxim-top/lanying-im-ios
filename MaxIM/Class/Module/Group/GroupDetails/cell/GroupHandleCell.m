@@ -72,14 +72,14 @@
     [_acceptBtn setHidden:YES];
     _acceptBtn.frame = CGRectMake(MAXScreenW-55-15, 20, 55, 40);
     [_acceptBtn setBackgroundColor:[UIColor lh_colorWithHex:0xF7EB5C]];
-    [_acceptBtn setTitle:@"同意" forState:UIControlStateNormal];
+    [_acceptBtn setTitle:NSLocalizedString(@"Agree", @"同意") forState:UIControlStateNormal];
     [_acceptBtn addTarget:self action:@selector(touchedAccept) forControlEvents:UIControlEventTouchUpInside];
     [self.contentView addSubview:_acceptBtn];
     
     _declineBtn = [UIButton buttonWithType:UIButtonTypeSystem];
     [_declineBtn setHidden:YES];
     _declineBtn.frame = CGRectMake(MAXScreenW-55-15-55-15, 20, 55, 40);
-    [_declineBtn setTitle:@"拒绝" forState:UIControlStateNormal];
+    [_declineBtn setTitle:NSLocalizedString(@"Reject", @"拒绝") forState:UIControlStateNormal];
     [_declineBtn setBackgroundColor:[UIColor lh_colorWithHex:0xE8E8E8]];
     [_declineBtn addTarget:self action:@selector(touchedDecline) forControlEvents:UIControlEventTouchUpInside];
     [self.contentView addSubview:_declineBtn];
@@ -128,23 +128,23 @@
     if(rosterName == nil || [rosterName isEqualToString:@""]) {
         rosterName = _roster.userName;
     }
-    NSString* msg = @"邀请";
-    _groupMessage.text = [NSString stringWithFormat:@"%@ 邀请您加入群 %@:%@", rosterName, _group.name, msg];
+    NSString* msg = NSLocalizedString(@"Invite", @"邀请");
+    _groupMessage.text = [NSString stringWithFormat:NSLocalizedString(@"sb_invited_you_to_join_group", @"%@ 邀请您加入群 %@:%@"), rosterName, _group.name, msg];
     if(status == 1) {
         [_actionStatus setHidden:NO];
         [_acceptBtn setHidden:YES];
         [_declineBtn setHidden:YES];
-        [_actionStatus setText:@"已同意"];
+        [_actionStatus setText:NSLocalizedString(@"Accepted", @"已同意")];
     }else if(status == 2) {
         [_actionStatus setHidden:NO];
         [_acceptBtn setHidden:YES];
         [_declineBtn setHidden:YES];
-        [_actionStatus setText:@"已拒绝"];
+        [_actionStatus setText:NSLocalizedString(@"Rejected", @"已拒绝")];
     }else if(currInterval > expTime) { //过期
         [_actionStatus setHidden:NO];
         [_acceptBtn setHidden:YES];
         [_declineBtn setHidden:YES];
-        [_actionStatus setText:@"已过期"];
+        [_actionStatus setText:NSLocalizedString(@"Expired", @"已过期")];
     }else if(status == 0) {
         [_actionStatus setHidden:YES];
         [_acceptBtn setHidden:NO];
@@ -175,22 +175,22 @@
         rosterName = _roster.userName;
     }
     NSString* msg = @"";
-    _groupMessage.text = [NSString stringWithFormat:@"%@ 申请加入群 %@:%@", rosterName, _group.name, msg];
+    _groupMessage.text = [NSString stringWithFormat:NSLocalizedString(@"Apply_to_join_group", @"%@ 申请加入群 %@:%@"), rosterName, _group.name, msg];
     if(status == BMXGroupApplicationStatusAccepted) {
         [_actionStatus setHidden:NO];
         [_acceptBtn setHidden:YES];
         [_declineBtn setHidden:YES];
-        [_actionStatus setText:@"已同意"];
+        [_actionStatus setText:NSLocalizedString(@"Accepted", @"已同意")];
     }else if(status == BMXGroupApplicationStatusDeclined) {
         [_actionStatus setHidden:NO];
         [_acceptBtn setHidden:YES];
         [_declineBtn setHidden:YES];
-        [_actionStatus setText:@"已拒绝"];
+        [_actionStatus setText:NSLocalizedString(@"Rejected", @"已拒绝")];
     }else if(currInterval > expTime) { //过期
         [_actionStatus setHidden:NO];
         [_acceptBtn setHidden:YES];
         [_declineBtn setHidden:YES];
-        [_actionStatus setText:@"已过期"];
+        [_actionStatus setText:NSLocalizedString(@"Expired", @"已过期")];
     }else if(status == BMXGroupApplicationStatusPending) {
         [_actionStatus setHidden:YES];
         [_acceptBtn setHidden:NO];

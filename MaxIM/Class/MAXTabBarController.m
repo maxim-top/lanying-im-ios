@@ -129,6 +129,31 @@ typedef enum : NSUInteger {
 
 }
 
+- (void)groupInfoDidUpdate:(BMXGroup *)group
+            updateInfoType:(BMXGroupUpdateInfoType)type{
+    MAXLog(@"群信息更新了");
+}
+
+/**
+ * 加入新成员
+ **/
+- (void)groupMemberJoined:(BMXGroup *)group
+                 memberId:(NSInteger)memberId
+                  inviter:(NSInteger)inviter{
+    MAXLog(@"群：%@有成员加入:%ld", group.name, (long)memberId);
+    [HQCustomToast showToastWithInfo:[NSString stringWithFormat:NSLocalizedString(@"Group_member_joined", @"群：%@有成员加入:%ld"), group.name, (long)memberId]];
+}
+
+/**
+ * 群成员退出
+ **/
+- (void)groupMemberLeft:(BMXGroup *)group
+               memberId:(NSInteger)memberId
+                 reason:(NSString *)reason{
+    MAXLog(@"群：%@有成员退出:%ld", group.name, (long)memberId);
+    [HQCustomToast showToastWithInfo:[NSString stringWithFormat:NSLocalizedString(@"Group_member_quited", @"群：%@有成员退出:%ld"), group.name, (long)memberId]];
+}
+
 /**
  * 群列表更新了
  */
@@ -156,8 +181,8 @@ typedef enum : NSUInteger {
  退出了某群
  */
 - (void)groupLeft:(BMXGroup *)group reason:(NSString *)reason {
-    MAXLog(@"退出了某群");
-
+    MAXLog(@"您退出了群：%@，原因:%@", group.name, reason);
+    [HQCustomToast showToastWithInfo:[NSString stringWithFormat:NSLocalizedString(@"You_have_quit_the_group", @"您退出了群：%@，原因:%@"), group.name, reason]];
 }
 
 /**
@@ -274,7 +299,7 @@ typedef enum : NSUInteger {
 
 - (void)rosterInfoDidUpdate:(BMXRoster *)roster {
     MAXLog(@"好友信息变更");
-    [[[BMXClient sharedClient] rosterService] downloadAvatarWithRoster:roster progress:^(int progress, BMXError *error) {
+    [[[BMXClient sharedClient] rosterService] downloadAvatarWithRoster:roster isThumbnail:YES progress:^(int progress, BMXError *error) {
     } completion:^(BMXRoster *roster, BMXError *error) {
         MAXLog(@"下载成功");
         
@@ -460,20 +485,20 @@ typedef enum : NSUInteger {
     if (_tabbarInfoDic == nil) {
         _tabbarInfoDic = @{ @(MAXRecentContactType) : @{
                                     TabVC           : @"MainViewController",
-                                    TabTitle        : @"对话",
+                                    TabTitle        : NSLocalizedString(@"Chats", @"对话"),
                                     TabImage        : @"recent",
                                     TabSelectedImage: @"recent_h",
                                     },
                             @(MAXContactListType)   : @{
                                     TabVC           : @"ContactListViewController",
-                                    TabTitle        : @"通讯录",
+                                    TabTitle        : NSLocalizedString(@"Address_book", @"通讯录"),
                                     TabImage        : @"contact",
                                     TabSelectedImage: @"contact_h",
                                     },
                             
                             @(MAXSettingType)       : @{
                                     TabVC           : @"SettingViewController",
-                                    TabTitle        : @"设置",
+                                    TabTitle        : NSLocalizedString(@"Set", @"设置"),
                                     TabImage        : @"tabsetting_n",
                                     TabSelectedImage: @"tabsetting_s",
                                     }

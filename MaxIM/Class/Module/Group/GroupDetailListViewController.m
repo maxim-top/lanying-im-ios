@@ -27,7 +27,7 @@
     [self.tableView registerClass:[UITableViewCell class] forCellReuseIdentifier:@"rosterCell"];
     [self.tableView registerClass:[UITableViewCell class] forCellReuseIdentifier:@"optionCell"];
 
-    self.sectionArray = @[@"群主/管理员", @"普通成员", @"设置", @"扩展功能"];
+    self.sectionArray = @[NSLocalizedString(@"Group_owner_Admin", @"群主/管理员"), NSLocalizedString(@"Ordinary_member", @"普通成员"), NSLocalizedString(@"Set", @"设置"), NSLocalizedString(@"Extension_features", @"扩展功能")];
     self.cellDataArray = [self getGroupConfigDataArray];
 }
 
@@ -79,7 +79,7 @@
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
     if (indexPath.section == 0) {
         UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:@"rosterCell" forIndexPath:indexPath];
-        cell.textLabel.text = @"拉取成员";
+        cell.textLabel.text = NSLocalizedString(@"Pull_members", @"拉取成员");
         return cell;
     } else if  (indexPath.section == 1)  {
         NSDictionary *dic = self.cellDataArray[indexPath.row];
@@ -90,7 +90,7 @@
         return cell;
     } else {
         UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:@"optionCell" forIndexPath:indexPath];
-        cell.textLabel.text = @"配置扩展功能json";
+        cell.textLabel.text = NSLocalizedString(@"Configure_extension_feature_json", @"配置扩展功能json");
         return cell;
     }
 //    return nil;
@@ -105,7 +105,7 @@
 
 #pragma mark - Subview
 - (void)setUpNavItem{
-    [self setNavigationBarTitle:@"联系人" navLeftButtonIcon:@"blackback" navRightButtonTitle:@"personal"];
+    [self setNavigationBarTitle:NSLocalizedString(@"Contact", @"联系人") navLeftButtonIcon:@"blackback" navRightButtonTitle:@"personal"];
     [self.navRightButton addTarget:self action:@selector(addFriend:) forControlEvents:UIControlEventTouchUpInside];
 }
 

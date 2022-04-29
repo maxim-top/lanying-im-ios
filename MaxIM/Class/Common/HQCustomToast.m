@@ -17,7 +17,6 @@
 #import "MBProgressHUD.h"
 #import "HQLoadingAnimationView.h"
 
-NSString *const NetworkErrorToastStr = @"网络正在开小差，请稍后重试";
 static bool isShowing = NO;
 
 @implementation HQCustomToast
@@ -41,7 +40,7 @@ static bool isShowing = NO;
 }
 
 + (void)showNetworkError {
-    [self showToastWithInfo:NetworkErrorToastStr];
+    [self showToastWithInfo:NSLocalizedString(@"Network_does_not_work_retry_later", @"网络正在开小差，请稍后重试")];
 }
 
 + (BOOL)p_isShowing {

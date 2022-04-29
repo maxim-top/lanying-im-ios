@@ -61,7 +61,7 @@ static NSString *cellID = @"ContactTableViewCell";
     UIImage *image = [UIImage imageWithContentsOfFile:roster.avatarThumbnailPath];
     if (!image) {
         
-        [[[BMXClient sharedClient] rosterService] downloadAvatarWithRoster:roster progress:^(int progress, BMXError *error) {
+        [[[BMXClient sharedClient] rosterService] downloadAvatarWithRoster:roster isThumbnail:YES progress:^(int progress, BMXError *error) {
             
         }  completion:^(BMXRoster *rosterObjc, BMXError *error) {
             if (!error) {
@@ -93,7 +93,7 @@ static NSString *cellID = @"ContactTableViewCell";
     self.infoLabel.size = CGSizeMake(MAXScreenW - nickNameleft * 2  - self.avatarImg.width , 40);
 
     
-    self.contentLabel.bmx_size = CGSizeMake(100, 30);
+    self.contentLabel.bmx_size = CGSizeMake(150, 30);
     self.contentLabel.bmx_right = MAXScreenW - avatarLeft;
     
     
@@ -155,7 +155,7 @@ static NSString *cellID = @"ContactTableViewCell";
         _button.layer.borderWidth = 1.0f;//设置边框颜色
         _button.titleLabel.font = [UIFont systemFontOfSize:11];
         [_button setTitleColor:[UIColor blackColor] forState:UIControlStateNormal];
-        [_button setTitle:@"添加好友" forState:UIControlStateNormal];
+        [_button setTitle:NSLocalizedString(@"Add_friend", @"添加好友") forState:UIControlStateNormal];
         [_button addTarget:self action:@selector(clickAccept:) forControlEvents:UIControlEventTouchUpInside];
         [self.contentView addSubview:_button];
         [_button sizeToFit];

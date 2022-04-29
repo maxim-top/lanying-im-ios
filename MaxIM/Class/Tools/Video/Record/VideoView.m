@@ -62,10 +62,10 @@
     [exitBtn mas_makeConstraints:^(MASConstraintMaker *make) {
         make.right.equalTo(self.mas_right).offset(-50);
         make.centerY.equalTo(_recordBtn.mas_centerY);
-        make.width.mas_equalTo(40);
+        make.width.mas_equalTo(70);
         make.height.mas_equalTo(40);
     }];
-    [exitBtn setTitle:@"取消" forState:UIControlStateNormal];
+    [exitBtn setTitle:NSLocalizedString(@"Cancel", @"取消") forState:UIControlStateNormal];
     [exitBtn.titleLabel setFont:[UIFont systemFontOfSize:16]];
     [exitBtn setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
     [exitBtn addTarget:self action:@selector(exit) forControlEvents:UIControlEventTouchUpInside];
@@ -77,7 +77,7 @@
     label.tag = 1001;
     [self.videoLayerView addSubview:label];
     [self addTapGestureRecognizer];
-    label.text = @"正在加载...";
+    label.text = NSLocalizedString(@"Now_loading", @"正在加载...");
     [label mas_makeConstraints:^(MASConstraintMaker *make) {
         make.centerX.equalTo(_videoLayerView.mas_centerX);
         make.centerY.equalTo(_videoLayerView.mas_centerY);
@@ -165,7 +165,7 @@
 // 提示信息
 - (void)setTimeLineAndPromptView
 {
-    self.promptLabel.text = @"↑上移取消";
+    self.promptLabel.text = NSLocalizedString(@"Move_up_canceled", @"↑上移取消");
     self.promptLabel.bottom = self.timeLine.bottom-40;
     [self.promptLabel sizeToFit];
     self.promptLabel.center = CGPointMake(self.width*0.5, _promptLabel.centerY);
@@ -203,10 +203,10 @@
 - (void)promptStatuesChanged:(BOOL)status
 {
     if (status) {
-        self.promptLabel.text = @"↑上移取消";
+        self.promptLabel.text = NSLocalizedString(@"Move_up_canceled", @"↑上移取消");
         self.promptLabel.textColor = [UIColor greenColor];
     } else {
-        self.promptLabel.text = @"松开取消录制";
+        self.promptLabel.text = NSLocalizedString(@"Release_to_cancel_recording", @"松开取消录制");
         self.promptLabel.textColor = [UIColor redColor];
     }
     [self.promptLabel sizeToFit];

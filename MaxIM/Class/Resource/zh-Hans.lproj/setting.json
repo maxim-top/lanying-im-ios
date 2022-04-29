@@ -1,0 +1,47 @@
+{
+    "type": "settingconfig",
+    "cells":
+    [{
+        "type": "切换账号",
+        "control": "0"
+    },{
+        "type": "接受新消息通知",
+        "control": "1"
+    },
+    {
+        "type": "声音",
+        "control": "1"
+    },
+    {
+        "type": "震动",
+        "control": "1"
+    },
+    {
+        "type": "是否推送详情",
+        "control": "1"
+    },
+    {
+        "type": "是否自动下载缩略图附件",
+        "control": "1"
+    },
+    {
+        "type": "是否自动接受群邀请",
+        "control": "1"
+    },
+    {
+        "type": "黑名单列表",
+        "control": "0"
+        
+    },
+    {
+        "type": "关于我们",
+        "control": "0"
+    },
+    {
+        "type": "设备管理",
+        "control": "0"
+    }
+    ]
+    
+}
+    

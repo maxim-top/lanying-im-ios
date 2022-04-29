@@ -1,0 +1,46 @@
+{
+    "type": "profile",
+
+    "cells": [
+    {
+        "type": "ID",
+        "control": "0"
+    },
+    {
+        "type": "Nickname",
+        "control": "alert"
+    },
+    {
+        "type": "Phone number",
+        "control": "alert"
+    },
+    {
+        "type": "Modify password",
+        "control": "alert"
+    },
+    {
+        "type": "Wechat",
+        "control": "alert"
+    },
+    {
+        "type": "Public info",
+        "control": "alert"
+    },
+    {
+        "type": "Private info",
+        "control": "alert"
+    },
+    {
+        "type": "Friend verification",
+        "control": "alert"
+    },
+    {
+        "type": "Friend verification question",
+        "control": "alert"
+    },
+    ]
+}
+
+       
+
+

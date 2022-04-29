@@ -63,7 +63,7 @@ NSUInteger kChangeMobileAlertTag = 100030;
     if (self = [super initWithFrame:frame]) {
         self.backgroundColor = BMXColorAlpha([UIColor grayColor], 0.75);
         self.phone = phone;
-        self.subTitleLabel.text = [NSString stringWithFormat:@"你已绑定手机号 %@",phone];
+        self.subTitleLabel.text = [NSString stringWithFormat:NSLocalizedString(@"You_have_bound_phone_number", @"你已绑定手机号 %@"),phone];
         self.tag = kChangeMobileAlertTag;
         self.titleLabel.text = title;
         [self setupSubview];
@@ -140,7 +140,7 @@ NSUInteger kChangeMobileAlertTag = 100030;
     if (!_subTitleLabel) {
         _subTitleLabel = [[UILabel alloc] init];
         _subTitleLabel.font =  [UIFont fontWithName:@"PingFangSC-Regular" size:14];
-        _subTitleLabel.text = @"已绑定手机号：";
+        _subTitleLabel.text = NSLocalizedString(@"Bound_phone_number", @"已绑定手机号：");
         _subTitleLabel.textColor =  [UIColor colorWithRed:0/255.0 green:0/255.0 blue:0/255.0 alpha:1/1.0];
         _subTitleLabel.textAlignment = NSTextAlignmentCenter;
         [self.backgroudView addSubview:_subTitleLabel];
@@ -152,7 +152,7 @@ NSUInteger kChangeMobileAlertTag = 100030;
 - (UIButton *)phonebutton {
     if (!_phonebutton) {
         _phonebutton = [UIButton buttonWithType:UIButtonTypeCustom];
-        [_phonebutton setTitle:@"通过手机验证码方式" forState:UIControlStateNormal];
+        [_phonebutton setTitle:NSLocalizedString(@"by_mobile_captcha", @"通过手机验证码方式") forState:UIControlStateNormal];
         _phonebutton.titleLabel.font =  [UIFont fontWithName:@"PingFangSC-Regular" size:14];
         [_phonebutton setBackgroundColor: [UIColor colorWithRed:0/255.0 green:161/255.0 blue:233/255.0 alpha:1/1.0]];
         [_phonebutton setTitleColor:[UIColor colorWithRed:255/255.0 green:255/255.0 blue:255/255.0 alpha:1/1.0] forState:UIControlStateNormal];
@@ -168,7 +168,7 @@ NSUInteger kChangeMobileAlertTag = 100030;
 - (UIButton *)passwordbutton {
     if (!_passwordbutton) {
         _passwordbutton = [UIButton buttonWithType:UIButtonTypeCustom];
-        [_passwordbutton setTitle:@"通过密码更换" forState:UIControlStateNormal];
+        [_passwordbutton setTitle:NSLocalizedString(@"Change_by_password", @"通过密码更换") forState:UIControlStateNormal];
         _passwordbutton.backgroundColor = [UIColor colorWithRed:255/255.0 green:255/255.0 blue:255/255.0 alpha:1/1.0];
         [_passwordbutton setTitleColor:[UIColor colorWithRed:0/255.0 green:161/255.0 blue:233/255.0 alpha:1/1.0] forState:UIControlStateNormal];
         [_passwordbutton addTarget:self action:@selector(passwordbuttonClick:) forControlEvents:UIControlEventTouchUpInside];

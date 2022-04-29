@@ -34,7 +34,7 @@
 }
 
 - (void)setUpNavItem {
-    [self setNavigationBarTitle:@"绑定新手机号" navLeftButtonIcon:@"blackback"];
+    [self setNavigationBarTitle:NSLocalizedString(@"Bind_a_new_phone_number", @"绑定新手机号") navLeftButtonIcon:@"blackback"];
 }
 
 //- (void)sendChaptchaWithPhone:(NSString *)phone {
@@ -79,7 +79,7 @@
 - (BindPhoneView *)contentView {
     
     if (!_contentView) {
-        _contentView = [[BindPhoneView alloc] initWithFrame:CGRectMake(0, NavHeight, MAXScreenW, MAXScreenH - NavHeight) needTitle:YES titleText:@"请输入新的手机号"];
+        _contentView = [[BindPhoneView alloc] initWithFrame:CGRectMake(0, NavHeight, MAXScreenW, MAXScreenH - NavHeight) needTitle:YES titleText:NSLocalizedString(@"enter_a_new_phone_number", @"请输入新的手机号")];
         _contentView.delegate = self;
     }
     return _contentView;

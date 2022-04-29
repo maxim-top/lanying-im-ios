@@ -51,6 +51,8 @@ typedef enum {
 @property (nonatomic, assign) MessageDeliveryState status;
 @property (nonatomic, strong) NSString *date;
 @property (nonatomic, strong) NSString *id;
+@property (nonatomic, assign) long long clientMsgId;
+
 @property (nonatomic, strong) NSString *nickName;
 
 /** text */

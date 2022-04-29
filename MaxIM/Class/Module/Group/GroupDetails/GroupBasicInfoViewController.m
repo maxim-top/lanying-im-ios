@@ -48,7 +48,7 @@
     self.avatarImageview.image = [UIImage imageNamed:@"contact_placeholder"];
     self.nameLabel.text = self.group.name;
 
-    [self setNavigationBarTitle:@"加入群" navLeftButtonIcon:@"blackback"];
+    [self setNavigationBarTitle:NSLocalizedString(@"Join_group", @"加入群") navLeftButtonIcon:@"blackback"];
     
     UIImage *avarat = [UIImage imageWithContentsOfFile:self.group.avatarThumbnailPath];
     if (avarat) {
@@ -80,9 +80,9 @@
             vc.hidesBottomBarWhenPushed = YES;
             [currentNav pushViewController:vc animated:YES];
         } else  if ([result.code isEqualToString: @"20024"]) {
-            [HQCustomToast showDialog:@"无权限加入群组"];
+            [HQCustomToast showDialog:NSLocalizedString(@"No_permission_to_join_group", @"无权限加入群组")];
         } else if([result isOK]){
-            [HQCustomToast showDialog:@"申请成功"];
+            [HQCustomToast showDialog:NSLocalizedString(@"Apply_successfully", @"申请成功")];
             [self.navigationController  popToRootViewControllerAnimated:NO];
             
             UITabBarController *bar =  (UITabBarController *)[UIApplication sharedApplication].keyWindow.rootViewController;
@@ -139,7 +139,7 @@
     if (_nameLabel == nil) {
         _nameLabel = [[UILabel alloc] init];
         _nameLabel.textAlignment = NSTextAlignmentCenter;
-        _nameLabel.text = @"群名称";
+        _nameLabel.text = NSLocalizedString(@"Group_name_ast", @"群名称*");
 
         [self.infoView addSubview:self.nameLabel];
     }
@@ -149,7 +149,7 @@
 - (UILabel *)contentLabel {
     if (_contentLabel == nil) {
         _contentLabel = [[UILabel alloc] init];
-        _contentLabel.text = @"确定要加入该群？";
+        _contentLabel.text = NSLocalizedString(@"Confirm_to_join_the_group", @"确定要加入该群？");
         _contentLabel.textAlignment = NSTextAlignmentCenter;
         [self.view addSubview:self.contentLabel];
     }
@@ -168,7 +168,7 @@
 - (UIButton *)confirmButton {
     if (_confirmButton == nil) {
         _confirmButton = [UIButton buttonWithType:UIButtonTypeCustom];
-        [_confirmButton setTitle:@"确定" forState:UIControlStateNormal];
+        [_confirmButton setTitle:NSLocalizedString(@"Confirm", @"确定") forState:UIControlStateNormal];
         _confirmButton.backgroundColor = BMXCOLOR_HEX(0xF7E700);
         [_confirmButton setTitleColor:BMXCOLOR_HEX(0x333333) forState:UIControlStateNormal];
         [_confirmButton addTarget:self action:@selector(commitButtonClicked:) forControlEvents:UIControlEventTouchUpInside];

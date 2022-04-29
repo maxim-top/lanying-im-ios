@@ -11,7 +11,7 @@
 #import <objc/runtime.h>
 
 #define ISEXITTABLE(modelClass) \
-{NSString *classNameTip = [NSString stringWithFormat:@"%@ 表不存在，请先创建",modelClass]; \
+{NSString *classNameTip = [NSString stringWithFormat:NSLocalizedString(@"table_does_not_exist_create_first", @"%@ 表不存在，请先创建"),modelClass]; \
 NSAssert([self isExitTable:modelClass autoCloseDB:NO], classNameTip);\
 }
 
@@ -238,7 +238,7 @@ SingleM(Manager)
 - (NSArray *)searchModelArr:(Class)modelClass byKey:(NSString *)key {
     if ([self.dataBase open]) {
         
-        NSString *classNameTip = [NSString stringWithFormat:@"%@ 表不存在，请先创建",modelClass];
+        NSString *classNameTip = [NSString stringWithFormat:NSLocalizedString(@"table_does_not_exist_create_first", @"%@ 表不存在，请先创建"),modelClass];
         [self isExitTable:modelClass autoCloseDB:NO];
         // 查询数据
         NSMutableString *sql = [NSString stringWithFormat:@"SELECT * FROM %@",modelClass].mutableCopy;
@@ -309,7 +309,7 @@ SingleM(Manager)
 - (id)searchModel:(Class)modelClass byKey:(NSString *)key autoCloseDB:(BOOL)autoCloseDB sqlString:(NSString *)sql {
     if ([self.dataBase open]) {
         
-//        NSString *classNameTip = [NSString stringWithFormat:@"%@ 表不存在，请先创建",modelClass];
+//        NSString *classNameTip = [NSString stringWithFormat:NSLocalizedString(@"table_does_not_exist_create_first", @"%@ 表不存在，请先创建"),modelClass];
 //        NSAssert([self isExitTable:modelClass autoCloseDB:NO], classNameTip);
         
         // 查询数据

@@ -26,7 +26,7 @@
 }
 
 - (void)show {
-    self.view = [[MenuView alloc] initWithFrame:CGRectMake(0, NavHeight, MAXScreenW, MAXScreenH - NavHeight - TabBarHeight) buttonArray:@[@"添加好友" ,@"创建群组", @"扫一扫"]];
+    self.view = [[MenuView alloc] initWithFrame:CGRectMake(0, NavHeight, MAXScreenW, MAXScreenH - NavHeight - TabBarHeight) buttonArray:@[NSLocalizedString(@"Add_friend", @"添加好友") ,NSLocalizedString(@"Create_group", @"创建群组"), NSLocalizedString(@"Scan", @"扫一扫")]];
     [MaxKeyWindow addSubview:self.view];
 }
 

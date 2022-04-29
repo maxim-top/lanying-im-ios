@@ -35,7 +35,7 @@
     self.backgroundColor = BMXCOLOR_HEX(0xffffff);
     
         UILabel *titleLabel = [[UILabel alloc] init];
-        titleLabel.text = @"请输入新密码";
+        titleLabel.text = NSLocalizedString(@"enter_your_new_password", @"请输入新密码");
         titleLabel.font = [UIFont systemFontOfSize:14];
         titleLabel.textColor = BMXCOLOR_HEX(0x666666);
         [self addSubview:titleLabel];
@@ -90,7 +90,7 @@
     
     NSLog(@"1 = %@, 2= %@",self.firstPwdTextfield.text, self.secondPwdTextfield.text);
     if (![self.firstPwdTextfield.text isEqualToString:self.secondPwdTextfield.text]) {
-        [HQCustomToast showDialog:@"两次输入密码不一致"];
+        [HQCustomToast showDialog:NSLocalizedString(@"Entered_passwords_differ", @"两次输入密码不一致")];
         return;
     }
     
@@ -119,7 +119,7 @@
         _firstPwdTextfield = [[UITextField alloc] init];
         _firstPwdTextfield.secureTextEntry = YES;
         _firstPwdTextfield.font = [UIFont systemFontOfSize:14];
-        _firstPwdTextfield.placeholder = @"请输入新密码";
+        _firstPwdTextfield.placeholder = NSLocalizedString(@"enter_your_new_password", @"请输入新密码");
         [self addSubview:_firstPwdTextfield];
         [_firstPwdTextfield addTarget:self action:@selector(textFieldDidChange:) forControlEvents:UIControlEventEditingChanged];
         
@@ -134,7 +134,7 @@
         _secondPwdTextfield = [[UITextField alloc] init];
         _secondPwdTextfield.secureTextEntry = YES;
         _secondPwdTextfield.font = [UIFont systemFontOfSize:14];
-        _secondPwdTextfield.placeholder = @"请再次输入新密码";
+        _secondPwdTextfield.placeholder = NSLocalizedString(@"enter_the_new_password_again", @"请再次输入新密码");
         [self addSubview:_secondPwdTextfield];
         [_secondPwdTextfield addTarget:self action:@selector(textFieldDidChange:) forControlEvents:UIControlEventEditingChanged];
         
@@ -151,8 +151,8 @@
         _continueButton.titleLabel.font = [UIFont systemFontOfSize:16];
         _continueButton.layer.masksToBounds = YES;
         _continueButton.layer.cornerRadius = 12;
-        [_continueButton setTitle:@"继续" forState:UIControlStateDisabled];
-        [_continueButton setTitle:@"继续" forState:UIControlStateNormal];
+        [_continueButton setTitle:NSLocalizedString(@"Continue", @"继续") forState:UIControlStateDisabled];
+        [_continueButton setTitle:NSLocalizedString(@"Continue", @"继续") forState:UIControlStateNormal];
         [_continueButton setTitleColor:[BMXCOLOR_HEX(0x333333) colorWithAlphaComponent:0.4] forState:UIControlStateDisabled];
         _continueButton.backgroundColor = [BMXCOLOR_HEX(0x00A1E9) colorWithAlphaComponent:0.2];
         [_continueButton addTarget:self action:@selector(continueButtonClick) forControlEvents:UIControlEventTouchUpInside];

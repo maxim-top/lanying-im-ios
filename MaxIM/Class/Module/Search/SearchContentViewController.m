@@ -72,7 +72,7 @@
 
 - (void)setupSearchView {
     self.searchView = [BMXSearchView searchView];
-    self.searchView.searchTF.placeholder = @"  请输入要搜索的聊天记录内容";
+    self.searchView.searchTF.placeholder = NSLocalizedString(@"enter_the_chat_log_content_to_search", @" 请输入要搜索的聊天记录内容");
     self.searchView.searchTF.delegate = self;
     self.searchView.searchTF.returnKeyType = UIReturnKeySearch;
     
@@ -80,7 +80,7 @@
 }
 
 - (void)setUpNavItem {
-    [self setNavigationBarTitle:@"搜索" navLeftButtonIcon:@"blackback"];
+    [self setNavigationBarTitle:NSLocalizedString(@"Search", @"搜索") navLeftButtonIcon:@"blackback"];
 }
 
 - (void)setupCategoryView {
@@ -88,13 +88,13 @@
     [self.view addSubview:categoryView];
     
     UILabel *label = [[UILabel alloc] initWithFrame:CGRectMake(20, 0, 100, 30)];
-    label.text = @"根据类型搜索：";
+    label.text = NSLocalizedString(@"Search_by_type", @"根据类型搜索：");
     label.font = [UIFont systemFontOfSize:13];
     [categoryView addSubview:label];
     
     for (int i = 0; i < self.categoryArray.count; i++) {
         UIButton *button = [UIButton buttonWithType:UIButtonTypeCustom];
-        button.frame = CGRectMake(20 + 100 + 5 + 45 * i, 0, 40, 30);
+        button.frame = CGRectMake(20 + 100 + 5 + 62 * i, 0, 60, 30);
         [button setTitle:self.categoryArray[i] forState:UIControlStateNormal];
         button.tag = 20001 + i;
         button.titleLabel.font = [UIFont systemFontOfSize:14];
@@ -113,14 +113,14 @@
         if (messageList.count > 0) {
             [self dataHandleMessages:messageList];
         } else {
-            [HQCustomToast showDialog:@"暂无查询结果"];
+            [HQCustomToast showDialog:NSLocalizedString(@"No_result_found_for_now", @"暂无查询结果")];
         }
     }];
 
 }
 
 - (NSArray *)categoryArray {
-    return @[@"图片", @"语音", @"文件", @"位置"];
+    return @[NSLocalizedString(@"Image", @"图片"), NSLocalizedString(@"Voice", @"语音"), NSLocalizedString(@"File", @"文件"), NSLocalizedString(@"Location", @"位置")];
 }
 
 #pragma mark - UITextFieldDelegate
@@ -281,7 +281,7 @@
         UIImage *image = [UIImage imageWithContentsOfFile:roster.avatarThumbnailPath];
         if (!image) {
             
-            [[[BMXClient sharedClient] rosterService] downloadAvatarWithRoster:roster progress:^(int progress, BMXError *error) {
+            [[[BMXClient sharedClient] rosterService] downloadAvatarWithRoster:roster isThumbnail:YES progress:^(int progress, BMXError *error) {
                 
             }  completion:^(BMXRoster *roster, BMXError *error) {
                 if (!error) {
@@ -301,7 +301,7 @@
     } else {
         
         BMXGroup *group = self.resultArray[indexPath.row];
-        cell.titleLabel.text = group.name != nil ? group.name : @"暂无名字";
+        cell.titleLabel.text = group.name != nil ? group.name : NSLocalizedString(@"No_name_for_now", @"暂无名字");
         cell.avatarImageView.image = [UIImage imageNamed:@"group_placeHo"];
     }
     

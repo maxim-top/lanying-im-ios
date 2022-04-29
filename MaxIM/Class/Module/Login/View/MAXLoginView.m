@@ -373,11 +373,11 @@
     
     if (isStart) {
         [self.codeTimerManager beginTimeWithTotalTime:60];
-        [self.getSmsButton setTitle:@"60秒后重发" forState:UIControlStateNormal];
+        [self.getSmsButton setTitle:NSLocalizedString(@"sixtysec_later_to_resend", @"60秒后重发") forState:UIControlStateNormal];
         [self.getSmsButton setTitleColor:kColorC3_7 forState:UIControlStateNormal];
         self.getSmsButton.enabled = NO;
     } else {
-        [self.getSmsButton setTitle:@"获取验证码" forState:UIControlStateNormal];
+        [self.getSmsButton setTitle:NSLocalizedString(@"Get_captcha", @"获取验证码") forState:UIControlStateNormal];
         if ([self.phoneTextField.text length]) {
             [self.getSmsButton setTitleColor:BMXCOLOR_HEX(0xffffff) forState:UIControlStateNormal];
         } else {
@@ -389,7 +389,7 @@
 }
 
 - (void)timeLast:(NSTimeInterval)lastTime {
-    [self.getSmsButton setTitle:[NSString stringWithFormat:@"%.0f秒后重发", lastTime] forState:UIControlStateNormal];
+    [self.getSmsButton setTitle:[NSString stringWithFormat:NSLocalizedString(@"nsec_later_to_resend", @"%.0f秒后重发"), lastTime] forState:UIControlStateNormal];
 }
 
 - (void)timeFinish {
@@ -562,7 +562,7 @@
         _usernameTextField = [[UITextField alloc] init];
         _usernameTextField.tag = kUsernameTextFieldTag;
 //        _usernameTextField.backgroundColor = [BMXCOLOR_HEX(0x999999) colorWithAlphaComponent:0.1];
-        _usernameTextField.placeholder = @"请输入用户名";
+        _usernameTextField.placeholder = NSLocalizedString(@"enter_username", @"请输入用户名");
         _usernameTextField.font = [UIFont systemFontOfSize:14];
         _usernameTextField.leftViewMode = UITextFieldViewModeAlways;
         _usernameTextField.layer.masksToBounds = YES;
@@ -578,7 +578,7 @@
         _passwordTextField = [[UITextField alloc] init];
         _passwordTextField.tag = kPasswordTextFieldTag;
 //        _passwordTextField.backgroundColor = [BMXCOLOR_HEX(0x999999) colorWithAlphaComponent:0.1];
-        _passwordTextField.placeholder = @"请输输入密码";
+        _passwordTextField.placeholder = NSLocalizedString(@"enter_password", @"请输输入密码");
         _passwordTextField.font = [UIFont systemFontOfSize:14];
         _passwordTextField.leftViewMode = UITextFieldViewModeAlways;
         _passwordTextField.layer.masksToBounds = YES;
@@ -650,7 +650,7 @@
         _phoneTextField = [[UITextField alloc] init];
         _phoneTextField.tag = kUsernameTextFieldTag;
 //        _phoneTextField.backgroundColor = [BMXCOLOR_HEX(0x999999) colorWithAlphaComponent:0.1];
-        _phoneTextField.placeholder = @"请输入手机号";
+        _phoneTextField.placeholder = NSLocalizedString(@"enter_phone_number", @"请输入手机号");
         _phoneTextField.font = [UIFont systemFontOfSize:14];
 //        _phoneTextField.leftView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 20, 20)];
         _phoneTextField.leftViewMode = UITextFieldViewModeAlways;
@@ -668,7 +668,7 @@
         _smsTextField = [[UITextField alloc] init];
         _smsTextField.tag = kSmsTextFieldTag;
 //        _smsTextField.backgroundColor = [BMXCOLOR_HEX(0x999999) colorWithAlphaComponent:0.1];
-        _smsTextField.placeholder = @"请输入验证码";
+        _smsTextField.placeholder = NSLocalizedString(@"enter_your_captcha", @"请输入验证码");
         _smsTextField.font = [UIFont systemFontOfSize:14];
 //        _smsTextField.leftView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 20, 20)];
         _smsTextField.leftViewMode = UITextFieldViewModeAlways;
@@ -683,7 +683,7 @@
     
     if (!_getSmsButton) {
         _getSmsButton = [UIButton buttonWithType:UIButtonTypeCustom];
-        [_getSmsButton setTitle:@"获取验证码" forState:UIControlStateNormal];
+        [_getSmsButton setTitle:NSLocalizedString(@"Get_captcha", @"获取验证码") forState:UIControlStateNormal];
         _getSmsButton.titleLabel.font = [UIFont systemFontOfSize:12];
         
 //        _getSmsButton.backgroundColor = [BMXCOLOR_HEX(0x0079F4) colorWithAlphaComponent:0.1];
@@ -705,7 +705,7 @@
 - (UIButton *)commitPhoneButton {
     if (!_commitPhoneButton) {
         _commitPhoneButton = [UIButton buttonWithType:UIButtonTypeCustom];
-        [_commitPhoneButton setTitle:@"注册" forState:UIControlStateNormal];
+        [_commitPhoneButton setTitle:NSLocalizedString(@"Register", @"注册") forState:UIControlStateNormal];
         
         _commitPhoneButton.backgroundColor = [BMXCOLOR_HEX(0x0079F4) colorWithAlphaComponent:0.1];
         [_commitPhoneButton setTitleColor:BMXCOLOR_HEX(0xffffff) forState:UIControlStateNormal];
@@ -723,7 +723,7 @@
 - (UIButton *)scanLoginButton {
     if (!_scanLoginButton) {
         _scanLoginButton = [UIButton buttonWithType:UIButtonTypeCustom];
-        [_scanLoginButton setTitle:@"扫描二维码登录" forState:UIControlStateNormal];
+        [_scanLoginButton setTitle:NSLocalizedString(@"Scan_QR_Code_to_login", @"扫描二维码登录") forState:UIControlStateNormal];
 //        _scanLoginButton.backgroundColor = BMXCOLOR_HEX(0x0079F4);
         [_scanLoginButton setTitleColor:BMXCOLOR_HEX(0x333333) forState:UIControlStateNormal];
         [_scanLoginButton addTarget:self action:@selector(scanLoginButtonClicked:) forControlEvents:UIControlEventTouchUpInside];
@@ -737,7 +737,7 @@
     
     if (!_closeButton) {
         _closeButton = [UIButton buttonWithType:UIButtonTypeCustom];
-        [_closeButton setTitle:@"直接登录" forState:UIControlStateNormal];
+        [_closeButton setTitle:NSLocalizedString(@"Login_directly", @"直接登录") forState:UIControlStateNormal];
         [_closeButton setTitleColor:BMXCOLOR_HEX(0x04A4A4A) forState:UIControlStateNormal];
         _closeButton.titleLabel.font = [UIFont systemFontOfSize:14];
     }
@@ -747,7 +747,7 @@
 - (UIButton *)tipButton {
     if (_tipButton == nil) {
         _tipButton = [UIButton buttonWithType:UIButtonTypeCustom];
-        NSString *str = @"注册即代表同意《用户服务及隐私政策》";
+        NSString *str = NSLocalizedString(@"Registration_signifies_acceptance", @"注册即代表同意《用户服务及隐私政策》");
         _tipButton.titleLabel.textAlignment = NSTextAlignmentCenter;
         [_tipButton setTitle:str forState:UIControlStateNormal];
         _tipButton.titleLabel.font = [UIFont systemFontOfSize:12];
@@ -796,7 +796,7 @@
         _wechatLabel = [[UILabel alloc] init];
         _wechatLabel.textColor = BMXCOLOR_HEX(0xAFAFAF);
         _wechatLabel.font = [UIFont systemFontOfSize:14];
-        _wechatLabel.text = @"快捷登录";
+        _wechatLabel.text = NSLocalizedString(@"Quick_login", @"快捷登录");
         [self addSubview:_wechatLabel];
     }
     return _wechatLabel;
@@ -819,7 +819,7 @@
 - (UIButton *)transformDNSBtn {
     if (!_transformDNSBtn) {
         _transformDNSBtn = [UIButton buttonWithType:UIButtonTypeCustom];
-        [_transformDNSBtn setTitle:@"切换DNS" forState:UIControlStateNormal];
+        [_transformDNSBtn setTitle:NSLocalizedString(@"Switch_DNS", @"切换DNS") forState:UIControlStateNormal];
         [_transformDNSBtn setTitleColor:BMXCOLOR_HEX(0x333333) forState:UIControlStateNormal];
         [_transformDNSBtn addTarget:self action:@selector(transformDNSBtnClick:) forControlEvents:UIControlEventTouchUpInside];
         _transformDNSBtn.layer.masksToBounds = YES;

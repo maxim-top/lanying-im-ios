@@ -32,7 +32,7 @@
 }
 
 - (void)p_setNavBar {
-    [self setNavigationBarTitle:@"系统通知" navLeftButtonIcon:@"blackback"];
+    [self setNavigationBarTitle:NSLocalizedString(@"System_notification", @"系统通知") navLeftButtonIcon:@"blackback"];
 }
 
 - (void)loadMessages {
@@ -58,9 +58,9 @@
     long temp = 0;
     NSString *result;
     if (timeInterval < 60) {
-        result = [NSString stringWithFormat:@"刚刚"];
+        result = [NSString stringWithFormat:NSLocalizedString(@"Just_now", @"刚刚")];
     }else if((temp = timeInterval/60) < 60){
-        result = [NSString stringWithFormat:@"%ld分钟前",temp];
+        result = [NSString stringWithFormat:NSLocalizedString(@"nminutes_ago", @"%ld分钟前"),temp];
     }else if((temp = temp/60) < 24){
         
         NSDate *messageDate = [NSDate dateWithTimeIntervalSince1970:comepareDate];
@@ -85,7 +85,7 @@
 
     BMXMessageObject *message = self.messageArray[indexPath.row];
     SystemNotificationTableViewCell *cell = [SystemNotificationTableViewCell cellWithTableview:tableView];
-    cell.titleLabel.text = @"【系统消息】";
+    cell.titleLabel.text = NSLocalizedString(@"System_message", @"【系统消息】");
     cell.subtitleLabel.text = message.content;
     cell.selectionStyle = UITableViewCellSelectionStyleNone;
     cell.avatarImageView.image = [UIImage imageNamed:@"systemAvater"];

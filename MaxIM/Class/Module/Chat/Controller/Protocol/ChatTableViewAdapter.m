@@ -60,9 +60,9 @@
             // 配置是否已读
             
             if (messageModel.messageObjc.isReadAcked == YES) {
-                messageCell.readStatusLabel.text = @"已读";
+                messageCell.readStatusLabel.text = NSLocalizedString(@"Read", @"已读");
             } else {
-                messageCell.readStatusLabel.text = @"未读";
+                messageCell.readStatusLabel.text = NSLocalizedString(@"Unread", @"未读");
             }
         }
         
@@ -76,7 +76,7 @@
                     [weakCell setAvaratImage:avarat];
                 }else {
                     
-                    [[[BMXClient sharedClient] rosterService] downloadAvatarWithRoster:roster progress:^(int progress, BMXError *error) {
+                    [[[BMXClient sharedClient] rosterService] downloadAvatarWithRoster:roster isThumbnail:YES progress:^(int progress, BMXError *error) {
                         
                     } completion:^(BMXRoster *roster, BMXError *error) {
                         if (!error) {

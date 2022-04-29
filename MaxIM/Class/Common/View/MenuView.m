@@ -48,7 +48,7 @@ NSUInteger kMenuViewTag = 1121;
 
 - (void)addBackGroundView {
     UIImage *image = [UIImage imageNamed:@"menuBubble_arrow"];
-    self.backgroudView = [[UIView alloc] initWithFrame:CGRectMake(MAXScreenW - 10 -  104 ,0 , 104, self.buttonArray.count * 44)];
+    self.backgroudView = [[UIView alloc] initWithFrame:CGRectMake(MAXScreenW - 10 -  130 ,0 , 130, self.buttonArray.count * 44)];
     [self addSubview:self.backgroudView];
     self.backgroudView.backgroundColor = BMXCOLOR_HEX(0x414040);
     self.backgroudView.layer.cornerRadius = 3;

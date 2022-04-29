@@ -44,7 +44,7 @@
 
 - (void)setupUI {
     self.titleView.backgroundColor = PYRGB(249, 249, 249);
-    self.titleLabel.text = @"用户隐私协议";
+    self.titleLabel.text = NSLocalizedString(@"User_Privacy_Agreement", @"用户隐私协议");
     self.closeButton.userInteractionEnabled = true;
 }
 
@@ -86,7 +86,7 @@
 - (UIButton *)closeButton {
     if (!_closeButton) {
         _closeButton = [UIButton buttonWithType:UIButtonTypeSystem];
-        [_closeButton setTitle:@"关闭" forState:UIControlStateNormal];
+        [_closeButton setTitle:NSLocalizedString(@"Close", @"关闭") forState:UIControlStateNormal];
         [_closeButton addTarget:self action:@selector(closeView) forControlEvents:UIControlEventTouchUpInside];
         [_closeButton sizeToFit];
         _closeButton.frame = CGRectMake(PYScreenWidth - _closeButton.frame.size.width - 20, [self navigationBarHeight] - 44, _closeButton.frame.size.width, 44);

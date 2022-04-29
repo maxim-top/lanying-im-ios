@@ -109,7 +109,7 @@
     if (indexPath.section == 0) {
         NSString *titleStr = [NSString stringWithFormat:@"%@", self.actionArray[indexPath.row]];
         [cell refreshByTitle:titleStr];
-        if ([titleStr isEqualToString:@"群申请列表"] || [titleStr isEqualToString: @"群聊系统消息"]) {
+        if ([titleStr isEqualToString:NSLocalizedString(@"Group_application_list", @"群申请列表")] || [titleStr isEqualToString: NSLocalizedString(@"System_message_of_group_chat", @"群聊系统消息")]) {
             cell.avatarImg.image = [UIImage imageNamed: [NSString stringWithFormat:@"group_application"]];
         }
     } else {
@@ -146,7 +146,7 @@
 }
 
 - (NSArray *)actionArray {
-    return @[@"新建群聊", @"群申请列表", @"群聊系统消息"];
+    return @[NSLocalizedString(@"Create_a_new_group_chat", @"新建群聊"), NSLocalizedString(@"Group_application_list", @"群申请列表"), NSLocalizedString(@"System_message_of_group_chat", @"群聊系统消息")];
 }
 
 - (UITableView *)tableView {
@@ -169,7 +169,7 @@
 
 - (void)setUpNavItem{
     self.navigationController.navigationBar.barTintColor = BMXColorNavBar;
-    self.navigationItem.title = @"群组";
+    self.navigationItem.title = NSLocalizedString(@"Group", @"群组");
 }
 
 - (NSArray *)groupArray {

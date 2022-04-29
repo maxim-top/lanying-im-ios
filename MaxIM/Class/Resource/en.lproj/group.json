@@ -1,0 +1,29 @@
+{
+    "type": "groupconfig",
+    "cells": [
+        {
+            "type": "Group ID",
+            "control": "0"
+        },
+        {
+            "type": "Group management",
+            "control": "0"
+        },
+        {
+            "type": "Modify group",
+            "control": "0"
+        },
+        {
+            "type": "Group announcement",
+            "control": "0"
+        },
+        {
+            "type": "Group extension info",
+            "control": "0"
+        },
+        {
+            "type": "Group shared files",
+            "control": "0"
+        },
+    ]
+}

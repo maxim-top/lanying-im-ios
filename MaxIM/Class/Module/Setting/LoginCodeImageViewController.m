@@ -45,7 +45,7 @@
         }
     } failureBlock:^(NSError * _Nullable error) {
         [HQCustomToast hideWating];
-        [HQCustomToast showDialog:@"网路异常"];
+        [HQCustomToast showDialog:NSLocalizedString(@"Network_exception", @"网路异常")];
     }];
 }
 
@@ -86,14 +86,14 @@
     if (!_tipLabel) {
         _tipLabel = [[UILabel alloc] init];
         _tipLabel.bmx_top = self.codeImageView.bottom + 20;
-        _tipLabel.text = @"扫码登录MaxIM";
+        _tipLabel.text = NSLocalizedString(@"Scan_QR_Code_to_login_MaxIM", @"扫码登录MaxIM");
         [self.view addSubview:_tipLabel];
     }
     return _tipLabel;
 }
 
 - (void)setUpNavItem  {
-    [self setNavigationBarTitle:@"我的二维码" navLeftButtonIcon:@"blackback"];
+    [self setNavigationBarTitle:NSLocalizedString(@"My_QR_Code", @"我的二维码") navLeftButtonIcon:@"blackback"];
 }
 
 @end

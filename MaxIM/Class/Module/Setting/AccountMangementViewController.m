@@ -55,7 +55,7 @@
 }
 
 - (void)setUpNavItem {
-    [self setNavigationBarTitle:@"切换账号" navLeftButtonIcon:@"blackback"];
+    [self setNavigationBarTitle:NSLocalizedString(@"Switch_account", @"切换账号") navLeftButtonIcon:@"blackback"];
 }
 
 - (void)changeNewAccount:(IMAcount *)account{
@@ -155,12 +155,12 @@
 - (NSArray<UITableViewRowAction *> *)tableView:(UITableView *)tableView editActionsForRowAtIndexPath:(NSIndexPath *)indexPath {
     // 添加一个删除按钮
     
-    UITableViewRowAction *deleteRowAction = [UITableViewRowAction rowActionWithStyle:UITableViewRowActionStyleDestructive title:@"删除"handler:^(UITableViewRowAction *action, NSIndexPath *indexPath) {
+    UITableViewRowAction *deleteRowAction = [UITableViewRowAction rowActionWithStyle:UITableViewRowActionStyleDestructive title:NSLocalizedString(@"Delete", @"删除")handler:^(UITableViewRowAction *action, NSIndexPath *indexPath) {
         MAXLog(@"点击了删除");
         IMAcount *account = self.accountArray[indexPath.row];
         
         if ([account.usedId isEqualToString:self.currentAccount.usedId]) {
-            [HQCustomToast showDialog:@"不能删除当前账户"];
+            [HQCustomToast showDialog:NSLocalizedString(@"Cannot_delete_current_account", @"不能删除当前账户")];
         } else {
             [self removeAccount:account];
 
@@ -172,7 +172,7 @@
 }
 
 - (NSString *)tableView:(UITableView *)tableView titleForDeleteConfirmationButtonForRowAtIndexPath:(NSIndexPath *)indexPath {
-    return @"删除";
+    return NSLocalizedString(@"Delete", @"删除");
 }
 
 - (void)removeAccount:(IMAcount *)account {

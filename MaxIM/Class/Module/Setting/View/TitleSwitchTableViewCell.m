@@ -39,7 +39,7 @@
     CGFloat nickNameleft = 15;
     
     self.titleLabel.bmx_left = nickNameleft ;
-    self.titleLabel.size = CGSizeMake(200, self.bmx_height);
+    self.titleLabel.size = CGSizeMake(330, self.bmx_height);
 
     self.contentLabel.bmx_left = nickNameleft + 80;
     self.contentLabel.size = CGSizeMake(MAXScreenW - nickNameleft * 2  -  80, self.bmx_height);

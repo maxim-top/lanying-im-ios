@@ -270,7 +270,7 @@
     NSString* systemName = [[UIDevice currentDevice] systemName];
     NSString* phoneVersion = [[UIDevice currentDevice] systemVersion];
   
-    NSString *phone = [NSString stringWithFormat:@"设备名称:%@;%@;%@;%@", phoneName,localizedModel,systemName,phoneVersion];
+    NSString *phone = [NSString stringWithFormat:NSLocalizedString(@"Device_name_name", @"设备名称:%@;%@;%@;%@"), phoneName,localizedModel,systemName,phoneVersion];
     BMXSDKConfig *config  = [[BMXSDKConfig alloc] initConfigWithDataDir:dataDir cacheDir:cacheDir pushCertName:@"apns_maximtop_distribution_2020" userAgent:phone];
     config.appID = [AppIDManager sharedManager].appid.appId;
     config.appSecret = @"47B13PBIAPDARZKD";
@@ -388,7 +388,7 @@
                 if ( result.isOK) {
                     if (!result.resultData[@"password"] ) {
                        //  注册登录
-                        [HQCustomToast showDialog:@"请登录注册绑定微信"];
+                        [HQCustomToast showDialog:NSLocalizedString(@"login_with_your_registered_WeChat_account", @"请登录注册绑定微信")];
                         [[NSNotificationCenter defaultCenter] postNotificationName:@"wechatloginsuccess_newuser" object:result.resultData];
                     } else {
                         

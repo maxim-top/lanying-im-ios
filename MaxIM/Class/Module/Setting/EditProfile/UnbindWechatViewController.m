@@ -31,7 +31,7 @@
 }
 
 - (void)setUpNavItem {
-    [self setNavigationBarTitle:@"解绑微信" navLeftButtonIcon:@"blackback"];
+    [self setNavigationBarTitle:NSLocalizedString(@"Unbind_WeChat_account", @"解绑微信") navLeftButtonIcon:@"blackback"];
 }
 
 - (void)commitWithPassword:(NSString *)password {
@@ -42,7 +42,7 @@
 - (VerifyPasswordView *)contentView {
  
     if (!_contentView) {
-        _contentView = [[VerifyPasswordView alloc] initWithFrame:CGRectMake(0, NavHeight, MAXScreenW, MAXScreenH - NavHeight) titleText:@"解绑时，需要输入密码验证" continueButtonName:@"确认绑定"];
+        _contentView = [[VerifyPasswordView alloc] initWithFrame:CGRectMake(0, NavHeight, MAXScreenW, MAXScreenH - NavHeight) titleText:NSLocalizedString(@"enter_password_to_verify_when_unbinding", @"解绑时，需要输入密码验证") continueButtonName:NSLocalizedString(@"Confirm_to_bind", @"确认绑定")];
         _contentView.delegate = self;
     }
     return _contentView;

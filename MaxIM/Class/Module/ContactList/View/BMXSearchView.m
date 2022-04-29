@@ -68,7 +68,7 @@
         
         _searchTF.leftViewMode = UITextFieldViewModeAlways;
         [_searchTF.leftView sizeToFit];
-        _searchTF.attributedPlaceholder = [[NSAttributedString alloc] initWithString:@"输入要查找的好友用户名"attributes:@{NSForegroundColorAttributeName: BMXCOLOR_HEX(0x666666)}];
+        _searchTF.attributedPlaceholder = [[NSAttributedString alloc] initWithString:NSLocalizedString(@"Enter_Friends_username_to_search", @"输入要查找的好友用户名")attributes:@{NSForegroundColorAttributeName: BMXCOLOR_HEX(0x666666)}];
 
         [_searchTF setClearButtonMode:UITextFieldViewModeWhileEditing];
         [self addSubview:_searchTF];

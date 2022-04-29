@@ -100,7 +100,7 @@
         _textfield = [[UITextField alloc] init];
         _textfield.keyboardType = UIKeyboardTypePhonePad;
         _textfield.font = [UIFont systemFontOfSize:14];
-        _textfield.placeholder = @"输入登录密码";
+        _textfield.placeholder = NSLocalizedString(@"Enter_login_password", @"输入登录密码");
         _textfield.clearButtonMode = UITextFieldViewModeWhileEditing;
         [self addSubview:_textfield];
         [_textfield addTarget:self action:@selector(textFieldDidChange:) forControlEvents:UIControlEventEditingChanged];
@@ -118,8 +118,8 @@
         _continueButton.titleLabel.font = [UIFont systemFontOfSize:16];
         _continueButton.layer.masksToBounds = YES;
         _continueButton.layer.cornerRadius = 12;
-        [_continueButton setTitle:@"继续" forState:UIControlStateDisabled];
-        [_continueButton setTitle:@"继续" forState:UIControlStateNormal];
+        [_continueButton setTitle:NSLocalizedString(@"Continue", @"继续") forState:UIControlStateDisabled];
+        [_continueButton setTitle:NSLocalizedString(@"Continue", @"继续") forState:UIControlStateNormal];
         [_continueButton setTitleColor:[BMXCOLOR_HEX(0x333333) colorWithAlphaComponent:0.4] forState:UIControlStateDisabled];
         _continueButton.backgroundColor = [BMXCOLOR_HEX(0x00A1E9) colorWithAlphaComponent:0.2];
         [_continueButton addTarget:self action:@selector(continueButtonClick) forControlEvents:UIControlEventTouchUpInside];

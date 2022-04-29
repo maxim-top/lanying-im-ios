@@ -130,15 +130,15 @@
         }
     }
     if (xids.count <=0) {
-        UIAlertController* alert = [UIAlertController alertControllerWithTitle:@"警告" message:@"您没有选中成员" preferredStyle:UIAlertControllerStyleAlert];
-        [alert addAction:[UIAlertAction actionWithTitle:@"确定" style:UIAlertActionStyleDefault handler:nil]];
+        UIAlertController* alert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Warning", @"警告") message:NSLocalizedString(@"You_have_no_members_selected", @"您没有选中成员") preferredStyle:UIAlertControllerStyleAlert];
+        [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Confirm", @"确定") style:UIAlertActionStyleDefault handler:nil]];
         [self presentViewController:alert animated:YES completion:nil];
     }else {
-        UIAlertController* alert = [UIAlertController alertControllerWithTitle:@"警告" message:@"确定要解除禁言吗？" preferredStyle:UIAlertControllerStyleAlert];
-        [alert addAction:[UIAlertAction actionWithTitle:@"确定" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+        UIAlertController* alert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Warning", @"警告") message:NSLocalizedString(@"Confirm_to_unban", @"确定要解除禁言吗？") preferredStyle:UIAlertControllerStyleAlert];
+        [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Confirm", @"确定") style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
             [self removeMuteListWithIds:xids];
         }]];
-        [alert addAction:[UIAlertAction actionWithTitle:@"取消" style:UIAlertActionStyleCancel handler:nil]];
+        [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Cancel", @"取消") style:UIAlertActionStyleCancel handler:nil]];
         [self presentViewController:alert animated:YES completion:nil];
     }
 }
@@ -148,7 +148,7 @@
 {
     [[[BMXClient sharedClient] groupService] unbanMembersByGroup:self.group  members:uids reason:@"unmute member" completion:^(BMXError *error) {
         if(!error) {
-            [HQCustomToast showDialog:@"解除禁言成功"];
+            [HQCustomToast showDialog:NSLocalizedString(@"Unbanned_successfully", @"解除禁言成功")];
             [self getMuteList];
             // TODO 优化， 直接从列表中删除
             [[NSNotificationCenter defaultCenter] postNotificationName:@"KEY_NOTIFICATION_GROUP_INFO_UPDATED" object:nil];
@@ -160,7 +160,7 @@
 }
 
 - (void)setUpNavItem {
-    [self setNavigationBarTitle:@"群禁言名单" navLeftButtonIcon:@"blackback" navRightButtonTitle:@"解除"];
+    [self setNavigationBarTitle:NSLocalizedString(@"List_of_banned_group_members", @"群禁言名单") navLeftButtonIcon:@"blackback" navRightButtonTitle:NSLocalizedString(@"Unbind", @"解除")];
     [self.navRightButton addTarget:self action:@selector(touchedRightBar) forControlEvents:UIControlEventTouchUpInside];
 }
 

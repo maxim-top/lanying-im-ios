@@ -36,12 +36,12 @@ static NSString *cellID = @"ImageTitleBasicTableViewCell";
     self.avatarImg.layer.borderWidth = 0.5;
     self.avatarImg.layer.borderColor = kColorC4_5.CGColor;
     
-    if ([titlel isEqualToString:@"好友申请与通知"]) {
+    if ([titlel isEqualToString:NSLocalizedString(@"Friend_request_and_notification", @"好友申请与通知")]) {
         self.avatarImg.image = [UIImage imageNamed:@"application"];
         self.avatarImg.layer.borderWidth = 0;
         self.avatarImg.layer.borderColor = [UIColor clearColor].CGColor;
         
-    } else if  ([titlel isEqualToString:@"群申请与通知"] || [titlel isEqualToString:@"群聊系统消息"]) {
+    } else if  ([titlel isEqualToString:NSLocalizedString(@"Group_application_and_notification", @"群申请与通知")] || [titlel isEqualToString:NSLocalizedString(@"System_message_of_group_chat", @"群聊系统消息")]) {
         self.avatarImg.image = [UIImage imageNamed:@"application"];
         self.avatarImg.layer.borderWidth = 0;
         self.avatarImg.layer.borderColor = [UIColor clearColor].CGColor;
@@ -86,7 +86,7 @@ static NSString *cellID = @"ImageTitleBasicTableViewCell";
     
     UIImage *image = [UIImage imageWithContentsOfFile:roster.avatarThumbnailPath];
     if (!image) {
-        [[[BMXClient sharedClient] rosterService] downloadAvatarWithRoster:roster progress:^(int progress, BMXError *error) {
+        [[[BMXClient sharedClient] rosterService] downloadAvatarWithRoster:roster isThumbnail:YES progress:^(int progress, BMXError *error) {
             
         }  completion:^(BMXRoster *rosterObjc, BMXError *error) {
             if (!error) {
@@ -114,7 +114,7 @@ static NSString *cellID = @"ImageTitleBasicTableViewCell";
     
     self.nicknameLabel.text = [[roster nickName] length] ?  roster.nickName : roster.userName;
     
-        [[[BMXClient sharedClient] rosterService] downloadAvatarWithRoster:roster progress:^(int progress, BMXError *error) {
+        [[[BMXClient sharedClient] rosterService] downloadAvatarWithRoster:roster isThumbnail:NO progress:^(int progress, BMXError *error) {
             
         }  completion:^(BMXRoster *rosterObjc, BMXError *error) {
             if (!error) {

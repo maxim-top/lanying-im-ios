@@ -55,11 +55,11 @@
 
 - (void)addRoster:(NSNotification *)noti {
     BMXRoster *roster = noti.object;
-    UIAlertController* alert = [UIAlertController alertControllerWithTitle:@"留言"
+    UIAlertController* alert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Leave_a_message", @"留言")
                                                                    message:@""
                                                             preferredStyle:UIAlertControllerStyleAlert];
     
-    UIAlertAction* okAction = [UIAlertAction actionWithTitle:@"确定" style:UIAlertActionStyleDefault
+    UIAlertAction* okAction = [UIAlertAction actionWithTitle:NSLocalizedString(@"Confirm", @"确定") style:UIAlertActionStyleDefault
                                                      handler:^(UIAlertAction * action) {
                                                          //响应事件
                                                          //得到文本信息
@@ -68,13 +68,13 @@
                                                              [self addRosterId:roster.rosterId reason:[text.text length] ? text.text : @""];
                                                          }
                                                      }];
-    UIAlertAction* cancelAction = [UIAlertAction actionWithTitle:@"取消" style:UIAlertActionStyleCancel
+    UIAlertAction* cancelAction = [UIAlertAction actionWithTitle:NSLocalizedString(@"Cancel", @"取消") style:UIAlertActionStyleCancel
                                                          handler:^(UIAlertAction * action) {
                                                              //响应事件
                                                              MAXLog(@"action = %@", alert.textFields);
                                                          }];
     [alert addTextFieldWithConfigurationHandler:^(UITextField *textField) {
-        textField.placeholder = @"请输入申请的留言信息";
+        textField.placeholder = NSLocalizedString(@"enter_message_for_group_application", @"请输入申请的留言信息");
     }];
     
     [alert addAction:okAction];
@@ -106,7 +106,7 @@
             NSMutableArray *array = [NSMutableArray arrayWithObject:roster];
             [self.tableview refresh:[NSArray arrayWithArray:array]];
         } else if (error.errorCode == BMXInvalidParam){
-            [HQCustomToast showDialog:@"请输入正确的用户名"];
+            [HQCustomToast showDialog:NSLocalizedString(@"enter_a_correct_username", @"请输入正确的用户名")];
         } else {
             [HQCustomToast showDialog:error.errorMessage];
         }
@@ -119,7 +119,7 @@
     [[[BMXClient sharedClient] rosterService] applyAddRoster:rosterId reason:reason completion:^(BMXRoster *roster, BMXError *error) {
         MAXLog(@"%@", roster);
         if (!error) {
-            [HQCustomToast showDialog:@"已发送添加好友申请"];
+            [HQCustomToast showDialog:NSLocalizedString(@"Friend_request_sent", @"已发送添加好友申请")];
             [self.navigationController popViewControllerAnimated:YES];
 
         } else {
@@ -152,7 +152,7 @@
 }
 
 - (void)setupNavBarAndItem{
-    [self setNavigationBarTitle:@"添加好友" navLeftButtonIcon:@"blackback" navRightButtonTitle:@"扫一扫"];
+    [self setNavigationBarTitle:NSLocalizedString(@"Add_friend", @"添加好友") navLeftButtonIcon:@"blackback" navRightButtonTitle:NSLocalizedString(@"Scan", @"扫一扫")];
     [self.navRightButton addTarget:self action:@selector(clickSearch:) forControlEvents:UIControlEventTouchUpInside];
 }
 

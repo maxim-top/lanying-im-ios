@@ -74,8 +74,8 @@ static NSString *userStaticKey;
 {
     if ([PrivacyView needShowPrivacyWithMaxTimeInterval:maxTimeInterVal
                                                 staticKey:staticKey]) {
-        PrivacyView *privacy = [[PrivacyView alloc] initWithCancelButtonTitle:@"不同意"
-                                                                 otherButtonTitle:@"同意"
+        PrivacyView *privacy = [[PrivacyView alloc] initWithCancelButtonTitle:NSLocalizedString(@"Do_not_agree", @"不同意")
+                                                                 otherButtonTitle:NSLocalizedString(@"Agree", @"同意")
                                                                        privacyUrl:privacyUrl
                                                                          delegate:delegate];
         privacy.supView = view;
@@ -92,8 +92,8 @@ static NSString *userStaticKey;
             self.delegate = delegate;
         }
         self.title = [NSBundle mainBundle].infoDictionary[@"CFBundleDisplayName"];
-        self.cancelButtonTitle = [cancelButtonTitle copy] ? : @"不同意";
-        self.otherButtonTitle = [otherButtonTitle copy] ? : @"同意";
+        self.cancelButtonTitle = [cancelButtonTitle copy] ? : NSLocalizedString(@"Do_not_agree", @"不同意");
+        self.otherButtonTitle = [otherButtonTitle copy] ? : NSLocalizedString(@"Agree", @"同意");
         self.privacyUrl = privacyUrl;
 
         [self setupUI];
@@ -112,9 +112,9 @@ static NSString *userStaticKey;
     [self addSubview:self.cancelButton];
     [self addSubview:self.otherButton];
 
-    NSString *text1 = [NSString stringWithFormat:@"感谢您使用“%@”！当您开始使用本软件时，我们可能会对您的部分个人信息进行收集、使用和共享。请您仔细阅读《%@用户隐私协议》并确定了解我们对您个人信息的处理规则，包括：\n\n", self.title, self.title];
+    NSString *text1 = [NSString stringWithFormat:@"感谢您使用%@！当您开始使用本软件时，我们可能会对您的部分个人信息进行收集、使用和共享。请您仔细阅读《%@用户隐私协议》并确定了解我们对您个人信息的处理规则，包括：\n\n", self.title, self.title];
     NSString *text2 = @"我们可能收集的信息\n我们可能如何使用信息\n您如何访问和控制自己的个人信息\n信息安全\n未成年人信息的保护\n\n";
-    NSString *text3 = [NSString stringWithFormat:@"如果您同意《%@用户隐私协议》请点击“同意”并开始使用我们的产品和服务，我们尽全力保护您的个人信息安全。", self.title];
+    NSString *text3 = [NSString stringWithFormat:NSLocalizedString(@"If_you_agree_to", @"如果您同意《%@用户隐私协议》请点击`同意`并开始使用我们的产品和服务，我们尽全力保护您的个人信息安全。"), self.title];
 
     NSString *allStr = [NSString stringWithFormat:@"%@%@%@", text1, text2, text3];
     NSMutableAttributedString *detail = [[NSMutableAttributedString alloc] initWithString:allStr];
@@ -123,7 +123,7 @@ static NSString *userStaticKey;
     NSRange range2 = [allStr rangeOfString:text2];
     NSRange range3 = [allStr rangeOfString:text3];
 
-    NSString *text4 = [NSString stringWithFormat:@"《%@用户隐私协议》", self.title];
+    NSString *text4 = [NSString stringWithFormat:NSLocalizedString(@"Doc_At_User_Privacy_Agreement", @"《%@用户隐私协议》"), self.title];
     NSRange range4 = [text3 rangeOfString:text4];
 
     [detail setAttributes:@{ NSFontAttributeName: [UIFont systemFontOfSize:13], NSForegroundColorAttributeName: PYRGB(51, 51, 51) } range:range2];
@@ -158,9 +158,9 @@ static NSString *userStaticKey;
 
 - (void)selectCancel {
     [self dismiss];
-    UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"温馨提示" message:[NSString stringWithFormat:@"您需同意并接受《%@用户隐私协议》全部条款后才可使用我们的服务", self.title] preferredStyle:UIAlertControllerStyleAlert];
+    UIAlertController *alert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Tips", @"温馨提示") message:[NSString stringWithFormat:NSLocalizedString(@"agree_and_accept_all_the_terms", @"您需同意并接受《%@用户隐私协议》全部条款后才可使用我们的服务"), self.title] preferredStyle:UIAlertControllerStyleAlert];
     __weak typeof(self) weakSelf = self;
-    UIAlertAction *action = [UIAlertAction actionWithTitle:@"下一步" style:UIAlertActionStyleDefault handler:^(UIAlertAction *_Nonnull action) {
+    UIAlertAction *action = [UIAlertAction actionWithTitle:NSLocalizedString(@"Next", @"下一步") style:UIAlertActionStyleDefault handler:^(UIAlertAction *_Nonnull action) {
         [weakSelf showWith:weakSelf.supView];
     }];
     [alert addAction:action];
@@ -311,7 +311,7 @@ static NSString *userStaticKey;
 - (UILabel *)titleLabel {
     if (!_titleLabel) {
         _titleLabel = [[UILabel alloc] init];
-        _titleLabel.text = [NSString stringWithFormat:@"%@用户隐私协议", self.title];
+        _titleLabel.text = [NSString stringWithFormat:NSLocalizedString(@"At_User_Privacy_Agreement", @"%@用户隐私协议"), self.title];
         _titleLabel.textColor = PYRGB(51, 51, 51);
         _titleLabel.font = [UIFont fontWithName:@"PingFangSC-Semibold" size:19];
         _titleLabel.textAlignment = NSTextAlignmentCenter;

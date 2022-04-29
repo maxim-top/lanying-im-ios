@@ -39,11 +39,11 @@
     
 
     UILabel *label = [[UILabel alloc] initWithFrame:CGRectMake(MAXScreenW / 2.0 - 100 /2.0, imageView.bmx_bottom + 10, 100, 40)];
-    label.text = @"MaxIM登录确认";
+    label.text = NSLocalizedString(@"MaxIM_login_confirmation", @"MaxIM登录确认");
     [self.view addSubview:label];
     
     UIButton *loginButton = [UIButton buttonWithType:UIButtonTypeCustom];
-    [loginButton setTitle:@"确认登录" forState:UIControlStateNormal];
+    [loginButton setTitle:NSLocalizedString(@"Confirm_to_login", @"确认登录") forState:UIControlStateNormal];
     loginButton.backgroundColor = BMXCOLOR_HEX(0xF7E700);
     [loginButton setTitleColor:BMXCOLOR_HEX(0x333333) forState:UIControlStateNormal];
     [loginButton addTarget:self action:@selector(loginButtonClick) forControlEvents:UIControlEventTouchUpInside];
