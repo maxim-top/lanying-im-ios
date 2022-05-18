@@ -23,7 +23,7 @@
 
 > 双击打开 MaxIM/MaxIM.xcworkspace 即可。
 
-了解更多信息可以阅读[在线文档](https://www.maximtop.com/docs/)，或者在本仓库提问，好好玩吧！🚀🚀🚀
+了解更多信息可以阅读[在线文档](https://docs.maximtop.com)，或者在本仓库提问，好好玩吧！🚀🚀🚀
 
 -- --
 **蓝莺IM 专业SDK，私有云按月付费**
