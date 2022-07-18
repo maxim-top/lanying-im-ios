@@ -43,8 +43,9 @@
 #define  isIphoneX_XS     (MAXScreenW == 375.f && MAXScreenH == 812.f ? YES : NO)
 //iPhoneXR / iPhoneXSMax
 #define  isIphoneXR_XSMax    (MAXScreenW == 414.f && MAXScreenH == 896.f ? YES : NO)
-//异性全面屏
-#define   MAXIsFullScreen    (isIphoneX_XS || isIphoneXR_XSMax)
+//异型全面屏（屏幕高度大于20）
+#import "AppDelegate.h"
+#define   MAXIsFullScreen  (((AppDelegate*)[[ UIApplication sharedApplication ]delegate ]).statusBarHeight > 20)
 
 #define IS_iPhone_Plus ([UIScreen instancesRespondToSelector:@selector(currentMode)] ? (CGSizeEqualToSize(CGSizeMake(1125,2001), [[UIScreen mainScreen] currentMode].size) || CGSizeEqualToSize(CGSizeMake(1242,2208), [[UIScreen mainScreen] currentMode].size)) : NO)
 
@@ -61,8 +62,21 @@
 #define LHWeakSelf __weak typeof(self) weakSelf = self;
 
 #define recourcesPath [[NSBundle mainBundle] resourcePath]
+#import "CocoaLumberjack.h"
+#define MAXLog(fmt, ...) DDLogInfo((@"%s [Line %d] " fmt), __PRETTY_FUNCTION__, __LINE__, ##__VA_ARGS__)
+#define MAXLogDebug(fmt, ...) DDLogDebug((@"%s [Line %d] " fmt), __PRETTY_FUNCTION__, __LINE__, ##__VA_ARGS__)
+#define NSLog DDLogDebug
 
-#define MAXLog(fmt, ...) NSLog((@"%s [Line %d] " fmt), __PRETTY_FUNCTION__, __LINE__, ##__VA_ARGS__);
+// Include any system framework and library headers here that should be included in all compilation units.
+// You will also need to set the Prefix Header build setting of one or more of your targets to reference this file.
+
+#define LOG_LEVEL_DEF ddLogLevel
+#ifdef DEBUG
+static const int ddLogLevel = DDLogLevelDebug;
+#else
+static const int ddLogLevel = DDLogLevelInfo;
+#endif
+
 
 #ifndef __IPHONE_5_0
 #warning "This project uses features only available in iOS SDK 5.0 and later."

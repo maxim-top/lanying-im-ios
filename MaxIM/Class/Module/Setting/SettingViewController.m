@@ -73,7 +73,7 @@
 
 
 - (void)setupTableView {
-    self.tableview = [[SettingTableView alloc] initWithFrame:CGRectMake(0, 0, MAXScreenW, MAXScreenH - kTabBarHeight) style:UITableViewStylePlain];
+    self.tableview = [[SettingTableView alloc] initWithFrame:CGRectMake(0, 0, MAXScreenW, MAXScreenH - kTabBarHeight) style:UITableViewStyleGrouped];
     [self.view addSubview:self.tableview];
 }
 

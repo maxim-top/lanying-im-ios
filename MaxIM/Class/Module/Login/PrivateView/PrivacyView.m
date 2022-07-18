@@ -91,7 +91,8 @@ static NSString *userStaticKey;
         if (delegate) {
             self.delegate = delegate;
         }
-        self.title = [NSBundle mainBundle].infoDictionary[@"CFBundleDisplayName"];
+//        self.title = [NSBundle mainBundle].infoDictionary[@"CFBundleDisplayName"];
+        self.title = NSLocalizedString(@"Product_name", @"蓝莺IM");
         self.cancelButtonTitle = [cancelButtonTitle copy] ? : NSLocalizedString(@"Do_not_agree", @"不同意");
         self.otherButtonTitle = [otherButtonTitle copy] ? : NSLocalizedString(@"Agree", @"同意");
         self.privacyUrl = privacyUrl;
@@ -112,8 +113,8 @@ static NSString *userStaticKey;
     [self addSubview:self.cancelButton];
     [self addSubview:self.otherButton];
 
-    NSString *text1 = [NSString stringWithFormat:@"感谢您使用%@！当您开始使用本软件时，我们可能会对您的部分个人信息进行收集、使用和共享。请您仔细阅读《%@用户隐私协议》并确定了解我们对您个人信息的处理规则，包括：\n\n", self.title, self.title];
-    NSString *text2 = @"我们可能收集的信息\n我们可能如何使用信息\n您如何访问和控制自己的个人信息\n信息安全\n未成年人信息的保护\n\n";
+    NSString *text1 = [NSString stringWithFormat:NSLocalizedString(@"Thank_you_for_using",@"感谢您使用%@！当您开始使用本软件时，我们可能会对您的部分个人信息进行收集、使用和共享。请您仔细阅读《%@用户隐私协议》并确定了解我们对您个人信息的处理规则，包括：\n\n"), self.title, self.title];
+    NSString *text2 = NSLocalizedString(@"Information_we_may_collect",@"我们可能收集的信息\n我们可能如何使用信息\n您如何访问和控制自己的个人信息\n信息安全\n未成年人信息的保护\n\n");
     NSString *text3 = [NSString stringWithFormat:NSLocalizedString(@"If_you_agree_to", @"如果您同意《%@用户隐私协议》请点击`同意`并开始使用我们的产品和服务，我们尽全力保护您的个人信息安全。"), self.title];
 
     NSString *allStr = [NSString stringWithFormat:@"%@%@%@", text1, text2, text3];
@@ -258,7 +259,7 @@ static NSString *userStaticKey;
     if (self.delegate && [self.delegate respondsToSelector:@selector(privacyViewGetOtherBtnBgColor:)]) {
         color = [self.delegate privacyViewGetOtherBtnBgColor:self];
     }
-    return color ? color : PYRGB(250, 39, 59);
+    return color ? color : PYRGB(2, 121, 242);
 }
 
 - (UIColor *)linkTextColor {
@@ -266,7 +267,7 @@ static NSString *userStaticKey;
     if (self.delegate && [self.delegate respondsToSelector:@selector(privacyViewLinkTextColor:)]) {
         color = [self.delegate privacyViewLinkTextColor:self];
     }
-    return color ? color : PYRGB(250, 39, 59);
+    return color ? color : PYRGB(94, 159, 229);
 }
 
 - (UIFont *)cancelBtnTextFont {
@@ -311,7 +312,7 @@ static NSString *userStaticKey;
 - (UILabel *)titleLabel {
     if (!_titleLabel) {
         _titleLabel = [[UILabel alloc] init];
-        _titleLabel.text = [NSString stringWithFormat:NSLocalizedString(@"At_User_Privacy_Agreement", @"%@用户隐私协议"), self.title];
+        _titleLabel.text = [NSString stringWithFormat:NSLocalizedString(@"At_User_Privacy_Agreement", @"%@ 用户隐私协议"), self.title];
         _titleLabel.textColor = PYRGB(51, 51, 51);
         _titleLabel.font = [UIFont fontWithName:@"PingFangSC-Semibold" size:19];
         _titleLabel.textAlignment = NSTextAlignmentCenter;

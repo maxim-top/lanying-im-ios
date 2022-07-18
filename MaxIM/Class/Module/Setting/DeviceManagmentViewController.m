@@ -59,6 +59,24 @@
     return self.deviceListArray.count;
 }
 
+- (NSArray<UITableViewRowAction *> *)tableView:(UITableView *)tableView editActionsForRowAtIndexPath:(NSIndexPath *)indexPath {
+    // 添加一个删除按钮
+    
+    UITableViewRowAction *deleteRowAction = [UITableViewRowAction rowActionWithStyle:UITableViewRowActionStyleDestructive title:NSLocalizedString(@"Delete", @"删除")handler:^(UITableViewRowAction *action, NSIndexPath *indexPath) {
+        BMXDevice *device = self.deviceListArray[indexPath.row];
+        [[[BMXClient sharedClient] userService] deleteDeviceByDeviceSN:device.deviceSN completion:^(BMXError *error) {
+            if (!error) {
+                [HQCustomToast showDialog:NSLocalizedString(@"Delete_successfully", @"删除成功")];
+                [self getDeviceList];
+            }
+        }];
+
+        MAXLog(@"点击了删除");
+    }];
+    
+    return @[deleteRowAction];
+}
+
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView {
     return 1;
 }
@@ -79,13 +97,8 @@
     cell.device = device;
     
     
-    
-    if (device.isCurrentDevice == YES) {
-        [cell hiddenDeleteButton:YES];
-    } else {
-        [cell hiddenDeleteButton:NO];
-    }
-
+    //Remove delete buttons, move to right swipe menu.
+    [cell hiddenDeleteButton:YES];
 
     NSString *decStr = @"";
     if (device.platform == 0) {

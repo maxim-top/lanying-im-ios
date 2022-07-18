@@ -6,23 +6,23 @@
             "control": "0"
         },
         {
-            "type": "Group management",
+            "type": "Group Management",
             "control": "0"
         },
         {
-            "type": "Modify group",
+            "type": "Modify Group",
             "control": "0"
         },
         {
-            "type": "Group announcement",
+            "type": "Group Announcement",
             "control": "0"
         },
         {
-            "type": "Group extension info",
+            "type": "Group Extension Info",
             "control": "0"
         },
         {
-            "type": "Group shared files",
+            "type": "Group Shared Files",
             "control": "0"
         },
     ]

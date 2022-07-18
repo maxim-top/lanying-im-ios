@@ -27,21 +27,15 @@
 #import "MenuViewManager.h"
 #import "MaxEmptyTipView.h"
 #import "AppIDManager.h"
-#import "ZoomMeetingsApi.h"
-#import <MobileRTC/MobileRTC.h>
-#import "IMAcountInfoStorage.h"
-#import "IMAcount.h"
 
 @interface ContactListViewController ()<UITableViewDelegate,
                                         UITableViewDataSource,
                                         BMXRosterServiceProtocol,
-                                        MenuViewDeleagte,
-                                        MobileRTCMeetingServiceDelegate>
+                                        MenuViewDeleagte>
 
 @property (nonatomic, strong) UITableView *rosterListTableView;
 @property (nonatomic, strong) UITableView *groupListTableView;
 @property (nonatomic, strong) UITableView *supportListTableView;
-@property (nonatomic, strong) UITableView *meetingsTableView;
 
 @property (nonatomic, strong) NSArray<BMXGroup *> *groupArray;
 @property (nonatomic, strong) NSArray *groupTableviewCellArray;
@@ -56,7 +50,6 @@
 @property (nonatomic, strong) UIView *navSepLine;
 
 @property (nonatomic, strong) NSArray *supportArray;
-@property (nonatomic, strong) NSArray *meetingArray;
 @property (nonatomic, strong) MenuViewManager *menuViewManager;
 
 @property (nonatomic, strong) MaxEmptyTipView *tipView;
@@ -76,7 +69,6 @@
     
     
     [self configSupportData];
-    [self getMeettings];
     
     [[[BMXClient sharedClient] rosterService] addRosterListener:self];
     
@@ -101,20 +93,6 @@
         return YES;
     }
     return NO;
-}
-
-- (void)getMeettings {
-    ZoomMeetingsApi *api  = [[ZoomMeetingsApi alloc] init];
-    [api startWithSuccessBlock:^(ApiResult * _Nullable result) {
-        if (result.isOK ) {
-            NSArray *array = [NSArray arrayWithArray:result.resultData];
-            self.meetingArray = array;
-            [self.meetingsTableView reloadData];
-        }
-    } failureBlock:^(NSError * _Nullable error) {
-        [HQCustomToast showNetworkError];
-
-    }];
 }
 
 - (void)getSupportData {
@@ -260,7 +238,7 @@
     [[[BMXClient sharedClient] rosterService] addToBlockList:userId
                                               withCompletion:^(BMXError *error) {
                                                   if (!error) {
-                                                      MAXLog(@"添加成功")
+                                                      MAXLog(@"添加成功");
                                                       [self getAllRoster];
                                                   } else {
                                                       [HQCustomToast showDialog:[NSString stringWithFormat:@"%@", error.errorMessage] time:2];
@@ -309,10 +287,8 @@
         } else {
             return self.groupArray.count ? self.groupArray.count : 0;
         }
-    } else if (self.tag == 2) {
-        return self.supportArray.count ? self.supportArray.count : 0;
     } else {
-        return self.meetingArray.count ? self.meetingArray.count : 0;
+        return self.supportArray.count ? self.supportArray.count : 0;
     }
     return 0;
 }
@@ -343,15 +319,14 @@
                 cell.avatarImg.image = [UIImage imageNamed: [NSString stringWithFormat:@"group_application"]];
             }
         } else {
-            BMXGroup *group = self.groupArray[indexPath.row];
-            [cell refreshByGroup:group];
+            if (indexPath.row < self.groupArray.count) {
+                BMXGroup *group = self.groupArray[indexPath.row];
+                [cell refreshByGroup:group];
+            }
         }
-    } else if (self.tag == 2){
+    } else {
         BMXRoster *roster = self.supportArray[indexPath.row];
         [cell refreshSupportRoster:roster];
-    } else {
-//        NSString *titleStr = [NSString stringWithFormat:@"%@", self.actionArray[indexPath.row]];
-        [cell refreshByTitle:[NSString stringWithFormat:NSLocalizedString(@"Chamber_ID", @"会议室ID:%@"), self.meetingArray[indexPath.row]]];
     }
 
     return cell;
@@ -401,34 +376,11 @@
             vc.hidesBottomBarWhenPushed = YES;
             [self.navigationController pushViewController:vc animated:YES];
         }
-    } else if (self.tag == 2) {
+    } else {
         BMXRoster *roster = self.supportArray[indexPath.row];
         LHChatVC *vc = [[LHChatVC alloc] initWithRoster:roster messageType:BMXMessageTypeSingle];
         vc.hidesBottomBarWhenPushed = YES;
         [self.navigationController pushViewController:vc animated:YES];
-    } else {
-        
-        IMAcount *acount = [IMAcountInfoStorage loadObject];
-        
-        NSNumber *number = self.meetingArray[indexPath.row];
-        MobileRTCMeetingService *ms = [[MobileRTC sharedRTC] getMeetingService];
-              ms.delegate = self;
-              NSDictionary *paramDict = @{
-                                          kMeetingParam_Username: acount.usedId,
-                                          kMeetingParam_MeetingNumber:[number stringValue],
-                                          };
-        
-        MobileRTCMeetError ret = [ms joinMeetingWithDictionary:paramDict];
-        
-        if (ret == MobileRTCMeetError_Success) {
-            NSString *messageTest = [NSString stringWithFormat:NSLocalizedString(@"joined_chamber", @"%@ 加入会议室"), acount.usedId];
-            BMXMessageObject *message = [[BMXMessageObject alloc] initWithBMXMessageText:messageTest
-                                                                                  fromId:[acount.usedId longLongValue]
-                                                                                    toId:6597373638528 type:BMXMessageTypeSingle
-                                                                          conversationId:6597373638528];
-            [[[BMXClient sharedClient] chatService] sendMessage:message];
-        }
-        
     }
 }
 
@@ -480,7 +432,6 @@
             [self.groupListTableView setHidden:YES];
             [self.rosterListTableView setHidden:NO];
             [self.supportListTableView setHidden:YES];
-            [self.meetingsTableView setHidden:YES];
 
             [self selectViewAnimationWithTag:self.tag];
             [self.rosterListTableView reloadData];
@@ -496,7 +447,6 @@
             [self.groupListTableView setHidden:NO];
             [self.rosterListTableView setHidden:YES];
             [self.supportListTableView setHidden:YES];
-            [self.meetingsTableView setHidden:YES];
 
             
             [self getGroupTableViewDatasource];
@@ -507,7 +457,6 @@
         case 2: {
             sender.selectedSegmentIndex = 2;
             self.tag = 2;
-            [self.meetingsTableView setHidden:YES];
             [self.groupListTableView setHidden:YES];
             [self.rosterListTableView setHidden:YES];
             [self.supportListTableView setHidden:NO];
@@ -528,29 +477,6 @@
             break;
             
         }
-            
-        case 3: {
-            sender.selectedSegmentIndex = 3;
-            self.tag = 3;
-            [self.groupListTableView setHidden:YES];
-            [self.rosterListTableView setHidden:YES];
-            [self.supportListTableView setHidden:YES];
-            [self.meetingsTableView setHidden:NO];
-
-            [self selectViewAnimationWithTag:self.tag];
-            [self getMeettings];
-            [self.meetingsTableView reloadData];
-            if (![self isShowSupportData]) {
-                [self.view insertSubview:self.tipView aboveSubview:self.supportListTableView];
-            } else {
-                [self.tipView removeFromSuperview];
-            }
-                            
-            break;
-        }
-    
-            
-            
         default:
             break;
     }
@@ -578,15 +504,11 @@
         }];
     } else if(tag == 1) {
         [UIView animateWithDuration:0.2 animations:^{
-            self.selectView.x = 17 + (23 + 40) ;
-        }];
-    } else if(tag == 2){
-        [UIView animateWithDuration:0.2 animations:^{
-            self.selectView.x = 17 + (23 + 40) *2;
+            self.selectView.x = 17 + 82 ;
         }];
     } else {
         [UIView animateWithDuration:0.2 animations:^{
-            self.selectView.x = 17 + (23 + 40) *3;
+            self.selectView.x = 17 + 158;
         }];
     }
 }
@@ -655,31 +577,10 @@
     
 }
 
-- (UITableView *)meetingsTableView {
-    if (!_meetingsTableView) {
-        _meetingsTableView = [[UITableView alloc] initWithFrame:CGRectMake(0, NavHeight, MAXScreenW, MAXScreenH
-                                                                            - NavHeight- 64) style:UITableViewStylePlain];
-        _meetingsTableView.bounces = NO;
-        _meetingsTableView.delegate = self;
-        _meetingsTableView.dataSource = self;
-        _meetingsTableView.separatorStyle = UITableViewCellSeparatorStyleNone;
-
-        UIView *view =  [[UIView alloc] init];
-        _meetingsTableView.tableHeaderView = view;
-        view.backgroundColor  = BMXCOLOR_HEX(0xf8f8f8);
-        _meetingsTableView.tableHeaderView.height = 10;
-        
-        [_meetingsTableView registerClass:[ImageTitleBasicTableViewCell class] forCellReuseIdentifier:@"ImageTitleBasicTableViewCell"];
-        [self.view addSubview:_meetingsTableView];
-    }
-    return _meetingsTableView;
-    
-}
-
 - (UIView *)selectView {
     if (!_selectView) {
         _selectView = [[UIView alloc] init];
-        _selectView.frame = CGRectMake(5, NavHeight - 2 , 80, 2);
+        _selectView.frame = CGRectMake(5, NavHeight - 2 , 70, 2);
         _selectView.backgroundColor = BMXCOLOR_HEX(0x009FE8);
         _selectView.layer.cornerRadius = 2;
         _selectView.layer.masksToBounds = YES;
@@ -716,13 +617,6 @@
     return _groupArray;
 }
 
-- (NSArray *)meetingArray {
-    if (!_meetingArray) {
-        _meetingArray = [NSArray array];
-        
-    }
-    return _meetingArray;
-}
 + (UIImage *)imageWithColor:(UIColor *)color {
     CGRect rect = CGRectMake(0, 0, 1, 1);
     UIGraphicsBeginImageContext(rect.size);
@@ -750,10 +644,10 @@
     [self.view addSubview:navigationBar];
     self.navigationBar = navigationBar;
     
-    NSArray * items = [NSArray arrayWithObjects:NSLocalizedString(@"Friend", @"好友"), NSLocalizedString(@"Group", @"群组"), NSLocalizedString(@"Support", @"支持"),NSLocalizedString(@"Chamber", @"会议室"), nil];
+    NSArray * items = [NSArray arrayWithObjects:NSLocalizedString(@"Friend", @"好友"), NSLocalizedString(@"Group", @"群组"), NSLocalizedString(@"Support", @"支持"), nil];
     UISegmentedControl *control = [[UISegmentedControl alloc] initWithItems: items];
     for (int i=0; i< items.count-1; i++){
-        [control setWidth:70.0 forSegmentAtIndex:i];
+        [control setWidth:80.0 forSegmentAtIndex:i];
     }
     [control setWidth:90.0 forSegmentAtIndex:items.count-1];
 
@@ -766,7 +660,7 @@
             [control setDividerImage:_dividerImage forLeftSegmentState:UIControlStateNormal rightSegmentState:UIControlStateNormal barMetrics:UIBarMetricsDefault];
   
   
-    control.frame = CGRectMake(5, MAXIsFullScreen ? 28 + 26 :  28 ,( 260/3.0 )*4.0, 25);
+    control.frame = CGRectMake(5, MAXIsFullScreen ? 28 + 26 :  28 ,( 260/3.0 )*3.0, 25);
     control.tintColor = [UIColor whiteColor];
     
     [control setTitleTextAttributes:@{NSFontAttributeName:[UIFont fontWithName:@"PingFangSC-Medium" size:T5_30PX], NSForegroundColorAttributeName:[UIColor blackColor]} forState:UIControlStateNormal];

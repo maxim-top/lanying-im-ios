@@ -655,7 +655,7 @@ forRowAtIndexPath:(NSIndexPath *)indexPath {
 }
 
 - (void)setUpNavItem{
-    [self setMainNavigationBarTitle:NSLocalizedString(@"Maximtop", @"美信拓扑")];
+    [self setMainNavigationBarTitle:NSLocalizedString(@"Maximtop", @"蓝莺IM")];
     
     UIImage *scanImage = [UIImage imageNamed:@"scanbutton"];
     UIButton *scanButton = [UIButton buttonWithType:UIButtonTypeCustom];

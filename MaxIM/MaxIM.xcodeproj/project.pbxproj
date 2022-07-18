@@ -28,6 +28,7 @@
 		48FB3E8A2193F4FD007740F4 /* MaxIMTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 48FB3E892193F4FD007740F4 /* MaxIMTests.m */; };
 		48FB3E952193F4FD007740F4 /* MaxIMUITests.m in Sources */ = {isa = PBXBuildFile; fileRef = 48FB3E942193F4FD007740F4 /* MaxIMUITests.m */; };
 		48FBBC6121A5852E00DB875A /* AssetsLibrary.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 48FBBC6021A5852D00DB875A /* AssetsLibrary.framework */; };
+		AF226BF028588778005C5C7F /* about.png in Resources */ = {isa = PBXBuildFile; fileRef = AF226BF228588778005C5C7F /* about.png */; };
 		AF3E6C3727D37ED000D016C7 /* appsetting.json in Resources */ = {isa = PBXBuildFile; fileRef = AF3E6C3927D37ED000D016C7 /* appsetting.json */; };
 		AF3E6C4327D37FC300D016C7 /* setting.json in Resources */ = {isa = PBXBuildFile; fileRef = AF3E6C4527D37FC300D016C7 /* setting.json */; };
 		AF3E6C4727D3813A00D016C7 /* group.json in Resources */ = {isa = PBXBuildFile; fileRef = AF3E6C4927D3813A00D016C7 /* group.json */; };
@@ -35,9 +36,11 @@
 		AF3E6C4F27D3BAED00D016C7 /* chatdetailproiledetail.json in Resources */ = {isa = PBXBuildFile; fileRef = AF3E6C5127D3BAED00D016C7 /* chatdetailproiledetail.json */; };
 		AF3E6C5327D3BB3400D016C7 /* searchDetailProfiledetail.json in Resources */ = {isa = PBXBuildFile; fileRef = AF3E6C5527D3BB3400D016C7 /* searchDetailProfiledetail.json */; };
 		AF3E6C5727D3BB6200D016C7 /* SystemRosterProfile.json in Resources */ = {isa = PBXBuildFile; fileRef = AF3E6C5927D3BB6200D016C7 /* SystemRosterProfile.json */; };
+		AF4C019728461BC400B8913D /* LanyingLangManager.m in Sources */ = {isa = PBXBuildFile; fileRef = AF4C019328461ACC00B8913D /* LanyingLangManager.m */; };
+		AF88CF0B2848AC7300013713 /* NSBundle+LanyingLanguage.m in Sources */ = {isa = PBXBuildFile; fileRef = AF88CF0A2848AC7300013713 /* NSBundle+LanyingLanguage.m */; };
 		AF8F120D27D2045D000C4104 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = AF8F120F27D2045D000C4104 /* InfoPlist.strings */; };
 		AF8F121327D20C90000C4104 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = AF8F121527D20C90000C4104 /* Localizable.strings */; };
-		AFF48A7425CF21D000634E80 /* MobileRTC.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AFF48A6C25CF1FE300634E80 /* MobileRTC.framework */; settings = {ATTRIBUTES = (Weak, ); }; };
+		AF923D17281B0725002875A3 /* splash.png in Resources */ = {isa = PBXBuildFile; fileRef = AF923D16281B0724002875A3 /* splash.png */; };
 		B321D07F2B7F3BE8404603F6 /* libPods-MaxIM.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 0817B35A699F1BD1DD697481 /* libPods-MaxIM.a */; };
 		B500050821D508DA00CD1CF8 /* RecentConversaionTableViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = B500050621D508DA00CD1CF8 /* RecentConversaionTableViewCell.m */; };
 		B500050C21D5493500CD1CF8 /* LHChatFileBubbleView.m in Sources */ = {isa = PBXBuildFile; fileRef = B500050B21D5493500CD1CF8 /* LHChatFileBubbleView.m */; };
@@ -150,7 +153,6 @@
 		B5433A6C21C4E7AB0062E141 /* ImageTitleBasicTableViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = B5433A6B21C4E7AB0062E141 /* ImageTitleBasicTableViewCell.m */; };
 		B5433A6F21C4F96C0062E141 /* RosterDetailViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = B5433A6E21C4F96C0062E141 /* RosterDetailViewController.m */; };
 		B5433A7221C523C80062E141 /* ApplyNotificationContainer.m in Sources */ = {isa = PBXBuildFile; fileRef = B5433A7121C523C80062E141 /* ApplyNotificationContainer.m */; };
-		B54BBA79247BE98B00862CE2 /* JoinMeetingView.m in Sources */ = {isa = PBXBuildFile; fileRef = B54BBA78247BE98B00862CE2 /* JoinMeetingView.m */; };
 		B5577C9923BF2E6600ED76E6 /* DropdownListView.m in Sources */ = {isa = PBXBuildFile; fileRef = B5577C9823BF2E6600ED76E6 /* DropdownListView.m */; };
 		B557D49A2451AB4E0035D60E /* QRCoodeFactor.m in Sources */ = {isa = PBXBuildFile; fileRef = B557D4992451AB4E0035D60E /* QRCoodeFactor.m */; };
 		B557D49F24529A8E0035D60E /* HostConfigStorage.m in Sources */ = {isa = PBXBuildFile; fileRef = B557D49E24529A8E0035D60E /* HostConfigStorage.m */; };
@@ -257,7 +259,6 @@
 		B593DFC722D59B99008AF2E2 /* libopencore-amrwb.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 4832592821CE74870061D47F /* libopencore-amrwb.a */; };
 		B593DFCA22D5C03A008AF2E2 /* RosterListViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = B593DFC922D5C03A008AF2E2 /* RosterListViewController.m */; };
 		B595932A249B184B00A307B3 /* MobileRTCResources.bundle in Resources */ = {isa = PBXBuildFile; fileRef = B5959328249B184B00A307B3 /* MobileRTCResources.bundle */; };
-		B599F26D247E4AA200051480 /* SupportManager.m in Sources */ = {isa = PBXBuildFile; fileRef = B599F26C247E4AA200051480 /* SupportManager.m */; };
 		B5A3D37622059D53009BAF12 /* DeviceTableViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = B5A3D37522059D53009BAF12 /* DeviceTableViewCell.m */; };
 		B5A7882B2387DDDC00A3730D /* AppWechatUnbindApi.m in Sources */ = {isa = PBXBuildFile; fileRef = B5A7882A2387DDDC00A3730D /* AppWechatUnbindApi.m */; };
 		B5A7882E2389352400A3730D /* UserMobileChangeApi.m in Sources */ = {isa = PBXBuildFile; fileRef = B5A7882D2389352400A3730D /* UserMobileChangeApi.m */; };
@@ -277,7 +278,6 @@
 		B5AFB30C227989EC00C23559 /* BindOpenIdApi.m in Sources */ = {isa = PBXBuildFile; fileRef = B5AFB30B227989EC00C23559 /* BindOpenIdApi.m */; };
 		B5B4F7E121D8762500997882 /* TitleSwitchTableViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = B5B4F7DF21D8762500997882 /* TitleSwitchTableViewCell.m */; };
 		B5B85F1A2204468600B76D9A /* DeviceManagmentViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = B5B85F192204468600B76D9A /* DeviceManagmentViewController.m */; };
-		B5B8C9872484DAF500404E3F /* ZoomMeetingsApi.m in Sources */ = {isa = PBXBuildFile; fileRef = B5B8C9862484DAF500404E3F /* ZoomMeetingsApi.m */; };
 		B5BBCAC022F05C0B00ABADFC /* UIResponder+Router.m in Sources */ = {isa = PBXBuildFile; fileRef = B5BBCABF22F05C0A00ABADFC /* UIResponder+Router.m */; };
 		B5BD462221E6935D009FDB59 /* SearchContentViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = B5BD462121E6935D009FDB59 /* SearchContentViewController.m */; };
 		B5BD4D2922C22F6E00B971A7 /* CoreTelephony.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B5BD4D2822C22F6E00B971A7 /* CoreTelephony.framework */; };
@@ -419,6 +419,9 @@
 		48FBBC6321A5863300DB875A /* libz.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libz.tbd; path = usr/lib/libz.tbd; sourceTree = SDKROOT; };
 		4C72A080A991AA6F34E3B973 /* Pods-MaxIMTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-MaxIMTests.debug.xcconfig"; path = "Pods/Target Support Files/Pods-MaxIMTests/Pods-MaxIMTests.debug.xcconfig"; sourceTree = "<group>"; };
 		684CB1224A07B8DA99E852E9 /* Pods-MaxIMUITests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-MaxIMUITests.release.xcconfig"; path = "Pods/Target Support Files/Pods-MaxIMUITests/Pods-MaxIMUITests.release.xcconfig"; sourceTree = "<group>"; };
+		AF226BF128588778005C5C7F /* Base */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = Base; path = Base.lproj/about.png; sourceTree = "<group>"; };
+		AF226BF328588784005C5C7F /* en */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = en; path = en.lproj/about.png; sourceTree = "<group>"; };
+		AF226BF428588789005C5C7F /* zh-Hans */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "zh-Hans"; path = "zh-Hans.lproj/about.png"; sourceTree = "<group>"; };
 		AF3E6C3827D37ED000D016C7 /* zh-Hans */ = {isa = PBXFileReference; lastKnownFileType = text.json; name = "zh-Hans"; path = "zh-Hans.lproj/appsetting.json"; sourceTree = "<group>"; };
 		AF3E6C4227D37EDE00D016C7 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.json; name = en; path = en.lproj/appsetting.json; sourceTree = "<group>"; };
 		AF3E6C4427D37FC300D016C7 /* zh-Hans */ = {isa = PBXFileReference; lastKnownFileType = text.json; name = "zh-Hans"; path = "zh-Hans.lproj/setting.json"; sourceTree = "<group>"; };
@@ -433,10 +436,15 @@
 		AF3E6C5627D3BB3700D016C7 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.json; name = en; path = en.lproj/searchDetailProfiledetail.json; sourceTree = "<group>"; };
 		AF3E6C5827D3BB6200D016C7 /* zh-Hans */ = {isa = PBXFileReference; lastKnownFileType = text.json; name = "zh-Hans"; path = "zh-Hans.lproj/SystemRosterProfile.json"; sourceTree = "<group>"; };
 		AF3E6C5A27D3BB6300D016C7 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.json; name = en; path = en.lproj/SystemRosterProfile.json; sourceTree = "<group>"; };
+		AF4C018A28461ACB00B8913D /* LanyingLangManager.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = LanyingLangManager.h; sourceTree = "<group>"; };
+		AF4C019328461ACC00B8913D /* LanyingLangManager.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = LanyingLangManager.m; sourceTree = "<group>"; };
+		AF88CF092848AC7300013713 /* NSBundle+LanyingLanguage.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSBundle+LanyingLanguage.h"; sourceTree = "<group>"; };
+		AF88CF0A2848AC7300013713 /* NSBundle+LanyingLanguage.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSBundle+LanyingLanguage.m"; sourceTree = "<group>"; };
 		AF8F120E27D2045D000C4104 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		AF8F121027D20468000C4104 /* zh-Hans */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hans"; path = "zh-Hans.lproj/InfoPlist.strings"; sourceTree = "<group>"; };
 		AF8F121427D20C90000C4104 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/Localizable.strings; sourceTree = "<group>"; };
 		AF8F121627D20C93000C4104 /* zh-Hans */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hans"; path = "zh-Hans.lproj/Localizable.strings"; sourceTree = "<group>"; };
+		AF923D16281B0724002875A3 /* splash.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = splash.png; sourceTree = "<group>"; };
 		AFF48A6C25CF1FE300634E80 /* MobileRTC.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = MobileRTC.framework; sourceTree = "<group>"; };
 		B500050521D508DA00CD1CF8 /* RecentConversaionTableViewCell.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = RecentConversaionTableViewCell.h; sourceTree = "<group>"; };
 		B500050621D508DA00CD1CF8 /* RecentConversaionTableViewCell.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = RecentConversaionTableViewCell.m; sourceTree = "<group>"; };
@@ -645,8 +653,6 @@
 		B5433A6E21C4F96C0062E141 /* RosterDetailViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = RosterDetailViewController.m; sourceTree = "<group>"; };
 		B5433A7021C523C80062E141 /* ApplyNotificationContainer.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ApplyNotificationContainer.h; sourceTree = "<group>"; };
 		B5433A7121C523C80062E141 /* ApplyNotificationContainer.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ApplyNotificationContainer.m; sourceTree = "<group>"; };
-		B54BBA77247BE98B00862CE2 /* JoinMeetingView.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = JoinMeetingView.h; sourceTree = "<group>"; };
-		B54BBA78247BE98B00862CE2 /* JoinMeetingView.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = JoinMeetingView.m; sourceTree = "<group>"; };
 		B5577C9723BF2E6600ED76E6 /* DropdownListView.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = DropdownListView.h; sourceTree = "<group>"; };
 		B5577C9823BF2E6600ED76E6 /* DropdownListView.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = DropdownListView.m; sourceTree = "<group>"; };
 		B557D4982451AB4E0035D60E /* QRCoodeFactor.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = QRCoodeFactor.h; sourceTree = "<group>"; };
@@ -852,8 +858,6 @@
 		B593DFC922D5C03A008AF2E2 /* RosterListViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RosterListViewController.m; sourceTree = "<group>"; };
 		B593DFD222D5D8EC008AF2E2 /* Single.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Single.h; sourceTree = "<group>"; };
 		B5959328249B184B00A307B3 /* MobileRTCResources.bundle */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.plug-in"; path = MobileRTCResources.bundle; sourceTree = "<group>"; };
-		B599F26B247E4AA200051480 /* SupportManager.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SupportManager.h; sourceTree = "<group>"; };
-		B599F26C247E4AA200051480 /* SupportManager.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = SupportManager.m; sourceTree = "<group>"; };
 		B5A3D37422059D53009BAF12 /* DeviceTableViewCell.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = DeviceTableViewCell.h; sourceTree = "<group>"; };
 		B5A3D37522059D53009BAF12 /* DeviceTableViewCell.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = DeviceTableViewCell.m; sourceTree = "<group>"; };
 		B5A788292387DDDC00A3730D /* AppWechatUnbindApi.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppWechatUnbindApi.h; sourceTree = "<group>"; };
@@ -884,8 +888,6 @@
 		B5B4F7E021D8762500997882 /* TitleSwitchTableViewCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TitleSwitchTableViewCell.h; sourceTree = "<group>"; };
 		B5B85F182204468600B76D9A /* DeviceManagmentViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = DeviceManagmentViewController.h; sourceTree = "<group>"; };
 		B5B85F192204468600B76D9A /* DeviceManagmentViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = DeviceManagmentViewController.m; sourceTree = "<group>"; };
-		B5B8C9852484DAF500404E3F /* ZoomMeetingsApi.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ZoomMeetingsApi.h; sourceTree = "<group>"; };
-		B5B8C9862484DAF500404E3F /* ZoomMeetingsApi.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ZoomMeetingsApi.m; sourceTree = "<group>"; };
 		B5BBCABF22F05C0A00ABADFC /* UIResponder+Router.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "UIResponder+Router.m"; sourceTree = "<group>"; };
 		B5BD462021E6935D009FDB59 /* SearchContentViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SearchContentViewController.h; sourceTree = "<group>"; };
 		B5BD462121E6935D009FDB59 /* SearchContentViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = SearchContentViewController.m; sourceTree = "<group>"; };
@@ -964,7 +966,6 @@
 				B55FFC6D2240E3F500DF0BAB /* AVFoundation.framework in Frameworks */,
 				B5142F2321CF74510013DBBD /* UserNotificationsUI.framework in Frameworks */,
 				B5142F2121CF744B0013DBBD /* UserNotifications.framework in Frameworks */,
-				AFF48A7425CF21D000634E80 /* MobileRTC.framework in Frameworks */,
 				B5FF65E021C8CDAA00BAD31C /* libresolv.tbd in Frameworks */,
 				B535A5E921C008E6002FBECD /* libz.tbd in Frameworks */,
 				B535A5E821C00893002FBECD /* libc++.tbd in Frameworks */,
@@ -1101,6 +1102,10 @@
 		4849CD6421A52C36006CB41D /* Common */ = {
 			isa = PBXGroup;
 			children = (
+				AF88CF092848AC7300013713 /* NSBundle+LanyingLanguage.h */,
+				AF88CF0A2848AC7300013713 /* NSBundle+LanyingLanguage.m */,
+				AF4C018A28461ACB00B8913D /* LanyingLangManager.h */,
+				AF4C019328461ACC00B8913D /* LanyingLangManager.m */,
 				B521C09022E86147003D7DB9 /* View */,
 				B55900C222D0A7E2003FDA76 /* HQCustomToast.h */,
 				B55900C122D0A7E2003FDA76 /* HQCustomToast.m */,
@@ -1122,6 +1127,7 @@
 		4849CD6E21A52C36006CB41D /* Resource */ = {
 			isa = PBXGroup;
 			children = (
+				AF226BF228588778005C5C7F /* about.png */,
 				B56B025E23830E17005E22B8 /* LaunchVideo */,
 				B5144F0C234C8E0700CF163E /* Assets.xcassets */,
 				AF3E6C3927D37ED000D016C7 /* appsetting.json */,
@@ -1162,6 +1168,7 @@
 		48FB3E642193F4FC007740F4 = {
 			isa = PBXGroup;
 			children = (
+				AF923D16281B0724002875A3 /* splash.png */,
 				B570FDD0249769B600445598 /* MaxIMDebug.entitlements */,
 				B5142F1F21CF73530013DBBD /* MaxIM.entitlements */,
 				4877EB0321A58D37000F2FF5 /* Base.lproj */,
@@ -1308,8 +1315,6 @@
 				B58A17E6244D5B61006A7BEA /* PwdChangeVerifyByPasswordApi.m */,
 				B58A17E8244D5EFC006A7BEA /* PwdChangeVerifyByMobileApi.h */,
 				B58A17E9244D5EFC006A7BEA /* PwdChangeVerifyByMobileApi.m */,
-				B5B8C9852484DAF500404E3F /* ZoomMeetingsApi.h */,
-				B5B8C9862484DAF500404E3F /* ZoomMeetingsApi.m */,
 			);
 			path = Api;
 			sourceTree = "<group>";
@@ -1556,8 +1561,6 @@
 				4815431621E7AD520082E38D /* TransterViewController.m */,
 				B5F21D3F230EACB600F6CA4B /* GroupAlreadyReadListViewController.h */,
 				B5F21D40230EACB600F6CA4B /* GroupAlreadyReadListViewController.m */,
-				B599F26B247E4AA200051480 /* SupportManager.h */,
-				B599F26C247E4AA200051480 /* SupportManager.m */,
 			);
 			path = Controller;
 			sourceTree = "<group>";
@@ -1590,8 +1593,6 @@
 				B539D66D21BFDD370011D30E /* LHChatViewCell.m */,
 				B5CDA8B9224CA82500BF04BE /* BubbleViewAlertView.h */,
 				B5CDA8BA224CA82600BF04BE /* BubbleViewAlertView.m */,
-				B54BBA77247BE98B00862CE2 /* JoinMeetingView.h */,
-				B54BBA78247BE98B00862CE2 /* JoinMeetingView.m */,
 			);
 			path = View;
 			sourceTree = "<group>";
@@ -2383,6 +2384,7 @@
 				B539D6D121BFDD370011D30E /* Keyboard_first_emoticon@2x.png in Resources */,
 				4877EB0821A58D37000F2FF5 /* LaunchScreen.storyboard in Resources */,
 				B539D6D021BFDD370011D30E /* Keyboard_first_emoticon@3x.png in Resources */,
+				AF923D17281B0725002875A3 /* splash.png in Resources */,
 				AF3E6C5327D3BB3400D016C7 /* searchDetailProfiledetail.json in Resources */,
 				AF3E6C4727D3813A00D016C7 /* group.json in Resources */,
 				B5AAD8F9238E4EA50000C7FA /* lauchVideo_1125.mp4 in Resources */,
@@ -2392,6 +2394,7 @@
 				B5AAD901238E58570000C7FA /* 1124x632.gif in Resources */,
 				B539D6DA21BFDD370011D30E /* emoticons.plist in Resources */,
 				AF3E6C4F27D3BAED00D016C7 /* chatdetailproiledetail.json in Resources */,
+				AF226BF028588778005C5C7F /* about.png in Resources */,
 				B595932A249B184B00A307B3 /* MobileRTCResources.bundle in Resources */,
 				B5AAD8F7238E4EA50000C7FA /* lauchVideo_374.mp4 in Resources */,
 				AF3E6C5727D3BB6200D016C7 /* SystemRosterProfile.json in Resources */,
@@ -2508,6 +2511,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				AF4C019728461BC400B8913D /* LanyingLangManager.m in Sources */,
 				B50BEAF622560D6000B0753D /* ApiResult.m in Sources */,
 				B539D6B721BFDD370011D30E /* UIColor+RGB.m in Sources */,
 				B5160A5A2216A53A00483883 /* BaseStorage.m in Sources */,
@@ -2585,6 +2589,7 @@
 				B55900A122D0A7A1003FDA76 /* GroupAlertView.m in Sources */,
 				B539D6D921BFDD370011D30E /* KeyboardEmojiAttachment.m in Sources */,
 				B559005022D0A64B003FDA76 /* NSAttributedString+YYText.m in Sources */,
+				AF88CF0B2848AC7300013713 /* NSBundle+LanyingLanguage.m in Sources */,
 				B559004422D0A64B003FDA76 /* YYTextLine.m in Sources */,
 				B50BEADA2255E6B200B0753D /* JSONResult.m in Sources */,
 				B5D9F45921D649A800B31AC3 /* ProfileSettingViewController.m in Sources */,
@@ -2604,7 +2609,6 @@
 				4849CD7121A52C36006CB41D /* MAXTabBarController.m in Sources */,
 				B50BEAD92255E6B200B0753D /* NetworkStatusMonitor.m in Sources */,
 				B559004322D0A64B003FDA76 /* YYTextLayout.m in Sources */,
-				B599F26D247E4AA200051480 /* SupportManager.m in Sources */,
 				B559003C22D0A64B003FDA76 /* NSBundle+YYAdd.m in Sources */,
 				B559FF9222D0A60B003FDA76 /* UIView+BMXframe.m in Sources */,
 				48BE996D21CFE2870042A535 /* ICDocumentViewController.m in Sources */,
@@ -2686,7 +2690,6 @@
 				B539D6C121BFDD370011D30E /* LHChatViewBaseCell.m in Sources */,
 				B557D49A2451AB4E0035D60E /* QRCoodeFactor.m in Sources */,
 				B53FB37822C5F57B002A4B1F /* NotifierUploadPushInfoApi.m in Sources */,
-				B54BBA79247BE98B00862CE2 /* JoinMeetingView.m in Sources */,
 				B5119BC02397F259005F68A0 /* BindPhoneView.m in Sources */,
 				B55DF4B323A75D6700AF1BF9 /* UserMobilePrechangeByPasswordApi.m in Sources */,
 				B5D9F45C21D64A8C00B31AC3 /* ProfileTableViewCell.m in Sources */,
@@ -2708,7 +2711,6 @@
 				B55900AC22D0A7A1003FDA76 /* GorupLittleCell.m in Sources */,
 				B559005622D0A64B003FDA76 /* NSString+YYAdd.m in Sources */,
 				B507248723605D6C003909F1 /* SystemNotificationViewController.m in Sources */,
-				B5B8C9872484DAF500404E3F /* ZoomMeetingsApi.m in Sources */,
 				B559004B22D0A64B003FDA76 /* YYTextAttribute.m in Sources */,
 				B50BEAF32256067E00B0753D /* BaseApi.m in Sources */,
 				B539D6C521BFDD370011D30E /* LHChatBaseBubbleView.m in Sources */,
@@ -2810,6 +2812,16 @@
 				4877EB0721A58D37000F2FF5 /* Base */,
 			);
 			name = Main.storyboard;
+			sourceTree = "<group>";
+		};
+		AF226BF228588778005C5C7F /* about.png */ = {
+			isa = PBXVariantGroup;
+			children = (
+				AF226BF128588778005C5C7F /* Base */,
+				AF226BF328588784005C5C7F /* en */,
+				AF226BF428588789005C5C7F /* zh-Hans */,
+			);
+			name = about.png;
 			sourceTree = "<group>";
 		};
 		AF3E6C3927D37ED000D016C7 /* appsetting.json */ = {
@@ -3017,7 +3029,7 @@
 			baseConfigurationReference = EEE1F2D13104E671B9511447 /* Pods-MaxIM.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
+				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = "";
 				CODE_SIGN_ENTITLEMENTS = MaxIMDebug.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
@@ -3071,7 +3083,7 @@
 					"$(PROJECT_DIR)/Class/Vendor/OpenSDK1.8.7.1_NoPay",
 				);
 				MACH_O_TYPE = mh_execute;
-				MARKETING_VERSION = 3.9;
+				MARKETING_VERSION = 3.12;
 				OTHER_LDFLAGS = (
 					"$(inherited)",
 					"-ObjC",
@@ -3101,7 +3113,7 @@
 			baseConfigurationReference = F933609A8FDAAF7CE0836C0C /* Pods-MaxIM.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
+				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = "";
 				CODE_SIGN_ENTITLEMENTS = MaxIM.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
@@ -3155,7 +3167,7 @@
 					"$(PROJECT_DIR)/Class/Vendor/OpenSDK1.8.7.1_NoPay",
 				);
 				MACH_O_TYPE = mh_execute;
-				MARKETING_VERSION = 3.9;
+				MARKETING_VERSION = 3.12;
 				OTHER_LDFLAGS = (
 					"$(inherited)",
 					"-ObjC",
@@ -3286,7 +3298,7 @@
 					"$(inherited)",
 					"$(PROJECT_DIR)/MaxIMShare/floolib",
 				);
-				MARKETING_VERSION = 3.9;
+				MARKETING_VERSION = 3.12;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				PRODUCT_BUNDLE_IDENTIFIER = com.maximtop.MaxIM.ShareExtention;
@@ -3321,7 +3333,7 @@
 					"$(inherited)",
 					"$(PROJECT_DIR)/MaxIMShare/floolib",
 				);
-				MARKETING_VERSION = 3.9;
+				MARKETING_VERSION = 3.12;
 				MTL_FAST_MATH = YES;
 				PRODUCT_BUNDLE_IDENTIFIER = com.maximtop.MaxIM.ShareExtention;
 				PRODUCT_NAME = "$(TARGET_NAME)";

@@ -398,7 +398,7 @@ CGFloat const kChatBatItemWH = 26.0f;
     
     [self resignFirstResponder];
     if (![[VideoManager shareManager] canRecordViedo]) {
-        UIAlertView *alert = [[UIAlertView alloc]initWithTitle:NSLocalizedString(@"allow_MaxIM_to_access_your_camera_and_microphone", @"请在iPhone的设置-隐私选项中，允许MaxIM访问你的摄像头和麦克风。") message:nil delegate:nil cancelButtonTitle:NSLocalizedString(@"Confirm", @"确定") otherButtonTitles:nil, nil];
+        UIAlertView *alert = [[UIAlertView alloc]initWithTitle:NSLocalizedString(@"allow_MaxIM_to_access_your_camera_and_microphone", @"请在iPhone的设置-隐私选项中，允许Lanying IM访问你的摄像头和麦克风。") message:nil delegate:nil cancelButtonTitle:NSLocalizedString(@"Confirm", @"确定") otherButtonTitles:nil, nil];
         [alert show];
     } else {
         [NSTimer scheduledTimerWithTimeInterval:0.3 target:self selector:@selector(videoViewWillAppear) userInfo:nil repeats:NO]; // 待动画完成

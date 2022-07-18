@@ -43,9 +43,28 @@
 }
 
 - (void)clickMoreButton:(UIButton *)button {
-    UIPasteboard* pasteboard = [UIPasteboard generalPasteboard];
-    [pasteboard setString:[NSString stringWithContentsOfFile:self.logPath encoding:NSUTF8StringEncoding error:nil]];
-    [HQCustomToast showDialog:NSLocalizedString(@"All_logs_have_been_copied_to_clipboard", @"日志已全部复制到剪贴板")];
+    dispatch_async(dispatch_get_main_queue(), ^{
+        NSMutableArray *itemsArr = [[NSMutableArray alloc]init];
+        for(id logger in [DDLog allLoggers]){
+            if([logger isKindOfClass:[DDFileLogger class]]){
+                DDFileLogger *fileLogger = (DDFileLogger*) logger;
+                for(NSString *path in [[fileLogger logFileManager] sortedLogFilePaths]){
+                    NSURL *logUrl = [NSURL fileURLWithPath:path];
+                    [itemsArr addObject: logUrl];
+                }
+            }
+        }
+        self.logPath =  [NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES).firstObject stringByAppendingPathComponent:[NSString stringWithFormat:@"ChatData/%@/flooLog/floo.log", [BMXClient sharedClient].sdkConfig.appID]];
+        NSURL *flooLogUrl = [NSURL fileURLWithPath:self.logPath];
+        [itemsArr addObject: flooLogUrl];
+        
+        UIActivityViewController *activityViewController = [[UIActivityViewController alloc] initWithActivityItems:itemsArr applicationActivities:nil];
+        
+        // 适配iPad
+        UIPopoverPresentationController *popVC = activityViewController.popoverPresentationController;
+        popVC.sourceView = self.view;
+        [self presentViewController:activityViewController animated:YES completion:nil];
+    });
 }
 
 

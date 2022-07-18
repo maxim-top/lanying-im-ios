@@ -12,7 +12,7 @@
 @implementation GroupListTableViewAdapter
 
 + (void)getGroupListcompletion:(void(^)(NSArray <BMXGroup *>*group, NSString *errmsg))aCompletionBlock {
-    [[[BMXClient sharedClient] groupService] getGroupListForceRefresh:NO completion:^(NSArray *groupList, BMXError *error) {
+    [[[BMXClient sharedClient] groupService] getGroupListForceRefresh:YES completion:^(NSArray *groupList, BMXError *error) {
         //        MAXLog(@"%ld", groupList.count);
         [HQCustomToast hideWating];
         

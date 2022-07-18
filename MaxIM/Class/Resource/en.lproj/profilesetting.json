@@ -11,11 +11,11 @@
         "control": "alert"
     },
     {
-        "type": "Phone number",
+        "type": "Phone Number",
         "control": "alert"
     },
     {
-        "type": "Modify password",
+        "type": "Modify Password",
         "control": "alert"
     },
     {
@@ -23,19 +23,19 @@
         "control": "alert"
     },
     {
-        "type": "Public info",
+        "type": "Public Info",
         "control": "alert"
     },
     {
-        "type": "Private info",
+        "type": "Private Info",
         "control": "alert"
     },
     {
-        "type": "Friend verification",
+        "type": "Friend Request Setting",
         "control": "alert"
     },
     {
-        "type": "Friend verification question",
+        "type": "Friend Request Question",
         "control": "alert"
     },
     ]

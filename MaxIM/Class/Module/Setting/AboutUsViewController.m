@@ -26,8 +26,10 @@
 }
 
 - (void)p_configSubview {
-    UIImage *image = [UIImage imageNamed:@"about_logo"];
-    UIImageView *imageView = [[UIImageView alloc] initWithFrame:CGRectMake(MAXScreenW / 2.0 - image.size.width / 2.0, 150, image.size.width, image.size.height)];
+    NSString *path = [[NSBundle mainBundle] pathForResource:@"about" ofType:@"png"];
+    UIImage *image = [UIImage imageWithContentsOfFile:path];
+    UIImageView *imageView = [[UIImageView alloc] initWithFrame:CGRectMake(MAXScreenW / 2.0 - 200.0 / 2.0, 150, 200.0, 100.0)];
+    imageView.contentMode = UIViewContentModeScaleAspectFit;
     imageView.image = image;
     [self.view addSubview:imageView];
     
@@ -38,7 +40,7 @@
     label1.font = [UIFont systemFontOfSize:14];
     NSDictionary *infoDictionary = [[NSBundle mainBundle] infoDictionary];
     NSString *app_Version = [infoDictionary objectForKey:@"CFBundleShortVersionString"];
-    label1.text = [NSString stringWithFormat:NSLocalizedString(@"Maximtop_IM__v", @"美信拓扑IM v%@"), app_Version];
+    label1.text = [NSString stringWithFormat:NSLocalizedString(@"Maximtop_IM__v", @"蓝莺IM v%@"), app_Version];
     [self.view addSubview:label1];
 
     
@@ -53,14 +55,14 @@
     
     
     UILabel *label3 = [[UILabel alloc] init];
-    label3.text = NSLocalizedString(@"One-Click_Multi-Cloud_Architecture", @"一键启用多云架构的即时通讯云服务");
+    label3.text = NSLocalizedString(@"One-Click_Multi-Cloud_Architecture", @"专业SDK，私有云按月付费");
     label3.textAlignment = NSTextAlignmentCenter;
     label3.numberOfLines = 0;
     label3.font = [UIFont systemFontOfSize:16];
     [self.view addSubview:label3];
     
     UILabel *label5 = [[UILabel alloc] init];
-    label5.text = NSLocalizedString(@"Official_Website", @"官网 https://www.maximtop.com");
+    label5.text = NSLocalizedString(@"Official_Website", @"官网 https://www.lanyingim.com");
     label5.textAlignment = NSTextAlignmentCenter;
     label5.numberOfLines = 0;
     label5.font = [UIFont systemFontOfSize:15];
@@ -82,7 +84,7 @@
     [label7 addGestureRecognizer:phoneTap];
     
     UILabel *bottom_label= [[UILabel alloc] init];
-    bottom_label.text = NSLocalizedString(@"copyright_Maximtop", @"© 2020 美信拓扑");
+    bottom_label.text = NSLocalizedString(@"copyright_Maximtop", @"© 2019-2022 美信拓扑");
     bottom_label.textAlignment = NSTextAlignmentCenter;
     bottom_label.numberOfLines = 0;
     bottom_label.font = [UIFont systemFontOfSize:15];
@@ -132,7 +134,7 @@
 
 - (void)openUrl {
     
-     [[UIApplication sharedApplication] openURL:[NSURL URLWithString:@"https://www.maximtop.com"]];
+     [[UIApplication sharedApplication] openURL:[NSURL URLWithString:@"https://www.lanyingim.com"]];
 }
 
 - (void)callAction {

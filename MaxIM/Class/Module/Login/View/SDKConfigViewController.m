@@ -272,12 +272,10 @@
 - (NSArray *)dataSoource {
     if (!_dataSoource) {
         NSDictionary *configDic = [NSDictionary dictionaryWithDictionary:[self readLocalFileWithName:@"appsetting"]];
-        MAXLog(@"%@", configDic);
         NSMutableArray *dataArray = [NSMutableArray array];
         for (NSDictionary *dic in configDic[@"cells"]) {
             [dataArray addObject:dic];
         }
-        MAXLog(@"%@", dataArray);
         _dataSoource =  dataArray;
     }
     return _dataSoource;

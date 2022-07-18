@@ -94,7 +94,7 @@
     }else {
         keyWindow = [UIApplication sharedApplication].keyWindow;
     }
-    [PrivacyView showPrivacyWithMaxTimeInterval:-1 view:self.view staticKey:@"maxim_privacy" privacyUrl:@"https://www.maximtop.com/privacy" delegate:self];
+    [PrivacyView showPrivacyWithMaxTimeInterval:-1 view:self.view staticKey:@"maxim_privacy" privacyUrl:NSLocalizedString(@"protocol_privacy", @"https://www.lanyingim.com/privacy") delegate:self];
 
     
 }
@@ -124,12 +124,12 @@
 }
 
 - (void)showUserPrivacy {
-    PravitcyViewController *vc =  [[PravitcyViewController alloc] initWithTitle:NSLocalizedString(@"User_Privacy_Agreement", @"用户隐私协议") url:@"https://www.maximtop.com/privacy"];
+    PravitcyViewController *vc =  [[PravitcyViewController alloc] initWithTitle:NSLocalizedString(@"User_Privacy_Agreement", @"用户隐私协议") url:NSLocalizedString(@"protocol_privacy", @"https://www.lanyingim.com/privacy")];
     [self.navigationController pushViewController:vc animated:YES];
 }
 
 - (void)showUserTerms {
-    PravitcyViewController *vc =  [[PravitcyViewController alloc] initWithTitle:NSLocalizedString(@"User_Services_Agreement", @"用户服务条款") url:@"https://www.maximtop.com/terms/"];
+    PravitcyViewController *vc =  [[PravitcyViewController alloc] initWithTitle:NSLocalizedString(@"User_Services_Agreement", @"用户服务条款") url:NSLocalizedString(@"protocol_terms", @"https://www.lanyingim.com/terms")];
     [self.navigationController pushViewController:vc animated:YES];
 }
 
@@ -211,6 +211,8 @@
             [self registerLoginByName:name password:password];
         } else if (error.errorCode == BMXUserAlreadyExist){
             [self.config showErrorText:NSLocalizedString(@"This_username_already_exists", @"该用户名已存在")];
+        } else if (error.errorCode == BMXInvalidRequestParameter) {
+            [HQCustomToast showDialog:NSLocalizedString(@"username_constraint", @"用户名仅支持字母数字下划线中文组合，且不能是纯数字，不能以maxim、mta开头") time:5.0f];
         } else {
             [HQCustomToast showDialog:error.errorMessage];
         }
@@ -384,6 +386,7 @@
 - (void)jumpToRegistVC:(NSNotification *)notify {
     NSDictionary *dict = notify.object;
     if (dict) {
+        MAXLogDebug(@"WXAPI:jumpToRegistVC");
         NSString *openId = [dict objectForKey:@"openid"];
         LoginViewController *regiestervc = [[LoginViewController alloc] initWithViewType:LoginVCTypeRegisterAndBindWechat];
         regiestervc.config.wechatOpenId = openId;

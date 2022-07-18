@@ -69,7 +69,7 @@
     [self getRosterInfo];
 }
 
-- (void)setalis:(NSString *)name {
+- (void)setalias:(NSString *)name {
     [[[BMXClient sharedClient] rosterService] updateItemAliasByRoster:self.currentRoster aliasJson:name completion:^(BMXRoster *roster, BMXError *error) {
         if (!error) {
             [HQCustomToast showDialog:NSLocalizedString(@"Set_successfully", @"设置成功")];
@@ -80,6 +80,17 @@
                 }
             }];
         }
+    }];
+}
+
+- (void)setExtension:(NSString *)ext {
+    [[[BMXClient sharedClient] rosterService] updateItemExtensionByRoster:self.currentRoster extensionJson:ext completion:^(BMXRoster *roster, NSString *extensionJson) {
+        [[[BMXClient sharedClient] rosterService] searchByRosterId:self.currentRoster.rosterId forceRefresh:YES completion:^(BMXRoster *roster, BMXError *error) {
+            if (!error) {
+                self.currentRoster = roster;
+                [self.tableView reloadData];
+            }
+        }];
     }];
 }
 
@@ -94,12 +105,10 @@
 
 - (NSArray *)getSettingConfigDataArray {
     NSDictionary *configDic = [NSDictionary dictionaryWithDictionary:[self readLocalFileWithName:@"chatdetailproiledetail"]];
-    MAXLog(@"%@", configDic);
     NSMutableArray *dataArray = [NSMutableArray array];
     for (NSDictionary *dic in configDic[@"cells"]) {
         [dataArray addObject:dic];
     }
-    MAXLog(@"%@", dataArray);
     return dataArray;
 }
 
@@ -187,7 +196,7 @@
                                                              //得到文本信息
                                                              for(UITextField *text in alert.textFields){
                                                                  MAXLog(@"text = %@", text.text);
-                                                                 [self setalis:text.text];
+                                                                 [self setalias:text.text];
                                                                  
                                                              }
                                                          }];
@@ -198,6 +207,33 @@
                                                              }];
         [alert addTextFieldWithConfigurationHandler:^(UITextField *textField) {
             textField.placeholder = NSLocalizedString(@"enter_nickname", @"请输入昵称");
+        }];
+        
+        [alert addAction:okAction];
+        [alert addAction:cancelAction];
+        [self presentViewController:alert animated:YES completion:nil];
+    } else if ([dic[@"type"] isEqualToString:NSLocalizedString(@"Set_extension_info", @"设置扩展信息")]) {
+        UIAlertController* alert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Set_extension_info", @"设置扩展信息")
+                                                                       message:NSLocalizedString(@"ext_info_message", @"好友的扩展信息，可用于实现打标签之类的功能")
+                                                                preferredStyle:UIAlertControllerStyleAlert];
+        
+        UIAlertAction* okAction = [UIAlertAction actionWithTitle:NSLocalizedString(@"Confirm", @"确定") style:UIAlertActionStyleDefault
+                                                         handler:^(UIAlertAction * action) {
+                                                             //响应事件
+                                                             //得到文本信息
+                                                             for(UITextField *text in alert.textFields){
+                                                                 MAXLog(@"text = %@", text.text);
+                                                                 [self setExtension:text.text];
+                                                                 
+                                                             }
+                                                         }];
+        UIAlertAction* cancelAction = [UIAlertAction actionWithTitle:NSLocalizedString(@"Cancel", @"取消") style:UIAlertActionStyleCancel
+                                                             handler:^(UIAlertAction * action) {
+                                                                 //响应事件
+                                                                 MAXLog(@"action = %@", alert.textFields);
+                                                             }];
+        [alert addTextFieldWithConfigurationHandler:^(UITextField *textField) {
+            textField.placeholder = NSLocalizedString(@"Input_extension_info", @"请输入扩展信息");
         }];
         
         [alert addAction:okAction];

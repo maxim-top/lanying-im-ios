@@ -121,7 +121,7 @@
     self.errorLabel.bmx_left = self.usernameTextFieldLine.bmx_left;
     self.errorLabel.bmx_top = self.usernameTextFieldLine.bmx_top + 2;
     
-    self.confirmButton.bmx_top = self.passwordTextField.bmx_bottom + 46;
+    self.confirmButton.bmx_top = self.passwordTextField.bmx_bottom + 66;
     self.confirmButton.bmx_left = self.usernameTextField.bmx_left;
     self.confirmButton.bmx_width = self.usernameTextField.bmx_width;
     self.confirmButton.bmx_height = 55;
@@ -287,7 +287,7 @@
         [leftButton setTitle:leftButtonName forState:UIControlStateNormal];
         [leftButton addTarget:self action:@selector(leftJumpButtonClick) forControlEvents:UIControlEventTouchUpInside];
         [leftButton setTitleColor:BMXCOLOR_HEX(0x576B95) forState:UIControlStateNormal];
-        leftButton.frame = CGRectMake(0, 0, 150, 20);
+        leftButton.frame = CGRectMake(0, 0, 200, 20);
         leftButton.titleLabel.textAlignment = NSTextAlignmentCenter;
         [self addSubview:leftButton];
         leftButton.bmx_top = self.confirmButton.bmx_bottom + 18;
@@ -300,7 +300,7 @@
         [leftButton setTitle:leftButtonName forState:UIControlStateNormal];
         [leftButton addTarget:self action:@selector(leftJumpButtonClick) forControlEvents:UIControlEventTouchUpInside];
         [leftButton setTitleColor:BMXCOLOR_HEX(0x576B95) forState:UIControlStateNormal];
-        leftButton.frame = CGRectMake(0, 0, 150, 20);
+        leftButton.frame = CGRectMake(0, 0, 180, 20);
         leftButton.titleLabel.textAlignment = NSTextAlignmentRight;
         leftButton.titleLabel.font = [UIFont systemFontOfSize:14.0];
 
@@ -322,13 +322,13 @@
         [self addSubview:line];
         
         line.bmx_top = self.confirmButton.bmx_bottom + 18;
-        line.bmx_centerX = self.bmx_centerX + 10;
+        line.bmx_centerX = self.bmx_centerX + 30;
         
         leftButton.bmx_top = self.confirmButton.bmx_bottom + 18;
         leftButton.bmx_right = line.bmx_left + 3;
         
         rightButton.bmx_top = self.confirmButton.bmx_bottom + 18;
-        rightButton.bmx_left = line.bmx_right + 5;
+        rightButton.bmx_left = line.bmx_right + 3;
         
     }
 }
@@ -373,14 +373,14 @@
 
 - (void)addPrivacyLabel {
     
-    self.privacyLabel.bmx_bottom = self.confirmButton.bmx_top - 5;
+    self.privacyLabel.bmx_bottom = self.confirmButton.bmx_top - 25;
     self.privacyLabel.bmx_left = self.confirmButton.bmx_left;
     
-    self.privacyButton.bmx_centerY = self.privacyLabel.bmx_centerY;
-    self.privacyButton.bmx_left = self.privacyLabel.bmx_right;
+    self.privacyButton.bmx_centerY = self.privacyLabel.bmx_centerY + 20;
+    self.privacyButton.bmx_left = self.privacyLabel.bmx_left + 40;
     
-    self.termsButton.bmx_centerY = self.privacyLabel.bmx_centerY;
-    self.termsButton.bmx_left = self.privacyButton.bmx_right;
+    self.termsButton.bmx_centerY = self.privacyLabel.bmx_centerY + 20;
+    self.termsButton.bmx_left = self.privacyButton.right;
 
 }
 
@@ -549,8 +549,8 @@
     
     if (!_privacyLabel) {
         _privacyLabel = [[UILabel alloc] init];
-        _privacyLabel.textAlignment = NSTextAlignmentRight;
-        _privacyLabel.frame = CGRectMake(0, 0, 100, 18);
+        _privacyLabel.textAlignment = NSTextAlignmentLeft;
+        _privacyLabel.frame = CGRectMake(0, 0, 250, 18);
         _privacyLabel.font = [UIFont systemFontOfSize:12];
         _privacyLabel.textColor = BMXCOLOR_HEX(0x4A4A4A);
         _privacyLabel.text = NSLocalizedString(@"Registration_signifies_your_acceptance", @"注册即代表您同意");

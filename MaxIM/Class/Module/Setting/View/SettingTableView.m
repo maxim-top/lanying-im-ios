@@ -23,6 +23,10 @@
 #import "AboutUsViewController.h"
 #import "AccountMangementViewController.h"
 #import "AppIDManager.h"
+#import "LanyingLangManager.h"
+#import "MaxGlobalTool.h"
+#import "IMAcount.h"
+#import "IMAcountInfoStorage.h"
 
 //#import <ZXingObjC.h>
 
@@ -70,12 +74,10 @@
 #pragma mark - data
 - (NSArray *)getSettingConfigDataArray {
     NSDictionary *configDic = [NSDictionary dictionaryWithDictionary:[self readLocalFileWithName:@"setting"]];
-    MAXLog(@"%@", configDic);
     NSMutableArray *dataArray = [NSMutableArray array];
     for (NSDictionary *dic in configDic[@"cells"]) {
         [dataArray addObject:dic];
     }
-    MAXLog(@"%@", dataArray);
     return dataArray;
 }
 
@@ -141,9 +143,14 @@
 }
 
 - (void)refeshProfile:(BMXUserProfile *)profile {
+    const int MAX_NICKNAME_LENGTH = 12;
     self.profile = profile;
     [self reloadData];
-    self.nameLabel.text = [profile.nickName length] ? [NSString stringWithFormat:@"%@", profile.nickName] : NSLocalizedString(@"Click_to_set_nickname", @"点击设置昵称");
+    NSString *nickName = profile.nickName;
+    if (nickName.length > MAX_NICKNAME_LENGTH) {
+        nickName = [NSString stringWithFormat:@"%@...", [nickName substringToIndex: MAX_NICKNAME_LENGTH]];
+    }
+    self.nameLabel.text = [profile.nickName length] ? [NSString stringWithFormat:@"%@", nickName] : NSLocalizedString(@"Click_to_set_nickname", @"点击设置昵称");
     self.nickNameLabel.text = [NSString stringWithFormat:NSLocalizedString(@"Username_name", @"用户名：%@"), profile.userName];
     [self.nickNameLabel sizeToFit];
 
@@ -187,14 +194,46 @@
 
 }
 
+#pragma mark == public functions ...
+-(UIView*) sectionHeaderViewWithTitle: (NSString*) title
+{
+    UIView* sv = [[UIView alloc] initWithFrame:CGRectMake(0, 0, MAXScreenW, 40)];
+    sv.backgroundColor = [UIColor lh_colorWithHex:0xf8f8f8];
+    UILabel* label = [[UILabel alloc] initWithFrame:CGRectMake(15, 5, MAXScreenW-100, 30)];
+    label.text = title;
+    label.font = [UIFont fontWithName:@"PingFangSC-Medium" size:12];
+    label.textColor = [UIColor colorWithRed:100/255.0 green:100/255.0 blue:100/255.0 alpha:1/1.0];
+    [sv addSubview:label];
+    return sv;
+}
+
 #pragma mark - UITableViewDataSource
+- (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView{
+    return 3;
+}
+
+-(UIView*) tableView:(UITableView *)tableView viewForHeaderInSection:(NSInteger)section
+{
+    switch (section) {
+        case 0:
+            return [self sectionHeaderViewWithTitle:@""];
+        case 1:
+            return [self sectionHeaderViewWithTitle:NSLocalizedString(@"In-app_Notification", @"应用内通知")];
+        case 2:
+            return [self sectionHeaderViewWithTitle:@""];
+        default:
+            return [self sectionHeaderViewWithTitle:@""];
+    }
+    return [self sectionHeaderViewWithTitle:@""];
+}
+
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
     TitleSwitchTableViewCell *cell = [TitleSwitchTableViewCell cellWithTableView:tableView];
-    NSDictionary *dic = self.cellDataArray[indexPath.row];
+    NSDictionary *dic = self.cellDataArray[indexPath.section*2 + indexPath.row];
     cell.titleLabel.text = dic[@"type"];
     cell.delegate = self;
     cell.titleLabel.font = [UIFont fontWithName:@"PingFangSC-Medium" size:16];
-    if ([dic[@"control"] isEqualToString:@"0"]) {
+    if ([dic[@"control"] isEqualToString:@"0"] || [dic[@"control"] isEqualToString:@"alert"]) {
         cell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
         [cell.mswitch setHidden:YES];
     } else {
@@ -213,18 +252,34 @@
         [cell.mswitch setOn:self.profile.isAutoAcceptGroupInvite];
     } else if ([cell.titleLabel.text isEqualToString:NSLocalizedString(@"Whether_to_push_details", @"是否推送详情")]) {
         [cell.mswitch setOn:self.profile.messageSetting.mPushDetail];
-    } else if ([cell.titleLabel.text isEqualToString:NSLocalizedString(@"About_Us", @"关于我们")]) {
+    }  else if ([cell.titleLabel.text isEqualToString:NSLocalizedString(@"About_Us", @"关于我们")]) {
+        cell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
+    } else if ([cell.titleLabel.text isEqualToString:NSLocalizedString(@"Del_Account", @"删除账号")]) {
         cell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
     } else if ([cell.titleLabel.text isEqualToString:NSLocalizedString(@"Set_push_nickname", @"设置推送昵称")]) {
         cell.contentLabel.text = self.profile.messageSetting.pushNickname;
         cell.contentLabel.right = MAXScreenW - 50;
+    }
+    if ([cell.titleLabel.text isEqualToString:NSLocalizedString(@"Language", @"语言")]) {
+        NSString *currLan = [LanyingLangManager userLanguage];
+        if (currLan.length == 0) {
+            currLan = [NSLocale preferredLanguages].firstObject;
+        }
+        if ([currLan hasPrefix:@"en-"] || [currLan isEqualToString:@"en"]) {
+            cell.contentLabel.text = [NSString stringWithFormat:NSLocalizedString(@"English", @"English")];
+        } else {
+            cell.contentLabel.text = [NSString stringWithFormat:NSLocalizedString(@"Chinese", @"简体中文")];
+        }
+        [cell.mswitch setHidden:YES];
+    } else {
+        cell.contentLabel.text = @"";
     }
     return cell;
 }
 
 - (void)cellDidchangeSwitchStatus:(UISwitch *)mswtich cell:(TitleSwitchTableViewCell *)cell {
     NSIndexPath *indexPath = [self indexPathForCell:cell];
-    NSDictionary *dic = self.cellDataArray[indexPath.row];
+    NSDictionary *dic = self.cellDataArray[indexPath.section*2 + indexPath.row];
     NSString *str = dic[@"type"];
     BOOL state = mswtich.on ? YES : NO;
     
@@ -269,8 +324,17 @@
 }
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
-    MAXLog(@"%lu", self.cellDataArray.count);
-    return self.cellDataArray.count;
+    switch (section) {
+        case 0:
+            return 2;
+        case 1:
+            return 2;
+        case 2:
+            return 8;
+        default:
+            return 0;
+    }
+    return 0;
 }
 
 - (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath {
@@ -278,15 +342,25 @@
 }
 
 - (CGFloat)tableView:(UITableView *)tableView heightForFooterInSection:(NSInteger)section {
-    return 10.f;
+    return 0.001f;
 }
 
 - (CGFloat)tableView:(UITableView *)tableView heightForHeaderInSection:(NSInteger)section {
-    return 0.01f;
+    switch (section) {
+        case 0:
+            return 0.001f;
+        case 1:
+            return 35.0f;
+        case 2:
+            return 10;
+        default:
+            return 10;
+    }
+    return 10;
 }
 
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
-    NSDictionary *dic = self.cellDataArray[indexPath.row];
+    NSDictionary *dic = self.cellDataArray[indexPath.section*2 + indexPath.row];
     NSString *str = [NSString stringWithFormat:@"%@", dic[@"type"]];
     if ([str isEqualToString:NSLocalizedString(@"Switch_account", @"切换账号")]) {
         AccountMangementViewController *vc = [[AccountMangementViewController alloc] init];
@@ -296,6 +370,30 @@
         MAXBlackListViewController *vc = [[MAXBlackListViewController alloc] init];
         vc.hidesBottomBarWhenPushed = YES;
         [self.currentViewController.navigationController pushViewController:vc animated:YES];
+    } else if ([dic[@"type"] isEqualToString:NSLocalizedString(@"Language", @"语言")]) {
+        UIAlertController* alert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Switch_language", @"设置语言") message:nil preferredStyle:UIAlertControllerStyleActionSheet];
+       
+        UIAlertAction* action1 = [UIAlertAction actionWithTitle:NSLocalizedString(@"English", @"English") style:UIAlertActionStyleDefault                                                        handler:^(UIAlertAction * action) {
+            [LanyingLangManager setUserLanguage:@"en"];
+            AppDelegate *appDelegate = (AppDelegate *)[UIApplication sharedApplication].delegate;
+            [appDelegate userLogout];
+            [[MAXGlobalTool share].rootViewController addIMListener];
+        }];
+        UIAlertAction* action2 = [UIAlertAction actionWithTitle:NSLocalizedString(@"Chinese", @"简体中文") style:UIAlertActionStyleDefault
+            handler:^(UIAlertAction * action) {
+            [LanyingLangManager setUserLanguage:@"zh-Hans"];
+            AppDelegate *appDelegate = (AppDelegate *)[UIApplication sharedApplication].delegate;
+            [appDelegate userLogout];
+            [[MAXGlobalTool share].rootViewController addIMListener];
+       }];
+       UIAlertAction* cancelAction = [UIAlertAction actionWithTitle:NSLocalizedString(@"Cancel", @"取消") style:UIAlertActionStyleCancel
+                                                             handler:^(UIAlertAction * action) {
+                                                             }];
+        [alert addAction:action1];
+        [alert addAction:action2];
+        [alert addAction:cancelAction];
+        [self.currentViewController presentViewController:alert animated:YES completion:nil];
+        
     } else if ([str isEqualToString:NSLocalizedString(@"Device_management", @"设备管理")]){
         DeviceManagmentViewController *vc = [[DeviceManagmentViewController alloc] init];
         vc.hidesBottomBarWhenPushed = YES;
@@ -305,6 +403,27 @@
         vc.hidesBottomBarWhenPushed = YES;
         [self.currentViewController.navigationController pushViewController:vc animated:YES];
         
+    } else if ([str isEqualToString:NSLocalizedString(@"Del_Account", @"删除账号")]) {
+        UIAlertController* alert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Del_Account", @"删除账号") message:NSLocalizedString(@"Deletion_can_not_recover", @"账号删除后，您的所有数据都将擦除，不可恢复。确定要删除吗？") preferredStyle:UIAlertControllerStyleActionSheet];
+       
+        UIAlertAction* action1 = [UIAlertAction actionWithTitle:NSLocalizedString(@"Confirm", @"确定") style:UIAlertActionStyleDefault                                                        handler:^(UIAlertAction * action) {
+            [HQCustomToast showWating];
+            IMAcount *accout = [IMAcountInfoStorage loadObject];
+            if (accout) {
+                [[BMXClient sharedClient] deleteAccountWithPassword:accout.password completion:^(BMXError * _Nonnull error) {
+                    if (!error) {
+                        [HQCustomToast hideWating];
+                        [self dealWithLogout];
+                    }
+                }];
+            }
+        }];
+        UIAlertAction* cancelAction = [UIAlertAction actionWithTitle:NSLocalizedString(@"Cancel", @"取消") style:UIAlertActionStyleCancel
+                                                             handler:^(UIAlertAction * action) {
+                                                             }];
+        [alert addAction:action1];
+        [alert addAction:cancelAction];
+        [self.currentViewController presentViewController:alert animated:YES completion:nil];
     }
 }
 
@@ -404,7 +523,7 @@
         _avatarImageView.layer.cornerRadius = 50;
         _avatarImageView.bmx_size = avatarImageViewSize;
         _avatarImageView.bmx_top =  self.headerView.size.height - 95 - 18;
-        _avatarImageView.bmx_right = MAXScreenW - 36;
+        _avatarImageView.bmx_right = MAXScreenW - 16;
         _avatarImageView.image = [UIImage imageNamed:@"mine_avater_placoholder"];
         
     }
@@ -416,7 +535,7 @@
         _nameLabel = [[UILabel alloc] init];
         [self.headerView addSubview:_nameLabel];
         _nameLabel.text = @"Nick";
-        _nameLabel.font = [UIFont fontWithName:@"PingFangSC-Semibold" size:26];
+        _nameLabel.font = [UIFont fontWithName:@"PingFangSC-Semibold" size:20];
         _nameLabel.textColor = [UIColor colorWithRed:255/255.0 green:255/255.0 blue:255/255.0 alpha:1/1.0];
         _nameLabel.textAlignment = NSTextAlignmentLeft;
         [_nameLabel sizeToFit];

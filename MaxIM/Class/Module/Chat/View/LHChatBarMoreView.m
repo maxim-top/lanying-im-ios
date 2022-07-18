@@ -94,8 +94,8 @@ const NSInteger INSETS = 8;
     
     _videoButton =[UIButton buttonWithType:UIButtonTypeCustom];
     [_videoButton setFrame:CGRectMake(insets , CGRectGetMaxY(label.frame) + 10, CHAT_BUTTON_SIZE , CHAT_BUTTON_SIZE)];
-    [_videoButton setImage: [UIImage imageNamed:@"file"] forState:UIControlStateNormal];
-    [_videoButton setImage:[UIImage imageNamed:@"file"] forState:UIControlStateHighlighted];
+    [_videoButton setImage: [UIImage imageNamed:@"video"] forState:UIControlStateNormal];
+    [_videoButton setImage:[UIImage imageNamed:@"video"] forState:UIControlStateHighlighted];
     [_videoButton addTarget:self action:@selector(videoAction) forControlEvents:UIControlEventTouchUpInside];
     _videoButton.titleLabel.textColor = [UIColor lh_colorWithHex:0x8e8e93];
     [self addSubview:_videoButton];

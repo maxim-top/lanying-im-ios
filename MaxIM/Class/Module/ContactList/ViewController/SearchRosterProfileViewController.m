@@ -91,12 +91,10 @@
 
 - (NSArray *)getSettingConfigDataArray {
     NSDictionary *configDic = [NSDictionary dictionaryWithDictionary:[self readLocalFileWithName:@"searchDetailProfiledetail"]];
-    MAXLog(@"%@", configDic);
     NSMutableArray *dataArray = [NSMutableArray array];
     for (NSDictionary *dic in configDic[@"cells"]) {
         [dataArray addObject:dic];
     }
-    MAXLog(@"%@", dataArray);
     return dataArray;
 }
 

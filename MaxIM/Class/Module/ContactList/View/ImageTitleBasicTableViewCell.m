@@ -114,7 +114,7 @@ static NSString *cellID = @"ImageTitleBasicTableViewCell";
     
     self.nicknameLabel.text = [[roster nickName] length] ?  roster.nickName : roster.userName;
     
-        [[[BMXClient sharedClient] rosterService] downloadAvatarWithRoster:roster isThumbnail:NO progress:^(int progress, BMXError *error) {
+        [[[BMXClient sharedClient] rosterService] downloadAvatarWithRoster:roster isThumbnail:YES progress:^(int progress, BMXError *error) {
             
         }  completion:^(BMXRoster *rosterObjc, BMXError *error) {
             if (!error) {

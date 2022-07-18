@@ -6,19 +6,19 @@
             "control": "0"
         },
         {
-            "type": "nickname",
+            "type": "Nickname",
             "control": "0"
         },
         {
-            "type": "Public info",
+            "type": "Public Info",
             "control": "0"
         },
         {
-            "type": "set alias",
+            "type": "Alias",
             "control": "0"
         },
         {
-            "type": "Set extension info",
+            "type": "Extension Info",
             "control": "0"
         }
     ]

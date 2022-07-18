@@ -30,20 +30,22 @@
 #import <Bugly/Bugly.h>
 #import "HostConfigManager.h"
 
-#import <MobileRTC/MobileRTC.h>
-
 #import <floo-ios/BMXPushManager.h>
 #import <floo-ios/BMXPushServiceProtocol.h>
 #import "AppDelegate+PushService.h"
 
-@interface AppDelegate ()<UNUserNotificationCenterDelegate, BMXUserServiceProtocol, WXApiDelegate, MobileRTCAuthDelegate, BMXPushServiceProtocol>
+@interface AppDelegate ()<UNUserNotificationCenterDelegate, BMXUserServiceProtocol, WXApiDelegate, BMXPushServiceProtocol>
 
 @property (nonatomic, strong) MAXTabBarController *maintabController;
 @end
 
 @implementation AppDelegate
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
-    
+    if (@available(iOS 13.0, *)) {
+        _statusBarHeight = [UIApplication sharedApplication].windows.firstObject.windowScene.statusBarManager.statusBarFrame.size.height;
+    } else {
+        _statusBarHeight = [UIApplication sharedApplication].statusBarFrame.size.height;
+    }
     [NSThread sleepForTimeInterval:2];
     
     [self configapnsWithapplication:application didFinishLaunchingWithOptions:launchOptions];
@@ -56,8 +58,21 @@
     [self setupMainViewController];
     
     [self autologin];
-  
-    [self configZoom];
+    if (@available(iOS 10.0, *)) {
+        [DDLog addLogger:[DDOSLogger sharedInstance]];
+    } else {
+        [DDLog addLogger:[DDTTYLogger sharedInstance]];
+    }
+    
+    NSString *logPath =  [NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES).firstObject stringByAppendingPathComponent:[NSString stringWithFormat:@"ChatData/LYLog"]];
+
+    DDLogFileManagerDefault *fm = [[DDLogFileManagerDefault alloc] initWithLogsDirectory:logPath];
+    DDFileLogger *fileLogger = [[DDFileLogger alloc] initWithLogFileManager: fm];
+    fileLogger.rollingFrequency = 0;
+    fileLogger.maximumFileSize = 10 * 1024 * 1024; //10M
+    fileLogger.logFileManager.maximumNumberOfLogFiles = 5; // 最多允许创建7个文件
+    [DDLog addLogger:fileLogger];
+    
 //    if (application.applicationIconBadgeNumber > 0) {
 //        application.applicationIconBadgeNumber = 0;
 //    }
@@ -66,25 +81,6 @@
 
 - (void)initTingYunApp {
     [NBSAppAgent startWithAppID:@"abe2265adc9144bf810f056610e621ab"];
-}
-
-- (void)configZoom {
-    MobileRTCSDKInitContext *context = [[MobileRTCSDKInitContext alloc] init];
-       context.enableLog = YES;
-       context.domain = @"zoom.us";
-       
-       [[MobileRTC sharedRTC] initialize:context];
-       
-       MobileRTCAuthService *authService = [[MobileRTC sharedRTC] getAuthService];
-         if (authService)
-         {
-             authService.delegate = self;
-             authService.clientKey = @"fwFvS1VOVkucaqLtnWFSsqBPt6aFheTwaIRs";
-             authService.clientSecret = @"bb8f24VTFncmirpoMb1eB3Y0b3ZlXvNLDVGD";
-             [authService sdkAuth];
-         }
-       [authService sdkAuth];
-       
 }
 
 - (void)initBugly  {
@@ -275,6 +271,7 @@
     config.appID = [AppIDManager sharedManager].appid.appId;
     config.appSecret = @"47B13PBIAPDARZKD";
     config.loadAllServerConversations = YES;
+    config.logLevelType = BMXLogLevelDebug;
     
     IMAcount *accout = [IMAcountInfoStorage loadObject];
     if (accout.isLogin) {
@@ -319,23 +316,22 @@
     self.maintabController = [[MAXTabBarController alloc] initWithNibName:nil bundle:nil];
     [MAXGlobalTool share].rootViewController = self.maintabController;
     
-    BOOL firstLauch = [[NSUserDefaults standardUserDefaults] boolForKey:@"MAXFirstLauch"];
-    if (!firstLauch) {
-    
-        MAXLauchVideoViewController *lauchVideoViewController = [[MAXLauchVideoViewController alloc] init];
-        self.window.rootViewController = lauchVideoViewController;
-        [[NSUserDefaults standardUserDefaults] setBool:YES forKey:@"MAXFirstLauch"];
-        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(changeRootViewController) name:@"LauchVideoPlayeFinish" object:nil];
-        
-    }else {
+//    BOOL firstLauch = [[NSUserDefaults standardUserDefaults] boolForKey:@"MAXFirstLauch"];
+//    if (!firstLauch) {
+//
+//        MAXLauchVideoViewController *lauchVideoViewController = [[MAXLauchVideoViewController alloc] init];
+//        self.window.rootViewController = lauchVideoViewController;
+//        [[NSUserDefaults standardUserDefaults] setBool:YES forKey:@"MAXFirstLauch"];
+//        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(changeRootViewController) name:@"LauchVideoPlayeFinish" object:nil];
+//
+//    }else {
     
         if (![IMAcountInfoStorage isHaveLocalData]) {
             self.window.rootViewController = [LoginViewController loginViewWithViewControllerWithNavigation];
         }else {
             self.window.rootViewController = self.maintabController;
         }
-    }
-
+//    }
 }
 - (void)changeRootViewController {
     
@@ -378,20 +374,25 @@
 
 - (void)onResp:(BaseResp *)resp{
     //判断是否是微信认证的处理结果
+    MAXLogDebug(@"WXAPI:onResp");
     if ([resp isKindOfClass:[SendAuthResp class]]) {
+        MAXLogDebug(@"WXAPI:onResp1");
         SendAuthResp *temp = (SendAuthResp *)resp;
         //如果你点击了取消，这里的temp.code 就是空值
         if (temp.code != NULL) {
-            
+            MAXLogDebug(@"WXAPI:onResp2 %@", temp.code);
+
             WechatLoginApi *api = [[WechatLoginApi alloc] initWithCode:temp.code];
             [api startWithSuccessBlock:^(ApiResult * _Nullable result) {
+                MAXLogDebug(@"WXAPI:onResp3");
                 if ( result.isOK) {
+                    MAXLogDebug(@"WXAPI:onResp4");
                     if (!result.resultData[@"password"] ) {
                        //  注册登录
                         [HQCustomToast showDialog:NSLocalizedString(@"login_with_your_registered_WeChat_account", @"请登录注册绑定微信")];
                         [[NSNotificationCenter defaultCenter] postNotificationName:@"wechatloginsuccess_newuser" object:result.resultData];
                     } else {
-                        
+                        MAXLogDebug(@"WXAPI:onResp5 %@ %@", result.resultData[@"user_id"], result.resultData[@"username"]);
                         IMAcount *account = [[IMAcount alloc] init];
                         account.usedId  = [NSString stringWithFormat:@"%@",result.resultData[@"user_id"]];
                         account.password = result.resultData[@"password"];

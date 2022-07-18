@@ -39,7 +39,7 @@
     
 
     UILabel *label = [[UILabel alloc] initWithFrame:CGRectMake(MAXScreenW / 2.0 - 100 /2.0, imageView.bmx_bottom + 10, 100, 40)];
-    label.text = NSLocalizedString(@"MaxIM_login_confirmation", @"MaxIM登录确认");
+    label.text = NSLocalizedString(@"MaxIM_login_confirmation", @"Lanying IM登录确认");
     [self.view addSubview:label];
     
     UIButton *loginButton = [UIButton buttonWithType:UIButtonTypeCustom];

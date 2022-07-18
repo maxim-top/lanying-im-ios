@@ -2,23 +2,23 @@
     "type": "profile",
     "cells": [
         {
-            "type": "User name",
+            "type": "Username",
             "control": "0"
         },
         {
-            "type": "Public info",
+            "type": "Public Info",
             "control": "0"
         },
         {
-            "type": "Set alias",
+            "type": "Alias",
             "control": "0"
         },
         {
-            "type": "Set extension info",
+            "type": "Extension Info",
             "control": "0"
         },
         {
-            "type": "set Do-Not-Disturb",
+            "type": "Do-Not-Disturb",
             "control": "1"
         }
     ]

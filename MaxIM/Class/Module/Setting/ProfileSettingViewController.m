@@ -317,12 +317,10 @@
 #pragma mark - data
 - (NSArray *)getSettingConfigDataArray {
     NSDictionary *configDic = [NSDictionary dictionaryWithDictionary:[self readLocalFileWithName:@"profilesetting"]];
-    MAXLog(@"%@", configDic);
     NSMutableArray *dataArray = [NSMutableArray array];
     for (NSDictionary *dic in configDic[@"cells"]) {
         [dataArray addObject:dic];
     }
-    MAXLog(@"%@", dataArray);
     return dataArray;
 }
 
@@ -488,9 +486,9 @@
         [self presentViewController:alert animated:YES completion:nil];
 
         
-    } else if ([dic[@"type"] isEqualToString:NSLocalizedString(@"Set_public_profile", @"设置公开信息")]) {
+    } else if ([dic[@"type"] isEqualToString:NSLocalizedString(@"Public_info", @"公开信息")]) {
         UIAlertController* alert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Set_public_profile", @"设置公开信息")
-                                                                       message:@""
+                                                                       message:NSLocalizedString(@"public_info_message", @"好友可见的信息，可用于实现个性签名之类的功能")
                                                                 preferredStyle:UIAlertControllerStyleAlert];
         
         UIAlertAction* okAction = [UIAlertAction actionWithTitle:NSLocalizedString(@"Confirm", @"确定") style:UIAlertActionStyleDefault
@@ -515,9 +513,9 @@
         [alert addAction:cancelAction];
         [self presentViewController:alert animated:YES completion:nil];
         
-    } else if ([dic[@"type"] isEqualToString:NSLocalizedString(@"Set_private_profile", @"设置私密信息")]) {
+    } else if ([dic[@"type"] isEqualToString:NSLocalizedString(@"Private_profile", @"私密信息")]) {
         UIAlertController* alert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Set_private_profile", @"设置私密信息")
-                                                                       message:@""
+                                                                       message:NSLocalizedString(@"private_info_message", @"好友不可见的信息，可用于实现收藏夹之类的功能")
                                                                 preferredStyle:UIAlertControllerStyleAlert];
         
         UIAlertAction* okAction = [UIAlertAction actionWithTitle:NSLocalizedString(@"Confirm", @"确定") style:UIAlertActionStyleDefault

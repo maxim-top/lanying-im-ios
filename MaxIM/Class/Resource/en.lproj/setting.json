@@ -2,30 +2,30 @@
     "type": "settingconfig",
     "cells":
     [{
-        "type": "Switch account",
+        "type": "Switch Account",
         "control": "0"
     },{
-        "type": "Accept new message notification",
+        "type": "Push Notifications",
         "control": "1"
     },
     {
-        "type": "Sound notification",
+        "type": "Sound",
         "control": "1"
     },
     {
-        "type": "Vibrate notification",
+        "type": "Vibrate",
         "control": "1"
     },
     {
-        "type": "Enable push details",
+        "type": "Show Preview Text",
         "control": "1"
     },
     {
-        "type": "Download thumbnail automatically",
+        "type": "Download Thumbnail and Audio",
         "control": "1"
     },
     {
-        "type": "Accept group invitation automatically",
+        "type": "Accept Group Invitation",
         "control": "1"
     },
     {
@@ -34,11 +34,19 @@
         
     },
     {
+        "type": "Language",
+        "control": "alert"
+    },
+    {
+        "type": "Device Management",
+        "control": "0"
+    },
+    {
         "type": "About Us",
         "control": "0"
     },
     {
-        "type": "Device management",
+        "type": "Delete Account",
         "control": "0"
     }
     ]

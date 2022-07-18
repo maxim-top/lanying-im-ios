@@ -196,7 +196,7 @@
     if(authStatus == AVAuthorizationStatusRestricted || authStatus ==AVAuthorizationStatusDenied){
         // @"请在iPhone的设置-隐私-相机选项中，允许微信访问你的相机"
         
-        UIAlertController *alertVC = [UIAlertController alertControllerWithTitle:nil message:NSLocalizedString(@"allow_Maximtop_to_access_your_camera", @"请在iPhone的设置-隐私-相机选项中，允许美信拓扑访问你的相机") preferredStyle:UIAlertControllerStyleAlert];
+        UIAlertController *alertVC = [UIAlertController alertControllerWithTitle:nil message:NSLocalizedString(@"allow_Maximtop_to_access_your_camera", @"请在iPhone的设置-隐私-相机选项中，允许蓝莺IM拓扑访问你的相机") preferredStyle:UIAlertControllerStyleAlert];
         [alertVC addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Good", @"好") style:UIAlertActionStyleCancel handler:^(UIAlertAction * _Nonnull action) {
             
         }]];

@@ -478,6 +478,9 @@ typedef enum : NSUInteger {
 //        [handleArray addObject:handler];
     }];
     self.viewControllers = [NSArray arrayWithArray:vcArray];
+    if (@available(iOS 15.0, *)) {
+        self.tabBar.scrollEdgeAppearance = self.tabBar.standardAppearance;
+    }
 //    self.navigationHandlers = [NSArray arrayWithArray:handleArray];
 }
 

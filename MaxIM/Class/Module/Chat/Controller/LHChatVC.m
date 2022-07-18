@@ -61,10 +61,7 @@
 #import <CoreLocation/CoreLocation.h>
 #import "UIViewController+CustomNavigationBar.h"
 #import <floo-ios/BMXMessageConfig.h>
-#import "JoinMeetingView.h"
-#import "SupportManager.h"
 //#import <floo-ios/BMXGroupMember.h>
-#import "ZoomMeetingsApi.h"
 NSString *const kTableViewOffset = @"contentOffset";
 NSString *const kTableViewFrame = @"frame";
 
@@ -122,6 +119,7 @@ CLLocationManagerDelegate>
 
 // 录音
 @property (nonatomic, strong) BMXVoiceHud *voiceHud;
+@property (nonatomic, strong) UILabel *voiceTip;
 @property (nonatomic, strong) NSTimer *timer; //记录录音的动画
 
 @property (nonatomic, assign) NSInteger conversationId;
@@ -200,34 +198,6 @@ CLLocationManagerDelegate>
     
     [self p_configNotification];
     [self p_configEditMessage];
-    [self showJoinmeetingView];
-}
-
-- (void)showJoinmeetingView {
-    
-    ZoomMeetingsApi *api = [[ZoomMeetingsApi alloc] init];
-    [api startWithSuccessBlock:^(ApiResult * _Nullable result) {
-        if (result.isOK ) {
-            NSArray *array = [NSArray arrayWithArray:result.resultData];
-            if (array.count > 0) {
-                
-                if (self.messageType == BMXMessageTypeSingle) {
-                    [[SupportManager sharedSupportManager] checkCurrentRoster:self.currentRoster isSupport:^(BOOL isSupport) {
-                        if (isSupport == YES) {
-                            JoinMeetingView *view = [JoinMeetingView joinMeetingViewWithUserID:[NSString stringWithFormat:@"%lld", self.currentRoster.rosterId]
-                                                                                     meetingID:array[0]];
-                            [self.view addSubview:view];
-                        }
-                    }];
-                }
-                
-            }
-        }
-        
-    } failureBlock:^(NSError * _Nullable error) {
-    
-    }];
-    
 }
 
 - (void)p_configNotification {
@@ -1352,14 +1322,16 @@ CLLocationManagerDelegate>
     if (error) {
         [HQCustomToast showDialog:error.errorMessage];
     }
-    
+    MAXLog(@"message content:%@", message.content);
     if ([self isHaveExtion:message]) {
         //如果是扩展信息（现在的扩展信息，是不展示消息，）所以return不做UI处理
         return;
     } else {
+        MAXLogDebug(@"Message have no ext");
         [self.deliveringMsgClientIds removeObject:[NSNumber numberWithLong:(long) message.clientMsgId]];
         for (LHMessageModel *viewmodel in self.dataSource) {
             if ([viewmodel isKindOfClass:[LHMessageModel class]] && viewmodel.messageObjc.clientMsgId  == message.clientMsgId) {
+                MAXLogDebug(@"Message found in list");
                 NSInteger index = [self.dataSource indexOfObject:viewmodel];
                 __block LHChatViewCell *messageCell = (LHChatViewCell *) [self.tableView cellForRowAtIndexPath:[NSIndexPath indexPathForRow:index inSection:0]];
                 if (messageCell == nil) {
@@ -1376,6 +1348,7 @@ CLLocationManagerDelegate>
 
                 }
                 viewmodel.messageObjc.deliverystatus = message.deliverystatus;
+                MAXLogDebug(@"message delivery status:%d", message.deliverystatus);
 
                 switch ( message.deliverystatus) {
                     case BMXDeliveryStatusNew:
@@ -1700,6 +1673,18 @@ CLLocationManagerDelegate>
     return _voiceHud;
 }
 
+// 语音动画提示文字
+- (UILabel *)voiceTip {
+    if (!_voiceTip) {
+        _voiceTip = [[UILabel alloc] init];
+        _voiceTip.hidden = YES;
+        _voiceTip.textColor = [UIColor whiteColor];
+        _voiceTip.font = [UIFont systemFontOfSize:14.0];
+        [self.view addSubview:_voiceTip];
+    }
+    return _voiceTip;
+}
+
 // 语音动画计时器
 - (NSTimer *)timer {
     if (!_timer) {
@@ -1722,6 +1707,12 @@ CLLocationManagerDelegate>
     self.voiceHud.progress = progress;
 }
 
+- (void)changeVoiceTipWithText:(NSString *) text{
+    self.voiceTip.text = text;
+    [self.voiceTip sizeToFit];
+    self.voiceTip.center = CGPointMake(MAXScreenW/2, MAXScreenH/2 + 50);
+}
+
 // 录音
 - (void)chatViewDidStartRecordingVoice:(LHChatBarView *)chatView {
     self.recordName = [self p_currentRecordFileName];
@@ -1734,12 +1725,12 @@ CLLocationManagerDelegate>
                 [alert addAction:action];
                 [self presentViewController:alert animated:NO completion:nil];
             }
-        } else {
-            
+        } else {            
             [self timerInvalue];
             self.voiceHud.hidden = NO;
+            self.voiceTip.hidden = NO;
             [self timer];
-            
+            [self changeVoiceTipWithText: NSLocalizedString(@"Finger_up", @"手指上移，取消发送")];
         }
     }];
 }
@@ -1754,6 +1745,7 @@ CLLocationManagerDelegate>
 - (void)chatViewDidCancelRecordingVoice:(LHChatBarView *)chatView {
     [[BMXRecoderTools shareManager] removeCurrentRecordFile:self.recordName];
     self.voiceHud.hidden = YES;
+    self.voiceTip.hidden = YES;
     [self timerInvalue];
 }
 
@@ -1762,7 +1754,8 @@ CLLocationManagerDelegate>
     [[BMXRecoderTools shareManager] stopRecordingWithCompletion:^(NSString *recordPath, int duation) {
         
         self.voiceHud.hidden = YES;
-        
+        self.voiceTip.hidden = YES;
+
         if ([recordPath isEqualToString:shortRecord]) {
             MAXLog(@"录音时间太短");
         } else {
@@ -1778,10 +1771,12 @@ CLLocationManagerDelegate>
     if (inside) {
         [_timer setFireDate:[NSDate distantPast]];
         _voiceHud.image  = [UIImage imageNamed:@"voice_1"];
+        [self changeVoiceTipWithText: NSLocalizedString(@"Finger_up", @"手指上移，取消发送")];
     } else {
         [_timer setFireDate:[NSDate distantFuture]];
         self.voiceHud.animationImages  = nil;
         self.voiceHud.image = [UIImage imageNamed:@"cancelVoice"];
+        [self changeVoiceTipWithText: NSLocalizedString(@"Finger_release", @"松开手指，取消发送")];
     }
 }
 

@@ -20,7 +20,7 @@ target 'MaxIM' do
   pod 'Bugly'
   pod 'tingyunApp'
   pod 'FMDB'
-  
+  pod 'CocoaLumberjack'
   pod 'floo-ios'
 
   target 'MaxIMTests' do
