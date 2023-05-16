@@ -7,8 +7,7 @@
 //
 
 #import "HostConfigManager.h"
-#import <floo-ios/BMXClient.h>
-#import <floo-ios/BMXHostConfig.h>
+#import <floo-ios/floo_proxy.h>
 #import "HostConfigStorage.h"
 
 @implementation HostConfigManager
@@ -66,13 +65,13 @@ static HostConfigManager *manager = nil;
 }
 - (void)updataConfig {
     
-    BMXHostConfig *config  =  [[[BMXClient sharedClient] sdkConfig] hostConfig];
+    BMXSDKConfigHostConfig *config  =  [[[BMXClient sharedClient] getSDKConfig] getHostConfig];
     if (_IMServer.length > 0 && _IMPort.length > 0 && _restServer.length > 0) {
-        config.imHost = _IMServer;
-        config.mPort = [_IMPort intValue];
-        config.restHost = _restServer;
-        [[BMXClient sharedClient] sdkConfig].hostConfig = config;
-               [HostConfigStorage saveObject:self];
+        [config setImHost: _IMServer];
+        [config setImPort: [_IMPort intValue]];
+        [config setRestHost: _restServer];
+        [[[BMXClient sharedClient] getSDKConfig] setHostConfig: config];
+        [HostConfigStorage saveObject:self];
     }
 //    if (_IMPort.length > 0) {
 //        

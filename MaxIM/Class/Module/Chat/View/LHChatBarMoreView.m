@@ -18,6 +18,8 @@ const NSInteger INSETS = 8;
 @property (nonatomic, strong) UIButton *locationButton;
 @property (nonatomic, strong) UIButton *fileButton;
 @property (nonatomic, strong) UIButton *videoButton;
+@property (nonatomic, strong) UIButton *videoCallButton;
+@property (nonatomic, strong) UIButton *voiceCallButton;
 
 
 @end
@@ -106,6 +108,33 @@ const NSInteger INSETS = 8;
     label5.textAlignment = NSTextAlignmentCenter;
     [self addSubview:label5];
     
+    _videoCallButton =[UIButton buttonWithType:UIButtonTypeCustom];
+    [_videoCallButton setFrame:CGRectMake(insets*2 + CHAT_BUTTON_SIZE , CGRectGetMaxY(label.frame) + 10, CHAT_BUTTON_SIZE , CHAT_BUTTON_SIZE)];
+    [_videoCallButton setImage: [UIImage imageNamed:@"video_call"] forState:UIControlStateNormal];
+    [_videoCallButton setImage:[UIImage imageNamed:@"video_call"] forState:UIControlStateHighlighted];
+    [_videoCallButton addTarget:self action:@selector(videoCallAction) forControlEvents:UIControlEventTouchUpInside];
+    _videoCallButton.titleLabel.textColor = [UIColor lh_colorWithHex:0x8e8e93];
+    [self addSubview:_videoCallButton];
+    
+    UILabel *label6 = [[UILabel alloc] initWithFrame:CGRectMake(insets*2 + CHAT_BUTTON_SIZE - 2, CGRectGetMaxY(_videoCallButton.frame) + 10, CHAT_BUTTON_SIZE + 5, 12)];
+    label6.font = [UIFont systemFontOfSize:12];
+    label6.text = NSLocalizedString(@"Video_call", @"视频通话");
+    label6.textAlignment = NSTextAlignmentCenter;
+    [self addSubview:label6];
+    
+    _voiceCallButton =[UIButton buttonWithType:UIButtonTypeCustom];
+    [_voiceCallButton setFrame:CGRectMake(insets * 3 + CHAT_BUTTON_SIZE * 2 , CGRectGetMaxY(label.frame) + 10, CHAT_BUTTON_SIZE , CHAT_BUTTON_SIZE)];
+    [_voiceCallButton setImage: [UIImage imageNamed:@"voice_call"] forState:UIControlStateNormal];
+    [_voiceCallButton setImage:[UIImage imageNamed:@"voice_call"] forState:UIControlStateHighlighted];
+    [_voiceCallButton addTarget:self action:@selector(voiceCallAction) forControlEvents:UIControlEventTouchUpInside];
+    _voiceCallButton.titleLabel.textColor = [UIColor lh_colorWithHex:0x8e8e93];
+    [self addSubview:_voiceCallButton];
+    
+    UILabel *label7 = [[UILabel alloc] initWithFrame:CGRectMake(insets * 3 + CHAT_BUTTON_SIZE * 2 - 2, CGRectGetMaxY(_voiceCallButton.frame) + 10, CHAT_BUTTON_SIZE + 5, 12)];
+    label7.font = [UIFont systemFontOfSize:12];
+    label7.text = NSLocalizedString(@"Voice_call", @"语音通话");
+    label7.textAlignment = NSTextAlignmentCenter;
+    [self addSubview:label7];
 
 }
 
@@ -138,6 +167,18 @@ const NSInteger INSETS = 8;
 - (void)videoAction {
     if (_delegate && [_delegate respondsToSelector:@selector(moreViewVideoAction:)]) {
         [_delegate moreViewVideoAction:self];
+    }
+}
+
+- (void)videoCallAction {
+    if (_delegate && [_delegate respondsToSelector:@selector(moreViewVideoCallAction:)]) {
+        [_delegate moreViewVideoCallAction:self];
+    }
+}
+
+- (void)voiceCallAction {
+    if (_delegate && [_delegate respondsToSelector:@selector(moreViewVideoCallAction:)]) {
+        [_delegate moreViewVoiceCallAction:self];
     }
 }
 

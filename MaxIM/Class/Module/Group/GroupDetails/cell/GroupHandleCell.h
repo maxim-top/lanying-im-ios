@@ -17,19 +17,16 @@
 
 #import <UIKit/UIKit.h>
 
-#import <floo-ios/BMXGroupApplication.h>
-#import <floo-ios/BMXGroupInvitation.h>
-#import <floo-ios/BMXRoster.h>
-#import <floo-ios/BMXGroup.h>
+#import <floo-ios/floo_proxy.h>
 
 @class BMXGroup;
 @class BMXClient;
 
 @interface GroupHandleCell : UITableViewCell
 
-- (void) cellInviteContentWithRoster:(BMXRoster*) roster group:(BMXGroup*) group inviteStatus:(BMXGroupInvitationStatus) status exp:(long long) expTime actionHandler:(void (^)(BOOL ret)) handler;
+- (void) cellInviteContentWithRoster:(BMXRosterItem*) roster group:(BMXGroup*) group inviteStatus:(BMXGroup_InvitationStatus) status exp:(long long) expTime actionHandler:(void (^)(BOOL ret)) handler;
 
--(void) cellApplicationContentWithRoster:(BMXRoster*) roster group:(BMXGroup*) group applicationStatus:(BMXGroupApplicationStatus) status exp:(long long) expTime actionHandler:(void (^)(BOOL ret)) handler;
+-(void) cellApplicationContentWithRoster:(BMXRosterItem*) roster group:(BMXGroup*) group applicationStatus:(BMXGroup_ApplicationStatus) status exp:(long long) expTime actionHandler:(void (^)(BOOL ret)) handler;
 
 + (CGFloat) cellHeight;
 

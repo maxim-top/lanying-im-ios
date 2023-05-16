@@ -15,14 +15,15 @@
     
 
 #import <UIKit/UIKit.h>
-#import <floo-ios/BMXMessageObject.h>
+#import <floo-ios/floo_proxy.h>
+
 @class BMXConversation;
 
 NS_ASSUME_NONNULL_BEGIN
 
 @interface SearchContentViewController : UIViewController
 
-- (instancetype)initWithSearchContentType:(BMXContentType)contentType conversation:(BMXConversation *)conversation;
+- (instancetype)initWithSearchContentType:(BMXMessage_ContentType)contentType conversation:(BMXConversation *)conversation;
 @property (nonatomic,assign) BOOL isConversation;
 
 

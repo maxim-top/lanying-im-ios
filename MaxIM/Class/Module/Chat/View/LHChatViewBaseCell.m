@@ -7,7 +7,7 @@
 //
 
 #import "LHChatViewBaseCell.h"
-#import <floo-ios/BMXClient.h>
+#import <floo-ios/floo_proxy.h>
 #import "ChatRosterProfileViewController.h"
 
 @implementation LHChatViewBaseCell
@@ -64,14 +64,20 @@
     
     
     __weak LHChatViewBaseCell *weakSelf = self;
-    [[[BMXClient sharedClient] rosterService] searchByRosterId:self.messageModel.messageObjc.fromId forceRefresh:NO completion:^(BMXRoster *roster, BMXError *error) {
+    BMXMessage *msg = self.messageModel.messageObjc;
+    long long userId = msg.fromId;
+    if (msg.contentType == BMXMessage_ContentType_RTC) {
+        if ([msg.config.getRTCAction isEqualToString: @"hangup"]) {
+            userId = msg.config.getRTCInitiator;
+        }
+    }
+
+    [[[BMXClient sharedClient] rosterService] searchWithRosterId:userId forceRefresh:NO completion:^(BMXRosterItem *item, BMXError *error) {
         if (!error) {
             if (!weakSelf.messageModel.isSender) {
-                ChatRosterProfileViewController *vc = [[ChatRosterProfileViewController alloc] initWithRoster:roster];
+                ChatRosterProfileViewController *vc = [[ChatRosterProfileViewController alloc] initWithRoster:item];
                 [self.viewController.navigationController pushViewController:vc animated:YES];
             }
-
-           
         }
     }];
 }

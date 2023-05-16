@@ -11,5 +11,6 @@
 @interface MAXTabBarController : UITabBarController
 
 - (void)addIMListener;
+- (void)removeIMListener;
 
 @end

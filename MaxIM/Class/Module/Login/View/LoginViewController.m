@@ -14,7 +14,6 @@
 
 #import "WXApi.h"
 #import "WechatApi.h"
-#import <floo-ios/BMXClient.h>
 #import "IMAcountInfoStorage.h"
 #import "IMAcount.h"
 #import "MAXGlobalTool.h"
@@ -32,8 +31,7 @@
 
 #import "SDKConfigViewController.h"
 
-#import <floo-ios/BMXHostConfig.h>
-
+#import <floo-ios/floo_proxy.h>
 #import "PrivacyView.h"
 
 @interface LoginViewController ()<LoginViewConfigProtocol, SDKConfigViewControllerProtocl, PrivacyProtocol>
@@ -205,16 +203,15 @@
 
 // 用户名注册
 - (void)regiesterWithName:(NSString *)name password:(NSString *)password {
-    
-    [[BMXClient sharedClient] signUpNewUser:name password:password completion:^(BMXUserProfile * _Nonnull profile, BMXError * _Nonnull error) {
-        if (!error) {
+    [[BMXClient sharedClient] signUpNewUserWithUsername:name password:password completion:^(BMXUserProfile *profile, BMXError *error) {
+        if (error.errorCode == BMXErrorCode_NoError){
             [self registerLoginByName:name password:password];
-        } else if (error.errorCode == BMXUserAlreadyExist){
+        } else if (error.errorCode == BMXErrorCode_UserAlreadyExist){
             [self.config showErrorText:NSLocalizedString(@"This_username_already_exists", @"该用户名已存在")];
-        } else if (error.errorCode == BMXInvalidRequestParameter) {
+        } else if (error.errorCode == BMXErrorCode_InvalidRequestParameter) {
             [HQCustomToast showDialog:NSLocalizedString(@"username_constraint", @"用户名仅支持字母数字下划线中文组合，且不能是纯数字，不能以maxim、mta开头") time:5.0f];
         } else {
-            [HQCustomToast showDialog:error.errorMessage];
+            [HQCustomToast showDialog:[error description]];
         }
     }];
 }
@@ -234,14 +231,21 @@
 - (void)registerAndBindPhoneUserName:(NSString *)userName
                     password:(NSString *)password {
     // 注册
-    [[BMXClient sharedClient] signUpNewUser:userName password:password completion:^(BMXUserProfile * _Nonnull profile, BMXError * _Nonnull error) {
-        if (!error) {
-            // 登录
-            [self registerLoginBindByName:userName password:password];
-        } else if (error.errorCode == BMXUserAlreadyExist){
-            [self.config showErrorText:NSLocalizedString(@"This_username_already_exists", @"该用户名已存在")];
-        }
-    }];
+//    [[BMXClient sharedClient] signUpNewUser:userName password:password completion:^(BMXUserProfile * _Nonnull profile, BMXError * _Nonnull error) {
+//        if (!error) {
+//            // 登录
+//            [self registerLoginBindByName:userName password:password];
+//        } else if (error.errorCode == BMXUserAlreadyExist){
+//            [self.config showErrorText:NSLocalizedString(@"This_username_already_exists", @"该用户名已存在")];
+//        }
+//    }];
+    BMXUserProfile * userProfile = [[BMXUserProfile alloc] init];
+    BMXErrorCode error = [[BMXClient sharedClient] signUpNewUserWithUsername:userName password:password bmxUserProfilePtr:userProfile];
+    if (!error){
+        [self registerLoginBindByName:userName password:password];
+    } else if (error == BMXErrorCode_UserAlreadyExist){
+        [self.config showErrorText:NSLocalizedString(@"This_username_already_exists", @"该用户名已存在")];
+    }
 }
 // 手机验证码首次登录，绑定已有账号
 - (void)bindPhoneWithName:(NSString *)name
@@ -254,14 +258,23 @@
 - (void)regiesterAndBindWechatWithName:(NSString *)name
                               password:(NSString *)password {
     // 注册
-    [[BMXClient sharedClient] signUpNewUser:name password:password completion:^(BMXUserProfile * _Nonnull profile, BMXError * _Nonnull error) {
-        if (!error) {
-            // 登录
+//    [[BMXClient sharedClient] signUpNewUser:name password:password completion:^(BMXUserProfile * _Nonnull profile, BMXError * _Nonnull error) {
+//        if (!error) {
+//            // 登录
+//            [self registerLoginBindByName:name password:password];
+//        } else if (error.errorCode == BMXUserAlreadyExist){
+//            [self.config showErrorText:NSLocalizedString(@"This_username_already_exists", @"该用户名已存在")];
+//        } else {
+//            [HQCustomToast showDialog:error.errorMessage];
+//        }
+//    }];
+    [[BMXClient sharedClient] signUpNewUserWithUsername:name password:password completion:^(BMXUserProfile *profile, BMXError *error) {
+        if (error.errorCode == BMXErrorCode_NoError){
             [self registerLoginBindByName:name password:password];
-        } else if (error.errorCode == BMXUserAlreadyExist){
+        } else if (error.errorCode == BMXErrorCode_UserAlreadyExist){
             [self.config showErrorText:NSLocalizedString(@"This_username_already_exists", @"该用户名已存在")];
         } else {
-            [HQCustomToast showDialog:error.errorMessage];
+            [HQCustomToast showDialog:[error description]];
         }
     }];
 }
@@ -284,6 +297,10 @@
             [HQCustomToast showDialog:NSLocalizedString(@"This_phone_number_has_been_bound", @"该手机号已绑定")];
         } else if([result.code isEqualToString:@"10001"]) {
             [HQCustomToast showDialog:NSLocalizedString(@"Captcha_does_not_match", @"验证码不匹配")];
+//        } else if([result.code isEqualToString:@"11012"]) {
+//            [HQCustomToast showDialog:NSLocalizedString(@"Captcha_does_not_match", @"手机号已被绑定")];
+//        } else{
+//            [HQCustomToast showDialog:NSLocalizedString(@"Captcha_does_not_match", @"未知错误")];
         }
     } failureBlock:^(NSError * _Nullable error) {
         [HQCustomToast showNetworkError];
@@ -351,33 +368,22 @@
         password:(NSString *)password {
     [HQCustomToast showWating];
     
-    [[BMXClient sharedClient] signInByName:userName password:password completion:^(BMXError * _Nonnull error) {
-
+    [[BMXClient sharedClient] signInByNameWithName:userName password:password completion:^(BMXError *error) {
         [HQCustomToast hideWating];
-        if (!error) {
+        if (!error){
             MAXLog(@"登录成功 username = %@ , password = %@", userName, password);
-            
             [self getAppTokenWithName:userName password:password];
-            
             [self getProfile];
-            
             [self willMoveToParentViewController:nil];
             [self removeFromParentViewController];
             [self.view removeFromSuperview];
-            
             [self saveIMAcountName:userName password:password];
-            
             [UIApplication sharedApplication].delegate.window.rootViewController = [MAXGlobalTool share].rootViewController;
             [self bindDeviceToken];
-
             [[NSNotificationCenter defaultCenter] postNotificationName:@"loginSuccess" object:nil];
-//            [HQCustomToast showDialog:@"登录成功"];
             [[MAXGlobalTool share].rootViewController addIMListener];
-            
-            
-        }else {
-            [HQCustomToast showDialog:[NSString stringWithFormat:@"%@",error.errorMessage]];
-            
+        } else {
+            [HQCustomToast showDialog:[NSString stringWithFormat:@"%@",[error description]]];
             MAXLog(@"失败 errorCode = %lu ", error.errorCode);
         }
     }];
@@ -457,30 +463,29 @@
 - (void)bindDeviceToken {
     NSString *deviceToken = [[NSUserDefaults standardUserDefaults] valueForKey:@"deviceToken"];
     if ([deviceToken length]) {
-        [[[BMXClient sharedClient] userService] bindDevice:deviceToken completion:^(BMXError *error) {
-            MAXLog(@"绑定成功%@", deviceToken);
+        [[[BMXClient sharedClient] userService] bindDeviceWithToken:deviceToken completion:^(BMXError *error) {
+            if (!error){
+                MAXLog(@"绑定成功%@", deviceToken);
+            }
         }];
     }
 }
 
 - (void)getProfile{
-    [[[BMXClient sharedClient] userService] getProfileForceRefresh:YES completion:^(BMXUserProfile *profile, BMXError *aError) {
-        if (!aError) {
+    [[[BMXClient sharedClient] userService] getProfile: YES completion:^(BMXUserProfile *userProfile, BMXError *error) {
+        if (!error){
             IMAcount *account = [IMAcountInfoStorage loadObject];
-            account.usedId = [NSString stringWithFormat:@"%lld", profile.userId];
-            account.userName = profile.userName;
+            account.usedId = [NSString stringWithFormat:@"%lld", userProfile.userId];
+            account.userName = userProfile.username;
             [IMAcountInfoStorage saveObject:account];
-            account.appid = [[BMXClient sharedClient] sdkConfig].appID;
+            account.appid = [[BMXClient sharedClient] getSDKConfig].getAppID;
             [self saveAccountToLoaclListWithaccount:account];
             
-            [[[BMXClient sharedClient] userService] downloadAvatarWithProfile:profile thumbnail:YES progress:^(int progress, BMXError *error) {
+            [[[BMXClient sharedClient] userService] downloadAvatarWithProfile:userProfile thumbnail:YES callback:^(int progress) {
                 
-            } completion:^(BMXUserProfile *profile, BMXError *error) {
-                
-            }];
+            } completion:nil];
         }
-        
-    }];
+    } ];
 }
 
 - (void)getAppTokenWithName:(NSString *)name password:(NSString *)password {
@@ -594,40 +599,28 @@
 // 直接登录
 - (void)loginAndEntryMainVCWithName:(NSString *)name password:(NSString *)password {
     
-    MAXLog(@"%@", [[BMXClient sharedClient] sdkConfig].hostConfig.restHost);
+    MAXLog(@"%@", [[BMXClient sharedClient] getSDKConfig].getHostConfig.getRestHost);
     
     [HQCustomToast showWating];
-    [[BMXClient sharedClient] signInByName:name password:password completion:^(BMXError *error) {
+    [[BMXClient sharedClient] signInByNameWithName:name password:password completion:^(BMXError *error) {
         [HQCustomToast hideWating];
-        if (!error) {
+        if (!error){
             MAXLog(@"登录成功 username = %@ , password = %@",name, password);
-
             [self saveLastLoginAppid];
-            
             [self getAppTokenWithName:name password:password];
-            
             [self getProfile];
-            
             [self bindDeviceToken];
-            
             [self saveIMAcountName:name password:password];
-            
             [self willMoveToParentViewController:nil];
             [self removeFromParentViewController];
             [self.view removeFromSuperview];
             [UIApplication sharedApplication].delegate.window.rootViewController = [MAXGlobalTool share].rootViewController;
-            
-            
-            
             [[NSNotificationCenter defaultCenter] postNotificationName:@"loginSuccess" object:nil];
             //            [HQCustomToast showDialog:@"登录成功"];
-            
             [[MAXGlobalTool share].rootViewController addIMListener];
-            
-            
-        }else {
+        } else {
             MAXLog(@"失败 errorCode = %lu ", error.errorCode);
-            [HQCustomToast showDialog:[NSString stringWithFormat:@"%@", error.errorMessage]];
+            [HQCustomToast showDialog:[NSString stringWithFormat:@"%@", [error description]]];
         }
     }];
 }
@@ -637,40 +630,28 @@
 }
 
 - (void)saveLastLoginAppid {
-    BMXSDKConfig *sdkconfig = [[BMXClient sharedClient] sdkConfig];
-    [AppIDManager changeAppid:sdkconfig.appID isSave:YES];
+    BMXSDKConfig *sdkconfig = [[BMXClient sharedClient] getSDKConfig];
+    [AppIDManager changeAppid:sdkconfig.getAppID isSave:YES];
 }
 
 // 注册后的登录
 - (void)registerLoginByName:(NSString *)name password:(NSString *)password {
     [HQCustomToast showWating];
-    [[BMXClient sharedClient] signInByName:name password:password completion:^(BMXError *error) {
+    [[BMXClient sharedClient] signInByNameWithName:name password:password completion:^(BMXError *error) {
         [HQCustomToast hideWating];
-        
-        if (!error) {
+        if (!error){
             MAXLog(@"登录成功 username = %@ , password = %@",name, password);
-            
-            
             [self saveLastLoginAppid];
-
             [self getAppTokenWithName:name password:password];
-            
             [self saveIMAcountName:name password:password];
-            
             [self bindDeviceToken];
-            
             [self getProfile];
-            
-            
             [[NSNotificationCenter defaultCenter] postNotificationName:@"loginSuccess" object:nil];
-            
             LoginViewController *bindPhoneViewController = [[LoginViewController alloc] initWithViewType:LoginVCTypeBindPhone];
             [self.navigationController pushViewController:bindPhoneViewController animated:YES];
-            
-            
-        }else {
-            MAXLog(@"失败 errorCode = %lu ", error.errorCode);
-            [HQCustomToast showDialog:[NSString stringWithFormat:@"%@", error.errorMessage]];
+        } else {
+            MAXLog(@"失败 errorCode = %lu ", error);
+            [HQCustomToast showDialog:[NSString stringWithFormat:@"%@", [[BMXError errorCode:error] description]]];
         }
     }];
 }
@@ -678,33 +659,24 @@
 // 登录后需要绑定
 - (void)registerLoginBindByName:(NSString *)name password:(NSString *)password {
     [HQCustomToast showWating];
-    [[BMXClient sharedClient] signInByName:name password:password completion:^(BMXError *error) {
+    [[BMXClient sharedClient] signInByNameWithName:name password:password completion:^(BMXError *error) {
         [HQCustomToast hideWating];
-        
-        if (!error) {
+        if (!error){
             MAXLog(@"登录成功 username = %@ , password = %@",name, password);
-            
             [self saveLastLoginAppid];
-            
             [self getAppTokenWithName:name password:password];
-            
             [self getProfile];
-            
             [self bindDeviceToken];
-            
             [self saveIMAcountName:name password:password];
-            
             if (self.config.phone.length > 0 && self.config.sign.length > 0) {
                 [self bindPhoneWithUserName:name password:password phone:self.config.phone sign:self.config.sign];
             }else if (self.config.wechatOpenId.length > 0) {
                 [self bindWechatWithUserName:name password:password];
             }
-            
             [[NSNotificationCenter defaultCenter] postNotificationName:@"loginSuccess" object:nil];
-            
-        }else {
-            MAXLog(@"失败 errorCode = %lu ", error.errorCode);
-            [HQCustomToast showDialog:[NSString stringWithFormat:@"%@", error.errorMessage]];
+        } else {
+            MAXLog(@"失败 errorCode = %lu ", error);
+            [HQCustomToast showDialog:[NSString stringWithFormat:@"%@", [[BMXError errorCode:error] description]]];
         }
     }];
 }

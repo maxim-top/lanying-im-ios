@@ -8,7 +8,7 @@
 //
 
 #import "AboutUsViewController.h"
-#import <floo-ios/BMXClient.h>
+#import <floo-ios/floo_proxy.h>
 #import "UIView+BMXframe.h"
 #import "UIViewController+CustomNavigationBar.h"
 
@@ -45,8 +45,8 @@
 
     
     UILabel *label2 = [[UILabel alloc] init];
-    BMXSDKConfig *config = [[BMXClient sharedClient] sdkConfig];
-    NSString *SDK_Version = config.sdkVersion;
+    BMXSDKConfig *config = [[BMXClient sharedClient] getSDKConfig];
+    NSString *SDK_Version = config.getSDKVersion;
 
     label2.text = [NSString stringWithFormat:@"Floo/SDK  v%@", SDK_Version];
     label2.textAlignment = NSTextAlignmentCenter;
@@ -55,9 +55,9 @@
     
     
     UILabel *label3 = [[UILabel alloc] init];
-    label3.text = NSLocalizedString(@"One-Click_Multi-Cloud_Architecture", @"专业SDK，私有云按月付费");
+    label3.text = NSLocalizedString(@"One-Click_Multi-Cloud_Architecture", @"构建新一代智能聊天APP\n用蓝莺IM专业SDK！");
     label3.textAlignment = NSTextAlignmentCenter;
-    label3.numberOfLines = 0;
+    label3.numberOfLines = 2;
     label3.font = [UIFont systemFontOfSize:16];
     [self.view addSubview:label3];
     
@@ -94,7 +94,7 @@
     
     label3.bmx_top =  imageView.bmx_bottom + 30;
     label3.bmx_width = MAXScreenW - 20 * 2;
-    label3.bmx_height = 30;
+    label3.bmx_height = 60;
     label3.bmx_centerX = self.view.bmx_centerX;
 
     label5.bmx_top =  label3.bmx_bottom + 40;

@@ -8,8 +8,8 @@
 
 #import "MAXBlackListViewController.h"
 #import "ImageTitleBasicTableViewCell.h"
-#import <floo-ios/BMXClient.h>
-#import <floo-ios/BMXRoster.h>
+#import <floo-ios/floo_proxy.h>
+#import "MAXUtils.h"
 #import "UIViewController+CustomNavigationBar.h"
 #import "MaxEmptyTipView.h"
 
@@ -62,7 +62,7 @@
 
 #pragma mark - Manager
 - (void)addToBlackList:(NSString *)userId {
-    [[[BMXClient sharedClient] rosterService] addToBlockList:[userId integerValue] withCompletion:^(BMXError *error) {
+    [[[BMXClient sharedClient] rosterService] blockWithRosterId:[userId longLongValue] completion:^(BMXError *error) {
         if (!error) {
             [self getBlackList];
         }
@@ -74,11 +74,10 @@
         [self.tipView removeFromSuperview];
     }
 
-    [[[BMXClient sharedClient] rosterService] getBlockListforceRefresh:YES completion:^(NSArray *blockList, BMXError *error) {
-        if (!error && blockList.count > 0 ) {
-            self.rosterIdArray = [NSArray arrayWithArray:blockList];
-            [self searchRostersByidArray:self.rosterIdArray];
-            MAXLog(@"%ld", blockList.count);
+    [[[BMXClient sharedClient] rosterService] getBlockList:YES completion:^(ListOfLongLong *blockList, BMXError *error) {
+        if (!error && blockList.size > 0 ) {
+            [self searchRostersByidArray:blockList];
+            MAXLog(@"%ld", blockList.size);
         } else {
             MAXLog(@"暂无黑名单");
             self.rosterIdArray = [NSArray array];
@@ -90,22 +89,19 @@
 }
 
 // 批量搜索用户
-- (void)searchRostersByidArray:(NSArray *)idArray {
-    [[[BMXClient sharedClient] rosterService] searchRostersByRosterIdList:idArray forceRefresh:NO completion:^(NSArray<BMXRoster *> *rosterList, BMXError *error) {
-        MAXLog(@"%ld", rosterList.count);
-        self.rosterArray = [NSArray arrayWithArray:rosterList];
+- (void)searchRostersByidArray:(ListOfLongLong *)list {
+    [MAXUtils getRostersByidArray:list completion:^(NSArray *arr) {
+        self.rosterArray = arr;
         [self.tableview reloadData];
-        
     }];
 }
 
 - (void)removeRoster:(NSInteger)rosterId {
-    [[[BMXClient sharedClient] rosterService] removeRosterFromBlockList:rosterId
-                                                         withCompletion:^(BMXError *error) {
+    [[[BMXClient sharedClient] rosterService] unblockWithRosterId:rosterId
+                                                         completion:^(BMXError *error) {
         if (!error) {
             [self getBlackList];
             MAXLog(@"%@", error);
-            
         }
     }];
 }
@@ -116,7 +112,7 @@
 
 - (UITableViewCell *)tableView:(UITableView *)tableView
          cellForRowAtIndexPath:(NSIndexPath *)indexPath {
-    BMXRoster *roster = self.rosterArray[indexPath.row];
+    BMXRosterItem *roster = self.rosterArray[indexPath.row];
     ImageTitleBasicTableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:@"ImageTitleBasicTableViewCell"];
     [cell refresh:roster];
     return cell;
@@ -134,7 +130,7 @@
 commitEditingStyle:(UITableViewCellEditingStyle)editingStyle
 forRowAtIndexPath:(NSIndexPath *)indexPath {
     if (editingStyle == UITableViewCellEditingStyleDelete) {
-        BMXRoster *roster = self.rosterArray[indexPath.row];
+        BMXRosterItem *roster = self.rosterArray[indexPath.row];
 
         [self removeRoster:roster.rosterId];
         
@@ -173,7 +169,7 @@ forRowAtIndexPath:(NSIndexPath *)indexPath {
         if (MAXIsFullScreen) {
             navh  = kNavBarHeight + 24;
         }
-        _tipView = [[MaxEmptyTipView alloc] initWithFrame:CGRectMake(0, navh + 1 , MAXScreenW, MAXScreenH - navh - 37) type:MaxEmptyTipTypeCommonBlank];
+        _tipView = [[MaxEmptyTipView alloc] initWithFrame:CGRectMake(0, navh + 1 , MAXScreenW, MAXScreenH - navh - 37) type:MaxEmptyTipTypeBlocklist];
     }
     return _tipView;
 }

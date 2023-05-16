@@ -13,8 +13,9 @@
 #import "LHChatVC.h"
 #import "GroupListViewController.h"
 
-#import <floo-ios/BMXClient.h>
+#import <floo-ios/floo_proxy.h>
 #import "UIViewController+CustomNavigationBar.h"
+#import "MAXUtils.h"
 
 @interface TransformContactViewController ()<UITableViewDelegate, UITableViewDataSource>
 
@@ -43,38 +44,20 @@
     if (isNeed == YES) {
         [HQCustomToast showWating];
     }
-    [[[BMXClient sharedClient] rosterService] getRosterListforceRefresh:NO completion:^(NSArray *rostIdList, BMXError *error) {
-        if (!error) {
-            MAXLog(@"%ld", rostIdList.count);
-            [self searchRostersByidArray:[NSArray arrayWithArray:rostIdList]];
-        }
+    [MAXUtils getAllRosterWithCompletion:^(NSArray *arr) {
+        [HQCustomToast hideWating];
+        self.rosterArray = arr;
+        [self.tableView reloadData];
     }];
 }
 
 // 获取好友列表
 - (void)getAllRoster {
     [HQCustomToast showWating];
-    [[[BMXClient sharedClient] rosterService] getRosterListforceRefresh:NO completion:^(NSArray *rostIdList, BMXError *error) {
-        if (!error) {
-            MAXLog(@"%ld", rostIdList.count);
-            [self searchRostersByidArray:[NSArray arrayWithArray:rostIdList]];
-        }
-    }];
-}
-
-// 批量搜索用户
-- (void)searchRostersByidArray:(NSArray *)idArray {
-    [[[BMXClient sharedClient] rosterService] searchRostersByRosterIdList:idArray forceRefresh:NO completion:^(NSArray<BMXRoster *> *rosterList, BMXError *error) {
+    [MAXUtils getAllRosterWithCompletion:^(NSArray *arr) {
         [HQCustomToast hideWating];
-        
-        if (!error) {
-            MAXLog(@"%ld", rosterList.count);
-            self.rosterArray = [NSArray arrayWithArray:rosterList];
-            [self.tableView reloadData];
-        } else {
-            
-        }
-        
+        self.rosterArray = arr;
+        [self.tableView reloadData];
     }];
 }
 
@@ -102,7 +85,7 @@
         NSString *titleStr = [NSString stringWithFormat:@"%@", self.actionArray[indexPath.row]];
         [cell refreshByTitle:titleStr];
     } else {
-        BMXRoster *roster = self.rosterArray[indexPath.row];
+        BMXRosterItem *roster = self.rosterArray[indexPath.row];
         [cell refresh:roster];
     }
     return cell;
@@ -115,7 +98,7 @@
         vc.hidesBottomBarWhenPushed = YES;
         [self.navigationController pushViewController:vc animated:YES];
     } else {
-        BMXRoster *roster = self.rosterArray[indexPath.row];
+        BMXRosterItem *roster = self.rosterArray[indexPath.row];
         if (self.delegate && [self.delegate respondsToSelector:@selector(transterSlectedRoster:)]) {
             [self.delegate transterSlectedRoster:roster];
         }

@@ -22,7 +22,8 @@ target 'MaxIM' do
   pod 'FMDB'
   pod 'CocoaLumberjack'
   pod 'floo-ios'
-
+  pod 'GoogleWebRTC', '~> 1.1'
+  pod 'floo-rtc-ios'
   target 'MaxIMTests' do
     inherit! :search_paths
     # Pods for testing

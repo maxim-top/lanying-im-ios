@@ -13,7 +13,7 @@
 #import "DeviceTableViewCell.h"
 #import "IMAcount.h"
 #import "IMAcountInfoStorage.h"
-#import <floo-ios/BMXClient.h>
+#import <floo-ios/floo_proxy.h>
 #import "AppIDManager.h"
 #import "AppDelegate.h"
 
@@ -22,6 +22,7 @@
 #import "AccountManagementManager.h"
 #import "AccountListStorage.h"
 #import "HostConfigManager.h"
+#import "MainViewController.h"
 
 @interface AccountMangementViewController ()<UITableViewDataSource, UITableViewDelegate>
 
@@ -45,11 +46,8 @@
     NSArray *list = [AccountListStorage loadObject];
     self.accountArray = list;
     IMAcount *a = self.accountArray[0];
-    [[[BMXClient sharedClient] rosterService] searchByRosterId:[a.usedId integerValue] forceRefresh:YES completion:^(BMXRoster *roster, BMXError *error) {
-        
-        
+    [[[BMXClient sharedClient] rosterService] searchWithRosterId:[a.usedId integerValue] forceRefresh:YES completion:^(BMXRosterItem *item, BMXError *error) {
     }];
-    
     
     [self.tableView reloadData];
 }
@@ -74,13 +72,22 @@
 - (void)loginWithaccount:(IMAcount *)account {
     
     [HQCustomToast showWating];
-    
+    AppDelegate *appDelegate = (AppDelegate *)[UIApplication sharedApplication].delegate;
+    UIViewController *vc = appDelegate.window.rootViewController;
+    if ([vc isKindOfClass:[MAXTabBarController class]]) {
+        UINavigationController *navigation = (UINavigationController *)[vc.childViewControllers firstObject];
+        if ([NSStringFromClass([navigation.childViewControllers firstObject].class) isEqualToString:@"MainViewController"] ) {
+            MainViewController *mainVC = [navigation.childViewControllers firstObject];
+            [[[BMXClient sharedClient] chatService] removeChatListener:mainVC];
+        }
+    }
+
     [HostConfigManager sharedManager].IMServer = account.IMServer;
     [HostConfigManager sharedManager].IMPort = account.IMPort;
     [HostConfigManager sharedManager].restServer = account.restServer;
     [[HostConfigManager sharedManager]  updataConfig];
     
-    [[BMXClient sharedClient] changeAppID:account.appid completion:^(BMXError * _Nonnull error) {
+    [[BMXClient sharedClient] changeAppIdWithAppId  :account.appid completion:^(BMXError * _Nonnull error) {
         if (!error) {
             [self signByaccount:account];
         } else {
@@ -96,7 +103,7 @@
 }
 
 - (void)signByaccount:(IMAcount *)account {
-        [[BMXClient sharedClient] signInByName:account.userName password:account.password completion:^(BMXError * _Nonnull error) {
+        [[BMXClient sharedClient] signInByNameWithName:account.userName password:account.password completion:^(BMXError * _Nonnull error) {
             [HQCustomToast hideWating];
                 if (!error) {
                     
@@ -122,7 +129,7 @@
                     
                     [[NSNotificationCenter defaultCenter] postNotificationName:@"loginSuccess" object:nil];
                     
-                    [[MAXGlobalTool share].rootViewController addIMListener];
+                    [[MAXGlobalTool share].rootViewController removeIMListener];
                     
                     AppDelegate *appDelegate = (AppDelegate *)[UIApplication sharedApplication].delegate;
                     [appDelegate userLogout];
@@ -196,25 +203,25 @@
 - (void)bindDeviceToken {
     NSString *deviceToken = [[NSUserDefaults standardUserDefaults] valueForKey:@"deviceToken"];
     if ([deviceToken length]) {
-        [[[BMXClient sharedClient] userService] bindDevice:deviceToken completion:^(BMXError *error) {
+        [[[BMXClient sharedClient] userService] bindDeviceWithToken:deviceToken completion:^(BMXError *error) {
             MAXLog(@"绑定成功 %@", deviceToken);
         }];
     }
 }
 
 - (void)getProfile {
-    [[[BMXClient sharedClient] userService] getProfileForceRefresh:YES completion:^(BMXUserProfile *profile, BMXError *aError) {
+    [[[BMXClient sharedClient] userService] getProfile:YES completion:^(BMXUserProfile *profile, BMXError *aError) {
         if (!aError) {
             IMAcount *account = [IMAcountInfoStorage loadObject];
             account.usedId = [NSString stringWithFormat:@"%lld", profile.userId];
-            account.userName = profile.userName;
+            account.userName = profile.username;
             [IMAcountInfoStorage saveObject:account];
-            account.appid = [[BMXClient sharedClient] sdkConfig].appID;
+            account.appid = [[BMXClient sharedClient] getSDKConfig].getAppID;
             [self saveAccountToLoaclListWithaccount:account];
             
-            [[[BMXClient sharedClient] userService] downloadAvatarWithProfile:profile thumbnail:YES progress:^(int progress, BMXError *error) {
+            [[[BMXClient sharedClient] userService] downloadAvatarWithProfile:profile thumbnail:YES callback:^(int progress) {
                 
-            } completion:^(BMXUserProfile *profile, BMXError *error) {
+            } completion:^(BMXError *error) {
                 
             }];
         }
@@ -245,11 +252,11 @@
 
 - (void)saveLastLoginAppid {
     
-    BMXSDKConfig *sdkconfig = [[BMXClient sharedClient] sdkConfig];
+    BMXSDKConfig *sdkconfig = [[BMXClient sharedClient] getSDKConfig];
 
-    [AppIDManager changeAppid:sdkconfig.appID isSave:YES];
+    [AppIDManager changeAppid:sdkconfig.getAppID isSave:YES];
 
-    [[NetWorkingManager netWorkingManager] resetHeaderWithAppID:sdkconfig.appID];
+    [[NetWorkingManager netWorkingManager] resetHeaderWithAppID:sdkconfig.getAppID];
     
 //    BMXSDKConfig *sdkconfig = [[BMXClient sharedClient] sdkConfig];
 //    AppDelegate *appDelegate = (AppDelegate *)[UIApplication sharedApplication].delegate;

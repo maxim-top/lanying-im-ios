@@ -16,11 +16,9 @@
 
 #import "ProfileSettingViewController.h"
 #import "ProfileTableViewCell.h"
-#import <floo-ios/BMXClient.h>
-#import <floo-ios/BMXUserProfile.h>
 #import <TZImagePickerController.h>
-#import <floo-ios/BMXAuthQuestion.h>
 #import "UIViewController+CustomNavigationBar.h"
+#import <floo-ios/floo_proxy.h>
 
 #import "BindPhoneViewController.h"
 #import "ChangeMobileAlert.h"
@@ -81,11 +79,10 @@
 
 #pragma mark - manager
 - (void)getprofile {
-    [[[BMXClient sharedClient] userService] getProfileForceRefresh:YES completion:^(BMXUserProfile *profile, BMXError *aError) {
-        if (!aError) {
-            
-            self.profile = profile;
-            if (self.profile.addFriendAuthMode != BMXAddFriendAuthModeAnswerQuestion) {
+    [[[BMXClient sharedClient] userService] getProfile:NO completion:^(BMXUserProfile *bmxUserProfile, BMXError *error) {
+        if (!error){
+            self.profile = bmxUserProfile;
+            if (self.profile.addFriendAuthMode != BMXUserProfile_AddFriendAuthMode_AnswerQuestion) {
                 self.dataArray = [self getSettingConfigDataArray];
                 NSMutableArray *dataArrayM  = [NSMutableArray arrayWithArray:self.dataArray];
                 [dataArrayM removeLastObject];
@@ -104,7 +101,6 @@
             
             
             [self.tableView reloadData];
-        } else {
         }
     }];
 }
@@ -199,7 +195,7 @@
 }
 
 //设置加好友
-- (void)setAddFriendAuth:(BMXAddFriendAuthMode)mode {
+- (void)setAddFriendAuth:(BMXUserProfile_AddFriendAuthMode)mode {
     [[[BMXClient sharedClient] userService] setAddFriendAuthMode:mode completion:^(BMXError *error) {
         if (!error) {
             [HQCustomToast showDialog:NSLocalizedString(@"Set_successfully", @"设置成功")];
@@ -209,11 +205,10 @@
 }
 
 - (void)setQuestion:(NSString *)question answer:(NSString *)answer {
-    BMXAuthQuestion *qustionModel = [[BMXAuthQuestion alloc] init];
-    qustionModel.mQuestion = question;
-    qustionModel.mAnswer = answer;
-    
-    [[[BMXClient sharedClient] userService] setAuthQuestion:qustionModel completion:^(BMXError *error) {
+    BMXUserProfileAuthQuestion *authQuestion = [[BMXUserProfileAuthQuestion alloc] init];
+    [authQuestion setMQuestion:question];
+    [authQuestion setMAnswer:answer];
+    [[[BMXClient sharedClient] userService] setAuthQuestion: authQuestion completion:^(BMXError *error) {
         if (!error) {
             [HQCustomToast showDialog:NSLocalizedString(@"Set_successfully", @"设置成功")];
             [self getprofile];
@@ -357,7 +352,7 @@
     if ([dic[@"type"] isEqualToString:@"ID"]) {
         cell.contentLabel.text = [NSString stringWithFormat:@"%lld", self.profile.userId];
     } else if ([dic[@"type"] isEqualToString:NSLocalizedString(@"Nickname", @"昵称")]) {
-        NSString *aString = [self.profile.nickName length] ? self.profile.nickName : NSLocalizedString(@"set_nickname", @"请设置昵称");
+        NSString *aString = [self.profile.nickname length] ? self.profile.nickname : NSLocalizedString(@"set_nickname", @"请设置昵称");
         cell.contentLabel.text = aString;
     } else if ([dic[@"type"] isEqualToString:NSLocalizedString(@"Phone_number", @"手机号")]) {
         NSString *aString = [self.profile.mobilePhone length] ? self.profile.mobilePhone : NSLocalizedString(@"Go_to_bind", @"去绑定");
@@ -369,28 +364,28 @@
         NSString *aString = self.isbindWechat ? NSLocalizedString(@"Unbind", @"解绑") : NSLocalizedString(@"Unbound", @"未绑定");
         cell.contentLabel.text = aString;
     } else if ([dic[@"type"] isEqualToString:NSLocalizedString(@"Public_info", @"公开信息")]) {
-        cell.contentLabel.text = [NSString stringWithFormat:@"%@", self.profile.publicInfoJson];
+        cell.contentLabel.text = [NSString stringWithFormat:@"%@", self.profile.publicInfo];
     } else if ([dic[@"type"] isEqualToString:NSLocalizedString(@"Private_profile", @"私密信息")]) {
-        cell.contentLabel.text = [NSString stringWithFormat:@"%@", self.profile.privateInfoJson];
+        cell.contentLabel.text = [NSString stringWithFormat:@"%@", self.profile.privateInfo];
     } else if ([dic[@"type"] isEqualToString:NSLocalizedString(@"Friend_verification", @"好友验证")]) {
         switch (self.profile.addFriendAuthMode) {
-            case BMXAddFriendAuthModeOpen:
+            case BMXUserProfile_AddFriendAuthMode_Open:
                 cell.contentLabel.text = [NSString stringWithFormat:NSLocalizedString(@"Public", @"公开")];
                 break;
-            case BMXAddFriendAuthModeNeedApproval:
+            case BMXUserProfile_AddFriendAuthMode_NeedApproval:
                 cell.contentLabel.text = [NSString stringWithFormat:NSLocalizedString(@"Consent_required", @"需要同意")];
                 break;
-            case BMXAddFriendAuthModeAnswerQuestion:
+            case BMXUserProfile_AddFriendAuthMode_AnswerQuestion:
                 cell.contentLabel.text = [NSString stringWithFormat:NSLocalizedString(@"Require_to_answer_questions", @"需要回答问题")];
                 break;
-            case BMXAddFriendAuthModeRejectAll:
+            case BMXUserProfile_AddFriendAuthMode_RejectAll:
                 cell.contentLabel.text = [NSString stringWithFormat:NSLocalizedString(@"Reject_all", @"拒绝所有人")];
                 break;
             default:
                 break;
         }
     } else if ([dic[@"type"] isEqualToString:NSLocalizedString(@"Friend_verification_question", @"好友验证问题")]) {
-        cell.contentLabel.text = self.profile.authQuestion.mQuestion ? [NSString stringWithFormat:@"%@", self.profile.authQuestion.mQuestion] : @"";
+        cell.contentLabel.text = self.profile.authQuestion.getMQuestion ? [NSString stringWithFormat:@"%@", self.profile.authQuestion.getMQuestion] : @"";
         
     }
     
@@ -546,26 +541,26 @@
         UIAlertAction* action1 = [UIAlertAction actionWithTitle:NSLocalizedString(@"Public", @"公开") style:UIAlertActionStyleDefault
                                                         handler:^(UIAlertAction * action) {
                                                             //响应事件
-                                                            [self setAddFriendAuth:BMXAddFriendAuthModeOpen];
+                                                            [self setAddFriendAuth:BMXUserProfile_AddFriendAuthMode_Open];
                                                             
                                                         
                                                         }];
         UIAlertAction* action2 = [UIAlertAction actionWithTitle:NSLocalizedString(@"Consent_required", @"需要同意") style:UIAlertActionStyleDefault
                                                              handler:^(UIAlertAction * action) {
                                                                  //响应事件
-                                                                 [self setAddFriendAuth:BMXAddFriendAuthModeNeedApproval];
+                                                                 [self setAddFriendAuth:BMXUserProfile_AddFriendAuthMode_NeedApproval];
 
                                                              }];
         UIAlertAction* action3 = [UIAlertAction actionWithTitle:NSLocalizedString(@"Require_to_answer_questions", @"需要回答问题") style:UIAlertActionStyleDefault
                                                              handler:^(UIAlertAction * action) {
                                                                  //响应事件
-                                                                 [self setAddFriendAuth:BMXAddFriendAuthModeAnswerQuestion];
+                                                                 [self setAddFriendAuth:BMXUserProfile_AddFriendAuthMode_AnswerQuestion];
 
                                                              }];
         UIAlertAction* action4 = [UIAlertAction actionWithTitle:NSLocalizedString(@"Reject_all", @"拒绝所有人") style:UIAlertActionStyleDefault
                                                            handler:^(UIAlertAction * action) {
                                                                //响应事件
-                                                               [self setAddFriendAuth:BMXAddFriendAuthModeRejectAll];
+                                                               [self setAddFriendAuth:BMXUserProfile_AddFriendAuthMode_RejectAll];
 
                                                            }];
         UIAlertAction* cancelAction = [UIAlertAction actionWithTitle:NSLocalizedString(@"Cancel", @"取消") style:UIAlertActionStyleCancel
@@ -613,8 +608,8 @@
                                                                  MAXLog(@"action = %@", alert.textFields);
                                                              }];
         [alert addTextFieldWithConfigurationHandler:^(UITextField *textField) {
-            if ([self.profile.authQuestion.mQuestion length]) {
-                textField.text = self.profile.authQuestion.mQuestion;
+            if ([self.profile.authQuestion.getMQuestion length]) {
+                textField.text = self.profile.authQuestion.getMQuestion;
             } else {
                 textField.placeholder = NSLocalizedString(@"enter_question", @"请输入问题");
             }
@@ -623,8 +618,8 @@
         }];
         [alert addTextFieldWithConfigurationHandler:^(UITextField *textField) {
             
-            if ([self.profile.authQuestion.mAnswer length]) {
-                textField.text = self.profile.authQuestion.mAnswer;
+            if ([self.profile.authQuestion.getMAnswer length]) {
+                textField.text = self.profile.authQuestion.getMAnswer;
             } else {
                 textField.placeholder = NSLocalizedString(@"enter_answer", @"请输入答案");
             }
@@ -656,10 +651,21 @@
     [imagePickerVc setDidFinishPickingPhotosHandle:^(NSArray<UIImage *> *photos, NSArray *assets, BOOL isSelectOriginalPhoto) {
         UIImage *image = [photos firstObject];
         NSData *imageData = UIImagePNGRepresentation(image);
-        [[[BMXClient sharedClient] userService] uploadAvatarWithData:imageData progress:^(int progress, BMXError *error) {
-            MAXLog(@"%d == %@",progress, error);
-            if (!error && progress == 100) {
+        NSString *localPath = nil;
+        long long time = [[NSDate date] timeIntervalSince1970] * 1000;
+        NSString *fileName = [NSString stringWithFormat:@"%lld",time];
+        if ([imageData length]) {
+            localPath = [[[[BMXClient sharedClient] getSDKConfig] getCacheDir] stringByAppendingPathComponent:fileName];
+            [imageData writeToFile:localPath atomically:YES];
+        }
+        [[[BMXClient sharedClient] userService] uploadAvatarWithAvatarPath:localPath callback:^(int progress) {
+            MAXLog(@"%d",progress);
+            if (progress == 100) {
                 [HQCustomToast showDialog:NSLocalizedString(@"Upload_successfully", @"上传成功")];
+            }
+        } completion:^(BMXError *error) {
+            if (error) {
+                [HQCustomToast showDialog:NSLocalizedString(@"Upload_successfully", @"上传失败")];
             }
         }];
     }];

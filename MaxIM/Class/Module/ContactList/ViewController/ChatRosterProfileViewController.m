@@ -16,8 +16,8 @@
 #import "ChatRosterProfileViewController.h"
 #import "TitleSwitchTableViewCell.h"
 #import "UIView+BMXframe.h"
-#import <floo-ios/BMXRoster.h>
-#import <floo-ios/BMXClient.h>
+
+#import <floo-ios/floo_proxy.h>
 #import "UIViewController+CustomNavigationBar.h"
 
 @interface ChatRosterProfileViewController ()<UITableViewDelegate, UITableViewDataSource, TitleSwitchTableViewCellDelegate>
@@ -30,13 +30,13 @@
 @property (nonatomic, strong) UILabel *nameLabel;
 @property (nonatomic, strong) UILabel *userIDLabel;
 @property (nonatomic, strong) NSArray *cellDataArray;
-@property (nonatomic, strong) BMXRoster *currentRoster;
+@property (nonatomic, strong) BMXRosterItem *currentRoster;
 
 @end
 
 @implementation ChatRosterProfileViewController
 
-- (instancetype)initWithRoster:(BMXRoster *)roster {
+- (instancetype)initWithRoster:(BMXRosterItem *)roster {
     if (self = [super init]) {
         self.currentRoster  = roster;
     }
@@ -55,8 +55,8 @@
         self.avatarImageView.image = image ? image : [UIImage imageNamed:@"profileavatar"];
     }
     
-    if ([self.currentRoster.userName length]) {
-        self.nameLabel.text = [NSString stringWithFormat:@"%@", [self.currentRoster.nickName length] ? self.currentRoster.nickName : self.currentRoster.userName];
+    if ([self.currentRoster.username length]) {
+        self.nameLabel.text = [NSString stringWithFormat:@"%@", [self.currentRoster.nickname length] ? self.currentRoster.nickname : self.currentRoster.username];
         [self.nameLabel sizeToFit];
     }
     
@@ -70,22 +70,22 @@
 }
 
 - (void)setalias:(NSString *)name {
-    [[[BMXClient sharedClient] rosterService] updateItemAliasByRoster:self.currentRoster aliasJson:name completion:^(BMXRoster *roster, BMXError *error) {
+    [[[BMXClient sharedClient] rosterService] setItemAlias:self.currentRoster alias:name completion:^(BMXError *error) {
         if (!error) {
             [HQCustomToast showDialog:NSLocalizedString(@"Set_successfully", @"设置成功")];
-            [[[BMXClient sharedClient] rosterService] searchByRosterId:self.currentRoster.rosterId forceRefresh:YES completion:^(BMXRoster *roster, BMXError *error) {
-                if (!error) {
-                    self.currentRoster = roster;
-                    [self.tableView reloadData];
-                }
-            }];
+            BMXRosterItem * item = [[BMXRosterItem alloc] init];
+            BMXErrorCode error = [[[BMXClient sharedClient] rosterService] searchWithRosterId:self.currentRoster.rosterId forceRefresh:YES item:item];
+            if (!error) {
+                self.currentRoster = item;
+                [self.tableView reloadData];
+            }
         }
     }];
 }
 
 - (void)setExtension:(NSString *)ext {
-    [[[BMXClient sharedClient] rosterService] updateItemExtensionByRoster:self.currentRoster extensionJson:ext completion:^(BMXRoster *roster, NSString *extensionJson) {
-        [[[BMXClient sharedClient] rosterService] searchByRosterId:self.currentRoster.rosterId forceRefresh:YES completion:^(BMXRoster *roster, BMXError *error) {
+    [[[BMXClient sharedClient] rosterService] setItemExtension:self.currentRoster extension:ext completion:^(BMXError *error) {
+        [[[BMXClient sharedClient] rosterService] searchWithRosterId:self.currentRoster.rosterId forceRefresh:YES completion:^(BMXRosterItem *roster, BMXError *error) {
             if (!error) {
                 self.currentRoster = roster;
                 [self.tableView reloadData];
@@ -95,9 +95,9 @@
 }
 
 - (void)getRosterInfo {
-    [[[BMXClient sharedClient] rosterService] searchByRosterId:self.currentRoster.rosterId forceRefresh:YES completion:^(BMXRoster *roster, BMXError *error) {
+    [[[BMXClient sharedClient] rosterService] searchWithRosterId:self.currentRoster.rosterId forceRefresh:YES completion:^(BMXRosterItem *item, BMXError *error) {
         if (!error) {
-            self.currentRoster = roster;
+            self.currentRoster = item;
             [self.tableView reloadData];
         }
     }];
@@ -128,16 +128,16 @@
 //        cell.contentLabel.text = [NSString stringWithFormat:@"%lld", self.currentRoster.rosterId];
 //    } else
     if ([dic[@"type"] isEqualToString:NSLocalizedString(@"Common_info", @"公有信息")]) {
-        cell.contentLabel.text = [NSString stringWithFormat:@"%@", self.currentRoster.json_PublicInfo];
+        cell.contentLabel.text = [NSString stringWithFormat:@"%@", self.currentRoster.publicInfo];
         cell.accessoryType = UITableViewCellAccessoryNone;
     } else if ([dic[@"type"] isEqualToString:NSLocalizedString(@"Username", @"用户名")]) {
-        cell.contentLabel.text = [NSString stringWithFormat:@"%@", self.currentRoster.userName];
+        cell.contentLabel.text = [NSString stringWithFormat:@"%@", self.currentRoster.username];
     } else if ([dic[@"type"] isEqualToString:NSLocalizedString(@"Set_extension_info", @"设置扩展信息")]) {
-        cell.contentLabel.text = [NSString stringWithFormat:@"%@", self.currentRoster.json_ext];
+        cell.contentLabel.text = [NSString stringWithFormat:@"%@", self.currentRoster.ext];
         cell.accessoryType = UITableViewCellAccessoryDisclosureIndicator; //显示最右边的箭头
     }  else  if ([dic[@"type"] isEqualToString:NSLocalizedString(@"Set_alias", @"设置别名")]) {
         cell.accessoryType = UITableViewCellAccessoryDisclosureIndicator; //显示最右边的箭头
-        cell.contentLabel.text = [NSString stringWithFormat:@"%@", self.currentRoster.json_alias];
+        cell.contentLabel.text = [NSString stringWithFormat:@"%@", self.currentRoster.alias];
 
     }  else if ([dic[@"type"] isEqualToString:NSLocalizedString(@"Do-Not-Disturb", @"消息免打扰")]) {
         cell.contentLabel.text = @"";
@@ -159,11 +159,10 @@
     NSString *str = dic[@"type"];
     BOOL state = mswtich.on ? YES : NO;
     if ([str isEqualToString:NSLocalizedString(@"Do-Not-Disturb", @"消息免打扰")]) {
-        [[[BMXClient sharedClient] rosterService] muteNotificationByRoster:self.currentRoster muteNotificationStatus:state completion:^(BMXRoster *roster, BMXError *error) {
+    [[[BMXClient sharedClient] rosterService] setItemMuteNotification:self.currentRoster status:state completion:^(BMXError *error) {
             if (!error) {
                 MAXLog(@"设置成功");
                 [HQCustomToast showDialog:NSLocalizedString(@"Set_successfully", @"设置成功")];
-               
             } else {
                 MAXLog(@"设置失败");
             }
@@ -258,7 +257,7 @@
 }
 
 - (void)setUpNavItem{
-    [self setNavigationBarTitle:self.currentRoster.userName navLeftButtonIcon:@"blackback"];
+    [self setNavigationBarTitle:self.currentRoster.username navLeftButtonIcon:@"blackback"];
 }
 
 - (NSArray *)cellDataArray {

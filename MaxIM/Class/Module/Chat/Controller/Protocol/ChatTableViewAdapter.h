@@ -7,7 +7,7 @@
 //
 
 #import <Foundation/Foundation.h>
-#import <floo-ios/BMXMessageObject.h>
+#import <floo-ios/floo_proxy.h>
 
 
 NS_ASSUME_NONNULL_BEGIN
@@ -20,7 +20,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 @property (nonatomic,assign) BOOL isMeetRefresh;
 
-@property (nonatomic,assign) BMXMessageType messageType;
+@property (nonatomic,assign) BMXMessage_MessageType messageType;
 
 
 @end

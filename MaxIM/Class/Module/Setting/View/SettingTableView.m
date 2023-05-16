@@ -11,11 +11,8 @@
 #import "MAXBlackListViewController.h"
 #import "ProfileSettingViewController.h"
 #import <UIImageView+WebCache.h>
-#import <floo-ios/BMXUserProfile.h>
-#import <floo-ios/BMXClient.h>
 #import "IMAcountInfoStorage.h"
 #import "TitleSwitchTableViewCell.h"
-#import <floo-ios/BMXMessageSetting.h>
 #import "AppDelegate.h"
 #import "DeviceManagmentViewController.h"
 #import "UIView+BMXframe.h"
@@ -27,8 +24,11 @@
 #import "MaxGlobalTool.h"
 #import "IMAcount.h"
 #import "IMAcountInfoStorage.h"
+#import "CopyableLabel.h"
+#import <floo-ios/floo_proxy.h>
 
 //#import <ZXingObjC.h>
+static CGFloat nameLabelleft = 36;
 
 @interface SettingTableView()<UITableViewDelegate,UITableViewDataSource, TitleSwitchTableViewCellDelegate>
 
@@ -41,7 +41,8 @@
 @property (nonatomic, strong) UIImageView *codeImageView;
 @property (nonatomic, strong) UIButton *codeButton;
 @property (nonatomic, strong) BMXUserProfile *profile;
-@property (nonatomic, strong) UILabel *idLabel;
+@property (nonatomic, strong) UILabel *idLabelCaption;
+@property (nonatomic, strong) CopyableLabel *idLabel;
 @property (nonatomic, strong) UILabel *nickNameLabel;
 //@property (nonatomic, strong) UILabel *subTitleLabel;
 
@@ -83,8 +84,7 @@
 
 - (void)logoutclick{
     [HQCustomToast showWating];
-    [[BMXClient sharedClient] signOutID:(NSInteger)self.profile.userId ignoreUnbindDevice:NO completion:^(BMXError * _Nonnull error) {
-        
+    [[BMXClient sharedClient] signOutWithUid:(NSInteger)self.profile.userId ignoreUnbindDevice:NO completion:^(BMXError * _Nonnull error) {
 
         if (!error) {
             [HQCustomToast hideWating];
@@ -92,7 +92,7 @@
             [self dealWithLogout];
         } else {
             
-            [[BMXClient sharedClient] signOutID:(NSInteger)self.profile.userId ignoreUnbindDevice:YES completion:^(BMXError * _Nonnull error) {
+            [[BMXClient sharedClient] signOutWithUid:(NSInteger)self.profile.userId ignoreUnbindDevice:YES completion:^(BMXError * _Nonnull error) {
                 [self dealWithLogout];
             }];
             
@@ -146,15 +146,15 @@
     const int MAX_NICKNAME_LENGTH = 12;
     self.profile = profile;
     [self reloadData];
-    NSString *nickName = profile.nickName;
-    if (nickName.length > MAX_NICKNAME_LENGTH) {
-        nickName = [NSString stringWithFormat:@"%@...", [nickName substringToIndex: MAX_NICKNAME_LENGTH]];
+    NSString *nickname = profile.nickname;
+    if (nickname.length > MAX_NICKNAME_LENGTH) {
+        nickname = [NSString stringWithFormat:@"%@...", [nickname substringToIndex: MAX_NICKNAME_LENGTH]];
     }
-    self.nameLabel.text = [profile.nickName length] ? [NSString stringWithFormat:@"%@", nickName] : NSLocalizedString(@"Click_to_set_nickname", @"点击设置昵称");
-    self.nickNameLabel.text = [NSString stringWithFormat:NSLocalizedString(@"Username_name", @"用户名：%@"), profile.userName];
+    self.nameLabel.text = [profile.nickname length] ? [NSString stringWithFormat:@"%@", nickname] : NSLocalizedString(@"Click_to_set_nickname", @"点击设置昵称");
+    self.nickNameLabel.text = [NSString stringWithFormat:NSLocalizedString(@"Username_name", @"用户名：%@"), profile.username];
     [self.nickNameLabel sizeToFit];
 
-    self.idLabel.text = [NSString stringWithFormat:@"ID: %lld", profile.userId];
+    self.idLabel.text = [NSString stringWithFormat:@"%lld", profile.userId];
     [self.idLabel sizeToFit];
 //    if ([profile.publicInfoJson length] > 0) {
 //        self.subTitleLabel.text = [NSString stringWithFormat:@"个性签名：%@", profile.publicInfoJson];
@@ -170,9 +170,9 @@
     if (avarat) {
         self.avatarImageView.image  = avarat;
     }else {
-        [[[BMXClient sharedClient] userService] downloadAvatarWithProfile:profile thumbnail:YES  progress:^(int progress, BMXError *error) {
+        [[[BMXClient sharedClient] userService] downloadAvatarWithProfile:profile thumbnail:YES  callback:^(int progress) {
             
-        } completion:^(BMXUserProfile *profile, BMXError *error) {
+        } completion:^(BMXError *error) {
             if (error== nil) {
                 UIImage *image = [UIImage imageWithContentsOfFile:profile.avatarThumbnailPath];
                 dispatch_async(dispatch_get_main_queue(), ^{
@@ -229,7 +229,12 @@
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
     TitleSwitchTableViewCell *cell = [TitleSwitchTableViewCell cellWithTableView:tableView];
-    NSDictionary *dic = self.cellDataArray[indexPath.section*2 + indexPath.row];
+    NSInteger previousSectionsRows = 0;
+    for (int i=0; i<indexPath.section; i++) {
+        NSInteger rows = [self tableView:self numberOfRowsInSection:i];
+        previousSectionsRows += rows;
+    }
+    NSDictionary *dic = self.cellDataArray[previousSectionsRows + indexPath.row];
     cell.titleLabel.text = dic[@"type"];
     cell.delegate = self;
     cell.titleLabel.font = [UIFont fontWithName:@"PingFangSC-Medium" size:16];
@@ -240,24 +245,24 @@
         [cell.mswitch setHidden:NO];
         cell.accessoryType = UITableViewCellAccessoryNone;
     }
-    if ([cell.titleLabel.text isEqualToString:NSLocalizedString(@"Accept_new_message_notification", @"接受新消息通知")]) {
-        [cell.mswitch setOn:self.profile.messageSetting.mPushEnabled];
+    if ([cell.titleLabel.text isEqualToString:NSLocalizedString(@"Accept_new_message_notification", @"接受推送提醒")]) {
+        [cell.mswitch setOn:self.profile.messageSetting.getMPushEnabled];
     } else if ([cell.titleLabel.text isEqualToString:NSLocalizedString(@"Vibrate", @"震动")]) {
-        [cell.mswitch setOn:self.profile.messageSetting.mNotificationVibrate];
+        [cell.mswitch setOn:self.profile.messageSetting.getMNotificationVibrate];
     } else if ([cell.titleLabel.text isEqualToString:NSLocalizedString(@"Sound", @"声音")]) {
-        [cell.mswitch setOn:self.profile.messageSetting.mNotificationSound];
+        [cell.mswitch setOn:self.profile.messageSetting.getMNotificationSound];
     } else if ([cell.titleLabel.text isEqualToString:NSLocalizedString(@"Whether_to_download_thumbnail_attachments_automatically", @"是否自动下载缩略图附件")]) {
-        [cell.mswitch setOn:self.profile.messageSetting.mAutoDownloadAttachment];
+        [cell.mswitch setOn:self.profile.messageSetting.getMAutoDownloadAttachment];
     } else if ([cell.titleLabel.text isEqualToString:NSLocalizedString(@"Whether_to_accept_group_invitation_automatically", @"是否自动接受群邀请")]) {
         [cell.mswitch setOn:self.profile.isAutoAcceptGroupInvite];
     } else if ([cell.titleLabel.text isEqualToString:NSLocalizedString(@"Whether_to_push_details", @"是否推送详情")]) {
-        [cell.mswitch setOn:self.profile.messageSetting.mPushDetail];
+        [cell.mswitch setOn:self.profile.messageSetting.getMPushDetail];
     }  else if ([cell.titleLabel.text isEqualToString:NSLocalizedString(@"About_Us", @"关于我们")]) {
         cell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
     } else if ([cell.titleLabel.text isEqualToString:NSLocalizedString(@"Del_Account", @"删除账号")]) {
         cell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
     } else if ([cell.titleLabel.text isEqualToString:NSLocalizedString(@"Set_push_nickname", @"设置推送昵称")]) {
-        cell.contentLabel.text = self.profile.messageSetting.pushNickname;
+        cell.contentLabel.text = self.profile.messageSetting.getMPushNickname;
         cell.contentLabel.right = MAXScreenW - 50;
     }
     if ([cell.titleLabel.text isEqualToString:NSLocalizedString(@"Language", @"语言")]) {
@@ -279,12 +284,17 @@
 
 - (void)cellDidchangeSwitchStatus:(UISwitch *)mswtich cell:(TitleSwitchTableViewCell *)cell {
     NSIndexPath *indexPath = [self indexPathForCell:cell];
-    NSDictionary *dic = self.cellDataArray[indexPath.section*2 + indexPath.row];
+    NSInteger previousSectionsRows = 0;
+    for (int i=0; i<indexPath.section; i++) {
+        NSInteger rows = [self tableView:self numberOfRowsInSection:i];
+        previousSectionsRows += rows;
+    }
+    NSDictionary *dic = self.cellDataArray[previousSectionsRows + indexPath.row];
     NSString *str = dic[@"type"];
     BOOL state = mswtich.on ? YES : NO;
     
-   if ([str isEqualToString:NSLocalizedString(@"Accept_new_message_notification", @"接受新消息通知")]) {
-        [[[BMXClient sharedClient] userService] setEnablePushStatus:state completion:^(BMXError *error) {
+   if ([str isEqualToString:NSLocalizedString(@"Accept_new_message_notification", @"接受推送提醒")]) {
+        [[[BMXClient sharedClient] userService] setEnablePush:state completion:^(BMXError *error) {
             if (!error) {
                 [HQCustomToast showDialog:NSLocalizedString(@"Set_successfully", @"设置成功")];
             }
@@ -302,7 +312,7 @@
             }
         }];
     } else if ([str isEqualToString:NSLocalizedString(@"Whether_to_push_details", @"是否推送详情")]) {
-        [[[BMXClient sharedClient] userService] setEnablePushDetail:state completion:^(BMXError *error) {
+        [[[BMXClient sharedClient] userService] setEnablePushDetaile:state completion:^(BMXError *error) {
             if (!error) {
                 [HQCustomToast showDialog:NSLocalizedString(@"Set_successfully", @"设置成功")];
             }
@@ -326,7 +336,7 @@
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
     switch (section) {
         case 0:
-            return 2;
+            return 3;
         case 1:
             return 2;
         case 2:
@@ -360,10 +370,19 @@
 }
 
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
-    NSDictionary *dic = self.cellDataArray[indexPath.section*2 + indexPath.row];
+    NSInteger previousSectionsRows = 0;
+    for (int i=0; i<indexPath.section; i++) {
+        NSInteger rows = [self tableView:self numberOfRowsInSection:i];
+        previousSectionsRows += rows;
+    }
+    NSDictionary *dic = self.cellDataArray[previousSectionsRows + indexPath.row];
     NSString *str = [NSString stringWithFormat:@"%@", dic[@"type"]];
     if ([str isEqualToString:NSLocalizedString(@"Switch_account", @"切换账号")]) {
         AccountMangementViewController *vc = [[AccountMangementViewController alloc] init];
+        vc.hidesBottomBarWhenPushed = YES;
+        [self.currentViewController.navigationController pushViewController:vc animated:YES];
+    } else if ([str isEqualToString:NSLocalizedString(@"Personal_profile", @"个人资料")]) {
+        ProfileSettingViewController *vc = [[ProfileSettingViewController alloc] init];
         vc.hidesBottomBarWhenPushed = YES;
         [self.currentViewController.navigationController pushViewController:vc animated:YES];
     } else if ([str isEqualToString:NSLocalizedString(@"List_of_blacklists", @"黑名单列表")]) {
@@ -466,6 +485,7 @@
     [self nameLabel];
     [self codeButton];
     [self nickNameLabel];
+    [self idLabelCaption];
     [self idLabel];
 //    [self subTitleLabel];
     [self avatarImageView];
@@ -540,8 +560,6 @@
         _nameLabel.textAlignment = NSTextAlignmentLeft;
         [_nameLabel sizeToFit];
         
-        CGFloat nameLabelleft = 36;
-
         _nameLabel.size = CGSizeMake(60,30);
         _nameLabel.bmx_centerY = 120 / 2.0 + 10 - 10;
         _nameLabel.bmx_left = nameLabelleft;
@@ -566,9 +584,26 @@
 }
 
 
-- (UILabel *)idLabel {
+- (UILabel *)idLabelCaption {
+    if (!_idLabelCaption) {
+        _idLabelCaption = [[UILabel alloc] init];
+        [self.headerView addSubview:_idLabelCaption];
+        _idLabelCaption.text = @"ID:";
+        _idLabelCaption.font = [UIFont fontWithName:@"PingFangSC-Regular" size:12];
+        _idLabelCaption.textColor = [UIColor colorWithRed:255/255.0 green:255/255.0 blue:255/255.0 alpha:1/1.0];
+        _idLabelCaption.textAlignment = NSTextAlignmentLeft;
+        [_idLabelCaption sizeToFit];
+        
+        _idLabelCaption.bmx_top =  _nickNameLabel.bmx_bottom + 5;
+        _idLabelCaption.bmx_left = nameLabelleft;
+        
+    }
+    return _idLabelCaption;
+}
+
+- (CopyableLabel *)idLabel {
     if (!_idLabel) {
-        _idLabel = [[UILabel alloc] init];
+        _idLabel = [[CopyableLabel alloc] init];
         [self.headerView addSubview:_idLabel];
         _idLabel.text = @"";
         _idLabel.font = [UIFont fontWithName:@"PingFangSC-Regular" size:12];
@@ -576,11 +611,8 @@
         _idLabel.textAlignment = NSTextAlignmentLeft;
         [_idLabel sizeToFit];
         
-        CGFloat nameLabelleft = 36;
-        
-        _idLabel.size = CGSizeMake(80,20);
-        _idLabel.bmx_top =  _nickNameLabel.bmx_bottom + 5;
-        _idLabel.bmx_left = nameLabelleft;
+        _idLabel.bmx_top =  _idLabelCaption.bmx_top;
+        _idLabel.bmx_left = _idLabelCaption.bmx_right + 2;
         
     }
     return _idLabel;
@@ -595,8 +627,6 @@
         _nickNameLabel.textColor = [UIColor colorWithRed:255/255.0 green:255/255.0 blue:255/255.0 alpha:1/1.0];
         _nickNameLabel.textAlignment = NSTextAlignmentLeft;
         [_nickNameLabel sizeToFit];
-        
-        CGFloat nameLabelleft = 36;
         
         _nickNameLabel.size = CGSizeMake(80,20);
         _nickNameLabel.bmx_top =  _nameLabel.bmx_bottom + 15;

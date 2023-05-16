@@ -10,7 +10,7 @@
 #import "MAXTabBarController.h"
 #import "AppDelegate.h"
 
-#import <floo-ios/BMXClient.h>
+#import <floo-ios/floo_proxy.h>
 
 #define TabVC    @"vc"
 #define TabTitle @"title"
@@ -24,6 +24,7 @@
 
 #import "SettingViewController.h"
 #import "ContactListViewController.h"
+#import "AppIDManager.h"
 
 
 typedef enum : NSUInteger {
@@ -33,7 +34,7 @@ typedef enum : NSUInteger {
 } MAXTabBarType;
 
 
-@interface MAXTabBarController ()<BMXChatServiceProtocol, BMXRosterServiceProtocol, BMXUserServiceProtocol, BMXGroupServiceProtocol>
+@interface MAXTabBarController ()<BMXChatServiceProtocol, BMXRTCServiceProtocol, BMXRosterServiceProtocol, BMXUserServiceProtocol, BMXGroupServiceProtocol>
 
 @property (nonatomic, strong) UITabBarItem *item;
 @property (nonatomic, strong) NSDictionary *tabbarInfoDic;
@@ -88,13 +89,13 @@ typedef enum : NSUInteger {
 
 - (void)p_networkStatusDidChanged:(NSNotification *)notifiaction {
     if ([notifiaction.name isEqualToString:@"disConnectionNetworkNotifation"]) {
-        [[BMXClient sharedClient] networkDidChangedType:BMXNetworkTypeNone reconnect:NO];
+        [[BMXClient sharedClient] onNetworkChangedWithType: BMXNetworkType_None reconnect:NO];
         MAXLog(@"无网络");
     } else if ([notifiaction.name isEqualToString:@"connectingIPhoneNetworkNotifation"]) {
-        [[BMXClient sharedClient] networkDidChangedType:BMXNetworkTypeMobile reconnect:YES];
+        [[BMXClient sharedClient] onNetworkChangedWithType: BMXNetworkType_Mobile reconnect:YES];
         MAXLog(@"蜂窝");
     } else if ([notifiaction.name isEqualToString:@"connectingInWifiNetworkNotifation"]) {
-        [[BMXClient sharedClient] networkDidChangedType:BMXNetworkTypeWifi reconnect:YES];
+        [[BMXClient sharedClient] onNetworkChangedWithType: BMXNetworkType_Wifi reconnect:YES];
         MAXLog(@"WIFI");
     }
 }
@@ -104,19 +105,17 @@ typedef enum : NSUInteger {
     BMXClient *client = [BMXClient sharedClient];
     [[client rosterService] addDelegate:self];
     [[client chatService] addDelegate:self];
+    [[client rtcService] addDelegate:self];
     [[client userService] addDelegate:self];
     [[client groupService] addDelegate:self];
+}
 
-//     会话页面刷新UI
-    UINavigationController *navigation = (UINavigationController *)[self.childViewControllers firstObject];
-    if ([NSStringFromClass([navigation.childViewControllers firstObject].class) isEqualToString:@"MainViewController"] ) {
-     
-        MainViewController *mainVC = [navigation.childViewControllers firstObject];
-//        if ([mainVC checkConversation]) {
-            [mainVC getAllConversations];
-//        }
-    }
-    
+- (void)removeIMListener {
+    BMXClient *client = [BMXClient sharedClient];
+    [[client rosterService] removeDelegate:self];
+    [[client chatService] removeDelegate:self];
+    [[client userService] removeDelegate:self];
+    [[client groupService] removeDelegate:self];
 }
 
 #pragma mark - grouplistener
@@ -130,7 +129,8 @@ typedef enum : NSUInteger {
 }
 
 - (void)groupInfoDidUpdate:(BMXGroup *)group
-            updateInfoType:(BMXGroupUpdateInfoType)type{
+            updateInfoType:(BMXGroup_UpdateInfoType)type{
+
     MAXLog(@"群信息更新了");
 }
 
@@ -237,17 +237,24 @@ typedef enum : NSUInteger {
                           reason:(NSString *)reason {
     MAXLog(@"入群申请被拒绝");
 }
+#pragma mark - BMXRTCServiceProtocol
+- (void)onRTCCallMessageReceiveWithMsg:(BMXMessage*)msg {
+    UINavigationController *navigation = (UINavigationController *)[self.childViewControllers firstObject];
+    if ([NSStringFromClass([navigation.childViewControllers firstObject].class) isEqualToString:@"MainViewController"] ) {
+        MainViewController *mainVC = [navigation.childViewControllers firstObject];
+        [mainVC receiveRTCCallMessage:msg];
+    }
+}
 
-
-#pragma mark - chatservicelistener
+#pragma mark - BMXChatServiceProtocol
 /**
  * 收到系统通知消息
  **/
-- (void)receivedSystemMessages:(NSArray<BMXMessageObject*> *)messages {
+- (void)receivedSystemMessages:(NSArray<BMXMessage*> *)messages {
     MAXLog(@"收到系统通知消息");
 }
 
-- (void)receiveReadAllMessages:(NSArray<BMXMessageObject *> *)messages {
+- (void)receiveReadAllMessages:(NSArray<BMXMessage *> *)messages {
     UINavigationController *navigation = (UINavigationController *)[self.childViewControllers firstObject];
     if ([NSStringFromClass([navigation.childViewControllers firstObject].class) isEqualToString:@"MainViewController"] ) {
         
@@ -258,7 +265,7 @@ typedef enum : NSUInteger {
 
 }
 
-- (void)receivedRecallMessages:(NSArray<BMXMessageObject *> *)messages {
+- (void)receivedRecallMessages:(NSArray<BMXMessage *> *)messages {
     UINavigationController *navigation = (UINavigationController *)[self.childViewControllers firstObject];
     if ([NSStringFromClass([navigation.childViewControllers firstObject].class) isEqualToString:@"MainViewController"] ) {
         
@@ -283,45 +290,50 @@ typedef enum : NSUInteger {
 
 }
 
+
 - (void)userSignOut:(BMXError *)error userId:(long long)userId {
     MAXLog(@"用户登出");
+    if (!error){
+        [AppIDManager clearAppid];
+        AppDelegate *appDelegate = [UIApplication sharedApplication].delegate;
+        [appDelegate reloadAppID:BMXAppID];
+        [IMAcountInfoStorage clearObject];
+        [appDelegate userLogout];
+    }
 }
 
 
 - (void)userInfoDidUpdated:(BMXUserProfile *)userProflie {
     MAXLog(@"用户信息改变");
-    [[[BMXClient sharedClient] userService] downloadAvatarWithProfile:userProflie thumbnail:YES  progress:^(int progress, BMXError *error) {
-        
-    } completion:^(BMXUserProfile *profile, BMXError *error) {
-        MAXLog(@"下载成功");
+    [[[BMXClient sharedClient] userService] downloadAvatarWithProfile:userProflie thumbnail:YES callback:^(int progress) {} completion:^(BMXError *error) {
+        if (!error){
+            MAXLog(@"下载成功");
+        }
     }];
 }
 
-- (void)rosterInfoDidUpdate:(BMXRoster *)roster {
+- (void)rosterInfoDidUpdate:(BMXRosterItem *)roster {
     MAXLog(@"好友信息变更");
-    [[[BMXClient sharedClient] rosterService] downloadAvatarWithRoster:roster isThumbnail:YES progress:^(int progress, BMXError *error) {
-    } completion:^(BMXRoster *roster, BMXError *error) {
-        MAXLog(@"下载成功");
-        
-        // 会话页面刷新UI
-        UINavigationController *navigation = (UINavigationController *)[self.childViewControllers firstObject];
-        if ([NSStringFromClass([navigation.childViewControllers firstObject].class) isEqualToString:@"MainViewController"] ) {
-            
-            MainViewController *mainVC = [navigation.childViewControllers firstObject];
-            [mainVC getAllConversations];
+    [[[BMXClient sharedClient] rosterService] downloadAvatarWithItem:roster thumbnail:YES callback:^(int progress) {} completion:^(BMXError *error) {
+        if (!error){
+            MAXLog(@"下载成功");
+            // 会话页面刷新UI
+            UINavigationController *navigation = (UINavigationController *)[self.childViewControllers firstObject];
+            if ([NSStringFromClass([navigation.childViewControllers firstObject].class) isEqualToString:@"MainViewController"] ) {
+                MainViewController *mainVC = [navigation.childViewControllers firstObject];
+                [mainVC getAllConversations];
+            }
         }
-        
     }];
-
 }
 /**
  * 收到消息已送达回执
  **/
-- (void)receivedDeliverAcks:(NSArray<BMXMessageObject*> *)messages {
+- (void)receivedDeliverAcks:(NSArray<BMXMessage*> *)messages {
     MAXLog(@"收到消息已送达回执");
 }
 
-- (void)receivedReadAcks:(NSArray<BMXMessageObject *> *)messages {
+- (void)receivedReadAcks:(NSArray<BMXMessage *> *)messages {
     MAXLog(@"收到消息已读回执");
     UINavigationController *navigation = (UINavigationController *)[self.childViewControllers firstObject];
     if ([NSStringFromClass([navigation.childViewControllers firstObject].class) isEqualToString:@"MainViewController"] ) {
@@ -332,12 +344,12 @@ typedef enum : NSUInteger {
 }
 
 - (void)retrieveHistoryMessagesConversation:(BMXConversation *)conversation {
-    if (conversation.lastMessage.msgId != 0 ) {
+    if (conversation.lastMsg.msgId != 0 ) {
         UINavigationController *navigation = (UINavigationController *)[self.childViewControllers firstObject];
         if ([NSStringFromClass([navigation.childViewControllers firstObject].class) isEqualToString:@"MainViewController"] ) {
             
             MainViewController *mainVC = [navigation.childViewControllers firstObject];
-            [mainVC receiveNewMessage:conversation.lastMessage];
+            [mainVC receiveNewMessage:conversation.lastMsg];
         }
     }
 }
@@ -374,7 +386,7 @@ typedef enum : NSUInteger {
     [[NSNotificationCenter defaultCenter] postNotificationName:@"HideMenu" object:nil];
 }
 
-- (void)receivedMessages:(NSArray<BMXMessageObject*> *)messages {
+- (void)receivedMessages:(NSArray<BMXMessage*> *)messages {
     UINavigationController *navigation = (UINavigationController *)[self.childViewControllers firstObject];
     if ([NSStringFromClass([navigation.childViewControllers firstObject].class) isEqualToString:@"MainViewController"] ) {
         
@@ -385,12 +397,12 @@ typedef enum : NSUInteger {
     MAXLog(@"已经收到消息 %@", [messages firstObject]);
 }
 
-- (void)receivedCommandMessages:(NSArray<BMXMessageObject *> *)messages {
+- (void)receivedCommandMessages:(NSArray<BMXMessage *> *)messages {
     MAXLog(@"收到命令消息 %@", [messages firstObject]);
 
 }
 
-- (void)messageStatusChanged:(BMXMessageObject *)message
+- (void)messageStatusChanged:(BMXMessage *)message
                        error:(BMXError *)error {
 
     
@@ -408,7 +420,7 @@ typedef enum : NSUInteger {
         MainViewController *mainVC = [navigation.childViewControllers firstObject];
         [mainVC sendNewMessage:message];
     }
-     MAXLog(@"消息发送状态发生变化 %u",message.deliverystatus);
+     MAXLog(@"消息发送状态发生变化 %u",message.deliveryStatus);
 }
 
 - (void)friendDidRecivedAppliedSponsorId:(long long)sponsorId recipientId:(long long)recipientId message:(NSString *)message {

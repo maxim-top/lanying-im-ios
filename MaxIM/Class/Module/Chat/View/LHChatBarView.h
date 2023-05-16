@@ -26,6 +26,8 @@
 - (void)chatViewDidDrag:(BOOL)inside;
 
 - (void)chatViewSendLocation;
+- (void)chatViewVideoCall;
+- (void)chatViewVoiceCall;
 - (void)chatViewSelectedFile:(NSString *)filePath;
 - (void)chatViewSelectedFileData:(NSData *)data displayName:(NSString *)displayName;
 

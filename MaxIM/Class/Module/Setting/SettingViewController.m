@@ -10,7 +10,7 @@
 #import "SettingViewController.h"
 #import "SettingTableView.h"
 
-#import <floo-ios/BMXClient.h>
+#import <floo-ios/floo_proxy.h>
 
 
 @interface SettingViewController ()
@@ -52,9 +52,9 @@
     if (isNeed == YES) {
         [HQCustomToast showWating];
     }
-    [[[BMXClient sharedClient] userService] getProfileForceRefresh:NO completion:^(BMXUserProfile *profile, BMXError *aError) {
+    [[[BMXClient sharedClient] userService] getProfile:NO completion:^(BMXUserProfile *profile, BMXError *aError) {
         [HQCustomToast hideWating];
-        if (aError == nil) {
+        if (!aError) {
             [self.tableview refeshProfile:profile];
         }
     }];
@@ -62,9 +62,9 @@
 
 - (void)getprofile {
     [HQCustomToast showWating];
-    [[[BMXClient sharedClient] userService] getProfileForceRefresh:NO completion:^(BMXUserProfile *profile, BMXError *aError) {
+    [[[BMXClient sharedClient] userService] getProfile:NO completion:^(BMXUserProfile *profile, BMXError *aError) {
         [HQCustomToast hideWating];
-        if (aError == nil) {
+        if (!aError) {
             [self setupTableView];
             [self.tableview refeshProfile:profile];
         }

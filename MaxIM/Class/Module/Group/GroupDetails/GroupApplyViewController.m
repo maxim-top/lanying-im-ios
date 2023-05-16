@@ -15,8 +15,8 @@
     
 
 #import "GroupApplyViewController.h"
-#import <floo-ios/BMXClient.h>
-#import <floo-ios/BMXGroupApplication.h>
+#import <floo-ios/floo_proxy.h>
+
 #import "GroupHandleCell.h"
 #import "UIViewController+CustomNavigationBar.h"
 
@@ -40,28 +40,38 @@
 }
 
 - (void) getApplyList {
-    [[[BMXClient sharedClient] groupService] getApplicationListByCursor:@"" pageSize:100 completion:^(NSArray *applicationList, NSString *cursor, long long offset, BMXError *error) {
-        if (!error && applicationList != 0)  {
+    BMXGroupList *groupList = [[BMXGroupList alloc] init];
+    [[[BMXClient sharedClient] groupService] getApplicationList:groupList cursor:@"" pageSize:100 completion:^(BMXGroupApplicationPage* res, BMXError *error) {
+        if (!error)  {
+            NSMutableArray *applicationList = [[NSMutableArray alloc] init];
+            unsigned long sz = res.result.size;
+            BMXGroupApplicationList *result = res.result;
+            for (int i=0; i<sz; i++) {
+                [applicationList addObject:[result get:i]];
+            }
             
             self.applicationArray = applicationList;
             NSSet* set = [NSSet setWithArray:self.applicationArray];
             
-            NSMutableArray * array = [NSMutableArray array];
+            ListOfLongLong * idList = [[ListOfLongLong alloc] init];
             for (BMXGroupApplication* application in set) {
-                [array addObject:[NSString stringWithFormat:@"%lld", application.applicationId]];
+                long long val = application.getMApplicationId;
+                [idList addWithX: &val];
             }
             
-            [self searchRostersByidArray:array];
+            [self searchRostersByidList: idList];
         } else {
             
         }
     }];
 }
 
-- (void)searchRostersByidArray:(NSArray *)idArray {
-    [[[BMXClient sharedClient] rosterService] searchRostersByRosterIdList:idArray forceRefresh:YES completion:^(NSArray<BMXRoster *> *rosterList, BMXError *error) {
-        MAXLog(@"%ld", rosterList.count);
-        for (BMXRoster* roster in rosterList) {
+- (void)searchRostersByidList:(ListOfLongLong *)idList {
+    [[[BMXClient sharedClient] rosterService] searchWithRosterIdList:idList forceRefresh:YES completion:^(BMXRosterItemList *rosterList, BMXError *error) {
+        unsigned long sz = rosterList.size;
+        MAXLog(@"%ld", sz);
+        for (int i=0; i<sz; i++) {
+            BMXRosterItem* roster = [rosterList get:i];
             [self.rosterInfos setObject:roster forKey:[NSString stringWithFormat:@"%lld", roster.rosterId]];
         }
         [self.tableView reloadData];
@@ -88,8 +98,8 @@
         cell = [[GroupHandleCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:@"GroupHandleCell"];
     }
     BMXGroupApplication* application = [self.applicationArray objectAtIndex:indexPath.row];
-    BMXRoster* roster = [self.rosterInfos objectForKey:[NSString stringWithFormat:@"%lld", application.applicationId]];
-    [cell cellApplicationContentWithRoster:roster group:self.group applicationStatus:application.applicationStatus exp:application.expiredTime actionHandler:^(BOOL ret) {
+    BMXRosterItem* roster = [self.rosterInfos objectForKey:[NSString stringWithFormat:@"%lld", application.getMApplicationId]];
+    [cell cellApplicationContentWithRoster:roster group:self.group applicationStatus:application.getMStatus exp:application.getMExpired actionHandler:^(BOOL ret) {
         [self touchedActionWithRet:ret atIndex:indexPath.row];
     }];
     return cell;
@@ -98,7 +108,7 @@
 -(void) touchedActionWithRet:(BOOL) ret atIndex:(NSInteger) index {
     BMXGroupApplication* application = [self.applicationArray objectAtIndex:index];
     if(ret) { //同意
-        [[[BMXClient sharedClient] groupService] acceptApplicationByGroup:self.group applicantId:application.applicationId completion:^(BMXError *error) {
+        [[[BMXClient sharedClient] groupService] acceptApplicationWithGroup:self.group applicantId:application.getMApplicationId completion:^(BMXError *error) {
             MAXLog(@"同意成功...");
             if (!error) {
                 [self getApplyList];
@@ -107,7 +117,7 @@
             
         }];
     }else {
-        [[[BMXClient sharedClient] groupService] declineApplicationByGroup:self.group applicantId:application.applicationId completion:^(BMXError *error) {
+        [[[BMXClient sharedClient] groupService] declineApplicationWithGroup:self.group applicantId:application.getMApplicationId reason:@"" completion:^(BMXError *error) {
             MAXLog(@"拒绝成功...");
             [self getApplyList];
         }];

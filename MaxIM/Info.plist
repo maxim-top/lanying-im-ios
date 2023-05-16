@@ -89,6 +89,7 @@
 	<string>为了可以将您的照片分享给您的朋友，需要访问您的照片</string>
 	<key>UIBackgroundModes</key>
 	<array>
+		<string>audio</string>
 		<string>remote-notification</string>
 	</array>
 	<key>UILaunchStoryboardName</key>

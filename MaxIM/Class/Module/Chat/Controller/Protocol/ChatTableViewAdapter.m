@@ -11,9 +11,7 @@
 #import "LHChatTimeCell.h"
 #import "LHMessageModel.h"
 #import "LHChatViewCell.h"
-#import <floo-ios/BMXClient.h>
-#import <floo-ios/BMXRoster.h>
-#import <floo-ios/BMXGroup.h>
+#import <floo-ios/floo_proxy.h>
 
 @interface ChatTableViewAdapter () <UITableViewDelegate, UITableViewDataSource>
 
@@ -56,7 +54,7 @@
     if (messageModel.isSender) {
         [messageCell setAvaratImage:self.selfImage];
         
-        if (self.messageType == BMXMessageTypeSingle) {
+        if (self.messageType == BMXMessage_MessageType_Single) {
             // 配置是否已读
             
             if (messageModel.messageObjc.isReadAcked == YES) {
@@ -68,17 +66,17 @@
         
     } else {
         __weak  LHChatViewCell *weakCell = messageCell;
-        [[[BMXClient sharedClient] rosterService] searchByRosterId:messageModel.messageObjc.fromId forceRefresh:NO completion:^(BMXRoster *roster, BMXError *error) {
+        [[[BMXClient sharedClient] rosterService] searchWithRosterId:messageModel.messageObjc.fromId forceRefresh:NO completion:^(BMXRosterItem *roster, BMXError *error) {
             if (!error) {
                 
                 if ([[NSFileManager defaultManager] fileExistsAtPath:roster.avatarThumbnailPath]) {
                     UIImage *avarat = [UIImage imageWithContentsOfFile:roster.avatarThumbnailPath];
                     [weakCell setAvaratImage:avarat];
                 }else {
-                    
-                    [[[BMXClient sharedClient] rosterService] downloadAvatarWithRoster:roster isThumbnail:YES progress:^(int progress, BMXError *error) {
-                        
-                    } completion:^(BMXRoster *roster, BMXError *error) {
+
+                    [[[BMXClient sharedClient] rosterService] downloadAvatarWithItem:roster thumbnail:YES callback:^(int progress) {
+
+                    } completion:^(BMXError *error) {
                         if (!error) {
                             UIImage *avarat = [UIImage imageWithContentsOfFile:roster.avatarThumbnailPath];
                             [weakCell setAvaratImage:avarat];
@@ -91,14 +89,14 @@
         }];
     }
     
-    if (self.messageType == BMXMessageTypeGroup) {
+    if (self.messageType == BMXMessage_MessageType_Group) {
         
         messageModel.isChatGroup = YES;
         
         __weak  LHChatViewCell *weakCell = messageCell;
-        [[[BMXClient sharedClient] rosterService] searchByRosterId:messageModel.messageObjc.fromId  forceRefresh:NO completion:^(BMXRoster *roster, BMXError *error) {
+        [[[BMXClient sharedClient] rosterService] searchWithRosterId:messageModel.messageObjc.fromId forceRefresh:NO completion:^(BMXRosterItem *item, BMXError *error) {
             if (!error) {
-                messageModel.nickName = [roster.nickName length] ? roster.nickName : roster.userName;
+                messageModel.nickName = [item.nickname length] ? item.nickname : item.username;
                 [weakCell setMessageName:messageModel.nickName];
             }
         }];

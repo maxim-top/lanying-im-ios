@@ -15,6 +15,8 @@
     
 
 #import <UIKit/UIKit.h>
+#import <floo-ios/floo_proxy.h>
+
 @class BMXRoster;
 
 @interface ContactTableViewCell : UITableViewCell
@@ -24,11 +26,11 @@
 @property (nonatomic, strong) UILabel *contentLabel;
 @property (nonatomic, strong) UIButton *button;
 @property (nonatomic, strong) UILabel *infoLabel;
-@property(nonatomic, strong) BMXRoster *contact;
+@property(nonatomic, strong) BMXRosterItem *contact;
 
 + (instancetype)contactTableViewCellWith:(UITableView *)tableView;
 
-- (void)refresh:(BMXRoster *)contact;
+- (void)refresh:(BMXRosterItem *)contact;
 - (void)refreshByTitle:(NSString *)titlel;
 
 

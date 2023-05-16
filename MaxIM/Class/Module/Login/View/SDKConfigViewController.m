@@ -8,7 +8,8 @@
 
 #import "SDKConfigViewController.h"
 #import "UIView+BMXframe.h"
-#import <floo-ios/BMXClient.h>
+#import <floo-ios/floo_proxy.h>
+
 #import "UIViewController+CustomNavigationBar.h"
 #import "TitleSwitchTableViewCell.h"
 #import "HostConfigManager.h"
@@ -41,11 +42,12 @@
     [self.navRightButton addTarget:self action:@selector(clickNavRightButton) forControlEvents:UIControlEventTouchUpInside];
     [self.navLeftButton addTarget:self action:@selector(clickNavleftButton) forControlEvents:UIControlEventTouchUpInside];
     
-    if ([[BMXClient sharedClient] sdkConfig].enableDNS) {
+    if ([[[BMXClient sharedClient] getSDKConfig] getEnableDNS]){
         [HostConfigManager sharedManager].IMServer = @"";
         [HostConfigManager sharedManager].IMPort = @"";
         [HostConfigManager sharedManager].restServer = @"";
     }
+    
     [self refreshData];
 }
 
@@ -77,7 +79,7 @@
         [HostConfigManager sharedManager].IMServer = @"";
         [HostConfigManager sharedManager].IMPort = @"";
         [HostConfigManager sharedManager].restServer = @"";
-        [[BMXClient sharedClient] sdkConfig].enableDNS = YES;
+        [[[BMXClient sharedClient] getSDKConfig] setEnableDNS: YES];
         
     } else {
         
@@ -88,7 +90,7 @@
                 [HostConfigManager sharedManager].restServer =  self.restServer;
                 [HostConfigManager sharedManager].IMPort =  self.IMPort;
                 hasChanged = YES;
-                [[BMXClient sharedClient] sdkConfig].verifyCertificate = NO;
+                [[[BMXClient sharedClient] getSDKConfig] setVerifyCertificate: NO];
             }
         }
         if (hasChanged) {
@@ -100,7 +102,7 @@
             [HostConfigManager sharedManager].IMPort = @"";
             [HostConfigManager sharedManager].restServer = @"";
             self.isUserServer = NO;
-            [[BMXClient sharedClient] sdkConfig].enableDNS = YES;
+            [[[BMXClient sharedClient] getSDKConfig] setEnableDNS: YES];
             
         }
     }
@@ -179,7 +181,7 @@
     TitleSwitchTableViewCell *cell = [TitleSwitchTableViewCell cellWithTableView:tableView];
     cell.delegate = self;
     if ([type isEqualToString:@"AppID"]) {
-        content = [[BMXClient sharedClient] sdkConfig].appID;
+        content = [[[BMXClient sharedClient] getSDKConfig] getAppID];
     }else if ([type isEqualToString:@"IM Server"]) {
         content = self.IMServer;
     }else if ([type isEqualToString:@"IM Port"]) {

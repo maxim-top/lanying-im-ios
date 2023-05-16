@@ -9,7 +9,8 @@
 #import "LHChatVideoBubbleView.h"
 #import "SDImageCache.h"
 #import "UIImageView+WebCache.h"
-#import <floo-ios/BMXVideoAttachment.h>
+#import <floo-ios/floo_proxy.h>
+
 #import "UIView+BMXframe.h"
 
 //　图片最大显示大小
@@ -93,7 +94,7 @@ CGFloat const MAX_SIZE1 = 120.0f;
         self.imageView.image = [UIImage imageNamed:@"imageCell_Placer"];
     }
     
-    BMXVideoAttachment *attachment = (BMXVideoAttachment *)self.messageModel.messageObjc.attachment;
+    BMXVideoAttachment *attachment = [BMXVideoAttachment dynamicCastWithAttachment: self.messageModel.messageObjc.attachment];
     self.durationLabel.text = [NSString stringWithFormat:@"%d s", attachment.duration];
 }
 

@@ -7,13 +7,12 @@
 //
 
 #import "SearchRosterProfileViewController.h"
-#import <floo-ios/BMXClient.h>
-#import <floo-ios/BMXRoster.h>
+#import <floo-ios/floo_proxy.h>
 #import "LHChatVC.h"
 #import "UIViewController+CustomNavigationBar.h"
 
 @interface SearchRosterProfileViewController ()
-@property (nonatomic, strong) BMXRoster *roster;
+@property (nonatomic, strong) BMXRosterItem *roster;
 
 
 @end
@@ -21,7 +20,7 @@
 @implementation SearchRosterProfileViewController
 
 
-- (instancetype)initWithRoster:(BMXRoster *)roster {
+- (instancetype)initWithRoster:(BMXRosterItem *)roster {
     if (self = [super initWithRoster:roster]) {
         self.roster = roster;
     }
@@ -32,15 +31,8 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
     
-//    [self setMainNavigationBarTitle:self.roster.userName];
-    
-    
-    
-    [self setNavigationBarTitle:self.roster.userName navLeftButtonIcon:@"blackback" navRightButtonTitle:nil];
-    
-    
-    
-    [[[BMXClient sharedClient] userService] getProfileForceRefresh:NO completion:^(BMXUserProfile *profile, BMXError *aError) {
+    [self setNavigationBarTitle:self.roster.username navLeftButtonIcon:@"blackback" navRightButtonTitle:nil];
+    [[[BMXClient sharedClient] userService] getProfile:NO completion:^(BMXUserProfile *profile, BMXError *aError) {
         if (self.roster.rosterId == profile.userId) {
             
         } else {
@@ -66,24 +58,23 @@
 
 // 添加好友
 - (void)addRosterId:(long long)rosterId reason:(NSString *)reason {
-    MAXLog(@"%@", [[BMXClient sharedClient] rosterService]);
-    [[[BMXClient sharedClient] rosterService] applyAddRoster:rosterId reason:reason completion:^(BMXRoster *roster, BMXError *error) {
-        MAXLog(@"%@", roster);
+    [[[BMXClient sharedClient] rosterService] applyWithRosterId:rosterId message:reason completion:^(BMXError *error) {
+        MAXLog(@"%lld", rosterId);
         if (!error) {
             [HQCustomToast showDialog:NSLocalizedString(@"Request_sent", @"已发出请求")];
             [self.navigationController popToRootViewControllerAnimated:YES];
             
-        } else if (error.errorCode == BMXCurrentUserIsInRoster){
+        } else if (error.errorCode == BMXErrorCode_CurrentUserIsInRoster){
             [self.navigationController  popToRootViewControllerAnimated:NO];
             
             UITabBarController *bar =  (UITabBarController *)[UIApplication sharedApplication].keyWindow.rootViewController;
             UINavigationController *currentNav =  (UINavigationController *)bar.selectedViewController;
             
-            LHChatVC *vc = [[LHChatVC alloc] initWithRoster:self.roster messageType:BMXMessageTypeSingle];
+            LHChatVC *vc = [[LHChatVC alloc] initWithRoster:self.roster messageType:BMXMessage_MessageType_Single];
             vc.hidesBottomBarWhenPushed = YES;
             [currentNav pushViewController:vc animated:YES];
         } else {
-            [HQCustomToast showDialog:error.errorMessage];
+            [HQCustomToast showDialog:[error description]];
         }
     }];
 }

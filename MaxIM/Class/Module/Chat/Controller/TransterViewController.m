@@ -15,7 +15,8 @@
 #import "GroupListViewController.h"
 #import "UIViewController+CustomNavigationBar.h"
 
-#import <floo-ios/BMXClient.h>
+#import <floo-ios/floo_proxy.h>
+#import "MAXUtils.h"
 
 @interface TransterViewController ()<UITableViewDelegate, UITableViewDataSource, BMXRosterServiceProtocol>
 
@@ -45,30 +46,31 @@
 
 // 获取好友列表
 - (void)getAllRoster {
-    [[[BMXClient sharedClient] rosterService] getRosterListforceRefresh:YES completion:^(NSArray *rostIdList, BMXError *error) {
-        if (!error) {
-            MAXLog(@"%ld", rostIdList.count);
-            [self searchRostersByidArray:[NSArray arrayWithArray:rostIdList]];
-        }
+    [MAXUtils getAllRosterIdsWithCompletion:^(ListOfLongLong *list) {
+        [self searchRostersByidArray: list];
     }];
 }
 
 // 获取群list
 - (void)getGroupList {
-    [[[BMXClient sharedClient] groupService] getGroupListForceRefresh:YES completion:^(NSArray *groupList, BMXError *error) {
-        MAXLog(@"%ld", groupList.count);
-        if (!error) {
-            self.groupArray = groupList;
+    [[[BMXClient sharedClient] groupService] get:YES completion:^(BMXGroupList *res, BMXError *aError) {
+        unsigned long sz = res.size;
+        MAXLog(@"%ld", sz);
+        NSMutableArray *arr = [[NSMutableArray alloc] init];
+        if (!aError) {
+            for (int i=0; i<sz; i++) {
+                [arr addObject:[res get: i]];
+            }
+            self.groupArray = arr;
             [self.tableView reloadData];
         }
     }];
 }
 
 // 批量搜索用户
-- (void)searchRostersByidArray:(NSArray *)idArray {
-    [[[BMXClient sharedClient] rosterService] searchRostersByRosterIdList:idArray forceRefresh:NO completion:^(NSArray<BMXRoster *> *rosterList, BMXError *error) {
-        MAXLog(@"%ld", rosterList.count);
-        self.rosterArray = [NSArray arrayWithArray:rosterList];
+- (void)searchRostersByidArray:(ListOfLongLong *)list {
+    [MAXUtils getRostersByidArray:list completion:^(NSArray *arr) {
+        self.rosterArray = arr;
         [self.tableView reloadData];
     }];
 }
@@ -96,7 +98,7 @@
     if (indexPath.section == 0) {
         
         ImageTitleBasicTableViewCell *cell = [ImageTitleBasicTableViewCell ImageTitleBasicTableViewCellWith:tableView];
-        BMXRoster *roster = self.rosterArray[indexPath.row];
+        BMXRosterItem *roster = self.rosterArray[indexPath.row];
         [cell refresh:roster];
         return cell;
         
@@ -112,7 +114,7 @@
     [tableView deselectRowAtIndexPath:indexPath animated:YES];
     
     if (indexPath.section == 0 ) {
-        BMXRoster *roster = self.rosterArray[indexPath.row];
+        BMXRosterItem *roster = self.rosterArray[indexPath.row];
         if (self.delegate && [self.delegate respondsToSelector:@selector(transterSlectedRoster:)]) {
             [self.delegate transterSlectedRoster:roster];
 

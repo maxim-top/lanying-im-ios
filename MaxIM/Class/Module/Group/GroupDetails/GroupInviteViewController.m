@@ -16,8 +16,8 @@
 
 #import "GroupInviteViewController.h"
 #import "UIViewController+CustomNavigationBar.h"
-#import <floo-ios/BMXClient.h>
-#import <floo-ios/BMXGroupInvitation.h>
+#import <floo-ios/floo_proxy.h>
+
 #import "GroupHandleCell.h"
 
 
@@ -44,40 +44,66 @@
 
 
 - (void) getApplyList {
-    
-    [[[BMXClient sharedClient] groupService] getInvitationListByCursor:@"" pageSize:100 completion:^(NSArray *invitationList, NSString *cursor, long long offset, BMXError *error) {
-        if(!error && invitationList!= 0) {
-            self.invitationList = invitationList;
+    [[[BMXClient sharedClient] groupService] getInvitationList:@"" pageSize:100 completion:^(BMXGroupInvitationPage* res, BMXError *error) {
+        if (!error)  {
+            NSMutableArray *invitationList = [[NSMutableArray alloc] init];
+            unsigned long sz = res.result.size;
+            BMXGroupInvitationList *result = res.result;
             NSMutableSet* rosterIdSet = [NSMutableSet set];
             NSMutableSet* groupIdSet = [NSMutableSet set];
-            for (BMXGroupInvitation* invitation in invitationList) {
-                [rosterIdSet addObject:[NSNumber numberWithLongLong:invitation.inviterId]];
-                [groupIdSet addObject:[NSNumber numberWithLongLong:invitation.groupId]];
+            for (int i=0; i<sz; i++) {
+                BMXGroupInvitation * invitation = [result get:i];
+                [invitationList addObject:invitation];
+                long long rosterId = invitation.getMInviterId;
+                long long groupId = invitation.getMGroupId;
+                [rosterIdSet addObject:[NSNumber numberWithLongLong:rosterId]];
+                [groupIdSet addObject:[NSNumber numberWithLongLong:groupId]];
             }
-            [self searchGroupInfosByGids:[NSArray arrayWithArray:[groupIdSet allObjects] ] andRosters:[NSArray arrayWithArray:[rosterIdSet allObjects]]];
+            ListOfLongLong *rosterIds = [[ListOfLongLong alloc] init];
+            for (NSNumber *val in rosterIdSet) {
+                long long v = [val longLongValue];
+                [rosterIds addWithX: &v];
+            }
+            ListOfLongLong *groupIds = [[ListOfLongLong alloc] init];
+            for (NSNumber *val in groupIdSet) {
+                long long v = [val longLongValue];
+                [groupIds addWithX: &v];
+            }
+
+            self.invitationList = invitationList;
+            for (BMXGroupInvitation* invitation in invitationList) {
+                [rosterIdSet addObject:[NSNumber numberWithLongLong:invitation.getMInviterId]];
+                [groupIdSet addObject:[NSNumber numberWithLongLong:invitation.getMGroupId]];
+            }
+            [self searchGroupInfosByGids:groupIds andRosters:rosterIds];
         } else {
-            [HQCustomToast showDialog:error.errorMessage];
+            
         }
     }];
+
 }
 
-- (void) searchGroupInfosByGids:(NSArray*) gids andRosters:(NSArray*) rosterIds
+- (void) searchGroupInfosByGids:(ListOfLongLong*) gids andRosters:(ListOfLongLong*) rosterIds
 {
     dispatch_group_t group = dispatch_group_create();
     dispatch_group_async(group, dispatch_get_global_queue(0, 0), ^{
         dispatch_group_enter(group);
-        [[[BMXClient sharedClient] rosterService] searchRostersByRosterIdList:rosterIds forceRefresh:NO completion:^(NSArray<BMXRoster *> *rosterList, BMXError *error) {
-            MAXLog(@"%lu", (unsigned long)rosterList.count);
-            for (BMXRoster* roster in rosterList) {
+        [[[BMXClient sharedClient] rosterService] searchWithRosterIdList:rosterIds forceRefresh:NO completion:^(BMXRosterItemList *rosterList, BMXError *error) {
+            unsigned long sz = rosterList.size;
+            MAXLog(@"%lu", sz);
+            for (int i=0; i<sz; i++) {
+                BMXRosterItem* roster = [rosterList get:i];
                 [self.rosterInfos setObject:roster forKey:[NSString stringWithFormat:@"%lld", roster.rosterId]];
             }
             dispatch_group_leave(group);
         }];
 //        // 下面是群的。。。。
         dispatch_group_enter(group);
-        [[[BMXClient sharedClient] groupService] getGroupInfoByGroupIdArray:gids forceRefresh:NO completion:^(NSArray *aGroups, BMXError *aError) {
-            MAXLog(@"%ld",aGroups.count);
-            for (BMXGroup *group in aGroups) {                
+        [[[BMXClient sharedClient] groupService] fetchGroupsByIdListWithGroupIdList:gids forceRefresh:NO completion:^(BMXGroupList *aGroups, BMXError *aError) {
+            unsigned long sz = aGroups.size;
+            MAXLog(@"%ld",sz);
+            for (int i=0; i<sz; i++) {
+                BMXGroup *group = [aGroups get:i];
                 [self.groupInfos setObject:group forKey:[NSString stringWithFormat:@"%lld", group.groupId]];
             }
             dispatch_group_leave(group);
@@ -114,10 +140,10 @@
     }
     
     BMXGroupInvitation* invitation = [self.invitationList objectAtIndex:indexPath.row];
-    BMXRoster* roster = [self.rosterInfos objectForKey:[NSString stringWithFormat:@"%lld", invitation.inviterId]];
-    BMXGroup* group = [self.groupInfos objectForKey:[NSString stringWithFormat:@"%lld", invitation.groupId]];
+    BMXRosterItem* roster = [self.rosterInfos objectForKey:[NSString stringWithFormat:@"%lld", invitation.getMInviterId]];
+    BMXGroup* group = [self.groupInfos objectForKey:[NSString stringWithFormat:@"%lld", invitation.getMGroupId]];
     
-    [cell cellInviteContentWithRoster:roster group:group inviteStatus:invitation.invitationStatus exp:invitation.expiredTime actionHandler:^(BOOL ret) {
+    [cell cellInviteContentWithRoster:roster group:group inviteStatus:invitation.getMStatus exp:invitation.getMExpired actionHandler:^(BOOL ret) {
         [self touchedActionWithRet:ret atIndex:indexPath.row];
     }];
     return cell;
@@ -126,16 +152,15 @@
 - (void) touchedActionWithRet:(BOOL) ret atIndex: (NSInteger) index
 {
     BMXGroupInvitation* invitation = [self.invitationList objectAtIndex:index];
-    BMXRoster* roster = [self.rosterInfos objectForKey:[NSString stringWithFormat:@"%lld", invitation.inviterId]];
-    BMXGroup* group = [self.groupInfos objectForKey:[NSString stringWithFormat:@"%lld", invitation.groupId]];
+    BMXGroup* group = [self.groupInfos objectForKey:[NSString stringWithFormat:@"%lld", invitation.getMGroupId]];
     if(ret) { //同意
-        [[[BMXClient sharedClient] groupService] acceptInvitationByGroup:group inviter:invitation.inviterId completion:^(BMXError *error) {
+        [[[BMXClient sharedClient] groupService] acceptInvitationWithGroup:group inviter:invitation.getMInviterId completion:^(BMXError *error) {
             MAXLog(@"同意成功...");
             [self getApplyList];
             [[NSNotificationCenter defaultCenter] postNotificationName:@"KEY_NOTIFICATION_GROUP_MEMBER_UPDATED" object:nil];
         }];
     }else {
-        [[[BMXClient sharedClient] groupService] declineInvitationByGroup:group inviter:invitation.inviterId completion:^(BMXError *error) {
+        [[[BMXClient sharedClient] groupService] declineInvitationWithGroup:group inviter:invitation.getMInviterId reason:@"" completion:^(BMXError *error) {
             MAXLog(@"拒绝成功...");
             [self getApplyList];
         }];

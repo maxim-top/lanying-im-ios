@@ -12,8 +12,7 @@
 #import "ContactTableView.h"
 #import "ScanViewController.h"
 
-#import <floo-ios/BMXRoster.h>
-#import <floo-ios/BMXClient.h>
+#import <floo-ios/floo_proxy.h>
 #import "UIViewController+CustomNavigationBar.h"
 
 #define SearchViewHeight 56
@@ -47,14 +46,17 @@
     [self.searchView.searchTF endEditing:YES];
 
     if ([textField.text length]) {
-        [self searchByName:[NSString stringWithFormat:@"%@", textField.text]];
-//        [self searchById:[NSString stringWithFormat:@"%@", textField.text]];
+        if ([self isNumberString: textField.text]) {
+            [self searchById:[NSString stringWithFormat:@"%@", textField.text]];
+        } else{
+            [self searchByName:[NSString stringWithFormat:@"%@", textField.text]];
+        }
     }
     return YES;
 }
 
 - (void)addRoster:(NSNotification *)noti {
-    BMXRoster *roster = noti.object;
+    BMXRosterItem *roster = noti.object;
     UIAlertController* alert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Leave_a_message", @"留言")
                                                                    message:@""
                                                             preferredStyle:UIAlertControllerStyleAlert];
@@ -88,42 +90,54 @@
 //通过id搜索好友
 - (void)searchById:(NSString *)userId {
     MAXLog(@"通过id搜索好友");
-    [[[BMXClient sharedClient] rosterService] searchByRosterId:[userId integerValue] forceRefresh:YES
-                                       completion:^(BMXRoster *roster, BMXError *error) {
-                                           if (!error) {
-                                               NSMutableArray *array = [NSMutableArray arrayWithObject:roster];
-                                               [self.tableview refresh:[NSArray arrayWithArray:array]];
-                                           }
-      
-    }];
-}
-
-// 通过name搜索好友
-- (void)searchByName:(NSString *)name {
-    MAXLog(@"通过名字搜索好友");
-    [[[BMXClient sharedClient]  rosterService] searchByRoserName:name forceRefresh:NO completion:^(BMXRoster *roster, BMXError *error) {
+    [[[BMXClient sharedClient] rosterService] searchWithRosterId:[userId integerValue] forceRefresh:YES
+                                       completion:^(BMXRosterItem *roster, BMXError *error) {
         if (!error) {
             NSMutableArray *array = [NSMutableArray arrayWithObject:roster];
             [self.tableview refresh:[NSArray arrayWithArray:array]];
-        } else if (error.errorCode == BMXInvalidParam){
+        } else if (error.errorCode == BMXErrorCode_InvalidParam){
+            [HQCustomToast showDialog:NSLocalizedString(@"enter_a_correct_user_id", @"请输入正确的用户ID")];
+        } else {
+            [HQCustomToast showDialog:[error description]];
+        }
+    }];
+
+}
+
+- (BOOL)isNumberString: (NSString *)string {
+    string = [string stringByTrimmingCharactersInSet:[NSCharacterSet decimalDigitCharacterSet]];
+    
+    if (string.length > 0) {
+        return NO;
+    }
+    
+    return YES;
+}
+// 通过name搜索好友
+- (void)searchByName:(NSString *)name {
+    MAXLog(@"通过名字搜索好友");
+    [[[BMXClient sharedClient]  rosterService] searchWithName:name forceRefresh:NO completion:^(BMXRosterItem *roster, BMXError *error) {
+        if (!error) {
+            NSMutableArray *array = [NSMutableArray arrayWithObject:roster];
+            [self.tableview refresh:[NSArray arrayWithArray:array]];
+        } else if (error.errorCode == BMXErrorCode_InvalidParam){
             [HQCustomToast showDialog:NSLocalizedString(@"enter_a_correct_username", @"请输入正确的用户名")];
         } else {
-            [HQCustomToast showDialog:error.errorMessage];
+            [HQCustomToast showDialog:[error description]];
         }
     }];
 }
 
 // 添加好友
 - (void)addRosterId:(long long)rosterId reason:(NSString *)reason {
-    MAXLog(@"%@", [[BMXClient sharedClient] rosterService]);
-    [[[BMXClient sharedClient] rosterService] applyAddRoster:rosterId reason:reason completion:^(BMXRoster *roster, BMXError *error) {
-        MAXLog(@"%@", roster);
+    [[[BMXClient sharedClient] rosterService] applyWithRosterId:rosterId message:reason completion:^(BMXError *error) {
+        MAXLog(@"%lld", rosterId);
         if (!error) {
             [HQCustomToast showDialog:NSLocalizedString(@"Friend_request_sent", @"已发送添加好友申请")];
             [self.navigationController popViewControllerAnimated:YES];
 
         } else {
-            [HQCustomToast showDialog:error.errorMessage];
+            [HQCustomToast showDialog:[error description]];
         }
     }];
 }

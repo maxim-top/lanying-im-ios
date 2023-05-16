@@ -8,11 +8,9 @@
 
 #import "CodeImageViewController.h"
 #import "UIView+BMXframe.h"
-#import <floo-ios/BMXUserProfile.h>
-//#import <ZXingObjC.h>
 #import "QRCoodeFactor.h"
-#import <floo-ios/BMXClient.h>
-#import <floo-ios/BMXGroup.h>
+#import <floo-ios/floo_proxy.h>
+
 #import "GroupQRcodeInfoApi.h"
 #import "UIViewController+CustomNavigationBar.h"
 #import "AppWechatUnbindApi.h"
@@ -89,11 +87,11 @@
         UIImage *avarat = [UIImage imageWithContentsOfFile:self.group.avatarThumbnailPath];
         self.avatarImageView.image = avarat;
     } else {
-        [[[BMXClient sharedClient] groupService] downloadAvatarWithGroup:self.group progress:^(int progress, BMXError *error) {
+        [[[BMXClient sharedClient] groupService] downloadAvatarWithGroup:self.group thumbnail:YES callback:^(int progress) {
             
-        } completion:^(BMXGroup *resultGroup, BMXError *error) {
+        } completion:^(BMXError *error) {
             if (error== nil) {
-                UIImage *image = [UIImage imageWithContentsOfFile:resultGroup.avatarThumbnailPath];
+                UIImage *image = [UIImage imageWithContentsOfFile:self.group.avatarThumbnailPath];
                 dispatch_async(dispatch_get_main_queue(), ^{
                     self.avatarImageView.image  = image;
                 });
@@ -158,7 +156,7 @@
 
 - (void)configUserCodeAndContent {
     self.idLabel.text = [NSString stringWithFormat:@"id : %lld", self.profile.userId];
-    self.nameLabel.text = [NSString stringWithFormat:NSLocalizedString(@"Nickname_name", @"昵称 : %@"), self.profile.userName];
+    self.nameLabel.text = [NSString stringWithFormat:NSLocalizedString(@"Nickname_name", @"昵称 : %@"), self.profile.username];
     
     self.avatarImageView.image = [UIImage imageNamed:@"profileavatar"];
     
@@ -166,10 +164,10 @@
         UIImage *avarat = [UIImage imageWithContentsOfFile:self.profile.avatarThumbnailPath];
         self.avatarImageView.image = avarat;
     } else {
-        [[[BMXClient sharedClient] userService] downloadAvatarWithProfile:self.profile thumbnail:YES progress:^(int progress, BMXError *error) {
-        } completion:^(BMXUserProfile *profile, BMXError *error) {
+        [[[BMXClient sharedClient] userService] downloadAvatarWithProfile:self.profile thumbnail:YES callback:^(int progress) {
+        } completion:^(BMXError *error) {
             if (error== nil) {
-                UIImage *image = [UIImage imageWithContentsOfFile:profile.avatarThumbnailPath];
+                UIImage *image = [UIImage imageWithContentsOfFile:self.profile.avatarThumbnailPath];
                 dispatch_async(dispatch_get_main_queue(), ^{
                     self.avatarImageView.image  = image;
                 });

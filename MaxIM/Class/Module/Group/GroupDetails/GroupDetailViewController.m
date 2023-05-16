@@ -21,8 +21,6 @@
 #import "GroupPublicViewController.h"
 #import "GroupExtViewController.h"
 #import "GroupFileViewController.h"
-#import <floo-ios/BMXGroupMember.h>
-#import <floo-ios/BMXUserProfile.h>
 #import "GroupCommonCell.h"
 #import "IMAcount.h"
 #import "IMAcountInfoStorage.h"
@@ -31,8 +29,8 @@
 #import "GroupCollectionView.h"
 #import "SearchContentViewController.h"
 
-#import <floo-ios/BMXConversation.h>
-
+#import <floo-ios/floo_proxy.h>
+#import "MAXUtils.h"
 @interface GdetailSettingCell : UITableViewCell
 {
     UILabel* detailLabel;
@@ -64,8 +62,6 @@
 
 
 #import "GroupDetailViewController.h"
-#import <floo-ios/BMXClient.h>
-#import <floo-ios/BMXGroup.h>
 #import "GroupAddMemberController.h"
 #import "UIViewController+CustomNavigationBar.h"
 
@@ -115,14 +111,14 @@
 
 
 - (void)get {
-    [[[BMXClient sharedClient ] groupService] getSharedFilesListByGroup:self.group forceRefresh:YES
-                                                             completion:^(NSArray<BMXGroupSharedFile *> *sharedFileList, BMXError *error) {
-        MAXLog(@"%lu", (unsigned long)sharedFileList.count);
+    [[[BMXClient sharedClient ] groupService] getSharedFilesList:self.group forceRefresh:YES
+                                                             completion:^(BMXGroupSharedFileList *sharedFileList, BMXError *error) {
+        MAXLog(@"%lu", (unsigned long)sharedFileList.size);
     }];
 }
 // 离开群
 - (void)leaveGroup {
-    [[[BMXClient sharedClient] groupService] leaveGroup:self.group completion:^(BMXError *error) {
+    [[[BMXClient sharedClient] groupService] leaveWithGroup: self.group completion:^(BMXError *error) {
         if (!error) {
             [[NSNotificationCenter defaultCenter] postNotificationName:@"KGroupListModified" object:nil];
             NSInteger currentIndex = [[self.navigationController viewControllers] indexOfObject:self];
@@ -133,7 +129,7 @@
 
 // 解散群
 - (void) destroyGroup {
-    [[[BMXClient sharedClient] groupService] destroyGroup:self.group completion:^(BMXError *error) {
+    [[[BMXClient sharedClient] groupService] destroyWithGroup:self.group completion:^(BMXError *error) {
         if (!error) {
             [[NSNotificationCenter defaultCenter] postNotificationName:@"KGroupListModified" object:nil];
             NSInteger currentIndex = [[self.navigationController viewControllers] indexOfObject:self];
@@ -144,9 +140,8 @@
 
 // 获取群详情
 - (void)getGroupDetailInfo {
-    [[[BMXClient sharedClient] groupService] loadGroupInfo:self.group completion:^(BMXGroup *group, BMXError *error) {
+    [[[BMXClient sharedClient] groupService] getInfo:self.group completion:^(BMXError *error) {
         if(!error) {
-            self.group = group;
             [self.tableView reloadData];
         }
     }];
@@ -154,31 +149,25 @@
 
 // 获取群成员
 - (void)getMembers {
-    [[[BMXClient sharedClient] groupService] getMembers:self.group forceRefresh:YES completion:^(NSArray<BMXGroupMember *> *groupList, BMXError *error) {
-        MAXLog(@"%lu", (unsigned long)groupList.count);
-        NSMutableArray* array = [NSMutableArray array];
-        for (BMXGroupMember* amember in groupList) {
-            NSString* uidStr = [NSString stringWithFormat:@"%ld", (long)amember.uid];
-            [array addObject:uidStr];
-        }
-        [self getRostersByidArray:array];
+    [MAXUtils getMemberIdsWithGroup:self.group completion:^(ListOfLongLong *list) {
+        [self getRostersByidArray:list];
     }];
 }
 
 // 获取群成员详情
-- (void)getRostersByidArray:(NSArray *)idArray {
-    [[[BMXClient sharedClient] rosterService] searchRostersByRosterIdList:idArray forceRefresh:NO completion:^(NSArray<BMXRoster *> *rosterList, BMXError *error) {
-        MAXLog(@"%ld", rosterList.count);
-        self.memberList = [NSArray arrayWithArray: rosterList];
-        [self.collectionView fillRosterList:rosterList limit2line:YES];
+- (void)getRostersByidArray:(ListOfLongLong *)list {
+    [MAXUtils getRostersByidArray:list completion:^(NSArray *arr) {
+        MAXLog(@"%lu", (unsigned long)arr.count);
+        self.memberList = arr;
+        [self.collectionView fillRosterList:arr limit2line:YES];
         [self.tableView reloadData];
     }];
 }
 
 
 // 添加成员
-- (void)addMembersWithmembersId:(NSArray*)membersId message:(NSString *)message {
-    [[[BMXClient sharedClient] groupService] addMembersToGroup:self.group memberIdlist:membersId message:message completion:^(BMXError *error) {
+- (void)addMembersWithmembersId:(ListOfLongLong*)membersId message:(NSString *)message {
+    [[[BMXClient sharedClient] groupService] addMembersWithGroup:self.group members:membersId message:message completion:^(BMXError *error) {
         if (!error) {
             MAXLog(@"添加成功");
         }
@@ -187,8 +176,8 @@
 
 
 // 删除群成员
-- (void)removeMembersWithMembersId:(NSArray*)membersId message:(NSString *)message {
-    [[[BMXClient sharedClient] groupService] removeMembersWithGroup:self.group memberlist:membersId reason:message completion:^(BMXError *error) {
+- (void)removeMembersWithMembersId:(ListOfLongLong*)membersId message:(NSString *)message {
+    [[[BMXClient sharedClient] groupService] removeMembersWithGroup:self.group members:membersId reason:message completion:^(BMXError *error) {
         if (!error) {
             MAXLog(@"添加成功");
         }
@@ -196,8 +185,8 @@
 }
 
 // 添加管理员
-- (void)addAdminsId:(NSArray*)adminsId message:(NSString *)message {
-    [[[BMXClient sharedClient] groupService] addAdmins:self.group admins:adminsId message:message completion:^(BMXError *error) {
+- (void)addAdminsId:(ListOfLongLong*)adminsId message:(NSString *)message {
+    [[[BMXClient sharedClient] groupService] addAdminsWithGroup:self.group admins:adminsId message:message completion:^(BMXError *error) {
         if (!error) {
             MAXLog(@"添加管理员成功");
         }
@@ -272,7 +261,7 @@
         if(row == 0) {
             [cell setMainText:NSLocalizedString(@"Group_ID", @"群ID") detailText:[NSString stringWithFormat:@"%lld", self.group.groupId] switcherFlag:NO switcherTarget:nil switcherSelector:nil];
         }else if(row == 1) {
-            [cell setMainText:NSLocalizedString(@"My_nickname_in_group", @"我在群里的昵称") detailText:self.group.myNickName switcherFlag:NO switcherTarget:nil switcherSelector:nil];
+            [cell setMainText:NSLocalizedString(@"My_nickname_in_group", @"我在群里的昵称") detailText:self.group.myNickname switcherFlag:NO switcherTarget:nil switcherSelector:nil];
             [cell showAccesor:YES];
         }else if(row == 2) {
             [cell setMainText:NSLocalizedString(@"QR_Code", @"二维码") detailText:@"" switcherFlag:NO switcherTarget:nil switcherSelector:nil];
@@ -326,7 +315,7 @@
     if(section == 1 && row > 1) {
         NSString* className = [arr objectAtIndex:row-2];
         if ([className isEqualToString: @"SearchContentViewController"]) {
-            SearchContentViewController *vc = [[SearchContentViewController alloc] initWithSearchContentType:BMXContentTypeText conversation:self.conversation];
+            SearchContentViewController *vc = [[SearchContentViewController alloc] initWithSearchContentType:BMXMessage_ContentType_Text conversation:self.conversation];
             vc.isConversation = YES;
             [self.navigationController pushViewController:vc animated:YES];
             return;
@@ -334,8 +323,8 @@
         
         if ([className isEqualToString: @"CodeImageViewController"]) {
             
-            MAXLog(@"%u", self.group.inviteMode);
-            if (self.group.inviteMode == BMXGroupInviteModeOpen ) {
+            MAXLog(@"%ld", (long)self.group.inviteMode);
+            if (self.group.inviteMode == BMXGroup_InviteMode_Open ) {
                 CodeImageViewController * vc = [[CodeImageViewController alloc] initWithGroup:self.group];
                 [self.navigationController pushViewController:vc animated:YES];
                 return;
@@ -366,7 +355,7 @@
                                                          //得到文本信息
                                                          for(UITextField *text in alert.textFields){
                                                              MAXLog(@"text = %@", text.text);
-                                                             [[[BMXClient sharedClient] groupService] setMyNicknameWithGroup:self.group nickName:text.text completion:^(BMXError *error) {
+                                                             [[[BMXClient sharedClient] groupService] setMyNickname:self.group nickname:text.text completion:^(BMXError *error) {
                                                                  [HQCustomToast showDialog:NSLocalizedString(@"Set_successfully", @"设置成功")];
                                                                  [self.tableView reloadData];
                                                              }];
@@ -470,9 +459,9 @@
 
 
 #pragma mark -- delegate of collection view
--(void) groupMemberCellTouchedRoster:(BMXRoster*) roster
+-(void) groupMemberCellTouchedRoster:(BMXRosterItem*) roster
 {
-    MAXLog(@"you touched ... %@", roster.userName);
+    MAXLog(@"you touched ... %@", roster.username);
 }
 -(void) groupMemberCellTouchedAdd
 {
@@ -527,7 +516,7 @@
 
 - (BOOL) isOwner
 {
-    NSString* ownerStr = [NSString stringWithFormat:@"%ld", self.group.ownerId] ;
+    NSString* ownerStr = [NSString stringWithFormat:@"%lld", self.group.ownerId] ;
     IMAcount* acc = [IMAcountInfoStorage loadObject];
     NSString* currentAccId = acc.usedId;
     return [ownerStr isEqualToString:currentAccId];
@@ -535,16 +524,16 @@
 
 -(void) getAdminList
 {
-    [[[BMXClient sharedClient] groupService] getAdmins:self.group forceRefresh:YES completion:^(NSArray<BMXGroupMember *> *groupMembers, BMXError *error) {
-        IMAcount* acc = [IMAcountInfoStorage loadObject];
-        NSString* currentStr = acc.usedId;
-        for (BMXGroupMember* member in groupMembers) {
-            NSString* guidStr = [NSString stringWithFormat:@"%ld", member.uid];
+    [[[BMXClient sharedClient] groupService] getAdmins:self.group forceRefresh:YES completion:^(BMXGroupMemberList *groupMembers, BMXError *error) {
+        unsigned long sz = groupMembers.size;
+        for (int i=0; i<sz; i++) {
+            BMXGroupMember* member = [groupMembers get:i];
+            NSString* guidStr = [NSString stringWithFormat:@"%lld", member.getMUid];
             if([self isSelf:guidStr]) {
-                _isAdmin = YES;
+                self->_isAdmin = YES;
             }
         }
-        if (_isAdmin) {
+        if (self->_isAdmin) {
             [self.tableView reloadData];
         }
     }];

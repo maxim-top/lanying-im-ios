@@ -8,7 +8,8 @@
 
 #import "LHChatViewCell.h"
 #import "UIView+BMXframe.h"
-#import <floo-ios/BMXClient.h>
+#import <floo-ios/floo_proxy.h>
+
 CGFloat const ACTIVTIYVIEW_BUBBLE_PADDING = 5.0f;
 CGFloat const SEND_STATUS_SIZE = 20.0f;
 
@@ -126,7 +127,7 @@ CGFloat const SEND_STATUS_SIZE = 20.0f;
     self.self.messageModel.status = MessageDeliveryState_Delivering;
     [self layoutSubviews];
     
-    [[[BMXClient sharedClient] chatService] resendMessage: self.messageModel.messageObjc completion:^(BMXMessageObject *message, BMXError *error) {
+    [[[BMXClient sharedClient] chatService]resendMessageWithMsg:self.messageModel.messageObjc completion:^(BMXError *aError) {
     }];
 }
 
@@ -249,7 +250,7 @@ CGFloat const SEND_STATUS_SIZE = 20.0f;
 }
 
 - (void)readStatusLabelDidTaped:(UIButton *)tap {
-    if (self.messageModel.messageObjc.messageType == BMXMessageTypeGroup) {
+    if (self.messageModel.messageObjc.type == BMXMessage_MessageType_Group) {
         [self routerEventWithName:kRouterEventChatReadStatusLabelTapEventName userInfo:@{kMessageKey : self.messageModel}];
         MAXLog(@"点击群已读");
     }

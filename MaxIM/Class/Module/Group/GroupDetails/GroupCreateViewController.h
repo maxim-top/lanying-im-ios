@@ -15,6 +15,7 @@
     
 
 #import <UIKit/UIKit.h>
+#import <floo-ios/floo_proxy.h>
 
 @class BMXRoster;
 @class BMXGroup;
@@ -22,7 +23,7 @@
 
 @protocol GroupCreateViewControllerDelegate <NSObject>
 
-- (void)atgroupmemberVCdidPopToLastVC:(NSArray<BMXRoster *> *)rosterArray;
+- (void)atgroupmemberVCdidPopToLastVC:(NSArray<BMXRosterItem *> *)rosterArray;
 
 @end
 

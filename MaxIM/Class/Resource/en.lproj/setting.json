@@ -9,15 +9,15 @@
         "control": "1"
     },
     {
+        "type": "Show Preview Text",
+        "control": "1"
+    },
+    {
         "type": "Sound",
         "control": "1"
     },
     {
         "type": "Vibrate",
-        "control": "1"
-    },
-    {
-        "type": "Show Preview Text",
         "control": "1"
     },
     {
@@ -27,6 +27,11 @@
     {
         "type": "Accept Group Invitation",
         "control": "1"
+    },
+    {
+        "type": "My Profile",
+        "control": "0"
+        
     },
     {
         "type": "Blacklist",

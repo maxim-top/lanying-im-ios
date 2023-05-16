@@ -8,7 +8,7 @@
 
 #import "ContactTableView.h"
 #import "ContactTableViewCell.h"
-#import <floo-ios/BMXRoster.h>
+#import <floo-ios/floo_proxy.h>
 
 @interface ContactTableView ()<UITableViewDelegate, UITableViewDataSource>
 
@@ -41,7 +41,7 @@
     return self;
 }
 
-- (void)refresh:(NSArray<BMXRoster *> *)array {
+- (void)refresh:(NSArray<BMXRosterItem *> *)array {
     self.dataArray = [NSMutableArray arrayWithArray:array];
     [self reloadData];
 }
@@ -60,7 +60,7 @@
 }
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
-    BMXRoster *roster = self.dataArray[indexPath.row];
+    BMXRosterItem *roster = self.dataArray[indexPath.row];
     ContactTableViewCell *cell = [ContactTableViewCell contactTableViewCellWith:tableView];
     cell.selectionStyle = UITableViewCellSelectionStyleNone;
     [cell refresh:roster];

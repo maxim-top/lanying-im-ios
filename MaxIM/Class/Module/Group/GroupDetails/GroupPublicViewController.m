@@ -17,8 +17,8 @@
 #import "GroupPublicViewController.h"
 #import "AnounceCel.h"
 #import "NSString+YYAdd.h"
-#import <floo-ios/BMXGroupAnnounment.h>
-#import <floo-ios/BMXClient.h>
+#import <floo-ios/floo_proxy.h>
+
 #import "UIViewController+CustomNavigationBar.h"
 
 @interface GroupPublicViewController ()
@@ -89,23 +89,23 @@
 }
 
 - (void)getAnnoument {
-    [[[BMXClient sharedClient] groupService] getAnnouncementListWithGroup:self.group forceRefresh:YES completion:^(NSArray *annoucmentArray, BMXError *error) {
-        if (!error && annoucmentArray.count > 0) {
-            BMXGroupAnnounment *announment = annoucmentArray.lastObject;
-            _textView.text = announment.content;
-            _titleField.text = announment.tittle;
+    [[[BMXClient sharedClient] groupService] getAnnouncementList:self.group forceRefresh:YES completion:^(BMXGroupAnnouncementList *list, BMXError *error) {
+        if (!error && list.size > 0) {
+            BMXGroupAnnouncement *announcement = [list get:([list size] - 1)];
+            self->_textView.text = announcement.getMContent;
+            self->_titleField.text = announcement.getMTitle;
         }
     }];
 }
 
 - (void)touchedRightBar {
     MAXLog(@"发布群公告...");
-    [[[BMXClient sharedClient] groupService] editGroupAnnouncement:self.group title:_titleField.text content:_textView.text completion:^(BMXGroup *group, BMXError *error) {
+    [[[BMXClient sharedClient] groupService] editAnnouncementWithGroup:self.group title:_titleField.text content:_textView.text completion:^(BMXError *error) {
         if (!error) {
             [HQCustomToast showDialog:NSLocalizedString(@"Publish_successfully", @"发布成功")];
             [self.navigationController popViewControllerAnimated:YES];
         } else {
-            [HQCustomToast showDialog:[NSString stringWithFormat:@"%@", error.errorMessage]];
+            [HQCustomToast showDialog:[NSString stringWithFormat:@"%@", [error description]]];
         }
     }];
 }

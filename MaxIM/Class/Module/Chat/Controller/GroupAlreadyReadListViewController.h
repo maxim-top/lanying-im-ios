@@ -7,14 +7,14 @@
 //
 
 #import <UIKit/UIKit.h>
-@class BMXMessageObject;
+@class BMXMessage;
 @class BMXGroup;
 
 NS_ASSUME_NONNULL_BEGIN
 
 @interface GroupAlreadyReadListViewController : UIViewController
 
-- (instancetype)initWithMessage:(BMXMessageObject *)messageObject group:(BMXGroup *)group;
+- (instancetype)initWithMessage:(BMXMessage *)messageObject group:(BMXGroup *)group;
 
 @end
 

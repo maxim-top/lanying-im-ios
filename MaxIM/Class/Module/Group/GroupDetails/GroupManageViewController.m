@@ -22,7 +22,8 @@
 #import "GroupApplyViewController.h"
 
 #import <TZImagePickerController.h>
-#import <floo-ios/BMXClient.h>
+#import <floo-ios/floo_proxy.h>
+
 #import "IMAcount.h"
 #import "IMAcountInfoStorage.h"
 #import "UIViewController+CustomNavigationBar.h"
@@ -100,14 +101,14 @@
         if (self.group.avatarThumbnailPath > 0 && [[NSFileManager defaultManager] fileExistsAtPath:self.group.avatarThumbnailPath]) {
             cell.avatarImageView.image = [UIImage imageWithContentsOfFile:self.group.avatarThumbnailPath];
         }else {
-            [[[BMXClient sharedClient] groupService] downloadAvatarWithGroup:self.group progress:^(int progress, BMXError *error) {
-            } completion:^(BMXGroup *resultGroup, BMXError *error) {
+            [[[BMXClient sharedClient] groupService] downloadAvatarWithGroup:self.group thumbnail:YES callback:^(int progress) {
+            } completion:^(BMXError *error) {
                 if (error == nil) {
                     dispatch_async(dispatch_get_main_queue(), ^{
                         
-                        UIImage *image = [UIImage imageWithContentsOfFile:resultGroup.avatarThumbnailPath];
+                        UIImage *image = [UIImage imageWithContentsOfFile:self.group.avatarThumbnailPath];
                         cell.avatarImageView.image = image;
-                        self.group = resultGroup;
+//                        self.group = group;
                         if (self.delegate && [self.delegate respondsToSelector:@selector(updateGroup:)]) {
                             [self.delegate updateGroup:self.group];
                         }
@@ -125,13 +126,13 @@
         
         NSString *modeStr = @"";
         switch (self.group.msgMuteMode) {
-            case BMXGroupMsgMuteModeNone:
+            case BMXGroup_MsgMuteMode_None:
                 modeStr = NSLocalizedString(@"Accept_and_alert_message", @"接受并提醒消息");
                 break;
-            case BMXGroupMsgMuteModeMuteNotification:
+            case BMXGroup_MsgMuteMode_MuteNotification:
                 modeStr = NSLocalizedString(@"Accept_but_not_alert_message", @"接受但不提醒消息");
                 break;
-            case BMXGroupMsgMuteModeMuteChat:
+            case BMXGroup_MsgMuteMode_MuteChat:
                 modeStr = NSLocalizedString(@"Do_not_receive_any_messages", @"不接收任何消息");
                 break;
                 
@@ -149,19 +150,19 @@
 
         NSString *modeStr = @"";
         switch (self.group.msgPushMode) {
-            case BMXGroupMsgPushModeAt:
+            case BMXGroup_MsgPushMode_At:
                 modeStr = NSLocalizedString(@"Notify_only_for_at_messages", @"只通知被@消息");
                 break;
-            case BMXGroupMsgPushModeNone:
+            case BMXGroup_MsgPushMode_None:
                 modeStr = NSLocalizedString(@"No_notification_for_all_messages", @"所有消息都不通知");
                 break;
-            case BMXGroupMsgPushModeAll:
+            case BMXGroup_MsgPushMode_All:
                 modeStr = NSLocalizedString(@"Notify_all_group_messages", @"通知所有群消息");
                 break;
-            case BMXGroupMsgPushModeAdmin:
+            case BMXGroup_MsgPushMode_Admin:
                 modeStr = NSLocalizedString(@"Notify_only_for_admin_messages", @"只通知知管理员消息");
                 break;
-            case BMXGroupMsgPushModeAdminOrAt:
+            case BMXGroup_MsgPushMode_AdminOrAt:
                 modeStr = NSLocalizedString(@"Notify_only_for_admin_or_messages", @"只通知管理员或者被@消息");
                 break;
 
@@ -175,13 +176,13 @@
 
         NSString *modeStr = @"";
         switch (self.group.joinAuthMode) {
-            case BMXGroupJoinAuthOpen:
+            case BMXGroup_JoinAuthMode_Open:
                 modeStr = NSLocalizedString(@"No_verification_required", @"无需验证");
                 break;
-            case BMXGroupJoinAuthNeedApproval:
+            case BMXGroup_JoinAuthMode_NeedApproval:
                 modeStr = NSLocalizedString(@"Admin_approval_required", @"需要管理员批准");
                 break;
-            case BMXGroupJoinAuthRejectAll:
+            case BMXGroup_JoinAuthMode_RejectAll:
                 modeStr = NSLocalizedString(@"Reject_all_applications", @"拒绝所有申请");
                 break;
                 
@@ -195,10 +196,10 @@
 
         NSString *modeStr = @"";
         switch (self.group.inviteMode) {
-            case BMXGroupInviteModeOpen://
+            case BMXGroup_InviteMode_Open://
                 modeStr = NSLocalizedString(@"All_group_members_can_modify", @"所有群成员都可以修改");
                 break;
-            case BMXGroupInviteModeAdminOnly:
+            case BMXGroup_InviteMode_AdminOnly:
                 modeStr = NSLocalizedString(@"Admin_allowed_only", @"只有管理员可以");
                 break;
             default:
@@ -314,9 +315,22 @@
     [imagePickerVc setDidFinishPickingPhotosHandle:^(NSArray<UIImage *> *photos, NSArray *assets, BOOL isSelectOriginalPhoto) {
         UIImage *image = [photos firstObject];
         NSData *imageData = UIImagePNGRepresentation(image);
-        [[[BMXClient sharedClient] groupService] setAvatarWithGroup:self.group avatarData:imageData progress:^(int progress, BMXError *error) {
+        
+        NSString *localPath = nil;
+        long long time = [[NSDate date] timeIntervalSince1970] * 1000;
+        if ([imageData length]) {
+            NSString *dirName = [NSString stringWithFormat:@"%lld",time];
+            NSString *base = [[[BMXClient sharedClient] chatService] attachmentDir];
+            NSString *dir = [base stringByAppendingPathComponent:dirName];
+            localPath = [NSString stringWithFormat:@"%@/%@",dir,@"img"];
+            NSFileManager *fileManager = [NSFileManager defaultManager];
+            [fileManager createDirectoryAtPath:dir withIntermediateDirectories:YES attributes:nil error:nil];
+            [imageData writeToFile:localPath atomically:YES];
+        }
+
+        [[[BMXClient sharedClient] groupService] setAvatar:self.group avatarPath:localPath arg3:^(int progress) {
             
-        } completion:^(BMXGroup *resultGroup, BMXError *error) {
+        } completion:^(BMXError *error) {
             if (!error) {
                 dispatch_async(dispatch_get_main_queue(), ^{
                     GroupCommonCell* cell = [self.tableView cellForRowAtIndexPath:[NSIndexPath indexPathForRow:0 inSection:0]];
@@ -333,19 +347,19 @@
     UIAlertAction* action1 = [UIAlertAction actionWithTitle:NSLocalizedString(@"Accept_and_alert_message", @"接受并提醒消息") style:UIAlertActionStyleDefault
                                                     handler:^(UIAlertAction * action) {
                                                         //响应事件
-                                                        [self setMsgMuteModeBy:BMXGroupMsgMuteModeNone];
-//                                                        [self invitmodeWith:BMXGroupInviteModeOpen];
+                                                        [self setMsgMuteModeBy:BMXGroup_MsgMuteMode_None];
+//                                                        [self invitmodeWith:BMXGroup_InviteMode_Open];
                                                     }];
     UIAlertAction* action2 = [UIAlertAction actionWithTitle:NSLocalizedString(@"Accept_but_not_alert_message", @"接受但不提醒消息") style:UIAlertActionStyleDefault
                                                     handler:^(UIAlertAction * action) {
                                                         //响应事件
-                                                        [self setMsgMuteModeBy:BMXGroupMsgMuteModeMuteNotification];
+                                                        [self setMsgMuteModeBy:BMXGroup_MsgMuteMode_MuteNotification];
 
                                                     }];
     UIAlertAction* action3 = [UIAlertAction actionWithTitle:NSLocalizedString(@"Do_not_receive_any_messages", @"不接收任何消息") style:UIAlertActionStyleDefault
                                                     handler:^(UIAlertAction * action) {
                                                         //响应事件
-                                                        [self setMsgMuteModeBy:BMXGroupMsgMuteModeMuteChat];
+                                                        [self setMsgMuteModeBy:BMXGroup_MsgMuteMode_MuteChat];
                                                     }];
     
     UIAlertAction* cancelAction = [UIAlertAction actionWithTitle:NSLocalizedString(@"Cancel", @"取消") style:UIAlertActionStyleCancel
@@ -365,13 +379,13 @@
 }
 
 - (void)p_configEnableRecieveAck {
-    [[[BMXClient sharedClient] groupService] setEnableReadAckWithGroup:self.group enable:!self.group.enableReadAck completion:^(BMXError *error) {
+    [[[BMXClient sharedClient] groupService] setEnableReadAck:self.group enable:!self.group.enableReadAck completion:^(BMXError *error) {
         MAXLog(@"设置成功");
         if (error == nil) {
             [HQCustomToast showDialog:NSLocalizedString(@"Set_successfully", @"设置成功")];
             [self.tableView reloadData];
         } else {
-            [HQCustomToast showDialog:error.errorMessage];
+            [HQCustomToast showDialog:error.description];
         }
         
     }];
@@ -384,13 +398,13 @@
             [HQCustomToast showDialog:NSLocalizedString(@"Set_successfully", @"设置成功")];
             [self.tableView reloadData];
         } else {
-            [HQCustomToast showDialog:error.errorMessage];
+            [HQCustomToast showDialog:error.description];
         }
     };
     if (self.isGroupBanned){
-        [[[BMXClient sharedClient] groupService] unbanGroup:self.group completion:aCompletionBlock];
+        [[[BMXClient sharedClient] groupService] unbanGroupWithGroup:self.group completion:aCompletionBlock];
     }else{
-        [[[BMXClient sharedClient] groupService] banGroup:self.group duration:600 completion:aCompletionBlock];
+        [[[BMXClient sharedClient] groupService] banGroupWithGroup:self.group duration:600 completion:aCompletionBlock];
     }
     self.isGroupBanned = !self.isGroupBanned;
 }
@@ -400,12 +414,12 @@
     UIAlertAction* action1 = [UIAlertAction actionWithTitle:NSLocalizedString(@"All_group_members", @"所有群成员") style:UIAlertActionStyleDefault
                                                     handler:^(UIAlertAction * action) {
                                                         //响应事件
-                                                        [self invitmodeWith:BMXGroupInviteModeOpen];
+                                                        [self invitmodeWith:BMXGroup_InviteMode_Open];
                                                     }];
     UIAlertAction* action2 = [UIAlertAction actionWithTitle:NSLocalizedString(@"Admin_only", @"只有管理员") style:UIAlertActionStyleDefault
                                                     handler:^(UIAlertAction * action) {
                                                         //响应事件
-                                                       [self invitmodeWith:BMXGroupInviteModeAdminOnly];
+                                                       [self invitmodeWith:BMXGroup_InviteMode_AdminOnly];
                                                         
                                                     }];
    
@@ -429,30 +443,30 @@
     UIAlertAction* action1 = [UIAlertAction actionWithTitle:NSLocalizedString(@"Notify_all_group_messages", @"通知所有群消息") style:UIAlertActionStyleDefault
                                                     handler:^(UIAlertAction * action) {
                                                         //响应事件
-                                                         [self groupNofiyWith:BMXGroupMsgPushModeAll];
+                                                         [self groupNofiyWith:BMXGroup_MsgPushMode_All];
                                                     }];
     UIAlertAction* action2 = [UIAlertAction actionWithTitle:NSLocalizedString(@"No_notification_for_all_messages", @"所有消息都不通知") style:UIAlertActionStyleDefault
                                                     handler:^(UIAlertAction * action) {
                                                         //响应事件
-                                                       [self groupNofiyWith:BMXGroupMsgPushModeNone];
+                                                       [self groupNofiyWith:BMXGroup_MsgPushMode_None];
                                                         
                                                     }];
     UIAlertAction* action3 = [UIAlertAction actionWithTitle:NSLocalizedString(@"Notify_only_for_at_messages", @"只通知被@消息") style:UIAlertActionStyleDefault
                                                     handler:^(UIAlertAction * action) {
                                                         //响应事件
-                                                        [self groupNofiyWith:BMXGroupMsgPushModeAt];
+                                                        [self groupNofiyWith:BMXGroup_MsgPushMode_At];
                                                     }];
     
     UIAlertAction* action4 = [UIAlertAction actionWithTitle:NSLocalizedString(@"Notify_only_for_admin_messages", @"只通知知管理员消息") style:UIAlertActionStyleDefault
                                                     handler:^(UIAlertAction * action) {
                                                         //响应事件
-                                                         [self groupNofiyWith:BMXGroupMsgPushModeAdmin];
+                                                         [self groupNofiyWith:BMXGroup_MsgPushMode_Admin];
                                                     }];
     UIAlertAction* action5 = [UIAlertAction actionWithTitle:NSLocalizedString(@"Notify_only_for_admin_or_messages", @"只通知管理员或者被@消息") style:UIAlertActionStyleDefault
                                                     handler:^(UIAlertAction * action) {
                                                         //响应事件
                                                        
-                                                        [self groupNofiyWith:BMXGroupMsgPushModeAdminOrAt];
+                                                        [self groupNofiyWith:BMXGroup_MsgPushMode_AdminOrAt];
                                                     }];
     UIAlertAction* cancelAction = [UIAlertAction actionWithTitle:NSLocalizedString(@"Cancel", @"取消") style:UIAlertActionStyleCancel
                                                          handler:^(UIAlertAction * action) {
@@ -477,19 +491,19 @@
     UIAlertAction* action1 = [UIAlertAction actionWithTitle:NSLocalizedString(@"No_verification_required", @"无需验证") style:UIAlertActionStyleDefault
                                                     handler:^(UIAlertAction * action) {
                                                         //响应事件
-                                                        [self joinAuthWith:BMXGroupJoinAuthOpen];
+                                                        [self joinAuthWith:BMXGroup_JoinAuthMode_Open];
                                                         
                                                     }];
     UIAlertAction* action2 = [UIAlertAction actionWithTitle:NSLocalizedString(@"Admin_approval_required", @"需要管理员批准") style:UIAlertActionStyleDefault
                                                     handler:^(UIAlertAction * action) {
                                                         //响应事件
-                                                        [self joinAuthWith:BMXGroupJoinAuthNeedApproval];
+                                                        [self joinAuthWith:BMXGroup_JoinAuthMode_NeedApproval];
                                                         
                                                     }];
     UIAlertAction* action3 = [UIAlertAction actionWithTitle:NSLocalizedString(@"Reject_all_applications", @"拒绝所有申请") style:UIAlertActionStyleDefault
                                                     handler:^(UIAlertAction * action) {
                                                         //响应事件
-                                                        [self joinAuthWith:BMXGroupJoinAuthRejectAll];
+                                                        [self joinAuthWith:BMXGroup_JoinAuthMode_RejectAll];
                                                         
                                                     }];
     
@@ -507,50 +521,50 @@
     
 }
 
-- (void)groupNofiyWith:(BMXGroupMsgPushMode)mode {
-    [[[BMXClient sharedClient] groupService] setMsgPushModeWithGroup:self.group mode:mode completion:^(BMXError *error) {
+- (void)groupNofiyWith:(BMXGroup_MsgPushMode)mode {
+    [[[BMXClient sharedClient] groupService] setMsgPushMode:self.group mode:mode completion:^(BMXError *error) {
         if (!error) {
             [HQCustomToast showDialog:NSLocalizedString(@"Set_successfully", @"设置成功")];
             [self getGroupDetailInfo];
             [self.tableView reloadData];
             
         }else {
-            [HQCustomToast showDialog:[NSString stringWithFormat:@"%@", error.errorMessage]];
+            [HQCustomToast showDialog:[NSString stringWithFormat:@"%@", error.description]];
             
         }
     }];
 }
 
-- (void)invitmodeWith:(BMXGroupInviteMode)mode {
-    [[[BMXClient sharedClient] groupService] setInviteModeWithGroup:self.group mode:mode completion:^(BMXError *error) {
+- (void)invitmodeWith:(BMXGroup_InviteMode)mode {
+    [[[BMXClient sharedClient] groupService] setInviteMode:self.group mode:mode completion:^(BMXError *error) {
         if (!error) {
             [HQCustomToast showDialog:NSLocalizedString(@"Set_successfully", @"设置成功")];
             [self getGroupDetailInfo];
             [self.tableView reloadData];
             
         }else {
-            [HQCustomToast showDialog:[NSString stringWithFormat:@"%@", error.errorMessage]];
+            [HQCustomToast showDialog:[NSString stringWithFormat:@"%@", error.description]];
             
         }
     }];
     
 }
 
-- (void)joinAuthWith:(BMXGroupJoinAuthMode)mode {
-    [[[BMXClient sharedClient] groupService] setJoinAuthModeWithGroup:self.group joinAuthMode:mode completion:^(BMXError *error) {
+- (void)joinAuthWith:(BMXGroup_JoinAuthMode)mode {
+    [[[BMXClient sharedClient] groupService] setJoinAuthMode:self.group mode:mode completion:^(BMXError *error) {
         if (error == nil) {
             [HQCustomToast showDialog:NSLocalizedString(@"Set_successfully", @"设置成功")];
             [self getGroupDetailInfo];
             [self.tableView reloadData];
 
         }else {
-            [HQCustomToast showDialog:[NSString stringWithFormat:@"%@", error.errorMessage]];
+            [HQCustomToast showDialog:[NSString stringWithFormat:@"%@", error.description]];
         }
     }];
 }
 
--(void)setMsgMuteModeBy:(BMXGroupMsgMuteMode)mode {
-    [[[BMXClient sharedClient] groupService] muteMessageByGroup:self.group msgMuteMode:mode completion:^(BMXError *error) {
+-(void)setMsgMuteModeBy:(BMXGroup_MsgMuteMode)mode {
+    [[[BMXClient sharedClient] groupService] muteMessageWithGroup:self.group mode:mode completion:^(BMXError *error) {
         if (error == nil) {
             [HQCustomToast showDialog:NSLocalizedString(@"Set_successfully", @"设置成功")];
             [self getGroupDetailInfo];
@@ -561,7 +575,7 @@
 
 // 获取群详情
 - (void)getGroupDetailInfo {
-    [[[BMXClient sharedClient] groupService] getGroupInfoByGroupId:self.group.groupId forceRefresh:YES completion:^(BMXGroup *group, BMXError *error) {
+    [[[BMXClient sharedClient] groupService] fetchGroupByIdWithGroupId:self.group.groupId forceRefresh:YES completion:^(BMXGroup *group, BMXError *error) {
         self.group = group;
         [self.tableView reloadData];
     }];

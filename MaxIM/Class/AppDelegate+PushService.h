@@ -7,8 +7,7 @@
 //
 
 #import "AppDelegate.h"
-#import <floo-ios/BMXClient.h>
-
+#import <floo-ios/floo_proxy.h>
 NS_ASSUME_NONNULL_BEGIN
 
 @interface AppDelegate (PushService)<BMXPushServiceProtocol>

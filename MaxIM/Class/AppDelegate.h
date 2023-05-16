@@ -11,6 +11,8 @@
 @interface AppDelegate : UIResponder <UIApplicationDelegate>
 
 @property (strong, nonatomic) UIWindow *window;
+@property(nonatomic, assign) BOOL isDisconnected; //disconnected because the app entered the background
+
 @property (nonatomic, assign) CGFloat statusBarHeight;
 - (void)userLogin;
 

@@ -18,6 +18,8 @@
 - (void)moreViewLocationAction:(LHChatBarMoreView *)moreView;
 - (void)moreViewFileAction:(LHChatBarMoreView *)moreView;
 - (void)moreViewVideoAction:(LHChatBarMoreView *)moreView;
+- (void)moreViewVideoCallAction:(LHChatBarMoreView *)moreView;
+- (void)moreViewVoiceCallAction:(LHChatBarMoreView *)moreView;
 
 @end
 

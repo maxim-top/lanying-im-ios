@@ -17,8 +17,7 @@
 #import "GorupLittleCell.h"
 #import <UIImageView+WebCache.h>
 #import "UIView+BMXframe.h"
-#import <floo-ios/BMXRoster.h>
-#import <floo-ios/BMXClient.h>
+#import <floo-ios/floo_proxy.h>
 
 // cell height: 60;
 
@@ -68,16 +67,15 @@
     [_adminImage setHidden:YES];
 }
 
-- (void)setDlownAvatar:(BMXRoster *)roster Selected:(BOOL) isSelected {
+- (void)setDlownAvatar:(BMXRosterItem *)roster Selected:(BOOL) isSelected {
     _avatar.image = [UIImage imageNamed:@"contact_placeholder"];
     
     UIImage *image = [UIImage imageWithContentsOfFile:roster.avatarThumbnailPath];
     if (!image) {
-        [[[BMXClient sharedClient] rosterService] downloadAvatarWithRoster:roster isThumbnail:YES progress:^(int progress, BMXError *error) {
+        [[[BMXClient sharedClient] rosterService] downloadAvatarWithItem:roster thumbnail:YES callback:^(int progress) {
             
-        }  completion:^(BMXRoster *rosterObjc, BMXError *error) {
+        }  completion:^(BMXError *error) {
             if (!error) {
-                UIImage *image = [UIImage imageWithContentsOfFile:rosterObjc.avatarThumbnailPath];
                 dispatch_async(dispatch_get_main_queue(), ^{
                     _avatar.image = image;
                 });
@@ -95,20 +93,19 @@
     [_selectionImage setHidden:!isSelected];
 }
 
--(void) setAvatarRoster:(BMXRoster*)roster RosterName:(NSString*) name Selected:(BOOL) isSelected
+-(void) setAvatarRoster:(BMXRosterItem*)roster RosterName:(NSString*) name Selected:(BOOL) isSelected
 {
     _avatar.image = [UIImage imageNamed:@"contact_placeholder"];
 
     [_selectionImage setHidden:!isSelected];
     UIImage *image = [UIImage imageWithContentsOfFile:roster.avatarThumbnailPath];
     if (!image) {
-        [[[BMXClient sharedClient] rosterService] downloadAvatarWithRoster:roster isThumbnail:YES progress:^(int progress, BMXError *error) {
+        [[[BMXClient sharedClient] rosterService] downloadAvatarWithItem:roster thumbnail:YES callback:^(int progress) {
             
-        }  completion:^(BMXRoster *rosterObjc, BMXError *error) {
+        }  completion:^(BMXError *error) {
             if (!error) {
-                UIImage *image = [UIImage imageWithContentsOfFile:rosterObjc.avatarThumbnailPath];
                 dispatch_async(dispatch_get_main_queue(), ^{
-                    self->_avatar.image = image;
+                    _avatar.image = image;
                 });
             }
         }];

@@ -16,9 +16,8 @@
 
 #import "GroupMemberViewController.h"
 #import "GorupLittleCell.h"
-#import <floo-ios/BMXClient.h>
-#import <floo-ios/BMXGroupMember.h>
-#import <floo-ios/BMXRoster.h>
+#import <floo-ios/floo_proxy.h>
+#import "MAXUtils.h"
 #import "IMAcount.h"
 #import "IMAcountInfoStorage.h"
 #import "ChatRosterProfileViewController.h"
@@ -72,8 +71,8 @@
         cell = [[GorupLittleCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:@"GorupLittleCell"];
         cell.selectionStyle = UITableViewCellSelectionStyleNone;
     }
-    BMXRoster* roster = [self.memberList objectAtIndex:indexPath.row];
-    NSString* uname = (roster.nickName && ![@"" isEqualToString:roster.nickName]) ? roster.nickName : roster.userName;
+    BMXRosterItem* roster = [self.memberList objectAtIndex:indexPath.row];
+    NSString* uname = (roster.nickname && ![@"" isEqualToString:roster.nickname]) ? roster.nickname : roster.username;
     NSString* rosterIdStr = [NSString stringWithFormat:@"%lld", roster.rosterId];
     BOOL isAdmin = [[_adlinDictionary objectForKey:rosterIdStr] boolValue];
     [cell setAvatarStr:roster.avatarUrl RosterName:uname Selected:NO];
@@ -84,7 +83,7 @@
 
 -(void) tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
     [tableView deselectRowAtIndexPath:indexPath animated:YES];
-    BMXRoster* roster = [self.memberList objectAtIndex:indexPath.row];
+    BMXRosterItem* roster = [self.memberList objectAtIndex:indexPath.row];
     ChatRosterProfileViewController *vc = [[ChatRosterProfileViewController alloc] initWithRoster:roster];
     vc.hidesBottomBarWhenPushed = YES;
     [self.navigationController pushViewController:vc animated:YES];
@@ -93,7 +92,7 @@
 -(BOOL) tableView:(UITableView *)tableView canEditRowAtIndexPath:(NSIndexPath *)indexPath
 {
     BOOL canEdit = NO;
-    BMXRoster* roster = [self.memberList objectAtIndex:indexPath.row];
+    BMXRosterItem* roster = [self.memberList objectAtIndex:indexPath.row];
     NSString* rosterIdStr = [NSString stringWithFormat:@"%lld", roster.rosterId];
     
     if([self isSelf:rosterIdStr]) { //是自己
@@ -111,7 +110,7 @@
     UITableViewRowAction *deleteAction = [UITableViewRowAction rowActionWithStyle:UITableViewRowActionStyleNormal title:NSLocalizedString(@"Delete", @"删除") handler:^(UITableViewRowAction *action, NSIndexPath *indexPath)
                                          {
                                              [tableView setEditing:NO animated:YES];
-                                             BMXRoster* roster = self.memberList [indexPath.row];
+                                             BMXRosterItem* roster = self.memberList [indexPath.row];
                                              [self deleteR:roster];
                                          }];
     
@@ -133,9 +132,11 @@
 {
     UIAlertController* alert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Warning", @"警告") message:NSLocalizedString(@"Confirm_to_blacklist", @"确定加入黑名单？") preferredStyle:UIAlertControllerStyleAlert];
     UIAlertAction* okAction = [UIAlertAction actionWithTitle:NSLocalizedString(@"Confirm", @"确定") style:UIAlertActionStyleDefault handler:^(UIAlertAction * action) {
-        BMXRoster* roster = [self.memberList objectAtIndex:index];
-        NSNumber *rosterId = [NSNumber numberWithLongLong:roster.rosterId];
-        [[[BMXClient sharedClient] groupService] blockMembers:self.group members:@[rosterId] completion:^(BMXError *error) {
+        BMXRosterItem* roster = [self.memberList objectAtIndex:index];
+        long long rosterId = roster.rosterId;
+        ListOfLongLong *members = [[ListOfLongLong alloc] init];
+        [members addWithX:&rosterId];
+        [[[BMXClient sharedClient] groupService] blockMembersWithGroup:self.group members:members completion:^(BMXError *error) {
             if(!error) {
                 [[NSNotificationCenter defaultCenter] postNotificationName:@"KEY_NOTIFICATION_GROUP_MEMBER_UPDATED" object:nil];
                 [self getMembers];
@@ -151,17 +152,15 @@
 {
     UIAlertController* alert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Warning", @"警告") message:NSLocalizedString(@"Confirm_to_ban", @"确定要禁言吗？") preferredStyle:UIAlertControllerStyleAlert];
     UIAlertAction* okAction = [UIAlertAction actionWithTitle:NSLocalizedString(@"Confirm", @"确定") style:UIAlertActionStyleDefault handler:^(UIAlertAction * action) {
-        BMXRoster* roster = [self.memberList objectAtIndex:index];
-        NSNumber* rosterId = [NSNumber numberWithLongLong:roster.rosterId];
+        BMXRosterItem* roster = [self.memberList objectAtIndex:index];
+        long long rosterId = roster.rosterId;
+        ListOfLongLong *members = [[ListOfLongLong alloc] init];
+        [members addWithX:&rosterId];
         NSString* muteDurationStr = [alert.textFields objectAtIndex:0].text;
-        NSInteger duration = [muteDurationStr longLongValue];
-        [[[BMXClient sharedClient] groupService] banMembers:@[rosterId] group:self.group reason:NSLocalizedString(@"Ban", @"禁言") duration:duration completion:^(BMXError *error) {
+        long long duration = [muteDurationStr longLongValue];
+        [[[BMXClient sharedClient] groupService] banMembersWithGroup:self.group members:members duration:duration reason:NSLocalizedString(@"Ban", @"禁言") completion:^(BMXError *error) {
             if (error) {
-                MAXLog(@"mute member error, code: %ld", error.errorCode);
-                
-            }else {
-                
-                //                [[NSNotificationCenter defaultCenter] postNotificationName:@"KEY_NOTIFICATION_GROUP_INFO_UPDATED" object:nil];
+                MAXLog(@"mute member error, code: %ld", (long)[error errorCode]);
             }
         }];
     }];
@@ -193,53 +192,49 @@
     
 }
 
-- (void)deleteR:(BMXRoster *)roster{
-    NSNumber *s= [NSNumber numberWithLongLong: roster.rosterId];
-    [[[BMXClient sharedClient] groupService]removeMembersWithGroup:self.group memberlist:@[s] reason:@"" completion:^(BMXError *error) {
+- (void)deleteR:(BMXRosterItem *)roster{
+    long long rosterId = roster.rosterId;
+    ListOfLongLong *members = [[ListOfLongLong alloc] init];
+    [members addWithX:&rosterId];
+
+    [[[BMXClient sharedClient] groupService]removeMembersWithGroup:self.group members:members reason:@"" completion:^(BMXError *error) {
         if (!error) {
             [HQCustomToast showDialog:NSLocalizedString(@"Delete_successfully", @"删除成功")];
             [[NSNotificationCenter defaultCenter] postNotificationName:@"KEY_NOTIFICATION_GROUP_MEMBER_UPDATED" object:nil];
             [self getMembers];
-        } else {
-            
         }
     }];
 }
 
 // 获取群成员
 - (void)getMembers {
-    [[[BMXClient sharedClient] groupService] getMembers:self.group forceRefresh:YES completion:^(NSArray<BMXGroupMember *> *groupList, BMXError *error) {
-        MAXLog(@"%ld", groupList.count);
-        NSMutableArray* array = [NSMutableArray array];
-        for (BMXGroupMember* amember in groupList) {
-            NSString* uidStr = [NSString stringWithFormat:@"%ld", amember.uid];
-            [array addObject:uidStr];
-        }
-        [self getRostersByidArray:array];
+    [MAXUtils getMemberIdsWithGroup:self.group completion:^(ListOfLongLong *list) {
+        [self getRostersByidArray:list];
     }];
 }
 
 // 获取群成员详情
-- (void)getRostersByidArray:(NSArray *)idArray {
-    [[[BMXClient sharedClient] rosterService] searchRostersByRosterIdList:idArray forceRefresh:YES completion:^(NSArray<BMXRoster *> *rosterList, BMXError *error) {
-        MAXLog(@"%ld", rosterList.count);
-        self.memberList = [NSArray arrayWithArray: rosterList];
-        [self.tableView reloadData];
+- (void)getRostersByidArray:(ListOfLongLong *)idList {
+    [MAXUtils getRostersByidArray:idList completion:^(NSArray *arr) {
+         self.memberList = arr;
+         [self.tableView reloadData];
     }];
 }
 
 -(void) getManageList // 管理员不能被操作.
 {
-    [[[BMXClient sharedClient] groupService] getAdmins:self.group forceRefresh:YES completion:^(NSArray<BMXGroupMember *> *adminList, BMXError *error) {
-        for (BMXGroupMember* member in adminList) {
-            NSString* uidStr = [NSString stringWithFormat:@"%ld", member.uid];
+    [[[BMXClient sharedClient] groupService] getAdmins:self.group forceRefresh:YES completion:^(BMXGroupMemberList *adminList, BMXError *error) {
+        unsigned long sz = adminList.size;
+        for (int i=0; i<sz; i++) {
+            BMXGroupMember* member = [adminList get:i];
+            NSString* uidStr = [NSString stringWithFormat:@"%lld", member.getMUid];
             if([self isSelf:uidStr]) {
-                _isAdmin = YES;
+                self->_isAdmin = YES;
             }
-            [_adlinDictionary setObject:[NSNumber numberWithBool:YES] forKey:uidStr];
+            [self->_adlinDictionary setObject:[NSNumber numberWithBool:YES] forKey:uidStr];
         }
-        if (adminList != nil && adminList.count > 0) {
-            [_tableView reloadData];
+        if (adminList != nil && adminList.size > 0) {
+            [self->_tableView reloadData];
         }
     }];
 }
@@ -254,7 +249,7 @@
 
 - (BOOL) isOwner
 {
-    NSString* ownerStr = [NSString stringWithFormat:@"%ld", self.group.ownerId] ;
+    NSString* ownerStr = [NSString stringWithFormat:@"%lld", self.group.ownerId] ;
     IMAcount* acc = [IMAcountInfoStorage loadObject];
     NSString* currentAccId = acc.usedId;
     return [ownerStr isEqualToString:currentAccId];

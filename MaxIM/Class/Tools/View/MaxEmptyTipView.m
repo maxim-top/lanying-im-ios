@@ -47,10 +47,12 @@
 
 - (void)labelString:(MaxEmptyTipType)type {
     if (type == MaxEmptyTipTypeCommonBlank) {
-        self.tipLabel.text = NSLocalizedString(@"Nothing_here", @"这里什么也没有~");
+        self.tipLabel.text = NSLocalizedString(@"Nothing_here", @"你没有聊天会话，可以在右上角搜索用户id添加好友。");
     } else if(type == MaxEmptyTipTypeContactSupport) {
         self.tipLabel.text = NSLocalizedString(@"If_you_want_to_experience", @"如果想要体验该功能，请退出后，将APPID切换成`welovemaxim`");
 //        [self.tipLabel sizeToFit];
+    } else if(type == MaxEmptyTipTypeBlocklist) {
+        self.tipLabel.text = NSLocalizedString(@"block_list_empty", @"黑名单为空，您可以在好友列表上左划来添加好友到黑名单");
     }
 }
 

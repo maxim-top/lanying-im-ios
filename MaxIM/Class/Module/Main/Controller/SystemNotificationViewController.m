@@ -9,8 +9,7 @@
 #import "SystemNotificationViewController.h"
 #import "UIViewController+CustomNavigationBar.h"
 #import "SystemNotificationTableViewCell.h"
-#import <floo-ios/BMXClient.h>
-#import <floo-ios/BMXMessageObject.h>
+#import <floo-ios/floo_proxy.h>
 
 @interface SystemNotificationViewController ()<UITableViewDelegate, UITableViewDataSource>
 
@@ -36,16 +35,17 @@
 }
 
 - (void)loadMessages {
-    [[[BMXClient sharedClient] chatService] retrieveHistoryBMXconversation:self.conversation msgId:0 size:10 completion:^(NSArray *messageListms, BMXError *error) {
-        MAXLog(@"%lu", (unsigned long)messageListms.count);
-        if (messageListms.count > 0) {
-            self.messageArray = messageListms;
+    [[[BMXClient sharedClient] chatService] retrieveHistoryMessagesWithConversation:self.conversation refMsgId:0 size:10 completion:^(BMXMessageList *bmxMessageList, BMXError *aError) {
+        if (bmxMessageList.size > 0) {
+            unsigned long sz = bmxMessageList.size;
+            NSMutableArray *arr = [[NSMutableArray alloc] init];
+            for (int i=0; i<sz; i++) {
+                [arr addObject:[bmxMessageList get:i]];
+            }
+            self.messageArray = arr;
             [self.tableview reloadData];
-        } else {
-            
         }
     }];
-
 }
 
 - (NSString *)compareCurrentTime:(NSTimeInterval)currentDate
@@ -83,7 +83,7 @@
     
     [tableView deselectRowAtIndexPath:indexPath animated:YES];
 
-    BMXMessageObject *message = self.messageArray[indexPath.row];
+    BMXMessage *message = self.messageArray[indexPath.row];
     SystemNotificationTableViewCell *cell = [SystemNotificationTableViewCell cellWithTableview:tableView];
     cell.titleLabel.text = NSLocalizedString(@"System_message", @"【系统消息】");
     cell.subtitleLabel.text = message.content;

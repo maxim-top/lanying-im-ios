@@ -10,10 +10,9 @@
 #import "LHPhotoPreviewCell.h"
 #import "XSBrowserAnimateDelegate.h"
 #import "UIActionSheet+Blocks.h"
-#import <floo-ios/BMXImageAttachment.h>
 #import "LHMessageModel.h"
-#import <floo-ios/BMXClient.h>
 #import <Photos/Photos.h>
+#import <floo-ios/floo_proxy.h>
 
 
 @interface LHPhotoPreviewController () <UICollectionViewDataSource, UICollectionViewDelegate, UIScrollViewDelegate, UIActionSheetDelegate, BMXChatServiceProtocol> {
@@ -21,7 +20,7 @@
 }
 
 
-@property (nonatomic, strong) BMXMessageObject *messageObject;
+@property (nonatomic, strong) BMXMessage *messageObject;
 
 @end
 
@@ -36,7 +35,7 @@
 
 }
 
-- (void)messageAttachmentStatusDidChanged:(BMXMessageObject *)message error:(BMXError *)error percent:(int)percent {
+- (void)messageAttachmentStatusDidChanged:(BMXMessage *)message error:(BMXError *)error percent:(int)percent {
     
 //    MAXLog(@"走了吗");
     if (!error && percent == 101) {
@@ -52,13 +51,13 @@
 
 - (void)setModels:(NSArray *)models {
     LHMessageModel *messagemodel = models.firstObject;
-    BMXImageAttachment *attachment = (BMXImageAttachment *)messagemodel.messageObjc.attachment;
+    BMXImageAttachment *attachment = [BMXImageAttachment dynamicCastWithAttachment:messagemodel.messageObjc.attachment];
     if (attachment.path == nil ||  [@"" isEqualToString:attachment.path] || ![[NSFileManager defaultManager] fileExistsAtPath:attachment.path]) {
-        [[[BMXClient sharedClient] chatService] downloadAttachment:messagemodel.messageObjc];
-        
-        self.messageObject = messagemodel.messageObjc;
-        _models = @[self.messageObject];
-        [_collectionView reloadData];
+        [[[BMXClient sharedClient] chatService] downloadAttachmentWithMsg:messagemodel.messageObjc completion:^(BMXError *aError) {
+            self.messageObject = messagemodel.messageObjc;
+            _models = @[self.messageObject];
+            [_collectionView reloadData];
+        }];
     } else {
         self.messageObject = messagemodel.messageObjc;
         _models = @[self.messageObject];

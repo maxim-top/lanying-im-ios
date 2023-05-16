@@ -8,7 +8,6 @@
 
 #import "AppDelegate.h"
 #import "MAXTabBarController.h"
-#import <floo-ios/BMXClient.h>
 #import "MainViewController.h"
 #import "IMAcount.h"
 #import "IMAcountInfoStorage.h"
@@ -26,13 +25,13 @@
 #import "AccountListStorage.h"
 #import "AccountManagementManager.h"
 
-#import <floo-ios/BMXHostConfig.h>
 #import <Bugly/Bugly.h>
 #import "HostConfigManager.h"
+#import "RosterDetailViewController.h"
 
-#import <floo-ios/BMXPushManager.h>
-#import <floo-ios/BMXPushServiceProtocol.h>
+#import <floo-ios/floo_proxy.h>
 #import "AppDelegate+PushService.h"
+#import <floo-rtc-ios/RTCEngineManager.h>
 
 @interface AppDelegate ()<UNUserNotificationCenterDelegate, BMXUserServiceProtocol, WXApiDelegate, BMXPushServiceProtocol>
 
@@ -40,7 +39,11 @@
 @end
 
 @implementation AppDelegate
+@synthesize isDisconnected = _isDisconnected;
+
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
+    _isDisconnected = NO;
+    
     if (@available(iOS 13.0, *)) {
         _statusBarHeight = [UIApplication sharedApplication].windows.firstObject.windowScene.statusBarManager.statusBarFrame.size.height;
     } else {
@@ -64,7 +67,7 @@
         [DDLog addLogger:[DDTTYLogger sharedInstance]];
     }
     
-    NSString *logPath =  [NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES).firstObject stringByAppendingPathComponent:[NSString stringWithFormat:@"ChatData/LYLog"]];
+    NSString *logPath =  [NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES).firstObject stringByAppendingPathComponent:[NSString stringWithFormat:@"ChatData/logs"]];
 
     DDLogFileManagerDefault *fm = [[DDLogFileManagerDefault alloc] initWithLogsDirectory:logPath];
     DDFileLogger *fileLogger = [[DDFileLogger alloc] initWithLogFileManager: fm];
@@ -84,7 +87,7 @@
 }
 
 - (void)initBugly  {
-    [Bugly startWithAppId:@"62419d2a9f"];
+    [Bugly startWithAppId:@"b54d3afda3"];
 }
 
 - (void)initialWechat {
@@ -103,18 +106,22 @@
     [self.maintabController addIMListener];
 }
 
+- (void)bindDeviceToken {
+    NSString *deviceToken = [[NSUserDefaults standardUserDefaults] valueForKey:@"deviceToken"];
+    if ([deviceToken length]) {
+        [[[BMXClient sharedClient] userService] bindDeviceWithToken:deviceToken completion:^(BMXError *error) {
+            MAXLog(@"绑定成功%@", deviceToken);
+        }];
+    }
+}
+
 - (void)signByName:(NSString *)name password:(NSString *)password {
-    [[BMXClient sharedClient] fastSignInByName:name password:password  completion:^(BMXError *error) {
+    [[BMXClient sharedClient] fastSignInByNameWithName:name password:password completion:^(BMXError *error) {
         if (!error) {
             MAXLog(@"登录成功 username = %@ , password = %@",name, password);
             [self.maintabController addIMListener];
-            UINavigationController *navigation = (UINavigationController *)[self.maintabController.childViewControllers firstObject];
-            if ([NSStringFromClass([navigation.childViewControllers firstObject].class) isEqualToString:@"MainViewController"] ) {
-                
-                MainViewController *mainVC = [navigation.childViewControllers firstObject];
-                    [mainVC getAllConversations];
-            }
             [self getProfile];
+            [self bindDeviceToken];
             [self getRosterList];
             [self getAppTokenWithName:name password:password];
         }else {
@@ -140,10 +147,10 @@
 
 - (void)getProfile {
     
-    [[[BMXClient sharedClient] userService] getProfileForceRefresh:NO completion:^(BMXUserProfile *profile, BMXError *aError) {
+    [[[BMXClient sharedClient] userService] getProfile:NO completion:^(BMXUserProfile *profile, BMXError *aError) {
         [[NSNotificationCenter defaultCenter] postNotificationName:@"RefreshProfile" object:profile];
         
-        NSString *appid = [[BMXClient sharedClient] sdkConfig].appID;
+        NSString *appid = [[BMXClient sharedClient] getSDKConfig].getAppID;
         IMAcount *account = [IMAcountInfoStorage loadObject];
         account.usedId = [NSString stringWithFormat:@"%lld", profile.userId];
         [IMAcountInfoStorage saveObject:account];
@@ -159,8 +166,7 @@
 }
 
 - (void)getRosterList {
-    [[[BMXClient sharedClient] rosterService] getRosterListforceRefresh:YES completion:^(NSArray *rostIdList, BMXError *error) {
-    
+    [[[BMXClient sharedClient] rosterService] get:YES completion:^(ListOfLongLong *rostIdList, BMXError *error) {
     }];
 }
 
@@ -249,35 +255,40 @@
 }
 
 - (void)initializeBMX {
-    NSString* dataDir = [NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES).firstObject stringByAppendingPathComponent:@"ChatData"];
+    //设置数据和缓存目录路径
+    NSString* dataDir = [NSString pathWithComponents:@[NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES).firstObject, @"ChatData"]];
     NSFileManager *fileManager = [NSFileManager defaultManager];
     if (![fileManager fileExistsAtPath:dataDir]) {
         [fileManager createDirectoryAtPath:dataDir withIntermediateDirectories:YES attributes:nil error:nil];
     }
-    NSString* cacheDir = [NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, YES).firstObject stringByAppendingString:@"UserCache"];
+    NSString* cacheDir = [NSString pathWithComponents:@[NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, YES).firstObject,@"UserCache"]];
     if (![fileManager fileExistsAtPath:cacheDir]) {
         [fileManager createDirectoryAtPath:cacheDir withIntermediateDirectories:YES attributes:nil error:nil];
     }
     NSLog(@"dataDir = %@", dataDir);
     NSLog(@"cacheDir = %@", cacheDir);
   
+    //User agent信息
     NSString* phoneName = [[UIDevice currentDevice] name];
     NSString* localizedModel = [[UIDevice currentDevice] localizedModel];
     NSString* systemName = [[UIDevice currentDevice] systemName];
     NSString* phoneVersion = [[UIDevice currentDevice] systemVersion];
   
-    NSString *phone = [NSString stringWithFormat:NSLocalizedString(@"Device_name_name", @"设备名称:%@;%@;%@;%@"), phoneName,localizedModel,systemName,phoneVersion];
-    BMXSDKConfig *config  = [[BMXSDKConfig alloc] initConfigWithDataDir:dataDir cacheDir:cacheDir pushCertName:@"apns_maximtop_distribution_2020" userAgent:phone];
+    NSString *userAgent = [NSString stringWithFormat:NSLocalizedString(@"Device_name_name", @"设备名称:%@;%@;%@;%@"), phoneName,localizedModel,systemName,phoneVersion];
+    // pushCertName: DEV: apns_maximtop_dev_2022_11; DIST: apns_maximtop_distribution_2022_11
+    //创建SDK配置
+    BMXSDKConfig *config  = [[BMXSDKConfig alloc] initWithType:BMXClientType_iOS vsn:@"1" dataDir:dataDir
+        cacheDir:cacheDir sDKVersion:@"1" pushCertName:@"apns_maximtop_distribution_2022_11" userAgent:userAgent
+        appId:[AppIDManager sharedManager].appid.appId appSecret:@"47B13PBIAPDARZKD" deliveryAck:false];
     config.appID = [AppIDManager sharedManager].appid.appId;
     config.appSecret = @"47B13PBIAPDARZKD";
     config.loadAllServerConversations = YES;
-    config.logLevelType = BMXLogLevelDebug;
+    [config setLogLevel: BMXLogLevel_Debug];
     
     IMAcount *accout = [IMAcountInfoStorage loadObject];
     if (accout.isLogin) {
         if ([HostConfigManager checkLocalConfig]) {
-            
-            BMXHostConfig *hostConfig = [[BMXHostConfig alloc] initWithRestHostConfig:[HostConfigManager sharedManager].restServer imPort:[[HostConfigManager sharedManager].IMPort intValue] imHost:[HostConfigManager sharedManager].IMServer];
+            BMXSDKConfigHostConfig * hostConfig = [[BMXSDKConfigHostConfig alloc]initWithIm:[HostConfigManager sharedManager].IMServer port:[[HostConfigManager sharedManager].IMPort intValue] rest:[HostConfigManager sharedManager].restServer];
             config.hostConfig = hostConfig;
             config.enableDNS = NO;
 
@@ -286,17 +297,17 @@
         }
     } else {
         config.enableDNS = YES;
-
     }
     
     config.verifyCertificate = NO;
-    [[BMXClient sharedClient] registerWithSDKConfig:config];
+    //创建客户端实例
+    [BMXClient createWithConfig: config];
 }
 
 - (void)reloadAppID:(NSString *)appid {
     
     [AppIDManager changeAppid:appid isSave:NO];
-    [[BMXClient sharedClient] changeAppID:appid completion:^(BMXError * _Nonnull error) {
+    [[BMXClient sharedClient] changeAppIdWithAppId:appid completion:^(BMXError * _Nonnull error) {
         
     }];
     [[NetWorkingManager netWorkingManager] resetHeaderWithAppID:appid];
@@ -348,26 +359,19 @@
     if ([url.absoluteString containsString:@"login"]) {
         [WXApi handleOpenURL:url delegate:self];
     }else{
-        if ([url.absoluteString hasPrefix:@"MaxIMExtension://Roster"]) {
-            //        NSString *imageUrl = [[url.absoluteString componentsSeparatedByString:@"MaxIMExtension://Roster&url="] lastObject];
-            
-            if(self.maintabController) {
-                UINavigationController *nav = [self.maintabController.childViewControllers firstObject];
-                RosterListViewController *roster =   [[RosterListViewController alloc] init];
-                roster.hidesBottomBarWhenPushed = YES;
-                [nav pushViewController:roster animated:YES];
+        UIViewController *currVC = [self getCurrentViewController];
+        UINavigationController *nav = [currVC navigationController];
+        UIViewController *popVC;
+        if(self.maintabController) {
+            if ([url.absoluteString hasPrefix:@"MaxIMExtension://Roster"]) {
+                popVC = [[RosterListViewController alloc] init];
+                popVC.hidesBottomBarWhenPushed = YES;
+            } else {
+                popVC = [[GroupListSelectViewController alloc] init];
+                popVC.hidesBottomBarWhenPushed = YES;
             }
-            
-        } else {
-            
-            if(self.maintabController) {
-                UINavigationController *nav = [self.maintabController.childViewControllers firstObject];
-                GroupListSelectViewController *group =   [[GroupListSelectViewController alloc] init];
-                group.hidesBottomBarWhenPushed = YES;
-                [nav pushViewController:group animated:YES];
-            }
-    }
-
+            [nav pushViewController:popVC animated:YES];
+       }
     }
     return YES;
 }
@@ -432,7 +436,34 @@
     //                }
 }
 
+- (UIViewController *)getCurrentViewController {
+    UIWindow *window = [[UIApplication sharedApplication].delegate window];
+    UIViewController *topViewController = [window rootViewController];
+        
+    while (true) {
+        if (topViewController.presentedViewController) {
+            topViewController = topViewController.presentedViewController;
+        } else if ([topViewController isKindOfClass:[UINavigationController class]] && [(UINavigationController*)topViewController topViewController]) {
+            topViewController = [(UINavigationController *)topViewController topViewController];
+        } else if ([topViewController isKindOfClass:[UITabBarController class]]) {
+            UITabBarController *tab = (UITabBarController *)topViewController;
+            topViewController = tab.selectedViewController;
+        } else {
+            break;
+        }
+    }
+    return topViewController;
+}
+
 - (void)application:(UIApplication *)application didReceiveRemoteNotification:(NSDictionary * _Nonnull)userInfo fetchCompletionHandler:(void (^ _Nonnull)(UIBackgroundFetchResult))completionHandler{
+    NSString *msg_type = userInfo[@"msg_type"];
+    if ([msg_type isEqualToString:@"APPLIED"]) {
+        UIViewController *curr = [self getCurrentViewController];
+        UINavigationController *nav = [curr navigationController];
+        RosterDetailViewController *vc = [[RosterDetailViewController alloc] init];
+        vc.hidesBottomBarWhenPushed = YES;
+        [nav pushViewController:vc animated:YES];
+    }
     MAXLog(@"didReceiveRemoteNotification:%@",userInfo);
 }
 
@@ -442,7 +473,10 @@
 
 - (void)applicationDidEnterBackground:(UIApplication *)application {
     //进入后台
-    [[BMXClient sharedClient] disConnect];
+    if (![[RTCEngineManager engineWithType:kMaxEngine] isOnCall]) {
+        [[BMXClient sharedClient] disconnect];
+        _isDisconnected = YES;
+    }
 }
 
 - (void)applicationWillEnterForeground:(UIApplication *)application {
@@ -450,12 +484,13 @@
     //    if (application.applicationIconBadgeNumber > 0) {
     //        application.applicationIconBadgeNumber = 0;
     //    }
-    
-    IMAcount *accout = [IMAcountInfoStorage loadObject];
-    if (accout) {
-        [[BMXClient sharedClient]  reconnect];
-        MAXLog(@"reconnect");
-        
+    if (_isDisconnected) {
+        IMAcount *accout = [IMAcountInfoStorage loadObject];
+        if (accout) {
+            [[BMXClient sharedClient]  reconnect];
+            MAXLog(@"reconnect");
+            _isDisconnected = NO;
+        }
     }
 }
 
@@ -463,7 +498,7 @@
 
 - (void)applicationWillTerminate:(UIApplication *)application {
     MAXLog(@"程序被杀死，applicationWillTerminate");
-    [[BMXClient sharedClient] disConnect];
+    [[BMXClient sharedClient] disconnect];
 }
 
 

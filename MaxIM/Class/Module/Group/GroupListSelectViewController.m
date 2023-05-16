@@ -9,14 +9,13 @@
 
 #import "GroupListSelectViewController.h"
 #import "ImageTitleBasicTableViewCell.h"
-#import <floo-ios/BMXClient.h>
 #import "LHChatVC.h"
 
 #import "GroupCreateViewController.h"
 #import "GroupInviteViewController.h"
 #import "GroupApplyViewController.h"
 #import "ImageAlertView.h"
-#import <floo-ios/BMXImageAttachment.h>
+#import <floo-ios/floo_proxy.h>
 
 #import "IMAcountInfoStorage.h"
 #import "IMAcount.h"
@@ -46,16 +45,17 @@
 // 获取群list
 - (void)getGroupList {
     [HQCustomToast showWating];
-    [[[BMXClient sharedClient] groupService] getGroupListForceRefresh:NO completion:^(NSArray *groupList, BMXError *error) {
-        MAXLog(@"%ld", groupList.count);
+    [[[BMXClient sharedClient] groupService] get:NO completion:^(BMXGroupList *groupList, BMXError *error) {
+        MAXLog(@"%ld", groupList.size);
         [HQCustomToast hideWating];
-        
+
         if (!error) {
-            
+
             NSMutableArray *groupNormalArray = [NSMutableArray array];
-            for (BMXGroup *group in groupList) {
-                
-                if (group.groupStatus != BMXGroupDestroyed && group.roleType == BMXGroupMemberRoleTypeMember) {
+            unsigned long sz = groupList.size;
+            for (int i=0; i<sz; i++) {
+                BMXGroup *group = [groupList get:i];
+                if (group.groupStatus != BMXGroup_GroupStatus_Destroyed && group.roleType == BMXGroup_MemberRoleType_GroupMember) {
                     [groupNormalArray addObject:group];
                 } else {
                     MAXLog(@"%lld", group.groupId);
@@ -69,7 +69,7 @@
 
 // 销毁群
 - (void)destroyGroupWithGroup:(BMXGroup *)group {
-    [[[BMXClient sharedClient] groupService] destroyGroup:group completion:^(BMXError *error) {
+    [[[BMXClient sharedClient] groupService] destroyWithGroup:group completion:^(BMXError *error) {
         if (!error) {
             MAXLog(@"销毁群");
             [self onGrouplistChange];
@@ -80,7 +80,7 @@
 
 #pragma mark - TableViewDelegate
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView {
-    return 2;
+    return 1;
 }
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
@@ -95,7 +95,7 @@
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
     ImageTitleBasicTableViewCell *cell = [ImageTitleBasicTableViewCell ImageTitleBasicTableViewCellWith:tableView];
 
-        MAXLog(@"%ld", self.groupArray.count);
+    MAXLog(@"%lu", (unsigned long)self.groupArray.count);
         BMXGroup *group = self.groupArray[indexPath.row];
         [cell refreshByGroup:group];
         MAXLog(@"%@", group);
@@ -104,8 +104,8 @@
 
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
     [tableView deselectRowAtIndexPath:indexPath animated:YES];
-    BMXRoster *roster = self.rosterArray[indexPath.row];
-    [self showImageAlertWithRoster:roster];
+    BMXGroup *group = self.rosterArray[indexPath.row];
+    [self showImageAlertWithRoster:group];
 }
 
 - (UIImage *)getImage {
@@ -124,6 +124,13 @@
     return nil;
 }
 
+- (BMXMessage *)configMessage:(id)attachment fromId:(long long) fromId toId:(long long) toId {
+    BMXMessage *messageObject;
+    
+    messageObject = [BMXMessage createMessageWithFrom:fromId to:toId type:BMXMessage_MessageType_Group conversationId:toId attachment:attachment];
+    return messageObject;
+}
+
 - (void)showImageAlertWithRoster:(BMXGroup *)group {
     ImageAlertView *alertView = [[ImageAlertView alloc] initWithFrame:CGRectMake(0, 0, MAXScreenW, MAXScreenH)];
     
@@ -140,13 +147,12 @@
         UIImage *image = contentImg;
         NSData *imageData = UIImageJPEGRepresentation(image,1.0f);
         NSData *thumImageData =  UIImageJPEGRepresentation(image,1.0f);
-        BMXImageAttachment *imageAttachment = [[BMXImageAttachment alloc] initWithData:imageData thumbnailData:thumImageData imageSize:image.size conversationId:[NSString stringWithFormat:@"%lld",group.groupId]];
-        imageAttachment.pictureSize = CGSizeMake(image.size.width, image.size.height);
+        BMXMessageAttachmentSize *sz = [[BMXMessageAttachmentSize alloc] initWithWidth:image.size.width height:image.size.height];
+        BMXImageAttachment *imageAttachment = [[BMXImageAttachment alloc] initWithData:imageData thumbnailData:thumImageData imageSize:sz displayName:@"" conversationId:group.groupId];
         IMAcount *account = [IMAcountInfoStorage loadObject];
-        BMXMessageObject *messageObject = [[BMXMessageObject alloc] initWithBMXMessageAttachment:imageAttachment fromId:[account.usedId longLongValue] toId:group.groupId type:BMXMessageTypeGroup conversationId:group.groupId];
-        messageObject.contentType = BMXContentTypeImage;
+        BMXMessage *messageObject = [self configMessage:imageAttachment fromId:[account.usedId longLongValue] toId:group.groupId];
         if (messageObject) {
-            [[[BMXClient sharedClient] chatService] sendMessage:messageObject];
+            [[[BMXClient sharedClient] chatService] sendMessageWithMsg: messageObject];
             [self.navigationController popViewControllerAnimated:YES];
         }
     };

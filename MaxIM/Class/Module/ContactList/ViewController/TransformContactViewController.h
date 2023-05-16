@@ -7,6 +7,7 @@
 //
 
 #import "ContactListViewController.h"
+#import <floo-ios/floo_proxy.h>
 
 @class BMXRoster;
 @class BMXGroup;
@@ -15,7 +16,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 @protocol TransformContactVCProtocol <NSObject>
 
-- (void)transterSlectedRoster:(BMXRoster *)roster;
+- (void)transterSlectedRoster:(BMXRosterItem *)roster;
 - (void)transterSlectedGroup:(BMXGroup *)group;
 
 @end

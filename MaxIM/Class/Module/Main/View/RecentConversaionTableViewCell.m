@@ -17,7 +17,7 @@
 #import "RecentConversaionTableViewCell.h"
 #import "UIView+BMXframe.h"
 #import <UIImageView+WebCache.h>
-#import <floo-ios/BMXConversation.h>
+#import <floo-ios/floo_proxy.h>
 
 @interface RecentConversaionTableViewCell ()
 

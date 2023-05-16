@@ -8,10 +8,9 @@
 
 #import "LHPhotoPreviewCell.h"
 #import "SDImageCache.h"
-#import <floo-ios/BMXClient.h>
 #import "LHMessageModel.h"
-#import <floo-ios/BMXMessageAttachment.h>
-#import <floo-ios/BMXImageAttachment.h>
+#import <floo-ios/floo_proxy.h>
+
 @interface LHPhotoPreviewCell () <UIScrollViewDelegate>
 
 @property (nonatomic, strong) UIScrollView *scrollView;
@@ -91,10 +90,10 @@
     _imageView.frame = _imageContainerView.bounds;
 }
 
-- (void)setImageUrlWith:(BMXMessageObject *)messagemodel {
+- (void)setImageUrlWith:(BMXMessage *)messagemodel {
     MAXLog(@"显示原图");
     [_scrollView setZoomScale:1.0 animated:NO];
-    BMXImageAttachment *attachment = (BMXImageAttachment *)messagemodel.attachment;
+    BMXImageAttachment *attachment = [BMXImageAttachment dynamicCastWithAttachment:messagemodel.attachment];
     self.imageView.image = [UIImage imageNamed:@"contact_placeholder"];
     if (attachment.path == nil ||  [@"" isEqualToString:attachment.path] || ![[NSFileManager defaultManager] fileExistsAtPath:attachment.path]) {
         if ([[NSFileManager defaultManager] fileExistsAtPath:attachment.thumbnailPath]) {

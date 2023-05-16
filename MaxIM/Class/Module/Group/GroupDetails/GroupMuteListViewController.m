@@ -17,12 +17,10 @@
 
 #import "GroupMuteListViewController.h"
 #import "GorupLittleCell.h"
-#import <floo-ios/BMXClient.h>
-#import <floo-ios/BMXGroupMember.h>
-#import <floo-ios/BMXRoster.h>
+#import <floo-ios/floo_proxy.h>
+#import "MAXUtils.h"
 #import "IMAcount.h"
 #import "IMAcountInfoStorage.h"
-#import <floo-ios/BMXGroupBannedMember.h>
 #import "UIViewController+CustomNavigationBar.h"
 
 @interface GroupMuteListViewController ()<UITabBarDelegate, UITableViewDataSource>
@@ -79,8 +77,8 @@
         cell = [[GorupLittleCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:@"GorupLittleCell"];
         cell.selectionStyle = UITableViewCellSelectionStyleNone;
     }
-    BMXRoster* roster = [self.muteList objectAtIndex:indexPath.row];
-    NSString* uname = (roster.nickName && ![@"" isEqualToString:roster.nickName]) ? roster.nickName : roster.userName;
+    BMXRosterItem* roster = [self.muteList objectAtIndex:indexPath.row];
+    NSString* uname = (roster.nickname && ![@"" isEqualToString:roster.nickname]) ? roster.nickname : roster.username;
     NSString* rosterIdStr = [NSString stringWithFormat:@"%lld", roster.rosterId];
     BOOL isSel = [[_selectedIdDictionary objectForKey:rosterIdStr] boolValue] ;
     [cell setAvatarStr:roster.avatarUrl RosterName:uname Selected:isSel];
@@ -90,7 +88,7 @@
 
 -(void) tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
 {
-    BMXRoster* roster = [self.muteList objectAtIndex:indexPath.row];
+    BMXRosterItem* roster = [self.muteList objectAtIndex:indexPath.row];
     NSString* rosterIdStr = [NSString stringWithFormat:@"%lld", roster.rosterId];
     BOOL canEdit = NO;
     if([self isSelf:rosterIdStr]) { //是自己
@@ -122,14 +120,15 @@
 
 -(void) touchedRightBar
 {
-    NSMutableArray* xids = [NSMutableArray array];
+    ListOfLongLong* xids = [[ListOfLongLong alloc] init];
     for (NSString* uid in _selectedIdDictionary) {
         BOOL issel = [[_selectedIdDictionary objectForKey:uid] boolValue];
         if (issel) {
-            [xids addObject:[NSNumber numberWithLongLong:[uid longLongValue]]];
+            long long val = [uid longLongValue];
+            [xids addWithX:&val];
         }
     }
-    if (xids.count <=0) {
+    if (xids.size <=0) {
         UIAlertController* alert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Warning", @"警告") message:NSLocalizedString(@"You_have_no_members_selected", @"您没有选中成员") preferredStyle:UIAlertControllerStyleAlert];
         [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Confirm", @"确定") style:UIAlertActionStyleDefault handler:nil]];
         [self presentViewController:alert animated:YES completion:nil];
@@ -144,16 +143,16 @@
 }
 
 
--(void) removeMuteListWithIds: (NSArray*) uids
+-(void) removeMuteListWithIds: (ListOfLongLong*) uids
 {
-    [[[BMXClient sharedClient] groupService] unbanMembersByGroup:self.group  members:uids reason:@"unmute member" completion:^(BMXError *error) {
+    [[[BMXClient sharedClient] groupService] unbanMembersWithGroup:self.group  members:uids completion:^(BMXError *error) {
         if(!error) {
             [HQCustomToast showDialog:NSLocalizedString(@"Unbanned_successfully", @"解除禁言成功")];
             [self getMuteList];
             // TODO 优化， 直接从列表中删除
             [[NSNotificationCenter defaultCenter] postNotificationName:@"KEY_NOTIFICATION_GROUP_INFO_UPDATED" object:nil];
         }else {
-            MAXLog(@"request error, code: %d", error.errorCode);
+            MAXLog(@"request error, code: %ld", (long)error.errorCode);
         }
     }];
    
@@ -165,37 +164,39 @@
 }
 
 - (void)getMuteList {
-    [[[BMXClient sharedClient] groupService] getBannedMembersByGroup:self.group completion:^(NSArray<BMXGroupBannedMember *> *muteMemberList, BMXError *error) {
-        MAXLog(@"%ld", muteMemberList.count);
-        NSMutableArray* array = [NSMutableArray array];
-        for (BMXGroupBannedMember* amember in muteMemberList) {
-            NSString* uidStr = [NSString stringWithFormat:@"%ld", amember.uid];
-            [array addObject:uidStr];
+    [[[BMXClient sharedClient] groupService] getBannedMembers:self.group completion:^(BMXGroupBannedMemberList *muteMemberList, BMXError *error) {
+        unsigned long sz = muteMemberList.size;
+        ListOfLongLong *list = [[ListOfLongLong alloc] init];
+        for (int i=0; i<sz; i++) {
+            BMXGroupBannedMember *bannedMember = [muteMemberList get:i];
+            long long uid = bannedMember.getMUid;
+            [list addWithX: &uid];
         }
-        [self getRostersByidArray:array];
+        [self getRostersByidArray:list];
     }];
 }
 
 // 获取群成员详情
-- (void)getRostersByidArray:(NSArray *)idArray {
-    [[[BMXClient sharedClient] rosterService] searchRostersByRosterIdList:idArray forceRefresh:YES completion:^(NSArray<BMXRoster *> *rosterList, BMXError *error) {
-        MAXLog(@"%ld", rosterList.count);
-        self.muteList = [NSArray arrayWithArray: rosterList];
-        [self.tableView reloadData];
+- (void)getRostersByidArray:(ListOfLongLong *)idList {
+    [MAXUtils getRostersByidArray:idList completion:^(NSArray *arr) {
+         self.muteList = arr;
+         [self.tableView reloadData];
     }];
 }
 
 -(void) getAdminList
 {
-    [[[BMXClient sharedClient] groupService] getAdmins:self.group forceRefresh:NO completion:^(NSArray<BMXGroupMember *> *groupMembers, BMXError *error) {
-        IMAcount* acc = [IMAcountInfoStorage loadObject];
-        NSString* currentStr = acc.usedId;
-        for (BMXGroupMember* member in groupMembers) {
-            NSString* guidStr = [NSString stringWithFormat:@"%ld", member.uid];
-            [_adminDictionary setObject:[NSNumber numberWithBool:YES] forKey:guidStr];
+    [[[BMXClient sharedClient] groupService] getAdmins:self.group forceRefresh:YES completion:^(BMXGroupMemberList *groupMembers, BMXError *error) {
+        unsigned long sz = groupMembers.size;
+        for (int i=0; i<sz; i++) {
+            BMXGroupMember* member = [groupMembers get:i];
+            NSString* guidStr = [NSString stringWithFormat:@"%lld", member.getMUid];
             if([self isSelf:guidStr]) {
-                _isAdmin = YES;
+                self->_isAdmin = YES;
             }
+        }
+        if (self->_isAdmin) {
+            [self.tableView reloadData];
         }
     }];
 }

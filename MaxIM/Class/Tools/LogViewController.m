@@ -8,7 +8,8 @@
 
 #import "LogViewController.h"
 #import "UIViewController+CustomNavigationBar.h"
-#import <floo-ios/BMXClient.h>
+#import <floo-ios/floo_proxy.h>
+static const NSUInteger kLineNum = 200;
 
 @interface LogViewController ()
 
@@ -26,9 +27,18 @@
     [self.view addSubview:self.logTextView];
     
 //
-    self.logPath =  [NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES).firstObject stringByAppendingPathComponent:[NSString stringWithFormat:@"ChatData/%@/flooLog/floo.log", [BMXClient sharedClient].sdkConfig.appID]];
-    self.logTextView.text = [NSString stringWithContentsOfFile:self.logPath encoding:NSUTF8StringEncoding error:nil] ;
-//    [self.logTextView selectAll:nil];
+    self.logPath =  [NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES).firstObject stringByAppendingPathComponent:[NSString stringWithFormat:@"ChatData/%@/flooLog/floo.log", [BMXClient sharedClient].getSDKConfig.getAppID]];
+    NSString *content = [NSString stringWithContentsOfFile:self.logPath encoding:NSUTF8StringEncoding error:nil] ;
+    NSArray* lines =
+              [content componentsSeparatedByCharactersInSet:
+              [NSCharacterSet newlineCharacterSet]];
+    NSMutableString* lastLines = [NSMutableString string];
+    for (NSUInteger i = lines.count - kLineNum; i < lines.count; i++)
+    {
+        [lastLines appendString: [lines objectAtIndex: i]];
+        [lastLines appendString:@"\n"];
+    }
+    self.logTextView.text = lastLines;
 }
 
 - (void)setUpNavItem{
@@ -54,7 +64,7 @@
                 }
             }
         }
-        self.logPath =  [NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES).firstObject stringByAppendingPathComponent:[NSString stringWithFormat:@"ChatData/%@/flooLog/floo.log", [BMXClient sharedClient].sdkConfig.appID]];
+        self.logPath =  [NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES).firstObject stringByAppendingPathComponent:[NSString stringWithFormat:@"ChatData/%@/flooLog/floo.log", [BMXClient sharedClient].getSDKConfig.getAppID]];
         NSURL *flooLogUrl = [NSURL fileURLWithPath:self.logPath];
         [itemsArr addObject: flooLogUrl];
         

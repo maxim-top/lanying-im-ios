@@ -11,10 +11,8 @@
 #import "RosterDetailViewController.h"
 #import "ContactTableViewCell.h"
 
-#import <floo-ios/BMXClient.h>
-#import <floo-ios/BMXRoster.h>
-
-#import <floo-ios/BMXApplication.h>
+#import <floo-ios/floo_proxy.h>
+#import "MAXUtils.h"
 #import "UIViewController+CustomNavigationBar.h"
 
 @interface RosterDetailViewController ()<UITableViewDelegate, UITableViewDataSource>
@@ -39,7 +37,7 @@
 }
 
 - (void)acceptAddRoster:(NSNotification *)noti {
-    BMXRoster *roster = noti.object;
+    BMXRosterItem *roster = noti.object;
     [self acceptAddRosterById:(NSInteger)roster.rosterId];
 }
 
@@ -47,33 +45,36 @@
 // 获取申请添加好友列表
 - (void)getApplicationList {
     [HQCustomToast showWating];
-    [[[BMXClient sharedClient] rosterService] getApplicationListWithCursor:@"" pageSize:50 completion:^(NSArray *applicationList, NSString *cursor, int offset, BMXError *error) {
+    [[[BMXClient sharedClient] rosterService] getApplicationList:@"" pageSize:50 completion:^(BMXRosterApplicationResultPage *res, BMXError *error) {
         [HQCustomToast hideWating];
         if (!error) {
-            NSArray *applicationArray = [NSArray arrayWithArray:applicationList];
-            self.rosterApplicationArray = applicationArray;
-            NSMutableArray *idList = [NSMutableArray array];
-            for (BMXApplication *application in applicationArray) {
-                [idList addObject:[NSString stringWithFormat:@"%lld", application.rosterId]];
+            NSMutableArray *arr = [[NSMutableArray alloc] init];
+            ListOfLongLong *idList = [[ListOfLongLong alloc] init];
+            unsigned long sz = res.result.size;
+            for (int i=0; i<sz; i++) {
+                BMXRosterServiceApplication *app = [res.result get:i];
+                [arr addObject:app];
+                long long val = app.getMRosterId;
+                [idList addWithX: &val];
             }
-            [self searchRostersByidArray:[NSArray arrayWithArray:idList]];
-            MAXLog(@"%lu", (unsigned long)applicationArray.count);
+            self.rosterApplicationArray = arr;
+            [self searchRostersByidList:idList];
+            MAXLog(@"%lu", (unsigned long)self.rosterApplicationArray.count);
         }
     }];
 }
 
 // 批量搜索用户
-- (void)searchRostersByidArray:(NSArray *)idArray {
-[[[BMXClient sharedClient] rosterService] searchRostersByRosterIdList:idArray forceRefresh:YES completion:^(NSArray<BMXRoster *> *rosterList, BMXError *error) {
-    MAXLog(@"%lu", (unsigned long)rosterList.count);
-    self.rosterArray = [NSArray arrayWithArray:rosterList];
-    [self.tableView reloadData];
-}];
+- (void)searchRostersByidList:(ListOfLongLong *)list {
+    [MAXUtils getRostersByidArray:list completion:^(NSArray *arr) {
+        self.rosterArray = arr;
+        [self.tableView reloadData];
+    }];
 }
 
 // 添加好友
 - (void)acceptAddRosterById:(NSInteger)rosterId {
-    [[[BMXClient sharedClient] rosterService] acceptRosterById:rosterId withCompletion:^(BMXError *error) {
+    [[[BMXClient sharedClient] rosterService] acceptWithRosterId:rosterId completion:^(BMXError *error) {
         if (!error) {
             MAXLog(@"添加成功");
             [self getApplicationList];
@@ -96,18 +97,18 @@
 }
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
-    BMXApplication *application = self.rosterApplicationArray[indexPath.row];
-    BMXRoster *rosterProfile= self.rosterArray[indexPath.row];
+    BMXRosterServiceApplication *application = self.rosterApplicationArray[indexPath.row];
+    BMXRosterItem *rosterProfile= self.rosterArray[indexPath.row];
     ContactTableViewCell *cell = [ContactTableViewCell contactTableViewCellWith:tableView];
     [cell refresh:rosterProfile];
-    cell.nicknameLabel.text = rosterProfile.userName;   
+    cell.nicknameLabel.text = rosterProfile.username;
 
-    cell.infoLabel.text = application.reason;
-    if (application.applicationStatus == BMXApplicationStatusAccepted) {
+    cell.infoLabel.text = application.getMReason;
+    if (application.getMStatus == BMXRosterService_ApplicationStatus_Accepted) {
         [cell.button setHidden:YES];
         [cell.contentLabel setHidden:NO];
         cell.contentLabel.text = NSLocalizedString(@"Added_as_Friend", @"已添加为好友");
-    } else if (application.applicationStatus == BMXApplicationStatusPending) {
+    } else if (application.getMStatus == BMXRosterService_ApplicationStatus_Pending) {
         [cell.button setHidden:NO];
         [cell.contentLabel setHidden:YES];
         [cell.button setTitle:NSLocalizedString(@"Agree", @"同意") forState:UIControlStateNormal];

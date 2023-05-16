@@ -7,11 +7,10 @@
 //
 
 #import "GroupBasicInfoViewController.h"
-#import <floo-ios/BMXGroup.h>
 #import "UIView+BMXframe.h"
-#import <floo-ios/BMXClient.h>
 #import "QRCodeGroupInviteApi.h"
 #import "LHChatVC.h"
+#import <floo-ios/floo_proxy.h>
 
 #import "UIViewController+CustomNavigationBar.h"
 
@@ -50,14 +49,14 @@
 
     [self setNavigationBarTitle:NSLocalizedString(@"Join_group", @"加入群") navLeftButtonIcon:@"blackback"];
     
-    UIImage *avarat = [UIImage imageWithContentsOfFile:self.group.avatarThumbnailPath];
-    if (avarat) {
-        self.avatarImageview.image = avarat;
+    UIImage *avatar = [UIImage imageWithContentsOfFile:self.group.avatarThumbnailPath];
+    if (avatar) {
+        self.avatarImageview.image = avatar;
     }else {
-        [[[BMXClient sharedClient] groupService] downloadAvatarWithGroup:self.group progress:^(int progress, BMXError *error) {
-        } completion:^(BMXGroup *resultGroup, BMXError *error) {
+        [[[BMXClient sharedClient] groupService] downloadAvatarWithGroup:self.group thumbnail:NO callback:^(int progress) {
+        } completion:^(BMXError *error) {
             if (!error) {
-                UIImage *image = [UIImage imageWithContentsOfFile:resultGroup.avatarThumbnailPath];
+                UIImage *image = [UIImage imageWithContentsOfFile:self.group.avatarThumbnailPath];
                 
                 dispatch_async(dispatch_get_main_queue(), ^{
                     self.avatarImageview.image = image;
@@ -76,7 +75,7 @@
             UITabBarController *bar =  (UITabBarController *)[UIApplication sharedApplication].keyWindow.rootViewController;
             UINavigationController *currentNav =  (UINavigationController *)bar.selectedViewController;
             
-            LHChatVC *vc = [[LHChatVC alloc] initWithGroupChat:self.group messageType:BMXMessageTypeGroup];
+            LHChatVC *vc = [[LHChatVC alloc] initWithGroupChat:self.group messageType:BMXMessage_MessageType_Group];
             vc.hidesBottomBarWhenPushed = YES;
             [currentNav pushViewController:vc animated:YES];
         } else  if ([result.code isEqualToString: @"20024"]) {
@@ -88,7 +87,7 @@
             UITabBarController *bar =  (UITabBarController *)[UIApplication sharedApplication].keyWindow.rootViewController;
             UINavigationController *currentNav =  (UINavigationController *)bar.selectedViewController;
             
-            LHChatVC *vc = [[LHChatVC alloc] initWithGroupChat:self.group messageType:BMXMessageTypeGroup];
+            LHChatVC *vc = [[LHChatVC alloc] initWithGroupChat:self.group messageType:BMXMessage_MessageType_Group];
             vc.hidesBottomBarWhenPushed = YES;
             [currentNav pushViewController:vc animated:YES];
         } else {

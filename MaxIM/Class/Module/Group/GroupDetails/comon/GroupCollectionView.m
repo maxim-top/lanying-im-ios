@@ -19,8 +19,7 @@
 
 #import "GroupAddMemberController.h"
 
-#import <floo-ios/BMXClient.h>
-#import <floo-ios/BMXRoster.h>
+#import <floo-ios/floo_proxy.h>
 
 
 
@@ -55,36 +54,25 @@
     [self.avatar sd_setImageWithURL:[NSURL URLWithString:url]];
     self.textLabel.text = name;
 }
--(void) cellContentWIthRoster:(BMXRoster*) roster
+-(void) cellContentWIthRoster:(BMXRosterItem*) roster
 {
-    if(roster.avatarThumbnailPath == nil || [@"" isEqualToString:roster.avatarThumbnailPath]) {
-        self.avatar.image = [UIImage imageNamed:@"contact_placeholder"];
+    UIImage* image = [UIImage imageWithContentsOfFile:roster.avatarThumbnailPath];
+    if(!image){
+        [[[BMXClient sharedClient] rosterService] downloadAvatarWithItem:roster thumbnail:YES callback:^(int progress) {
+        }  completion:^(BMXError *error) {
+            if (!error) {
+                dispatch_async(dispatch_get_main_queue(), ^{
+                    _avatar.image = [UIImage imageWithContentsOfFile:roster.avatarThumbnailPath];
+                });
+            }
+        }];
     }else {
-        UIImage* image = [UIImage imageWithContentsOfFile:roster.avatarThumbnailPath];
-        if(!image){
-            [[[BMXClient sharedClient] rosterService] downloadAvatarWithRoster:roster isThumbnail:YES progress:^(int progress, BMXError *error) {
-                
-            } completion:^(BMXRoster *aroster, BMXError *error) {
-                if(!error) {
-                    UIImage* simage = [UIImage imageWithContentsOfFile:aroster.avatarThumbnailPath];
-                    if(simage != nil) {
-                        dispatch_async(dispatch_get_main_queue(), ^{
-                            self.avatar.image = simage;
-                            
-                        });
-                        
-                    }
-
-                }
-            }];
-        }else {
-            self.avatar.image = image;
-        }
+        self.avatar.image = image;
     }
     
-    NSString* name = roster.nickName;
+    NSString* name = roster.nickname;
     if(name == nil || [name isEqualToString:@""]) {
-        name = roster.userName;
+        name = roster.username;
     }
     self.textLabel.text = name;
 }
@@ -177,7 +165,7 @@
     if (index == _avaliableCount-1 && self.limit) {
         [cell setLast];
     }else {
-        BMXRoster* roster = [self.memberList objectAtIndex:indexPath.item];
+        BMXRosterItem* roster = [self.memberList objectAtIndex:indexPath.item];
         [cell cellContentWIthRoster:roster];
     }
     
@@ -228,7 +216,7 @@
         }
     } else {
         if([self.gmCollectionDelegate respondsToSelector:@selector(groupMemberCellTouchedRoster:)]) {
-            BMXRoster* roster = (BMXRoster*)[self.memberList objectAtIndex:index];
+            BMXRosterItem* roster = (BMXRosterItem*)[self.memberList objectAtIndex:index];
             [self.gmCollectionDelegate groupMemberCellTouchedRoster:roster];
         }
     }
@@ -244,7 +232,7 @@
     return 65*2 + 45;
 }
 
--(void) fillRosterList:(NSArray<BMXRoster*>*) list limit2line:(BOOL) limit
+-(void) fillRosterList:(NSArray<BMXRosterItem*>*) list limit2line:(BOOL) limit
 {
     self.memberList = [NSArray arrayWithArray:list];
     self.limit = limit;

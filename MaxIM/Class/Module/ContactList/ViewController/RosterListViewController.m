@@ -10,13 +10,13 @@
 //
 
 #import "RosterListViewController.h"
-#import <floo-ios/BMXClient.h>
+#import <floo-ios/floo_proxy.h>
+
 #import "ImageTitleBasicTableViewCell.h"
 #import "IMAcountInfoStorage.h"
 #import "IMAcount.h"
-#import <floo-ios/BMXRoster.h>
-#import <floo-ios/BMXImageAttachment.h>
 #import "ImageAlertView.h"
+#import "MAXUtils.h"
 
 
 @interface RosterListViewController ()<UITableViewDelegate, UITableViewDataSource>
@@ -50,54 +50,37 @@
 
 // 获取好友列表
 - (void)getAllRoster {
-    [[[BMXClient sharedClient] rosterService] getRosterListforceRefresh:NO completion:^(NSArray *rostIdList, BMXError *error) {
-        if (!error) {
-            NSLog(@"%lu", (unsigned long)rostIdList.count);
-            [self searchRostersByidArray:[NSArray arrayWithArray:rostIdList]];
-        }
+    [MAXUtils getAllRosterWithCompletion:^(NSArray *arr) {
+        self.rosterArray = arr;
+        [self.tableView reloadData];
     }];
 }
 
-// 批量搜索用户
-- (void)searchRostersByidArray:(NSArray *)idArray {
-    [[[BMXClient sharedClient] rosterService] searchRostersByRosterIdList:idArray forceRefresh:NO completion:^(NSArray<BMXRoster *> *rosterList, BMXError *error) {
-        
-        if (!error) {
-            NSLog(@"%lu", (unsigned long)rosterList.count);
-            self.rosterArray = [NSArray arrayWithArray:rosterList];
-            [self.tableView reloadData];
-        } else {
-            
-        }
-    }];
-}
-
-- (void)showImageAlertWithRoster:(BMXRoster *)roster {
+- (void)showImageAlertWithRoster:(BMXRosterItem *)roster {
     ImageAlertView *alertView = [[ImageAlertView alloc] initWithFrame:CGRectMake(0, 0, MAXScreenW, MAXScreenH)];
-    
     UIImage *avarart = [UIImage imageWithContentsOfFile:roster.avatarThumbnailPath];
     UIImage *contentImg = [self getImage];
     if (!avarart) {
         avarart = [UIImage imageNamed:@"contact_placeholder"];
     }
-    [alertView setAvarat:avarart nickName:roster.userName contentImg:contentImg];
-    
-    
+    [alertView setAvarat:avarart nickName:roster.username contentImg:contentImg];
+
+
     alertView.btnClickBlock = ^{
-        
+
             UIImage *image = contentImg;
             NSData *imageData = UIImageJPEGRepresentation(image,1.0f);
             NSData *thumImageData =  UIImageJPEGRepresentation(image,1.0f);
-            BMXImageAttachment *imageAttachment = [[BMXImageAttachment alloc] initWithData:imageData thumbnailData:thumImageData imageSize:image.size conversationId:[NSString stringWithFormat:@"%lld",roster.rosterId]];
-            imageAttachment.pictureSize = CGSizeMake(image.size.width, image.size.height);
             IMAcount *account = [IMAcountInfoStorage loadObject];
-        BMXMessageObject *messageObject = [[BMXMessageObject alloc] initWithBMXMessageAttachment:imageAttachment fromId:[account.usedId longLongValue] toId:roster.rosterId type:BMXMessageTypeSingle conversationId:roster.rosterId];
-            messageObject.contentType = BMXContentTypeImage;
-        if (messageObject) {
-            [[[BMXClient sharedClient] chatService] sendMessage:messageObject];
-            [self.navigationController popViewControllerAnimated:YES];
-        }
-        
+            BMXMessageAttachmentSize *sz = [[BMXMessageAttachmentSize alloc] initWithWidth:image.size.width height:image.size.height];
+            BMXImageAttachment *imageAttachment = [[BMXImageAttachment alloc] initWithData:imageData thumbnailData:thumImageData imageSize:sz displayName:@"" conversationId: roster.rosterId];
+            BMXMessage *msg;
+            msg = [BMXMessage createMessageWithFrom:[account.usedId longLongValue] to:roster.rosterId type: BMXMessage_MessageType_Single conversationId:roster.rosterId attachment:imageAttachment];
+            if (msg) {
+                [[[BMXClient sharedClient] chatService] sendMessageWithMsg: msg completion:^(BMXError *aError) {
+                }];
+                [self.navigationController popViewControllerAnimated:YES];
+            }
     };
     
     
@@ -136,7 +119,7 @@
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
     ImageTitleBasicTableViewCell *cell = [ImageTitleBasicTableViewCell ImageTitleBasicTableViewCellWith:tableView];
-    BMXRoster *roster = self.rosterArray[indexPath.row];
+    BMXRosterItem *roster = self.rosterArray[indexPath.row];
     [cell refresh:roster];
     
     return cell;
@@ -144,7 +127,7 @@
 
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
     [tableView deselectRowAtIndexPath:indexPath animated:YES];
-     BMXRoster *roster = self.rosterArray[indexPath.row];
+     BMXRosterItem *roster = self.rosterArray[indexPath.row];
     [self showImageAlertWithRoster:roster];
 }
 

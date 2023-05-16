@@ -15,7 +15,8 @@
     
 
 #import "GroupChangeNameViewController.h"
-#import <floo-ios/BMXClient.h>
+#import <floo-ios/floo_proxy.h>
+
 #import "UIViewController+CustomNavigationBar.h"
 
 @interface GroupChangeNameViewController ()
@@ -50,12 +51,12 @@
 }
 
 -(void) touchedRightBar {
-    [[[BMXClient sharedClient] groupService] setGroupName:self.group name:_textField.text completion:^(BMXGroup *group, BMXError *error) {
+    [[[BMXClient sharedClient] groupService] setName:self.group name:_textField.text completion:^(BMXError *error) {
         if (!error) {
             [HQCustomToast showDialog:NSLocalizedString(@"Set_successfully", @"设置成功")];
             [self.navigationController popViewControllerAnimated:YES];
         } else {
-            [HQCustomToast showDialog:[NSString stringWithFormat:@"%@", error.errorMessage]];
+            [HQCustomToast showDialog:[NSString stringWithFormat:@"%@", [error description]]];
         }
     }];
 }

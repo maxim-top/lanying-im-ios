@@ -15,6 +15,8 @@
     
 
 #import <UIKit/UIKit.h>
+#import <floo-ios/floo_proxy.h>
+
 @class BMXRoster;
 @interface GorupLittleCell : UITableViewCell
 
@@ -22,13 +24,13 @@
 -(void) setAvatarStr:(NSString*) avatarStr RosterName:(NSString*) name Selected:(BOOL) isSelected;
 
 -(void) setAvatarUrl:(NSString*) avatarUrl RosterName:(NSString*) name Selected:(BOOL) isSelected;
--(void) setAvatarRoster:(BMXRoster*)roster RosterName:(NSString*) name Selected:(BOOL) isSelected;
+-(void) setAvatarRoster:(BMXRosterItem*)roster RosterName:(NSString*) name Selected:(BOOL) isSelected;
 
 
 -(void) setSelect:(BOOL) isSelect;
 
 -(void) showAdmin:(BOOL) isShow;
 
-- (void)setDlownAvatar:(BMXRoster *)roster Selected:(BOOL) isSelected;
+- (void)setDlownAvatar:(BMXRosterItem *)roster Selected:(BOOL) isSelected;
 @end
 

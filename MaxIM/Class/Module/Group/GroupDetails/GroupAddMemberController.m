@@ -15,12 +15,9 @@
     
 
 #import "GroupAddMemberController.h"
-#import <floo-ios/BMXClient.h>
-#import <floo-ios/BMXGroup.h>
-#import <floo-ios/BMXRoster.h>
-#import <floo-ios/BMXGroupMember.h>
 #import "GorupLittleCell.h"
 #import "UIViewController+CustomNavigationBar.h"
+#import "MAXUtils.h"
 
 @interface GroupAddMemberController ()<UITableViewDelegate, UITableViewDataSource, BMXRosterServiceProtocol>
 {
@@ -66,13 +63,13 @@
         cell = [[GorupLittleCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:@"GorupLittleCell"];
         cell.selectionStyle = UITableViewCellSelectionStyleNone;
     }
-    BMXRoster* roster = [self.filteredRosterArray objectAtIndex:indexPath.row];
+    BMXRosterItem* roster = [self.filteredRosterArray objectAtIndex:indexPath.row];
     NSString* idStr = [NSString stringWithFormat:@"%lld", roster.rosterId];
     NSString* dicIdValue = [_selectedUids objectForKey:idStr];
     BOOL isSelected = ([dicIdValue isEqualToString:@"0"] || dicIdValue == nil) ? NO : YES;
-    NSString* name = roster.nickName;
+    NSString* name = roster.nickname;
     if([name isEqualToString:@""] || name == nil) {
-        name = roster.userName;
+        name = roster.username;
     }
     [cell setAvatarStr:roster.avatarUrl RosterName: name Selected: isSelected];
     [cell setDlownAvatar:roster Selected:isSelected];
@@ -81,7 +78,7 @@
 
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
 {
-    BMXRoster* roster = [self.filteredRosterArray objectAtIndex:indexPath.row];
+    BMXRosterItem* roster = [self.filteredRosterArray objectAtIndex:indexPath.row];
     NSString* idStr = [NSString stringWithFormat:@"%lld", roster.rosterId];
     NSString* selected = [_selectedUids objectForKey:idStr];
     NSString* ret = [selected isEqualToString:@"0"] || selected == nil ? @"1" : @"0";
@@ -91,40 +88,24 @@
 
 // 获取好友列表
 - (void)getAllRoster {
-    [[[BMXClient sharedClient] rosterService] getRosterListforceRefresh:YES completion:^(NSArray *rostIdList, BMXError *error) {
-        if (!error) {
-            [self searchRostersByidArray:[NSArray arrayWithArray:rostIdList]];
-        }
-    }];
-}
-
-// 批量搜索用户
-- (void)searchRostersByidArray:(NSArray *)idArray {
-    [[[BMXClient sharedClient] rosterService] searchRostersByRosterIdList:idArray forceRefresh:YES completion:^(NSArray<BMXRoster *> *rosterList, BMXError *error) {
-        MAXLog(@"%ld", rosterList.count);
-        self.rosterArray = [NSArray arrayWithArray:rosterList];
+    [MAXUtils getAllRosterWithCompletion:^(NSArray *arr) {
+        self.rosterArray = arr;
         [self filterData];
     }];
 }
 
 // 获取群成员
 - (void)getMembers {
-    [[[BMXClient sharedClient] groupService] getMembers:self.group forceRefresh:YES completion:^(NSArray<BMXGroupMember *> *groupList, BMXError *error) {
-        MAXLog(@"%ld", groupList.count);
-        NSMutableArray* muarr = [NSMutableArray array];
-        for (BMXGroupMember* amember in groupList) {
-            NSString* uid = [NSString stringWithFormat:@"%ld", amember.uid];
-            [muarr addObject:uid];
-        }
-        self.joinedRosterIds = [NSArray arrayWithArray:muarr];
+    [MAXUtils getMemberIdArrayWithGroup:self.group completion:^(NSArray *arr) {
+        self.joinedRosterIds = [NSArray arrayWithArray:arr];
         [self filterData];
     }];
 }
 
--(void) filterData
+-(void) filterData  
 {
     NSMutableArray* arr = [NSMutableArray array];
-    for (BMXRoster* roster in self.rosterArray) {
+    for (BMXRosterItem* roster in self.rosterArray) {
         NSString* uid = [NSString stringWithFormat:@"%lld", roster.rosterId];
         if(![self.joinedRosterIds containsObject:uid]) {
             [arr addObject:roster];
@@ -146,27 +127,28 @@
 
 -(void) touchedRightBar
 {
-    NSMutableArray* ids = [NSMutableArray array];
+    ListOfLongLong* ids = [[ListOfLongLong alloc] init];
     NSArray* allKey = _selectedUids.allKeys;
     for (NSString* idkey in allKey) {
         if ([[_selectedUids objectForKey:idkey] isEqualToString:@"1"]) {
-            [ids addObject:[NSNumber numberWithLongLong:[idkey longLongValue]]];
+            long long v = [idkey longLongValue];
+            [ids addWithX:&v];
         }
     }
-    if(ids.count == 0 ) {
+    if(ids.size == 0 ) {
         MAXLog(@"please select ....");
     }else {
         [self showAlertWithIds:ids];
     }
 }
 
--(void) showAlertWithIds:(NSArray*) ids {
+-(void) showAlertWithIds:(ListOfLongLong*) ids {
     UIAlertController *alertController = [UIAlertController alertControllerWithTitle:nil message:NSLocalizedString(@"enter_your_invitation_message", @"请输入邀请消息") preferredStyle:UIAlertControllerStyleAlert];
     [alertController addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Cancel", @"取消") style:UIAlertActionStyleCancel handler:nil]];
     [alertController addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Confirm", @"确定") style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
         UITextField* tfield = alertController.textFields.firstObject;
         NSString* message = tfield.text;
-        [[[BMXClient sharedClient] groupService] addMembersToGroup:self.group memberIdlist:ids message:message completion:^(BMXError *error) {
+        [[[BMXClient sharedClient] groupService] addMembersWithGroup:self.group members:ids message:message completion:^(BMXError *error) {
             [[NSNotificationCenter defaultCenter] postNotificationName:@"KEY_NOTIFICATION_GROUP_MEMBER_UPDATED" object:nil];
             [self.navigationController popViewControllerAnimated:YES];
         }];

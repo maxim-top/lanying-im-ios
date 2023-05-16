@@ -7,9 +7,7 @@
 //
 
 #import <UIKit/UIKit.h>
-#import <floo-ios/BMXRoster.h>
-#import <floo-ios/BMXMessageObject.h>
-#import <floo-ios/BMXGroup.h>
+#import <floo-ios/floo_proxy.h>
 
 @protocol ChatVCDelegate <NSObject>
 
@@ -19,11 +17,14 @@
 
 @interface LHChatVC : UIViewController
 
-- (instancetype)initWithRoster:(BMXRoster *)roster
-                   messageType:(BMXMessageType)messageType;
+- (instancetype)initWithRoster:(BMXRosterItem *)roster
+                   messageType:(BMXMessage_MessageType)messageType;
+
+- (instancetype)initWithConversationId:(long long)conversationId
+                   messageType:(BMXMessage_MessageType)messageType;
 
 - (instancetype)initWithGroupChat:(BMXGroup *)group
-                      messageType:(BMXMessageType)messageType;
+                      messageType:(BMXMessage_MessageType)messageType;
 
 @property (nonatomic,weak) id<ChatVCDelegate> delegate;
 

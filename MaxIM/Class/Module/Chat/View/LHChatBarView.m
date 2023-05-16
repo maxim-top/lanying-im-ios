@@ -14,7 +14,7 @@
 #import "LHTools.h"
 #import "TZImagePickerController.h"
 #import "ICDocumentViewController.h"
-#import <floo-ios/BMXClient.h>
+#import <floo-ios/floo_proxy.h>
 
 #import "VideoView.h"
 #import "VideoManager.h"
@@ -376,7 +376,7 @@ CGFloat const kChatBatItemWH = 26.0f;
     } else {
         ICDocumentViewController *docVC = [[ICDocumentViewController alloc] init];
         docVC.delegate = self;
-        NSString *filePath = [[[[BMXClient sharedClient] chatService] getAttachmentDir] stringByAppendingPathComponent:@"file"];
+        NSString *filePath = [[[[BMXClient sharedClient] chatService] attachmentDir] stringByAppendingPathComponent:@"file"];
         NSFileManager *fileManager = [NSFileManager defaultManager];
         if (![fileManager fileExistsAtPath:filePath]) {
             [fileManager createDirectoryAtPath:filePath withIntermediateDirectories:YES attributes:nil error:nil];
@@ -402,6 +402,20 @@ CGFloat const kChatBatItemWH = 26.0f;
         [alert show];
     } else {
         [NSTimer scheduledTimerWithTimeInterval:0.3 target:self selector:@selector(videoViewWillAppear) userInfo:nil repeats:NO]; // 待动画完成
+    }
+}
+
+- (void)moreViewVideoCallAction:(LHChatBarMoreView *)moreView {
+    MAXLog(@"点击视频通话");
+    if (self.delegate && [self.delegate respondsToSelector:@selector(chatViewVideoCall)]) {
+        [self.delegate chatViewVideoCall];
+    }
+}
+
+- (void)moreViewVoiceCallAction:(LHChatBarMoreView *)moreView {
+    MAXLog(@"点击语音通话");
+    if (self.delegate && [self.delegate respondsToSelector:@selector(chatViewVoiceCall)]) {
+        [self.delegate chatViewVoiceCall];
     }
 }
 

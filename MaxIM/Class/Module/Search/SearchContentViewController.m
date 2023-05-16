@@ -16,17 +16,14 @@
 
 #import "SearchContentViewController.h"
 #import "BMXSearchView.h"
-#import <floo-ios/BMXClient.h>
 #import "ContactTableView.h"
 #import "RecentConversaionTableViewCell.h"
-#import <floo-ios/BMXRoster.h>
-#import <floo-ios/BMXGroup.h>
 #import "LHChatVC.h"
 #import "IMAcount.h"
 #import "IMAcountInfoStorage.h"
 #import "UIView+BMXframe.h"
-#import <floo-ios/BMXConversation.h>
 #import "UIViewController+CustomNavigationBar.h"
+#import <floo-ios/floo_proxy.h>
 
 
 @interface SearchContentViewController () <UITextFieldDelegate, UITableViewDelegate, UITableViewDataSource>
@@ -36,7 +33,7 @@
 @property (nonatomic, strong) NSMutableArray *resultArray;
 @property (nonatomic, strong) NSMutableArray *messageArray;
 @property (nonatomic, strong) NSArray *categoryArray;
-@property (nonatomic,assign) BMXContentType searchContentType;
+@property (nonatomic,assign) BMXMessage_ContentType searchContentType;
 @property (nonatomic,assign) BOOL showContentTypeView;
 @property (nonatomic, strong) BMXConversation *conversation;
 
@@ -45,10 +42,10 @@
 
 @implementation SearchContentViewController
 
-- (instancetype)initWithSearchContentType:(BMXContentType)contentType conversation:(BMXConversation *)conversation {
+- (instancetype)initWithSearchContentType:(BMXMessage_ContentType)contentType conversation:(BMXConversation *)conversation {
     if (self = [super init]) {
         self.searchContentType = contentType;
-        if (contentType == BMXContentTypeText) {
+        if (contentType == BMXMessage_ContentType_Text) {
             self.showContentTypeView = YES;
         } else {
             self.showContentTypeView = NO;
@@ -108,15 +105,14 @@
 }
 
 - (void)searchTypeClick:(UIButton *)button {
-    BMXContentType type = (int)button.tag - 20000;
-    [self.conversation searchMessagesBycontentType:type refTime:0 size:100 directionType:BMXMessageDirectionUp completion:^(NSArray<BMXMessageObject *> * _Nonnull messageList, BMXError * _Nonnull error) {
-        if (messageList.count > 0) {
-            [self dataHandleMessages:messageList];
+    BMXMessage_ContentType type = (int)button.tag - 20000;
+    [self.conversation searchMessagesByTypeWithType:type refTime:0 size:100 completion:^(BMXMessageList *result, BMXError *aError) {
+        if (result.size > 0) {
+            [self dataHandleMessages:result];
         } else {
             [HQCustomToast showDialog:NSLocalizedString(@"No_result_found_for_now", @"暂无查询结果")];
         }
     }];
-
 }
 
 - (NSArray *)categoryArray {
@@ -140,22 +136,20 @@
 
 - (void)searchContentWith:(NSString *)keywords {
     if (self.isConversation == YES) {
-        if (self.searchContentType == BMXContentTypeText) {
-            [self.conversation searchMessagesByKeyWords:keywords refTime:0 size:100 directionType:BMXMessageDirectionUp completion:^(NSArray<BMXMessageObject *> * _Nonnull messageList, BMXError * _Nonnull error) {
-                [self dataHandleMessages:messageList];
-
+        if (self.searchContentType == BMXMessage_ContentType_Text) {
+            [self.conversation searchMessagesByKeyWordsWithKeywords :keywords refTime:0 size:100 arg5:BMXConversation_Direction_Up completion:^(BMXMessageList *result, BMXError *aError) {
+                [self dataHandleMessages:result];
             }];
         }
     } else {
-        [[[BMXClient sharedClient] chatService] searchMessagesByKeyWords:keywords refTime:0 size:100 directionType:BMXMessageDirectionUp completion:^(NSArray *array, BMXError *error) {
-            [self dataHandleConversation:array];
-            
+        [[[BMXClient sharedClient] chatService] searchMessagesByKeyWordsWithKeywords:keywords refTime:0 size:100 arg5:BMXConversation_Direction_Up completion:^(BMXMessageListList *result, BMXError *aError) {
+            [self dataHandleConversation:result];
         }];
    
     }
 }
 
-- (void)dataHandleConversation:(NSArray *)conversations {
+- (void)dataHandleConversation:(BMXMessageListList *)conversations {
     
     NSMutableArray *tempProfileArray = [NSMutableArray array];
     self.messageArray = [NSMutableArray array];
@@ -163,17 +157,21 @@
     dispatch_queue_t queue = dispatch_queue_create("getSearchResult",DISPATCH_QUEUE_SERIAL);
     dispatch_semaphore_t semaphore = dispatch_semaphore_create(0);
     
-    for (NSArray * array in conversations) {
-        for (BMXMessageObject *messageObjc in array) {
+    unsigned long szConv = conversations.size;
+    for (int i=0; i<szConv; i++) {
+        BMXMessageList *messageList = [conversations get:i];
+        unsigned long sz = messageList.size;
+        for (int j=0; j<sz; j++) {
+            BMXMessage *messageObjc = [messageList get:j];
             [self.messageArray addObject:messageObjc];
             dispatch_async(queue, ^{
-                if (messageObjc.messageType == BMXMessageTypeSingle) {
+                if (messageObjc.type == BMXMessage_MessageType_Single) {
                     IMAcount *im =  [IMAcountInfoStorage loadObject];
                     
                     NSString *fromIdstr = [NSString stringWithFormat:@"%lld", messageObjc.fromId];
-                    NSInteger rosterId = [fromIdstr isEqualToString:im.usedId] ? messageObjc.toId : messageObjc.fromId;
+                    long long rosterId = [fromIdstr isEqualToString:im.usedId] ? messageObjc.toId : messageObjc.fromId;
                     
-                    [[[BMXClient sharedClient] rosterService] searchByRosterId:rosterId forceRefresh:NO completion:^(BMXRoster *roster, BMXError *error) {
+                    [[[BMXClient sharedClient] rosterService] searchWithRosterId:rosterId forceRefresh:NO completion:^(BMXRosterItem *roster, BMXError *error) {
                         dispatch_semaphore_signal(semaphore);
                         if (roster) {
                             
@@ -182,8 +180,7 @@
                     }];
                      dispatch_semaphore_wait(semaphore, DISPATCH_TIME_FOREVER);
                 }else {
-                    
-                    [[[BMXClient sharedClient] groupService] getGroupInfoByGroupId:messageObjc.conversationId forceRefresh:NO completion:^(BMXGroup *group, BMXError *error) {
+                    [[[BMXClient sharedClient] groupService] fetchGroupByIdWithGroupId:messageObjc.conversationId forceRefresh:NO completion:^(BMXGroup *group, BMXError *error) {
                         dispatch_semaphore_signal(semaphore);
                         [tempProfileArray addObject:group];
                     }];
@@ -203,22 +200,24 @@
     
 }
 
-- (void)dataHandleMessages:(NSArray *)messages {
+- (void)dataHandleMessages:(BMXMessageList *)messages {
     NSMutableArray *tempProfileArray = [NSMutableArray array];
     self.messageArray = [NSMutableArray array];
     
     dispatch_queue_t queue = dispatch_queue_create("getSearchResult",DISPATCH_QUEUE_SERIAL);
     dispatch_semaphore_t semaphore = dispatch_semaphore_create(0);
     
-    for (BMXMessageObject *messageObjc in messages) {
+    unsigned long sz = messages.size;
+    for (int i=0; i<sz; i++) {
+        BMXMessage *messageObjc = [messages get:i];
         [self.messageArray addObject:messageObjc];
         dispatch_async(queue, ^{
-            if (messageObjc.messageType == BMXMessageTypeSingle) {
+            if (messageObjc.type == BMXMessage_MessageType_Single) {
                 IMAcount *im =  [IMAcountInfoStorage loadObject];
                 NSString *fromIdStr = [NSString stringWithFormat:@"%lld", messageObjc.fromId];
-                NSInteger rosterId = [fromIdStr isEqualToString:im.usedId] ? messageObjc.toId : messageObjc.fromId;
+                long long rosterId = [fromIdStr isEqualToString:im.usedId] ? messageObjc.toId : messageObjc.fromId;
                 
-                [[[BMXClient sharedClient] rosterService] searchByRosterId:rosterId forceRefresh:NO completion:^(BMXRoster *roster, BMXError *error) {
+                [[[BMXClient sharedClient] rosterService] searchWithRosterId:rosterId forceRefresh:NO completion:^(BMXRosterItem *roster, BMXError *error) {
                     dispatch_semaphore_signal(semaphore);
                     if (roster) {
                         
@@ -228,7 +227,7 @@
                 dispatch_semaphore_wait(semaphore, DISPATCH_TIME_FOREVER);
             }else {
                 
-                [[[BMXClient sharedClient] groupService] getGroupInfoByGroupId:messageObjc.conversationId forceRefresh:NO completion:^(BMXGroup *group, BMXError *error) {
+                [[[BMXClient sharedClient] groupService] fetchGroupByIdWithGroupId:messageObjc.conversationId forceRefresh:NO completion:^(BMXGroup *group, BMXError *error) {
                     dispatch_semaphore_signal(semaphore);
                     [tempProfileArray addObject:group];
                 }];
@@ -272,18 +271,18 @@
     
     RecentConversaionTableViewCell *cell = [RecentConversaionTableViewCell cellWithTableview:tableView];
     
-    if ([NSStringFromClass([self.resultArray[indexPath.row] class]) isEqualToString:@"BMXRoster"]) {
+    if ([NSStringFromClass([self.resultArray[indexPath.row] class]) isEqualToString:@"BMXRosterItem"]) {
         
-        BMXRoster *roster = self.resultArray[indexPath.row];
-        cell.titleLabel.text = [roster.nickName length] ? roster.nickName : roster.userName;
+        BMXRosterItem *roster = self.resultArray[indexPath.row];
+        cell.titleLabel.text = [roster.nickname length] ? roster.nickname : roster.username;
         cell.avatarImageView.image = [UIImage imageNamed:@"contact_placeholder"];
         
         UIImage *image = [UIImage imageWithContentsOfFile:roster.avatarThumbnailPath];
         if (!image) {
             
-            [[[BMXClient sharedClient] rosterService] downloadAvatarWithRoster:roster isThumbnail:YES progress:^(int progress, BMXError *error) {
+            [[[BMXClient sharedClient] rosterService] downloadAvatarWithItem:roster thumbnail:YES callback:^(int progress) {
                 
-            }  completion:^(BMXRoster *roster, BMXError *error) {
+            }  completion:^(BMXError *error) {
                 if (!error) {
                     UIImage *image = [UIImage imageWithContentsOfFile:roster.avatarThumbnailPath];
                     dispatch_async(dispatch_get_main_queue(), ^{
@@ -305,7 +304,7 @@
         cell.avatarImageView.image = [UIImage imageNamed:@"group_placeHo"];
     }
     
-    BMXMessageObject *message = self.messageArray[indexPath.row];
+    BMXMessage *message = self.messageArray[indexPath.row];
     cell.subtitleLabel.text = message.content;
     cell.dotLabel.hidden = YES;
     return cell;
@@ -314,12 +313,12 @@
     [tableView deselectRowAtIndexPath:indexPath animated:YES];
     
     LHChatVC *chatVC;
-    if ([NSStringFromClass([self.resultArray[indexPath.row] class]) isEqualToString:@"BMXRoster"]) {
-        BMXRoster *roster = self.resultArray[indexPath.row];
-        chatVC = [[LHChatVC alloc] initWithRoster:roster messageType:BMXMessageTypeSingle];
+    if ([NSStringFromClass([self.resultArray[indexPath.row] class]) isEqualToString:@"BMXRosterItem"]) {
+        BMXRosterItem *roster = self.resultArray[indexPath.row];
+        chatVC = [[LHChatVC alloc] initWithRoster:roster messageType:BMXMessage_MessageType_Single];
     } else {
         BMXGroup *group = self.resultArray[indexPath.row];
-        chatVC = [[LHChatVC alloc] initWithGroupChat:(BMXGroup *)group messageType:BMXMessageTypeGroup];
+        chatVC = [[LHChatVC alloc] initWithGroupChat:(BMXGroup *)group messageType:BMXMessage_MessageType_Group];
     }
     [chatVC setHidesBottomBarWhenPushed:YES];
     [self.navigationController pushViewController:chatVC animated:YES];

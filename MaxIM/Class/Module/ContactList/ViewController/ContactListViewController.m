@@ -13,9 +13,9 @@
 #import "LHChatVC.h"
 #import "GroupListViewController.h"
 #import "UIViewController+CustomNavigationBar.h"
-#import <floo-ios/BMXClient.h>
+#import <floo-ios/floo_proxy.h>
+
 #import "GroupListTableViewAdapter.h"
-#import <floo-ios/BMXGroup.h>
 #import "GroupCreateViewController.h"
 #import "GroupApplyViewController.h"
 #import "GroupInviteViewController.h"
@@ -27,6 +27,7 @@
 #import "MenuViewManager.h"
 #import "MaxEmptyTipView.h"
 #import "AppIDManager.h"
+#import "SupportsStorage.h"
 
 @interface ContactListViewController ()<UITableViewDelegate,
                                         UITableViewDataSource,
@@ -63,7 +64,6 @@
     [self setUpNavItem];
     [self selectView];
     [self rosterListTableView];
-    [self getAllRoster];
     [self actionArray];
     [self.rosterListTableView reloadData];
     
@@ -89,38 +89,51 @@
 }
 
 - (BOOL)isShowSupportData {
-    if ([[[BMXClient sharedClient] sdkConfig].appID isEqualToString:BMXAppID]) {
+    if ([[[[BMXClient sharedClient] getSDKConfig] getAppID] isEqualToString:BMXAppID]) {
         return YES;
     }
     return NO;
 }
 
+- (void)getSupportListProfileWithArray:(NSArray *)arr{
+    ListOfLongLong * idList = [[ListOfLongLong alloc] init];
+    for (NSDictionary *dic in arr) {
+        NSString *str = [NSString stringWithFormat:@"%@", dic[@"user_id"]];
+        long long rosterId = [str longLongValue];
+        [idList addWithX: &rosterId];
+    }
+    [self getSupportListProfileWithList: idList];
+}
+
 - (void)getSupportData {
     SupportStaffApi *api  = [[SupportStaffApi alloc] init];
     [api startWithSuccessBlock:^(ApiResult * _Nullable result) {
-        MAXLog(@"aaaaaaaaa");
         if (result.isOK) {
-            NSMutableArray *idArrayM = [NSMutableArray array];
-            for (NSDictionary *dic in result.resultData) {
-                [idArrayM addObject:[NSString stringWithFormat:@"%@", dic[@"user_id"]]];
-            }
-            [self getSupportListProfileWithArray:[NSArray arrayWithArray:idArrayM]];
+            [SupportsStorage saveObject:result.resultData];
+            NSArray *arr = result.resultData;
+            [self getSupportListProfileWithArray:arr];
         } else {
-            MAXLog(@"bbbbbb");
+            MAXLog(@"getSupportData failed.");
         }
     } failureBlock:^(NSError * _Nullable error) {
+        NSArray *arr = [SupportsStorage loadObject];
+        [self getSupportListProfileWithArray:arr];
         [HQCustomToast showNetworkError];
     }];
 }
 
-- (void)getSupportListProfileWithArray:(NSArray *)array {
-    [[[BMXClient sharedClient] rosterService] searchRostersByRosterIdList:array forceRefresh:NO completion:^(NSArray<BMXRoster *> *rosterList, BMXError *error) {
+- (void)getSupportListProfileWithList:(ListOfLongLong *)idList {
+    [[[BMXClient sharedClient] rosterService] searchWithRosterIdList:idList forceRefresh:NO completion:^(BMXRosterItemList *list, BMXError *error) {
         if (!error) {
-            self.supportArray = rosterList;
-            [self.supportListTableView reloadData];
+            NSMutableArray *arr = [[NSMutableArray alloc] init];
+            unsigned long sz = list.size;
+            MAXLog(@"%lu", sz);
+            for (int i=0; i<sz; i++) {
+                [arr addObject:[list get:i]];
+            }
+            self.supportArray = [NSArray arrayWithArray:arr];
         }
     }];
-    
 }
 
 - (void)contactRefreshIfNeededToast:(BOOL)isNeed {
@@ -132,10 +145,10 @@
     if (isNeed == YES) {
         [HQCustomToast showWating];
     }
-    [[[BMXClient sharedClient] rosterService] getRosterListforceRefresh:NO completion:^(NSArray *rostIdList, BMXError *error) {
+    [[[BMXClient sharedClient] rosterService] get:NO completion:^(ListOfLongLong *list, BMXError *error) {
         if (!error) {
-            MAXLog(@"%ld", rostIdList.count);
-            [self searchRostersByidArray:[NSArray arrayWithArray:rostIdList]];
+            MAXLog(@"%ld", list.size);
+            [self searchRostersByidArray:list forceRefresh:NO];
         }
     }];
 }
@@ -143,33 +156,41 @@
 #pragma mark - Manager
 // 同意好友申请
 - (void)acceptApplication:(NSInteger)rosterId {
-    [[[BMXClient sharedClient] rosterService] acceptRosterById:rosterId withCompletion:^(BMXError *error) {
-        MAXLog(@"%@", error);
+    [[[BMXClient sharedClient] rosterService] acceptWithRosterId:rosterId completion:^(BMXError *error) {
+        MAXLog(@"%@", [error description]);
     }];
 }
 
 // 获取好友列表
-- (void)getAllRoster {
+- (void)getAllRoster:(BOOL)forceRefresh {
     [HQCustomToast showWating];
-    [[[BMXClient sharedClient] rosterService] getRosterListforceRefresh:NO completion:^(NSArray *rostIdList, BMXError *error) {
+    [[[BMXClient sharedClient] rosterService] get:forceRefresh completion:^(ListOfLongLong *list, BMXError *error) {
         if (!error) {
-            MAXLog(@"%lu", (unsigned long)rostIdList.count);
-            [self searchRostersByidArray:[NSArray arrayWithArray:rostIdList]];
+            MAXLog(@"%ld", list.size);
+            [self searchRostersByidArray:list forceRefresh: forceRefresh];
+        }else{
+            [HQCustomToast hideWating];
         }
     }];
 }
 
 // 批量搜索用户
-- (void)searchRostersByidArray:(NSArray *)idArray {
-    [[[BMXClient sharedClient] rosterService] searchRostersByRosterIdList:idArray forceRefresh:NO completion:^(NSArray<BMXRoster *> *rosterList, BMXError *error) {
+- (void)searchRostersByidArray:(ListOfLongLong *)idList forceRefresh:(BOOL)forceRefresh {
+    [[[BMXClient sharedClient] rosterService] searchWithRosterIdList:idList forceRefresh:forceRefresh completion:^(BMXRosterItemList *list, BMXError *error) {
         [HQCustomToast hideWating];
-
         if (!error) {
-            MAXLog(@"%lu", (unsigned long)rosterList.count);
-            self.rosterArray = [NSArray arrayWithArray:rosterList];
-            [self.rosterListTableView reloadData];
-        } else {
+            NSMutableArray *arr = [[NSMutableArray alloc] init];
+            unsigned long sz = list.size;
+            MAXLog(@"%lu", sz);
+            for (int i=0; i<sz; i++) {
+                BMXRosterItem *item = [list get:i];
+                if(item.relation == BMXRosterItem_RosterRelation_Friend){
+                    [arr addObject:item];
+                }
+            }
             
+            self.rosterArray = [NSArray arrayWithArray:arr];
+            [self.rosterListTableView reloadData];
         }
     }];
 }
@@ -177,14 +198,14 @@
 // 删除好友
 -  (void)removeRoster:(NSInteger)rosterId {
     MAXLog(@"删除好友");
-    [[[BMXClient sharedClient] rosterService] removeRosterById:rosterId withCompletion:^(BMXError *error) {
-        [self getAllRoster];
+    [[[BMXClient sharedClient] rosterService] removeWithRosterId:rosterId completion:^(BMXError *error) {
+        [self getAllRoster: YES];
     }];
 }
 
 // 拒绝加好友申请
 - (void)declineRosterById:(NSInteger)roster reason:(NSString *)reason {
-    [[[BMXClient sharedClient] rosterService] declineRosterById:roster withReason:reason completion:^(BMXError *error) {
+    [[[BMXClient sharedClient] rosterService] declineWithRosterId:roster reason:reason completion:^(BMXError *error) {
         
     }];
 }
@@ -235,13 +256,13 @@
 }
 
 - (void)addToBlackList:(NSInteger)userId {
-    [[[BMXClient sharedClient] rosterService] addToBlockList:userId
-                                              withCompletion:^(BMXError *error) {
+    [[[BMXClient sharedClient] rosterService] blockWithRosterId:userId
+                                              completion:^(BMXError *error) {
                                                   if (!error) {
                                                       MAXLog(@"添加成功");
-                                                      [self getAllRoster];
+                                                      [self getAllRoster: YES];
                                                   } else {
-                                                      [HQCustomToast showDialog:[NSString stringWithFormat:@"%@", error.errorMessage] time:2];
+                                                      [HQCustomToast showDialog:[NSString stringWithFormat:@"%@", [error description]] time:2];
                                                   }
                                               }];
 }
@@ -308,7 +329,7 @@
             NSString *titleStr = [NSString stringWithFormat:@"%@", self.actionArray[indexPath.row]];
             [cell refreshByTitle:titleStr];
         } else {
-            BMXRoster *roster = self.rosterArray[indexPath.row];
+            BMXRosterItem *roster = self.rosterArray[indexPath.row];
             [cell refresh:roster];
         }
     } else if (self.tag == 1) { // 群组列表
@@ -325,7 +346,7 @@
             }
         }
     } else {
-        BMXRoster *roster = self.supportArray[indexPath.row];
+        BMXRosterItem *roster = self.supportArray[indexPath.row];
         [cell refreshSupportRoster:roster];
     }
 
@@ -344,8 +365,8 @@
                 [self.navigationController pushViewController:vc animated:YES];
             }
         } else {
-            BMXRoster *roster = self.rosterArray[indexPath.row];
-            LHChatVC *vc = [[LHChatVC alloc] initWithRoster:roster messageType:BMXMessageTypeSingle];
+            BMXRosterItem *roster = self.rosterArray[indexPath.row];
+            LHChatVC *vc = [[LHChatVC alloc] initWithRoster:roster messageType:BMXMessage_MessageType_Single];
             vc.hidesBottomBarWhenPushed = YES;
             [self.navigationController pushViewController:vc animated:YES];
         }
@@ -372,13 +393,13 @@
         } else {
             BMXGroup *group = self.groupArray[indexPath.row];
             
-            LHChatVC *vc = [[LHChatVC alloc] initWithGroupChat:group messageType:BMXMessageTypeGroup];
+            LHChatVC *vc = [[LHChatVC alloc] initWithGroupChat:group messageType:BMXMessage_MessageType_Group];
             vc.hidesBottomBarWhenPushed = YES;
             [self.navigationController pushViewController:vc animated:YES];
         }
     } else {
-        BMXRoster *roster = self.supportArray[indexPath.row];
-        LHChatVC *vc = [[LHChatVC alloc] initWithRoster:roster messageType:BMXMessageTypeSingle];
+        BMXRosterItem *roster = self.supportArray[indexPath.row];
+        LHChatVC *vc = [[LHChatVC alloc] initWithRoster:roster messageType:BMXMessage_MessageType_Single];
         vc.hidesBottomBarWhenPushed = YES;
         [self.navigationController pushViewController:vc animated:YES];
     }
@@ -395,7 +416,7 @@
     // 添加一个删除按钮
     UITableViewRowAction *deleteRowAction = [UITableViewRowAction rowActionWithStyle:UITableViewRowActionStyleDestructive title:NSLocalizedString(@"Delete", @"删除")handler:^(UITableViewRowAction *action, NSIndexPath *indexPath) {
         MAXLog(@"点击了删除");
-        BMXRoster *roster = self.rosterArray[indexPath.row];
+        BMXRosterItem *roster = self.rosterArray[indexPath.row];
         [self removeRoster:roster.rosterId];
         MAXLog(@"删除动作");
         
@@ -404,7 +425,7 @@
     // 删除一个置顶按钮
     UITableViewRowAction *topRowAction = [UITableViewRowAction rowActionWithStyle:UITableViewRowActionStyleDefault title:NSLocalizedString(@"Add_to_blacklist", @"加入黑名单")handler:^(UITableViewRowAction *action, NSIndexPath *indexPath) {
         MAXLog(@"点击了点入黑名单");
-        BMXRoster *roster = self.rosterArray[indexPath.row];
+        BMXRosterItem *roster = self.rosterArray[indexPath.row];
 
         [self addToBlackList:roster.rosterId];
     }];
@@ -434,7 +455,7 @@
             [self.supportListTableView setHidden:YES];
 
             [self selectViewAnimationWithTag:self.tag];
-            [self.rosterListTableView reloadData];
+            [self getAllRoster: YES];
 
             break;
         }
@@ -713,7 +734,7 @@
 - (void) setNotifications {
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(onGrouplistChange) name:@"KGroupListModified" object:nil];
     
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(getAllRoster) name:@"RefreshContactList" object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(getAllRoster:) name:@"RefreshContactList" object:nil];
     
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(hideMenu) name:@"HideMenu" object:nil];
 }

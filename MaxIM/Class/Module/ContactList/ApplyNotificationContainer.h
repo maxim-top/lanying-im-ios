@@ -7,6 +7,7 @@
 //
 
 #import <Foundation/Foundation.h>
+#import <floo-ios/floo_proxy.h>
 
 @class BMXRoster;
 
@@ -15,7 +16,7 @@ NS_ASSUME_NONNULL_BEGIN
 @interface ApplyNotificationContainer : NSObject
 
 + (instancetype) shareInstance;
-+ (void)addObjectTo:(BMXRoster *)roster;
++ (void)addObjectTo:(BMXRosterItem *)roster;
 
 @end
 

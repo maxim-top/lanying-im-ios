@@ -8,17 +8,14 @@
 
 #import "GroupAlreadyReadListViewController.h"
 #import "ImageTitleBasicTableViewCell.h"
-#import <floo-ios/BMXClient.h>
-#import <floo-ios/BMXRoster.h>
-#import <floo-ios/BMXGroupMember.h>
 #import "UIViewController+CustomNavigationBar.h"
-#import <floo-ios/BMXMessageConfig.h>
+#import <floo-ios/floo_proxy.h>
 
 @interface GroupAlreadyReadListViewController () <UITableViewDataSource, UITableViewDelegate>
 
 @property (nonatomic, strong) UITableView *leftTableView;
 @property (nonatomic, strong) UITableView *rightTableView;
-@property (nonatomic, strong) BMXMessageObject *message;
+@property (nonatomic, strong) BMXMessage *message;
 @property (nonatomic, strong) UISegmentedControl *segment;
 @property (nonatomic, strong) UIView *selectView;
 @property (nonatomic,assign) NSInteger tag;
@@ -33,7 +30,7 @@
 
 @implementation GroupAlreadyReadListViewController
 
-- (instancetype)initWithMessage:(BMXMessageObject *)messageObject group:(BMXGroup *)group {
+- (instancetype)initWithMessage:(BMXMessage *)messageObject group:(BMXGroup *)group {
     if (self = [super init]) {
         self.message = messageObject;
         self.group = group;
@@ -52,10 +49,23 @@
 }
 
 - (void)getAlreadyRoster {
-    [[[BMXClient sharedClient] chatService] getGroupAckMessageUserIdListWithMessage:self.message completion:^(NSArray *groupMemberIdList, BMXError *error) {
-        self.alreadyRosterIdArray = groupMemberIdList;
-        [[[BMXClient sharedClient] rosterService] searchRostersByRosterIdList:groupMemberIdList forceRefresh:NO completion:^(NSArray<BMXRoster *> *rosterList, BMXError *error) {
-            self.alreadyRosterArray = rosterList;
+    [[[BMXClient sharedClient] chatService] getGroupAckMessageUserIdList:self.message completion:^(ListOfLongLong *groupMemberIdList, BMXError *error) {
+        NSMutableArray *arr = [[NSMutableArray alloc] init];
+        unsigned long sz = groupMemberIdList.size;
+        for (int i=0; i<sz; i++) {
+            long long uid = *[groupMemberIdList get:i];
+            [arr addObject: [NSString stringWithFormat:@"%lld", uid]];
+        }
+        self.alreadyRosterIdArray = arr;
+        [[[BMXClient sharedClient] rosterService] searchWithRosterIdList:groupMemberIdList forceRefresh:NO completion:^(BMXRosterItemList *rosterList, BMXError *error) {
+            NSMutableArray *arr = [[NSMutableArray alloc] init];
+            unsigned long sz = rosterList.size;
+            for (int i=0; i<sz; i++) {
+                BMXRosterItem *item = [rosterList get:i];
+                [arr addObject: item];
+            }
+
+            self.alreadyRosterArray = arr;
             dispatch_async(dispatch_get_main_queue(), ^{
                 [self.leftTableView reloadData];
             });
@@ -80,10 +90,17 @@
     MAXLog(@"拉取未读群成员");
     
     
-    [[[BMXClient sharedClient] chatService] getGroupAckMessageUnreadUserIdListWithMessage:self.message completion:^(NSArray *groupMemberIdList, BMXError *error) {
-        [[[BMXClient sharedClient] rosterService] searchRostersByRosterIdList:groupMemberIdList forceRefresh:NO completion:^(NSArray<BMXRoster *> *rosterList, BMXError *error) {
+    [[[BMXClient sharedClient] chatService] getGroupAckMessageUserIdList:self.message completion:^(ListOfLongLong *groupMemberIdList, BMXError *error) {
+        [[[BMXClient sharedClient] rosterService] searchWithRosterIdList:groupMemberIdList forceRefresh:NO completion:^(BMXRosterItemList *rosterList, BMXError *error) {
             [HQCustomToast hideWating];
-            self.unReadRosterArray = rosterList;
+            NSMutableArray *arr = [[NSMutableArray alloc] init];
+            unsigned long sz = rosterList.size;
+            for (int i=0; i<sz; i++) {
+                BMXRosterItem *item = [rosterList get:i];
+                [arr addObject: item];
+            }
+
+            self.unReadRosterArray = arr;
             dispatch_async(dispatch_get_main_queue(), ^{
                 [self.rightTableView reloadData];
             });
@@ -167,7 +184,7 @@
 
     ImageTitleBasicTableViewCell *cell = [ImageTitleBasicTableViewCell ImageTitleBasicTableViewCellWith:tableView];
     cell.selectionStyle = UITableViewCellSelectionStyleNone;
-    BMXRoster *roster;
+    BMXRosterItem *roster;
     if (self.tag == 0) {
         roster = self.alreadyRosterArray[indexPath.row];
     } else {

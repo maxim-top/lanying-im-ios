@@ -62,6 +62,9 @@
         frame.size.width = width;
     }
     frame.origin.x = ((MAXScreenW - 80) - frame.size.width ) / 2;
+    if (frame.size.width < 0 || frame.size.height < 0) {
+        MAXLog(@"MAXScreenH:%lf,MAXScreenW:%lf,contentImg:%lf,%lf,%lf,%lf",MAXScreenH,MAXScreenW, self.contentImg.frame.origin.x, self.contentImg.frame.origin.y,self.contentImg.frame.size.width, self.contentImg.frame.size.height);
+    }
     self.contentImg.frame = frame;
     
 }

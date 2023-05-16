@@ -15,9 +15,8 @@
     
 #import "ContactTableViewCell.h"
 #import "UIView+BMXframe.h"
-#import <SDWebImage/UIImageView+WebCache.h>
-#import <floo-ios/BMXClient.h>
-#import <floo-ios/BMXRoster.h>
+#import <UIImageView+WebCache.h>
+#import <floo-ios/floo_proxy.h>
 
 static NSString *cellID = @"ContactTableViewCell";
 
@@ -51,21 +50,21 @@ static NSString *cellID = @"ContactTableViewCell";
     self.nicknameLabel.text = titlel;
 }
 
-- (void)refresh:(BMXRoster *)roster {
+- (void)refresh:(BMXRosterItem *)roster {
     self.contact = roster;
     
     
     self.avatarImg.image = [UIImage imageNamed:@"contact_placeholder"];
-    self.nicknameLabel.text = roster.userName;
+    self.nicknameLabel.text = roster.username;
     
     UIImage *image = [UIImage imageWithContentsOfFile:roster.avatarThumbnailPath];
     if (!image) {
         
-        [[[BMXClient sharedClient] rosterService] downloadAvatarWithRoster:roster isThumbnail:YES progress:^(int progress, BMXError *error) {
+        [[[BMXClient sharedClient] rosterService] downloadAvatarWithItem:roster thumbnail:YES callback:^(int progress) {
             
-        }  completion:^(BMXRoster *rosterObjc, BMXError *error) {
+        }  completion:^(BMXError *error) {
             if (!error) {
-                UIImage *image = [UIImage imageWithContentsOfFile:rosterObjc.avatarThumbnailPath];
+                UIImage *image = [UIImage imageWithContentsOfFile:roster.avatarThumbnailPath];
                 dispatch_async(dispatch_get_main_queue(), ^{
                     self.avatarImg.image = image;
                 });

@@ -16,9 +16,8 @@
 
 #import "GroupBlackListViewController.h"
 #import "GorupLittleCell.h"
-#import <floo-ios/BMXClient.h>
-#import <floo-ios/BMXGroupMember.h>
-#import <floo-ios/BMXRoster.h>
+#import <floo-ios/floo_proxy.h>
+#import "MAXUtils.h"
 #import "UIViewController+CustomNavigationBar.h"
 
 @interface GroupBlackListViewController ()<UITabBarDelegate, UITableViewDataSource>
@@ -68,8 +67,8 @@
         cell = [[GorupLittleCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:@"GorupLittleCell"];
         cell.selectionStyle = UITableViewCellSelectionStyleNone;
     }
-    BMXRoster* roster = [self.blackList objectAtIndex:indexPath.row];
-    NSString* uname = (roster.nickName && ![@"" isEqualToString:roster.nickName]) ? roster.nickName : roster.userName;
+    BMXRosterItem* roster = [self.blackList objectAtIndex:indexPath.row];
+    NSString* uname = (roster.nickname && ![@"" isEqualToString:roster.nickname]) ? roster.nickname : roster.username;
     NSString* rosterIdStr = [NSString stringWithFormat:@"%lld", roster.rosterId];
     BOOL isSel = [[_selectedIdDictionary objectForKey:rosterIdStr] boolValue] ;
     [cell setAvatarStr:roster.avatarUrl RosterName:uname Selected:isSel];
@@ -79,7 +78,7 @@
 
 -(void) tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
 {
-    BMXRoster* roster = [self.blackList objectAtIndex:indexPath.row];
+    BMXRosterItem* roster = [self.blackList objectAtIndex:indexPath.row];
     NSString* rosterIdStr = [NSString stringWithFormat:@"%lld", roster.rosterId];
     BOOL isSel = [[_selectedIdDictionary objectForKey:rosterIdStr] boolValue];
     [_selectedIdDictionary setObject:[NSNumber numberWithBool:!isSel] forKey:rosterIdStr];
@@ -102,14 +101,15 @@
 
 -(void) touchedRightBar
 {
-    NSMutableArray* xids = [NSMutableArray array];
+    ListOfLongLong* xids = [[ListOfLongLong alloc] init];
     for (NSString* uid in _selectedIdDictionary) {
         BOOL issel = [[_selectedIdDictionary objectForKey:uid] boolValue];
         if (issel) {
-            [xids addObject:[NSNumber numberWithLongLong:[uid longLongValue]]];
+            long long val = [uid longLongValue];
+            [xids addWithX:&val];
         }
     }
-    if (xids.count <=0) {
+    if (xids.size <=0) {
         UIAlertController* alert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Warning", @"警告") message:NSLocalizedString(@"You_have_no_members_selected", @"您没有选中成员") preferredStyle:UIAlertControllerStyleAlert];
         [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Confirm", @"确定") style:UIAlertActionStyleDefault handler:nil]];
         [self presentViewController:alert animated:YES completion:nil];
@@ -124,15 +124,15 @@
 }
 
 
--(void) removeBlackList: (NSArray*) uids
+-(void) removeBlackList: (ListOfLongLong*) uids
 {
-    [[[BMXClient sharedClient] groupService] unblockMember:self.group members:uids completion:^(BMXError *error) {
+    [[[BMXClient sharedClient] groupService] unblockMembersWithGroup:self.group members:uids completion:^(BMXError *error) {
         if(!error) {
             [self getBlackList];
             [[NSNotificationCenter defaultCenter] postNotificationName:@"KEY_NOTIFICATION_GROUP_MEMBER_UPDATED" object:nil];
             // TODO 优化， 直接从列表中删除
         }else {
-            MAXLog(@"request error, code: %d", error.errorCode);
+            MAXLog(@"request error, code: %ld", (long)[error errorCode]);
         }
     }];
 }
@@ -144,22 +144,24 @@
 
 
 - (void)getBlackList {
-    [[[BMXClient sharedClient] groupService] getBlockListByGroup:self.group forceRefresh:YES completion:^(NSArray<BMXGroupMember *> *blockList, BMXError *error) {
-        MAXLog(@"%ld", blockList.count);
-        NSMutableArray* array = [NSMutableArray array];
-        for (BMXGroupMember* amember in blockList) {
-            NSString* uidStr = [NSString stringWithFormat:@"%ld", amember.uid];
-            [array addObject:uidStr];
+    [[[BMXClient sharedClient] groupService] getBlockList:self.group forceRefresh:YES completion:^(BMXGroupMemberList *blockList, BMXError *error) {
+        unsigned long sz = blockList.size;
+        MAXLog(@"%ld", sz);
+        ListOfLongLong* list = [[ListOfLongLong alloc] init];
+        for (int i=0; i<sz; i++) {
+            BMXGroupMember* amember = [blockList get:i];
+            long long val = amember.getMUid;
+            [list addWithX: &val];
         }
-        [self getRostersByidArray:array];
+
+        [self getRostersByidArray:list];
     }];
 }
 
 // 获取群成员详情
-- (void)getRostersByidArray:(NSArray *)idArray {
-    [[[BMXClient sharedClient] rosterService] searchRostersByRosterIdList:idArray forceRefresh:YES completion:^(NSArray<BMXRoster *> *rosterList, BMXError *error) {
-        MAXLog(@"%ld", rosterList.count);
-        self.blackList = [NSArray arrayWithArray: rosterList];
+- (void)getRostersByidArray:(ListOfLongLong *)idList {
+    [MAXUtils getRostersByidArray:idList completion:^(NSArray *arr) {
+        self.blackList = arr;
         [self.tableView reloadData];
     }];
 }

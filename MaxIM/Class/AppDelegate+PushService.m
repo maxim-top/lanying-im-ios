@@ -11,8 +11,8 @@
 @implementation AppDelegate (PushService)
 
 - (void)registerAPNs {
-    [[[BMXClient sharedClient] pushService] start];
-    [[[BMXClient sharedClient] pushService] addDelegate:self];
+//    [[[BMXClient sharedClient] pushService] start];
+//    [[[BMXClient sharedClient] pushService] addDelegate:self];
     
     
 //    [[[BMXClient sharedClient] pushService] setBadge:10];
@@ -38,7 +38,7 @@
 }
 
 
-- (void)pushMessageStatusChanged:(BMXMessageObject *)message error:(BMXError *)error {
+- (void)pushMessageStatusChanged:(BMXMessage *)message error:(BMXError *)error {
     MAXLog(@"%@", message.content);
 }
 
@@ -68,7 +68,7 @@
     MAXLog(@"%@", operationId);
 }
 
-- (void)receivedPush:(NSArray<BMXMessageObject *> *)messages {
+- (void)receivedPush:(NSArray<BMXMessage *> *)messages {
 
 }
 

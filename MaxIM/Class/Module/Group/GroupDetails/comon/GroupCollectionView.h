@@ -15,12 +15,12 @@
     
 
 #import <UIKit/UIKit.h>
-#import <floo-ios/BMXRoster.h>
+#import <floo-ios/floo_proxy.h>
 
 
 @protocol groupMemberCollectionDelegate <NSObject>
 
--(void) groupMemberCellTouchedRoster:(BMXRoster*) roster;
+-(void) groupMemberCellTouchedRoster:(BMXRosterItem*) roster;
 -(void) groupMemberCellTouchedAdd;
 
 @end

@@ -95,6 +95,9 @@ static CGSize kTextBoundingSize;
 
 #pragma mark - 私有
 + (NSAttributedString *)processModel:(LHMessageModel *)model {
+    if (!model.content) {
+        model.content = @"";
+    }
     NSMutableAttributedString * mAttributedString = [[NSMutableAttributedString alloc]init];
     NSMutableParagraphStyle *paragraphStyle = [[NSMutableParagraphStyle alloc] init];
     [paragraphStyle setLineSpacing:4];//调整行间距

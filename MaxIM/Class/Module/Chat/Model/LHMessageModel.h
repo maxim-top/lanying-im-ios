@@ -7,8 +7,7 @@
 //
 
 #import <Foundation/Foundation.h>
-#import <floo-ios/BMXMessageObject.h>
-
+#import <floo-ios/floo_proxy.h>
 /*!
  @enum
  @brief 聊天类型
@@ -75,7 +74,7 @@ typedef enum {
 
 
 // 消息实体
-@property (nonatomic, strong) BMXMessageObject *messageObjc;
+@property (nonatomic, strong) BMXMessage *messageObjc;
 
 @property (nonatomic, strong) NSIndexPath *indexPath;
 

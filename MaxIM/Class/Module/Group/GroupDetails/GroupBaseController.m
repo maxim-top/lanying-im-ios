@@ -16,10 +16,7 @@
 
 #import "GroupBaseController.h"
 
-#import <floo-ios/BMXClient.h>
-#import <floo-ios/BMXGroup.h>
-#import <floo-ios/BMXRoster.h>
-#import <floo-ios/BMXGroupMember.h>
+#import <floo-ios/floo_proxy.h>
 
 #import "IMAcountInfoStorage.h"
 #import "IMAcount.h"

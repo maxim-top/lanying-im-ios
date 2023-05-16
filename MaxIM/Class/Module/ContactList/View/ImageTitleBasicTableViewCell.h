@@ -7,6 +7,8 @@
 //
 
 #import <UIKit/UIKit.h>
+#import <floo-ios/floo_proxy.h>
+
 @class BMXRoster;
 @class BMXGroup;
 
@@ -20,9 +22,9 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, strong) UIView *line;
 
 - (void)refreshByTitle:(NSString *)titlel;
-- (void)refresh:(BMXRoster *)roster;
+- (void)refresh:(BMXRosterItem *)roster;
 - (void)refreshByGroup:(BMXGroup *)group;
-- (void)refreshSupportRoster:(BMXRoster *)roster;
+- (void)refreshSupportRoster:(BMXRosterItem *)roster;
 + (instancetype)ImageTitleBasicTableViewCellWith:(UITableView *)tableView;
 
 @end

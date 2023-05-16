@@ -16,10 +16,7 @@
 
 #import "GroupHandleCell.h"
 
-#import <floo-ios/BMXClient.h>
-#import <floo-ios/BMXGroup.h>
-#import <floo-ios/BMXRoster.h>
-#import <floo-ios/BMXGroupApplication.h>
+#import <floo-ios/floo_proxy.h>
 
 #import <UIImageView+WebCache.h>
 
@@ -35,7 +32,7 @@
     UIButton* _declineBtn;
     void (^_blockHandler)(BOOL isAccept);
     
-    BMXRoster* _roster;
+    BMXRosterItem* _roster;
     BMXGroup* _group;
 }
 @end
@@ -105,7 +102,7 @@
     }
 }
 
-- (void) cellInviteContentWithRoster:(BMXRoster*) roster group:(BMXGroup*) group inviteStatus:(BMXGroupInvitationStatus) status exp:(long long) expTime actionHandler:(void (^)(BOOL ret)) handler
+- (void) cellInviteContentWithRoster:(BMXRosterItem*) roster group:(BMXGroup*) group inviteStatus:(BMXGroup_InvitationStatus) status exp:(long long) expTime actionHandler:(void (^)(BOOL ret)) handler
 {
     _blockHandler = handler;
     _roster = roster;
@@ -124,9 +121,9 @@
     _groupInfo.text = _group.name;
     NSDate* date = [NSDate date];
     NSTimeInterval currInterval = [date timeIntervalSince1970]*1000;
-    NSString* rosterName = _roster.nickName;
+    NSString* rosterName = _roster.nickname;
     if(rosterName == nil || [rosterName isEqualToString:@""]) {
-        rosterName = _roster.userName;
+        rosterName = _roster.username;
     }
     NSString* msg = NSLocalizedString(@"Invite", @"邀请");
     _groupMessage.text = [NSString stringWithFormat:NSLocalizedString(@"sb_invited_you_to_join_group", @"%@ 邀请您加入群 %@:%@"), rosterName, _group.name, msg];
@@ -153,15 +150,15 @@
 }
 ////////////////////////////////////////////////
 
--(void) cellApplicationContentWithRoster:(BMXRoster*) roster group:(BMXGroup*) group applicationStatus:(BMXGroupApplicationStatus) status exp:(long long) expTime actionHandler:(void (^)(BOOL ret)) handler
+-(void) cellApplicationContentWithRoster:(BMXRosterItem*) roster group:(BMXGroup*) group applicationStatus:(BMXGroup_ApplicationStatus) status exp:(long long) expTime actionHandler:(void (^)(BOOL ret)) handler
 {
     _blockHandler = handler;
     _group = group;
     _roster = roster;
-    [self cellApplyWithStatus: (BMXGroupApplicationStatus) status exp:(long long) expTime];
+    [self cellApplyWithStatus: (BMXGroup_ApplicationStatus) status exp:(long long) expTime];
 }
 
-- (void) cellApplyWithStatus: (BMXGroupApplicationStatus) status exp:(long long) expTime
+- (void) cellApplyWithStatus: (BMXGroup_ApplicationStatus) status exp:(long long) expTime
 {
     NSString* avatar = _group.avatarUrl;
     if(avatar != nil && ![avatar isEqualToString:@""]) {
@@ -170,18 +167,18 @@
     _groupInfo.text = _group.name;
     NSDate* date = [NSDate date];
     NSTimeInterval currInterval = [date timeIntervalSince1970]*1000;
-    NSString* rosterName = _roster.nickName;
+    NSString* rosterName = _roster.nickname;
     if(rosterName == nil || [rosterName isEqualToString:@""]) {
-        rosterName = _roster.userName;
+        rosterName = _roster.username;
     }
     NSString* msg = @"";
     _groupMessage.text = [NSString stringWithFormat:NSLocalizedString(@"Apply_to_join_group", @"%@ 申请加入群 %@:%@"), rosterName, _group.name, msg];
-    if(status == BMXGroupApplicationStatusAccepted) {
+    if(status == BMXGroup_ApplicationStatus_Accepted) {
         [_actionStatus setHidden:NO];
         [_acceptBtn setHidden:YES];
         [_declineBtn setHidden:YES];
         [_actionStatus setText:NSLocalizedString(@"Accepted", @"已同意")];
-    }else if(status == BMXGroupApplicationStatusDeclined) {
+    }else if(status == BMXGroup_ApplicationStatus_Declined) {
         [_actionStatus setHidden:NO];
         [_acceptBtn setHidden:YES];
         [_declineBtn setHidden:YES];
@@ -191,7 +188,7 @@
         [_acceptBtn setHidden:YES];
         [_declineBtn setHidden:YES];
         [_actionStatus setText:NSLocalizedString(@"Expired", @"已过期")];
-    }else if(status == BMXGroupApplicationStatusPending) {
+    }else if(status == BMXGroup_ApplicationStatus_Pending) {
         [_actionStatus setHidden:YES];
         [_acceptBtn setHidden:NO];
         [_declineBtn setHidden:NO];

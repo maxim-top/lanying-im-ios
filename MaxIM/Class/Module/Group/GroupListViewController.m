@@ -18,15 +18,15 @@
 
 #import "GroupListViewController.h"
 #import "ImageTitleBasicTableViewCell.h"
-#import <floo-ios/BMXClient.h>
+#import <floo-ios/floo_proxy.h>
+
 #import "LHChatVC.h"
 
 #import "GroupCreateViewController.h"
 #import "GroupInviteViewController.h"
 #import "GroupApplyViewController.h"
 
-
-@interface GroupListViewController ()<UITableViewDelegate, UITableViewDataSource, BMXGroupManager>
+@interface GroupListViewController ()<UITableViewDelegate, UITableViewDataSource>
 
 @property (nonatomic, strong) UITableView *tableview;
 
@@ -51,19 +51,21 @@
 // 获取群list
 - (void)getGroupList {
     [HQCustomToast showWating];
-    [[[BMXClient sharedClient] groupService] getGroupListForceRefresh:NO completion:^(NSArray *groupList, BMXError *error) {
+    [[[BMXClient sharedClient] groupService] get:NO completion:^(BMXGroupList *res, BMXError *error) {
 //        MAXLog(@"%ld", groupList.count);
         [HQCustomToast hideWating];
 
         if (!error) {
             
             NSMutableArray *groupNormalArray = [NSMutableArray array];
-            for (BMXGroup *group in groupList) {
+            unsigned long sz = res.size;
+            for (int i=0; i<sz; i++) {
+                BMXGroup *group = [res get:i];
 //                MAXLog(@"%@", group.name);
 //                MAXLog(@"%d", group.groupStatus);
 //                MAXLog(@"%d", group.isMember);
 
-                if (group.groupStatus != BMXGroupDestroyed && group.roleType == BMXGroupMemberRoleTypeMember) {
+                if (group.groupStatus != BMXGroup_GroupStatus_Destroyed && group.roleType == BMXGroup_MemberRoleType_GroupMember) {
                     [groupNormalArray addObject:group];
                 } else {
 //                    MAXLog(@"%lld", group.groupId);
@@ -77,7 +79,7 @@
 
 // 销毁群
 - (void)destroyGroupWithGroup:(BMXGroup *)group {
-    [[[BMXClient sharedClient] groupService] destroyGroup:group completion:^(BMXError *error) {
+    [[[BMXClient sharedClient] groupService] destroyWithGroup:group completion:^(BMXError *error) {
         if (!error) {
             MAXLog(@"销毁群");
             [self onGrouplistChange];
@@ -139,7 +141,7 @@
     } else {
         BMXGroup *group = self.groupArray[indexPath.row];
 
-        LHChatVC *vc = [[LHChatVC alloc] initWithGroupChat:group messageType:BMXMessageTypeGroup];
+        LHChatVC *vc = [[LHChatVC alloc] initWithGroupChat:group messageType:BMXMessage_MessageType_Group];
         vc.hidesBottomBarWhenPushed = YES;
         [self.navigationController pushViewController:vc animated:YES];
     }

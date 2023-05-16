@@ -15,13 +15,15 @@
     
 
 #import <UIKit/UIKit.h>
+#import <floo-ios/floo_proxy.h>
+
 @class BMXRoster;
 
 NS_ASSUME_NONNULL_BEGIN
 
 @interface ChatRosterProfileViewController : UIViewController
 
-- (instancetype)initWithRoster:(BMXRoster *)roster;
+- (instancetype)initWithRoster:(BMXRosterItem *)roster;
 
 
 - (NSArray *)getSettingConfigDataArray;

@@ -218,6 +218,9 @@ SingleM(Manager)
         }
         
         id value = [model valueForKey:key];
+        if ([key isEqualToString:@"messageObjc"]){
+            value = nil;
+        }
         if ([value isKindOfClass:[NSDictionary class]] || [value isKindOfClass:[NSMutableDictionary class]] || [value isKindOfClass:[NSArray class]] || [value isKindOfClass:[NSMutableArray class]] || [value isKindOfClass:[NSNull class]]) {
             value = [NSString stringWithFormat:@"%@",value];
         }

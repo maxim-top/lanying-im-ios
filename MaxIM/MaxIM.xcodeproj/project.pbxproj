@@ -36,11 +36,20 @@
 		AF3E6C4F27D3BAED00D016C7 /* chatdetailproiledetail.json in Resources */ = {isa = PBXBuildFile; fileRef = AF3E6C5127D3BAED00D016C7 /* chatdetailproiledetail.json */; };
 		AF3E6C5327D3BB3400D016C7 /* searchDetailProfiledetail.json in Resources */ = {isa = PBXBuildFile; fileRef = AF3E6C5527D3BB3400D016C7 /* searchDetailProfiledetail.json */; };
 		AF3E6C5727D3BB6200D016C7 /* SystemRosterProfile.json in Resources */ = {isa = PBXBuildFile; fileRef = AF3E6C5927D3BB6200D016C7 /* SystemRosterProfile.json */; };
+		AF4B381228C1B6EE0043ADA4 /* MAXUtils.m in Sources */ = {isa = PBXBuildFile; fileRef = AF4B380828C1B6EE0043ADA4 /* MAXUtils.m */; };
 		AF4C019728461BC400B8913D /* LanyingLangManager.m in Sources */ = {isa = PBXBuildFile; fileRef = AF4C019328461ACC00B8913D /* LanyingLangManager.m */; };
+		AF4C80A729261BC200ADBA82 /* CallView.m in Sources */ = {isa = PBXBuildFile; fileRef = AF3CC7D028E599BE0026EF89 /* CallView.m */; };
+		AF4C80A829261BC600ADBA82 /* CallViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = AF3CC7D128E599BE0026EF89 /* CallViewController.m */; };
+		AF51DDEB29CEDAA8006656CD /* bell.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = AF51DDEA29CEDAA8006656CD /* bell.mp3 */; };
+		AF51DDEC29CEDAA8006656CD /* bell.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = AF51DDEA29CEDAA8006656CD /* bell.mp3 */; };
+		AF5780BC29C22F8F002CC192 /* NotificationService.m in Sources */ = {isa = PBXBuildFile; fileRef = AF5780BB29C22F8F002CC192 /* NotificationService.m */; };
+		AF5780C029C22F8F002CC192 /* MaxIMNotification.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = AF5780B829C22F8F002CC192 /* MaxIMNotification.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		AF5DB35129AE617500E1367B /* CopyableLabel.m in Sources */ = {isa = PBXBuildFile; fileRef = AF5DB35029AE617500E1367B /* CopyableLabel.m */; };
 		AF88CF0B2848AC7300013713 /* NSBundle+LanyingLanguage.m in Sources */ = {isa = PBXBuildFile; fileRef = AF88CF0A2848AC7300013713 /* NSBundle+LanyingLanguage.m */; };
 		AF8F120D27D2045D000C4104 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = AF8F120F27D2045D000C4104 /* InfoPlist.strings */; };
 		AF8F121327D20C90000C4104 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = AF8F121527D20C90000C4104 /* Localizable.strings */; };
 		AF923D17281B0725002875A3 /* splash.png in Resources */ = {isa = PBXBuildFile; fileRef = AF923D16281B0724002875A3 /* splash.png */; };
+		AFED17F929A3E15B001A5F8B /* SupportsStorage.m in Sources */ = {isa = PBXBuildFile; fileRef = AFED17F829A3E15B001A5F8B /* SupportsStorage.m */; };
 		B321D07F2B7F3BE8404603F6 /* libPods-MaxIM.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 0817B35A699F1BD1DD697481 /* libPods-MaxIM.a */; };
 		B500050821D508DA00CD1CF8 /* RecentConversaionTableViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = B500050621D508DA00CD1CF8 /* RecentConversaionTableViewCell.m */; };
 		B500050C21D5493500CD1CF8 /* LHChatFileBubbleView.m in Sources */ = {isa = PBXBuildFile; fileRef = B500050B21D5493500CD1CF8 /* LHChatFileBubbleView.m */; };
@@ -258,7 +267,6 @@
 		B58A17ED244D5FF9006A7BEA /* PwdChangeApi.m in Sources */ = {isa = PBXBuildFile; fileRef = B58A17EC244D5FF9006A7BEA /* PwdChangeApi.m */; };
 		B593DFC722D59B99008AF2E2 /* libopencore-amrwb.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 4832592821CE74870061D47F /* libopencore-amrwb.a */; };
 		B593DFCA22D5C03A008AF2E2 /* RosterListViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = B593DFC922D5C03A008AF2E2 /* RosterListViewController.m */; };
-		B595932A249B184B00A307B3 /* MobileRTCResources.bundle in Resources */ = {isa = PBXBuildFile; fileRef = B5959328249B184B00A307B3 /* MobileRTCResources.bundle */; };
 		B5A3D37622059D53009BAF12 /* DeviceTableViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = B5A3D37522059D53009BAF12 /* DeviceTableViewCell.m */; };
 		B5A7882B2387DDDC00A3730D /* AppWechatUnbindApi.m in Sources */ = {isa = PBXBuildFile; fileRef = B5A7882A2387DDDC00A3730D /* AppWechatUnbindApi.m */; };
 		B5A7882E2389352400A3730D /* UserMobileChangeApi.m in Sources */ = {isa = PBXBuildFile; fileRef = B5A7882D2389352400A3730D /* UserMobileChangeApi.m */; };
@@ -339,6 +347,7 @@
 			dstPath = "";
 			dstSubfolderSpec = 13;
 			files = (
+				AF5780C029C22F8F002CC192 /* MaxIMNotification.appex in Embed App Extensions */,
 				B511684B228E9817001B2AE7 /* MaxIMShare.appex in Embed App Extensions */,
 			);
 			name = "Embed App Extensions";
@@ -422,6 +431,10 @@
 		AF226BF128588778005C5C7F /* Base */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = Base; path = Base.lproj/about.png; sourceTree = "<group>"; };
 		AF226BF328588784005C5C7F /* en */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = en; path = en.lproj/about.png; sourceTree = "<group>"; };
 		AF226BF428588789005C5C7F /* zh-Hans */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "zh-Hans"; path = "zh-Hans.lproj/about.png"; sourceTree = "<group>"; };
+		AF3CC7C528E599BE0026EF89 /* CallView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CallView.h; sourceTree = "<group>"; };
+		AF3CC7D028E599BE0026EF89 /* CallView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CallView.m; sourceTree = "<group>"; };
+		AF3CC7D128E599BE0026EF89 /* CallViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CallViewController.m; sourceTree = "<group>"; };
+		AF3CC7D228E599BF0026EF89 /* CallViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CallViewController.h; sourceTree = "<group>"; };
 		AF3E6C3827D37ED000D016C7 /* zh-Hans */ = {isa = PBXFileReference; lastKnownFileType = text.json; name = "zh-Hans"; path = "zh-Hans.lproj/appsetting.json"; sourceTree = "<group>"; };
 		AF3E6C4227D37EDE00D016C7 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.json; name = en; path = en.lproj/appsetting.json; sourceTree = "<group>"; };
 		AF3E6C4427D37FC300D016C7 /* zh-Hans */ = {isa = PBXFileReference; lastKnownFileType = text.json; name = "zh-Hans"; path = "zh-Hans.lproj/setting.json"; sourceTree = "<group>"; };
@@ -436,8 +449,17 @@
 		AF3E6C5627D3BB3700D016C7 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.json; name = en; path = en.lproj/searchDetailProfiledetail.json; sourceTree = "<group>"; };
 		AF3E6C5827D3BB6200D016C7 /* zh-Hans */ = {isa = PBXFileReference; lastKnownFileType = text.json; name = "zh-Hans"; path = "zh-Hans.lproj/SystemRosterProfile.json"; sourceTree = "<group>"; };
 		AF3E6C5A27D3BB6300D016C7 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.json; name = en; path = en.lproj/SystemRosterProfile.json; sourceTree = "<group>"; };
+		AF4B380828C1B6EE0043ADA4 /* MAXUtils.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MAXUtils.m; sourceTree = "<group>"; };
+		AF4B381128C1B6EE0043ADA4 /* MAXUtils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MAXUtils.h; sourceTree = "<group>"; };
 		AF4C018A28461ACB00B8913D /* LanyingLangManager.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = LanyingLangManager.h; sourceTree = "<group>"; };
 		AF4C019328461ACC00B8913D /* LanyingLangManager.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = LanyingLangManager.m; sourceTree = "<group>"; };
+		AF51DDEA29CEDAA8006656CD /* bell.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = bell.mp3; sourceTree = "<group>"; };
+		AF5780B829C22F8F002CC192 /* MaxIMNotification.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = MaxIMNotification.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		AF5780BA29C22F8F002CC192 /* NotificationService.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = NotificationService.h; sourceTree = "<group>"; };
+		AF5780BB29C22F8F002CC192 /* NotificationService.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = NotificationService.m; sourceTree = "<group>"; };
+		AF5780BD29C22F8F002CC192 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		AF5DB34F29AE617500E1367B /* CopyableLabel.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CopyableLabel.h; sourceTree = "<group>"; };
+		AF5DB35029AE617500E1367B /* CopyableLabel.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CopyableLabel.m; sourceTree = "<group>"; };
 		AF88CF092848AC7300013713 /* NSBundle+LanyingLanguage.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSBundle+LanyingLanguage.h"; sourceTree = "<group>"; };
 		AF88CF0A2848AC7300013713 /* NSBundle+LanyingLanguage.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSBundle+LanyingLanguage.m"; sourceTree = "<group>"; };
 		AF8F120E27D2045D000C4104 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
@@ -445,6 +467,8 @@
 		AF8F121427D20C90000C4104 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/Localizable.strings; sourceTree = "<group>"; };
 		AF8F121627D20C93000C4104 /* zh-Hans */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hans"; path = "zh-Hans.lproj/Localizable.strings"; sourceTree = "<group>"; };
 		AF923D16281B0724002875A3 /* splash.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = splash.png; sourceTree = "<group>"; };
+		AFED17EF29A3E15B001A5F8B /* SupportsStorage.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SupportsStorage.h; sourceTree = "<group>"; };
+		AFED17F829A3E15B001A5F8B /* SupportsStorage.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SupportsStorage.m; sourceTree = "<group>"; };
 		AFF48A6C25CF1FE300634E80 /* MobileRTC.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = MobileRTC.framework; sourceTree = "<group>"; };
 		B500050521D508DA00CD1CF8 /* RecentConversaionTableViewCell.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = RecentConversaionTableViewCell.h; sourceTree = "<group>"; };
 		B500050621D508DA00CD1CF8 /* RecentConversaionTableViewCell.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = RecentConversaionTableViewCell.m; sourceTree = "<group>"; };
@@ -857,7 +881,6 @@
 		B593DFC822D5C03A008AF2E2 /* RosterListViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RosterListViewController.h; sourceTree = "<group>"; };
 		B593DFC922D5C03A008AF2E2 /* RosterListViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RosterListViewController.m; sourceTree = "<group>"; };
 		B593DFD222D5D8EC008AF2E2 /* Single.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Single.h; sourceTree = "<group>"; };
-		B5959328249B184B00A307B3 /* MobileRTCResources.bundle */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.plug-in"; path = MobileRTCResources.bundle; sourceTree = "<group>"; };
 		B5A3D37422059D53009BAF12 /* DeviceTableViewCell.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = DeviceTableViewCell.h; sourceTree = "<group>"; };
 		B5A3D37522059D53009BAF12 /* DeviceTableViewCell.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = DeviceTableViewCell.m; sourceTree = "<group>"; };
 		B5A788292387DDDC00A3730D /* AppWechatUnbindApi.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppWechatUnbindApi.h; sourceTree = "<group>"; };
@@ -1001,6 +1024,13 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		C2EC9492011782D97B2B25D1 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
@@ -1109,6 +1139,8 @@
 				B521C09022E86147003D7DB9 /* View */,
 				B55900C222D0A7E2003FDA76 /* HQCustomToast.h */,
 				B55900C122D0A7E2003FDA76 /* HQCustomToast.m */,
+				AF4B381128C1B6EE0043ADA4 /* MAXUtils.h */,
+				AF4B380828C1B6EE0043ADA4 /* MAXUtils.m */,
 				B55900C322D0A7E2003FDA76 /* HQToast.h */,
 				B55900C422D0A7E3003FDA76 /* HQToast.m */,
 				B55900C022D0A7E2003FDA76 /* CommonColor.h */,
@@ -1127,6 +1159,7 @@
 		4849CD6E21A52C36006CB41D /* Resource */ = {
 			isa = PBXGroup;
 			children = (
+				AF51DDEA29CEDAA8006656CD /* bell.mp3 */,
 				AF226BF228588778005C5C7F /* about.png */,
 				B56B025E23830E17005E22B8 /* LaunchVideo */,
 				B5144F0C234C8E0700CF163E /* Assets.xcassets */,
@@ -1180,6 +1213,7 @@
 				48FB3E882193F4FD007740F4 /* MaxIMTests */,
 				48FB3E932193F4FD007740F4 /* MaxIMUITests */,
 				B5116841228E9817001B2AE7 /* MaxIMShare */,
+				AF5780B929C22F8F002CC192 /* MaxIMNotification */,
 				48FB3E6E2193F4FC007740F4 /* Products */,
 				038451FB1B14BE872151C59E /* Pods */,
 				B5738D927166D01AB0CE4043 /* Frameworks */,
@@ -1193,6 +1227,7 @@
 				48FB3E852193F4FD007740F4 /* MaxIMTests.xctest */,
 				48FB3E902193F4FD007740F4 /* MaxIMUITests.xctest */,
 				B5116840228E9817001B2AE7 /* MaxIMShare.appex */,
+				AF5780B829C22F8F002CC192 /* MaxIMNotification.appex */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -1213,6 +1248,16 @@
 				48FB3E962193F4FD007740F4 /* Info.plist */,
 			);
 			path = MaxIMUITests;
+			sourceTree = "<group>";
+		};
+		AF5780B929C22F8F002CC192 /* MaxIMNotification */ = {
+			isa = PBXGroup;
+			children = (
+				AF5780BA29C22F8F002CC192 /* NotificationService.h */,
+				AF5780BB29C22F8F002CC192 /* NotificationService.m */,
+				AF5780BD29C22F8F002CC192 /* Info.plist */,
+			);
+			path = MaxIMNotification;
 			sourceTree = "<group>";
 		};
 		B50AE51622CDE8EF00D82476 /* Record */ = {
@@ -1557,6 +1602,8 @@
 				B5229E4922E6F87C00AF9337 /* Protocol */,
 				B539D66221BFDD370011D30E /* LHChatVC.h */,
 				B539D66321BFDD370011D30E /* LHChatVC.m */,
+				AF3CC7D228E599BF0026EF89 /* CallViewController.h */,
+				AF3CC7D128E599BE0026EF89 /* CallViewController.m */,
 				4815431521E7AD520082E38D /* TransterViewController.h */,
 				4815431621E7AD520082E38D /* TransterViewController.m */,
 				B5F21D3F230EACB600F6CA4B /* GroupAlreadyReadListViewController.h */,
@@ -1583,6 +1630,8 @@
 				B539D67121BFDD370011D30E /* BubbleView */,
 				B539D66F21BFDD370011D30E /* LHChatBarMoreView.h */,
 				B539D66B21BFDD370011D30E /* LHChatBarMoreView.m */,
+				AF3CC7C528E599BE0026EF89 /* CallView.h */,
+				AF3CC7D028E599BE0026EF89 /* CallView.m */,
 				B539D66C21BFDD370011D30E /* LHChatBarView.h */,
 				B539D67E21BFDD370011D30E /* LHChatBarView.m */,
 				B539D67021BFDD370011D30E /* LHChatTimeCell.h */,
@@ -1727,6 +1776,8 @@
 		B53FB37D22C5FCF6002A4B1F /* LoginStorage */ = {
 			isa = PBXGroup;
 			children = (
+				AFED17EF29A3E15B001A5F8B /* SupportsStorage.h */,
+				AFED17F829A3E15B001A5F8B /* SupportsStorage.m */,
 				B53FB38022C5FCF6002A4B1F /* IMAcount.h */,
 				B53FB37F22C5FCF6002A4B1F /* IMAcount.m */,
 				B53FB38122C5FCF6002A4B1F /* IMAcountInfoStorage.h */,
@@ -2106,6 +2157,8 @@
 			children = (
 				B508DA7A2298509100490C95 /* ImageAlertView.h */,
 				B508DA7B2298509100490C95 /* ImageAlertView.m */,
+				AF5DB34F29AE617500E1367B /* CopyableLabel.h */,
+				AF5DB35029AE617500E1367B /* CopyableLabel.m */,
 			);
 			path = Share;
 			sourceTree = "<group>";
@@ -2119,26 +2172,9 @@
 			path = Search;
 			sourceTree = "<group>";
 		};
-		B5959326249B184B00A307B3 /* zoom */ = {
-			isa = PBXGroup;
-			children = (
-				B5959327249B184B00A307B3 /* lib */,
-			);
-			path = zoom;
-			sourceTree = "<group>";
-		};
-		B5959327249B184B00A307B3 /* lib */ = {
-			isa = PBXGroup;
-			children = (
-				B5959328249B184B00A307B3 /* MobileRTCResources.bundle */,
-			);
-			path = lib;
-			sourceTree = "<group>";
-		};
 		B5BD4D1F22C22B6900B971A7 /* Vendor */ = {
 			isa = PBXGroup;
 			children = (
-				B5959326249B184B00A307B3 /* zoom */,
 				B570FDC82497562400445598 /* OpenSDK1.8.7.1_NoPay */,
 				4832592221CE74870061D47F /* VoiceConvert */,
 				B559FFEB22D0A64B003FDA76 /* YYKit */,
@@ -2232,6 +2268,7 @@
 				B532178721C15C2E0042F403 /* Embed Frameworks */,
 				B511684F228E9817001B2AE7 /* Embed App Extensions */,
 				B54BBA81247C0C3200862CE2 /* CopyFiles */,
+				D6F7801DFC6C90B43B873797 /* [CP] Embed Pods Frameworks */,
 			);
 			buildRules = (
 			);
@@ -2280,6 +2317,23 @@
 			productName = MaxIMUITests;
 			productReference = 48FB3E902193F4FD007740F4 /* MaxIMUITests.xctest */;
 			productType = "com.apple.product-type.bundle.ui-testing";
+		};
+		AF5780B729C22F8F002CC192 /* MaxIMNotification */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = AF5780CD29C22F8F002CC192 /* Build configuration list for PBXNativeTarget "MaxIMNotification" */;
+			buildPhases = (
+				AF5780B429C22F8F002CC192 /* Sources */,
+				AF5780B629C22F8F002CC192 /* Resources */,
+				C2EC9492011782D97B2B25D1 /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = MaxIMNotification;
+			productName = MaxIMNotification;
+			productReference = AF5780B829C22F8F002CC192 /* MaxIMNotification.appex */;
+			productType = "com.apple.product-type.app-extension";
 		};
 		B511683F228E9817001B2AE7 /* MaxIMShare */ = {
 			isa = PBXNativeTarget;
@@ -2367,6 +2421,7 @@
 				48FB3E842193F4FD007740F4 /* MaxIMTests */,
 				48FB3E8F2193F4FD007740F4 /* MaxIMUITests */,
 				B511683F228E9817001B2AE7 /* MaxIMShare */,
+				AF5780B729C22F8F002CC192 /* MaxIMNotification */,
 			);
 		};
 /* End PBXProject section */
@@ -2387,6 +2442,7 @@
 				AF923D17281B0725002875A3 /* splash.png in Resources */,
 				AF3E6C5327D3BB3400D016C7 /* searchDetailProfiledetail.json in Resources */,
 				AF3E6C4727D3813A00D016C7 /* group.json in Resources */,
+				AF51DDEB29CEDAA8006656CD /* bell.mp3 in Resources */,
 				B5AAD8F9238E4EA50000C7FA /* lauchVideo_1125.mp4 in Resources */,
 				AF3E6C4327D37FC300D016C7 /* setting.json in Resources */,
 				B570FDCE2497562400445598 /* README.txt in Resources */,
@@ -2395,7 +2451,6 @@
 				B539D6DA21BFDD370011D30E /* emoticons.plist in Resources */,
 				AF3E6C4F27D3BAED00D016C7 /* chatdetailproiledetail.json in Resources */,
 				AF226BF028588778005C5C7F /* about.png in Resources */,
-				B595932A249B184B00A307B3 /* MobileRTCResources.bundle in Resources */,
 				B5AAD8F7238E4EA50000C7FA /* lauchVideo_374.mp4 in Resources */,
 				AF3E6C5727D3BB6200D016C7 /* SystemRosterProfile.json in Resources */,
 				B539D6D321BFDD370011D30E /* Keyboard_gradient_mask@3x.png in Resources */,
@@ -2419,6 +2474,14 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		AF5780B629C22F8F002CC192 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				AF51DDEC29CEDAA8006656CD /* bell.mp3 in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2504,6 +2567,23 @@
 			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-MaxIM/Pods-MaxIM-resources.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
+		D6F7801DFC6C90B43B873797 /* [CP] Embed Pods Frameworks */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-MaxIM/Pods-MaxIM-frameworks-${CONFIGURATION}-input-files.xcfilelist",
+			);
+			name = "[CP] Embed Pods Frameworks";
+			outputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-MaxIM/Pods-MaxIM-frameworks-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-MaxIM/Pods-MaxIM-frameworks.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
 /* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
@@ -2511,6 +2591,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				AF4C80A729261BC200ADBA82 /* CallView.m in Sources */,
+				AF4C80A829261BC600ADBA82 /* CallViewController.m in Sources */,
 				AF4C019728461BC400B8913D /* LanyingLangManager.m in Sources */,
 				B50BEAF622560D6000B0753D /* ApiResult.m in Sources */,
 				B539D6B721BFDD370011D30E /* UIColor+RGB.m in Sources */,
@@ -2576,6 +2658,7 @@
 				B5EC8848243F4A6900C3344D /* SDKConfigViewController.m in Sources */,
 				B55900B022D0A7A1003FDA76 /* GroupCollectionView.m in Sources */,
 				B539D6B521BFDD370011D30E /* NSDate+Judge.m in Sources */,
+				AFED17F929A3E15B001A5F8B /* SupportsStorage.m in Sources */,
 				B539D6B021BFDD370011D30E /* LHPhotoPreviewCell.m in Sources */,
 				B5AFB3002276E24000C23559 /* WechatApi.m in Sources */,
 				B559003B22D0A64B003FDA76 /* YYAnimatedImageView.m in Sources */,
@@ -2596,6 +2679,7 @@
 				B559003D22D0A64B003FDA76 /* UIView+YYAdd.m in Sources */,
 				B559004522D0A64B003FDA76 /* YYTextSelectionView.m in Sources */,
 				B50AE5F2244C95DA006CC493 /* ChangePasswordView.m in Sources */,
+				AF5DB35129AE617500E1367B /* CopyableLabel.m in Sources */,
 				4815431721E7AD520082E38D /* TransterViewController.m in Sources */,
 				B5F17B8821C2551A00B613A9 /* RosterSearchViewController.m in Sources */,
 				B5F17B8621C2551A00B613A9 /* ContactTableView.m in Sources */,
@@ -2714,6 +2798,7 @@
 				B559004B22D0A64B003FDA76 /* YYTextAttribute.m in Sources */,
 				B50BEAF32256067E00B0753D /* BaseApi.m in Sources */,
 				B539D6C521BFDD370011D30E /* LHChatBaseBubbleView.m in Sources */,
+				AF4B381228C1B6EE0043ADA4 /* MAXUtils.m in Sources */,
 				B51FFBF0239813FB00E82887 /* VerifyPhoneViewController.m in Sources */,
 				B50AE52922CDE9EA00D82476 /* VideoPlayerOperation.m in Sources */,
 				B5433A6F21C4F96C0062E141 /* RosterDetailViewController.m in Sources */,
@@ -2765,6 +2850,14 @@
 			buildActionMask = 2147483647;
 			files = (
 				48FB3E952193F4FD007740F4 /* MaxIMUITests.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		AF5780B429C22F8F002CC192 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				AF5780BC29C22F8F002CC192 /* NotificationService.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -3083,7 +3176,7 @@
 					"$(PROJECT_DIR)/Class/Vendor/OpenSDK1.8.7.1_NoPay",
 				);
 				MACH_O_TYPE = mh_execute;
-				MARKETING_VERSION = 3.12;
+				MARKETING_VERSION = 4.4;
 				OTHER_LDFLAGS = (
 					"$(inherited)",
 					"-ObjC",
@@ -3167,7 +3260,7 @@
 					"$(PROJECT_DIR)/Class/Vendor/OpenSDK1.8.7.1_NoPay",
 				);
 				MACH_O_TYPE = mh_execute;
-				MARKETING_VERSION = 3.12;
+				MARKETING_VERSION = 4.4;
 				OTHER_LDFLAGS = (
 					"$(inherited)",
 					"-ObjC",
@@ -3270,6 +3363,69 @@
 			};
 			name = Release;
 		};
+		AF5780C129C22F8F002CC192 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++17";
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 963BX74UXU;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = MaxIMNotification/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = MaxIMNotification;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "Copyright © 2023 hyt. All rights reserved.";
+				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				PRODUCT_BUNDLE_IDENTIFIER = com.maximtop.MaxIM.MaxIMNotification;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		AF5780C229C22F8F002CC192 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++17";
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 963BX74UXU;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = MaxIMNotification/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = MaxIMNotification;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "Copyright © 2023 hyt. All rights reserved.";
+				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				MTL_FAST_MATH = YES;
+				PRODUCT_BUNDLE_IDENTIFIER = com.maximtop.MaxIM.MaxIMNotification;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
 		B511684C228E9817001B2AE7 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -3298,7 +3454,7 @@
 					"$(inherited)",
 					"$(PROJECT_DIR)/MaxIMShare/floolib",
 				);
-				MARKETING_VERSION = 3.12;
+				MARKETING_VERSION = 3.13;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				PRODUCT_BUNDLE_IDENTIFIER = com.maximtop.MaxIM.ShareExtention;
@@ -3333,7 +3489,7 @@
 					"$(inherited)",
 					"$(PROJECT_DIR)/MaxIMShare/floolib",
 				);
-				MARKETING_VERSION = 3.12;
+				MARKETING_VERSION = 3.13;
 				MTL_FAST_MATH = YES;
 				PRODUCT_BUNDLE_IDENTIFIER = com.maximtop.MaxIM.ShareExtention;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -3378,6 +3534,15 @@
 			buildConfigurations = (
 				48FB3EA02193F4FD007740F4 /* Debug */,
 				48FB3EA12193F4FD007740F4 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		AF5780CD29C22F8F002CC192 /* Build configuration list for PBXNativeTarget "MaxIMNotification" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				AF5780C129C22F8F002CC192 /* Debug */,
+				AF5780C229C22F8F002CC192 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

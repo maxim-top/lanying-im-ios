@@ -16,9 +16,8 @@
 
 #import "GroupOwnerTransterViewController.h"
 #import "GorupLittleCell.h"
-#import <floo-ios/BMXClient.h>
-#import <floo-ios/BMXGroupMember.h>
-#import <floo-ios/BMXRoster.h>
+#import <floo-ios/floo_proxy.h>
+#import "MAXUtils.h"
 #import "UIViewController+CustomNavigationBar.h"
 
 
@@ -68,12 +67,12 @@
 
 -(UITableViewCell*) tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
     GorupLittleCell* cell = [tableView dequeueReusableCellWithIdentifier:@"GorupLittleCell"];
-    BMXRoster* roster = [self.memberList objectAtIndex:indexPath.row];
+    BMXRosterItem* roster = [self.memberList objectAtIndex:indexPath.row];
     if(cell == nil) {
         cell = [[GorupLittleCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:@"GorupLittleCell"];
         cell.selectionStyle = UITableViewCellSelectionStyleNone;
     }
-    NSString* uname = (roster.nickName && ![@"" isEqualToString:roster.nickName]) ? roster.nickName : roster.userName;
+    NSString* uname = (roster.nickname && ![@"" isEqualToString:roster.nickname]) ? roster.nickname : roster.username;
     BOOL isSelected = indexPath.row == _selectedIndex;
     [cell setAvatarRoster:roster RosterName:uname Selected:isSelected];
     return cell;
@@ -116,8 +115,8 @@
 
 -(void) touchedRightBar
 {
-    BMXRoster* roster = [self.memberList objectAtIndex:_selectedIndex];
-    NSString* ownerIdStr = [NSString stringWithFormat:@"%ld", self.group.ownerId];
+    BMXRosterItem* roster = [self.memberList objectAtIndex:_selectedIndex];
+    NSString* ownerIdStr = [NSString stringWithFormat:@"%lld", self.group.ownerId];
     NSString* rosterIdStr = [NSString stringWithFormat:@"%lld", roster.rosterId];
     if([ownerIdStr isEqualToString:rosterIdStr] || _selectedIndex == -1) {
         UIAlertController* alert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Warning", @"警告") message:NSLocalizedString(@"The_group_owner_you_selected_has_no_changed", @"您选的群主没有改变") preferredStyle:UIAlertControllerStyleAlert];
@@ -135,10 +134,10 @@
 
 -(void) transferOwner
 {
-    BMXRoster* roster = [self.memberList objectAtIndex:_selectedIndex];
-    [[[BMXClient sharedClient] groupService] transferOwnerByGroup:self.group newOwnerId:roster.rosterId completion:^(BMXError *error) {
+    BMXRosterItem* roster = [self.memberList objectAtIndex:_selectedIndex];
+    [[[BMXClient sharedClient] groupService] transferOwnerWithGroup:self.group newOwnerId:roster.rosterId completion:^(BMXError *error) {
         if (error) {
-            MAXLog(@"group transfer error: %d", error.errorCode);
+            MAXLog(@"group transfer error: %ld", (long)error.errorCode);
         }else {
             [self.navigationController popViewControllerAnimated:YES];
         }
@@ -153,33 +152,28 @@
 
 // 获取群成员
 - (void)getMembers {
-    [[[BMXClient sharedClient] groupService] getMembers:self.group forceRefresh:YES completion:^(NSArray<BMXGroupMember *> *groupList, BMXError *error) {
-        MAXLog(@"%ld", groupList.count);
-        NSMutableArray* array = [NSMutableArray array];
-        for (BMXGroupMember* amember in groupList) {
-            NSString* uidStr = [NSString stringWithFormat:@"%ld", amember.uid];
-            [array addObject:uidStr];
-        }
-        [self getRostersByidArray:array];
+    [MAXUtils getMemberIdsWithGroup:self.group completion:^(ListOfLongLong *idList) {
+        [self getRostersByidArray:idList];;
     }];
 }
 
 // 获取群成员详情
-- (void)getRostersByidArray:(NSArray *)idArray {
-    [[[BMXClient sharedClient] rosterService] searchRostersByRosterIdList:idArray forceRefresh:YES completion:^(NSArray<BMXRoster *> *rosterList, BMXError *error) {
-        MAXLog(@"%ld", rosterList.count);
-        self.memberList = [NSArray arrayWithArray: rosterList];
+- (void)getRostersByidArray:(ListOfLongLong *)idList {
+    [MAXUtils getRostersByidArray:idList completion:^(NSArray *arr) {
+        MAXLog(@"%ld", arr.count);
+        self.memberList = arr;
         for (NSInteger i=0; i<self.memberList.count; i++) {
-            BMXRoster* roster = [self.memberList objectAtIndex:i];
-            NSString* ownerIdStr = [NSString stringWithFormat:@"%ld", self.group.ownerId];
+            BMXRosterItem* roster = [self.memberList objectAtIndex:i];
+            NSString* ownerIdStr = [NSString stringWithFormat:@"%lld", self.group.ownerId];
             NSString* rosterIdStr = [NSString stringWithFormat:@"%lld", roster.rosterId];
             if([ownerIdStr isEqualToString:rosterIdStr]) {
-                _selectedIndex = i;
+                self->_selectedIndex = i;
             }
-            
         }
+
         [self.tableView reloadData];
     }];
+
 }
 
 

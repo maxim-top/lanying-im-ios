@@ -7,6 +7,7 @@
 //
 
 #import <UIKit/UIKit.h>
+#import <floo-ios/floo_proxy.h>
 
 @class BMXRoster;
 NS_ASSUME_NONNULL_BEGIN
@@ -14,7 +15,7 @@ NS_ASSUME_NONNULL_BEGIN
 @interface ContactTableView : UITableView
 
 + (instancetype)contactTableView;
-- (void)refresh:(NSArray<BMXRoster *> *)array;
+- (void)refresh:(NSArray<BMXRosterItem *> *)array;
 
 @end
 

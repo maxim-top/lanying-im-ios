@@ -10,7 +10,8 @@
 #import <AVFoundation/AVFoundation.h>
 #import "SearchRosterProfileViewController.h"
 #import "GroupBasicInfoViewController.h"
-#import <floo-ios/BMXClient.h>
+#import <floo-ios/floo_proxy.h>
+
 #import "QRCodeLoginViewController.h"
 #import "NotifierUploadPushInfoApi.h"
 #import "AppDelegate.h"
@@ -146,13 +147,20 @@
     } else if ([action isEqualToString:@"upload_device_token"] && [self isLogin]) {
         [self configUploadDeviceTokenWithInfo:dic];
         
-    } else if ([action isEqualToString:@"app"] && ![self isLogin]) {
-        NSString *appId = [NSString stringWithFormat:@"%@", dic[@"app_id"]];
-        NSDictionary *dic = @{@"appId": appId};
-        [self reloadAppID:appId];
-        [[NSNotificationCenter defaultCenter] postNotificationName:@"ScanConsule" object:dic];
-        [self closwBtnClick];
-        
+    } else if ([action isEqualToString:@"app"]) {
+        if (![self isLogin]){
+            NSString *appId = [NSString stringWithFormat:@"%@", dic[@"app_id"]];
+            NSDictionary *dic = @{@"appId": appId};
+            [self reloadAppID:appId];
+            [[NSNotificationCenter defaultCenter] postNotificationName:@"ScanConsule" object:dic];
+            [self closwBtnClick];
+            NSString *tip = [NSString stringWithFormat:@"%@%@",
+                             NSLocalizedString(@"appid_changed", @"成功切换Appid为："), appId];
+            [HQCustomToast showDialog:tip];
+        }else{
+            [HQCustomToast showDialog:NSLocalizedString(@"logout_first", @"请先登出当前账号，再扫码登录")];
+            [self.navigationController popToRootViewControllerAnimated:YES];
+        }
     } else {
         [HQCustomToast showDialog:NSLocalizedString(@"QR_Code_is_not_recognized", @"未识别该二维码")];
         [self.navigationController popToRootViewControllerAnimated:YES];
@@ -294,13 +302,14 @@
 
 - (void)searchRosterById:(NSInteger)rosterid {
     [HQCustomToast showWating];
-    [[[BMXClient sharedClient] rosterService] searchByRosterId:rosterid forceRefresh:YES completion:^(BMXRoster *roster, BMXError *error) {
+    [[[BMXClient sharedClient] rosterService] searchWithRosterId:rosterid forceRefresh:YES completion:^(BMXRosterItem *rosterItem, BMXError *error) {
         [HQCustomToast hideWating];
-        if (error == nil) {
-            SearchRosterProfileViewController *vc = [[SearchRosterProfileViewController alloc] initWithRoster:roster];
+
+        if (!error){
+            SearchRosterProfileViewController *vc = [[SearchRosterProfileViewController alloc] initWithRoster:rosterItem];
             [self.navigationController pushViewController:vc animated:YES];
         } else {
-            [HQCustomToast showDialog:error.errorMessage];
+            [HQCustomToast showDialog: @"Unknow error."];
             [self.navigationController popViewControllerAnimated:YES];
 
         }
@@ -311,14 +320,14 @@
 
 - (void)searcGroupById:(NSInteger)groupId WithInfo:(NSString *)info{
     [HQCustomToast showWating];
-    [[[BMXClient sharedClient] groupService]  getGroupInfoByGroupId:groupId forceRefresh:YES completion:^(BMXGroup *group, BMXError *error) {
+    [[[BMXClient sharedClient] groupService]  fetchGroupByIdWithGroupId:groupId forceRefresh:YES completion:^(BMXGroup *group, BMXError *error) {
         [HQCustomToast hideWating];
         if (error == nil) {
             GroupBasicInfoViewController *vc = [[GroupBasicInfoViewController alloc] initWithGroup:group info:info];
             [self.navigationController pushViewController:vc animated:YES];
-           
+
         } else {
-            [HQCustomToast showDialog:error.errorMessage];
+            [HQCustomToast showDialog:[error description]];
             [self.navigationController popViewControllerAnimated:YES];
         }
     }];

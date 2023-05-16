@@ -16,8 +16,8 @@
 
 #import "DeviceManagmentViewController.h"
 #import "DeviceTableViewCell.h"
-#import <floo-ios/BMXClient.h>
-#import <floo-ios/BMXDevice.h>
+#import <floo-ios/floo_proxy.h>
+
 #import "IMAcountInfoStorage.h"
 #import "IMAcount.h"
 #import "UIViewController+CustomNavigationBar.h"
@@ -43,9 +43,14 @@
 }
 
 - (void)getDeviceList {
-    [[[BMXClient sharedClient] userService] getDeviceListCompletion:^(BMXError *error, NSArray *deviceList) {
+    [[[BMXClient sharedClient] userService] getDeviceListWithCompletion:^(BMXDeviceList *deviceList, BMXError *error) {
         if (!error) {
-            self.deviceListArray  = [NSArray arrayWithArray:deviceList];
+            unsigned long sz = deviceList.size;
+            NSMutableArray *arr = [[NSMutableArray alloc] init];
+            for (int i=0; i<sz; i++) {
+                [arr addObject:[deviceList get:i]];
+            }
+            self.deviceListArray  = arr;
             [self.tableView reloadData];
         }
     }];
@@ -64,7 +69,7 @@
     
     UITableViewRowAction *deleteRowAction = [UITableViewRowAction rowActionWithStyle:UITableViewRowActionStyleDestructive title:NSLocalizedString(@"Delete", @"删除")handler:^(UITableViewRowAction *action, NSIndexPath *indexPath) {
         BMXDevice *device = self.deviceListArray[indexPath.row];
-        [[[BMXClient sharedClient] userService] deleteDeviceByDeviceSN:device.deviceSN completion:^(BMXError *error) {
+        [[[BMXClient sharedClient] userService] deleteDeviceWithDeviceSn:device.deviceSN completion:^(BMXError *error) {
             if (!error) {
                 [HQCustomToast showDialog:NSLocalizedString(@"Delete_successfully", @"删除成功")];
                 [self getDeviceList];
@@ -82,7 +87,7 @@
 }
 
 - (void)deviceTableViewCelldidClickButtonWithDevice:(BMXDevice *)device {
-    [[[BMXClient sharedClient] userService] deleteDeviceByDeviceSN:device.deviceSN completion:^(BMXError *error) {
+    [[[BMXClient sharedClient] userService] deleteDeviceWithDeviceSn:device.deviceSN completion:^(BMXError *error) {
         if (!error) {
             [HQCustomToast showDialog:NSLocalizedString(@"Delete_successfully", @"删除成功")];
             [self getDeviceList];

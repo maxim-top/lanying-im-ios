@@ -24,15 +24,7 @@
 #import "BMXRecoderTools.h"
 #import "BMXVoiceHud.h"
 
-#import <floo-ios/BMXClient.h>
-#import <floo-ios/BMXChatManager.h>
-#import <floo-ios/BMXMessageObject.h>
-#import <floo-ios/BMXMessageAttachment.h>
-#import <floo-ios/BMXImageAttachment.h>
-#import <floo-ios/BMXVoiceAttachment.h>
-#import <floo-ios/BMXLocationAttachment.h>
-#import <floo-ios/BMXFileAttachment.h>
-#import <floo-ios/BMXVideoAttachment.h>
+#import <floo-ios/floo_proxy.h>
 
 #import "IMAcount.h"
 #import "IMAcountInfoStorage.h"
@@ -47,7 +39,6 @@
 #import "GroupCreateViewController.h"
 #import "GroupOwnerTransterViewController.h"
 #import "GroupAlreadyReadListViewController.h"
-#import <floo-ios/BMXRoster.h>
 
 #import "BubbleViewAlertView.h"
 #import "YYLabel.h"
@@ -60,8 +51,8 @@
 
 #import <CoreLocation/CoreLocation.h>
 #import "UIViewController+CustomNavigationBar.h"
-#import <floo-ios/BMXMessageConfig.h>
-//#import <floo-ios/BMXGroupMember.h>
+#import "CallViewController.h"
+
 NSString *const kTableViewOffset = @"contentOffset";
 NSString *const kTableViewFrame = @"frame";
 
@@ -69,6 +60,7 @@ NSString *const kTableViewFrame = @"frame";
 UITableViewDataSource,
 XSBrowserDelegate,
 BMXChatServiceProtocol,
+BMXRTCServiceProtocol,
 ChatBarProtocol,
 GroupCreateViewControllerDelegate,
 GroupOwnerTransterViewControllerDelegate,
@@ -89,9 +81,9 @@ CLLocationManagerDelegate>
     
 }
 
-@property (nonatomic, strong) BMXRoster *currentRoster;
+@property (nonatomic, strong) BMXRosterItem *currentRoster;
 @property (nonatomic, strong) BMXGroup *currentGroup;
-@property (nonatomic,assign)  BMXMessageType messageType;
+@property (nonatomic,assign)  BMXMessage_MessageType messageType;
 
 
 @property (strong, nonatomic) UITableView *tableView;
@@ -122,7 +114,7 @@ CLLocationManagerDelegate>
 @property (nonatomic, strong) UILabel *voiceTip;
 @property (nonatomic, strong) NSTimer *timer; //记录录音的动画
 
-@property (nonatomic, assign) NSInteger conversationId;
+@property (nonatomic, assign) long long conversationId;
 @property (nonatomic, strong) UIImage *selfImage;
 @property (nonatomic, strong) UIImage *deImage;
 
@@ -153,8 +145,8 @@ CLLocationManagerDelegate>
 
 @implementation LHChatVC
 
-- (instancetype)initWithRoster:(BMXRoster *)roster
-                   messageType:(BMXMessageType)messageType {
+- (instancetype)initWithRoster:(BMXRosterItem *)roster
+                   messageType:(BMXMessage_MessageType)messageType {
     if (self = [super init]) {
         self.currentRoster = roster;
         self.messageType = messageType;
@@ -163,14 +155,66 @@ CLLocationManagerDelegate>
     return self;
 }
 
+- (instancetype)initWithConversationId:(long long)conversationId
+                   messageType:(BMXMessage_MessageType)messageType {
+    if (self = [super init]) {
+        self.conversationId = conversationId;
+        self.messageType = messageType;
+        MAXLog(@"单聊：conversationId:%lld",self.conversationId );
+    }
+    return self;
+}
+
 - (instancetype)initWithGroupChat:(BMXGroup *)group
-                      messageType:(BMXMessageType)messageType {
+                      messageType:(BMXMessage_MessageType)messageType {
     if (self = [super init]) {
         self.currentGroup = group;
         self.messageType = messageType;
         MAXLog(@"群聊：group%lld",self.currentGroup.groupId );
     }
     return self;
+}
+
+- (void)receiveNoti:(NSNotification*)noti
+{
+    NSString *event = noti.userInfo[@"event"];
+    if ([event isEqualToString:@"hangup"]) {
+        [[[BMXClient sharedClient] chatService] retrieveHistoryMessagesWithConversation:self.conversation refMsgId:0 size:1 completion:^(BMXMessageList *messageList, BMXError *error) {
+            if (!error) {
+                BMXMessage *msg = [messageList get:0];
+                if (!msg) {
+                    return;
+                }
+
+                LHMessageModel *messageModel = [self changeUIModelWithBMXMessage:msg atIndex:-1];
+                MAXLog(@"==1==%@", messageModel.content);
+
+                if (self.messageType == BMXMessage_MessageType_Single) {
+                    [self ackMessagebyModel:messageModel];
+                } else {
+                    if (self.currentGroup.enableReadAck == YES) {
+                        [self ackMessagebyModel:messageModel];
+                    }
+                }
+
+                NSString *time = [LHTools processingTimeWithDate:messageModel.date];
+                if (![self.lastTime isEqualToString:time]) {
+                    [self.dataSource insertObject:time atIndex:0];
+                    self.lastTime = time;
+                }
+
+                [self.tableView reloadData];
+                
+                if (self.dataSource.count >  1) {
+                    NSIndexPath *ip = [NSIndexPath indexPathForRow:self.dataSource.count - 1 inSection:0];
+                    dispatch_async(dispatch_get_main_queue(), ^{
+                        [self.tableView scrollToRowAtIndexPath:ip atScrollPosition:UITableViewScrollPositionBottom animated:NO ]; //滚动到最后一行
+                        
+                    });
+                }
+            }
+       }];
+    }
 }
 
 - (void)viewWillDisappear:(BOOL)animated {
@@ -195,9 +239,13 @@ CLLocationManagerDelegate>
     [self scrollToBottomAnimated:NO refresh:NO];
     
     [[[BMXClient sharedClient] chatService] addDelegate:self delegateQueue:dispatch_get_main_queue()];
+    [[[BMXClient sharedClient] rtcService] addDelegate:self delegateQueue:dispatch_get_main_queue()];
     
     [self p_configNotification];
     [self p_configEditMessage];
+    
+    NSNotificationCenter *center = [NSNotificationCenter defaultCenter];
+    [center addObserver:self selector:@selector(receiveNoti:) name:@"call" object:nil];
 }
 
 - (void)p_configNotification {
@@ -214,34 +262,33 @@ CLLocationManagerDelegate>
 //监听状态,处理typing状态
 - (void)endEdit {
     MAXLog(@"结束编辑");
-    if (self.messageType == BMXMessageTypeGroup) {
+    if (self.messageType == BMXMessage_MessageType_Group) {
         return;
     }
     [self sendTypingMessage:@{@"input_status":@"nothing"}];
 }
 
 - (void)sendTypingMessage:(NSDictionary *)configdic {
-    BMXMessageObject *messageObject = [[BMXMessageObject alloc] initWithBMXMessageText:@""
-                                                                                fromId:[self.account.usedId longLongValue]
-                                                                                  toId:self.currentRoster.rosterId
-                                                                                  type:BMXMessageTypeSingle
-                                                                        conversationId:self.currentRoster.rosterId];
-    messageObject.extensionJson = [NSString jsonStringWithDictionary:configdic];
-    messageObject.qos = DeliveryQosModeAtMostOnce;
-    [[[BMXClient sharedClient] chatService] sendMessage:messageObject];
+    BMXMessage * msg = [BMXMessage createMessageWithFrom:[self.account.usedId longLongValue]  to:self.currentRoster.rosterId type:BMXMessage_MessageType_Single conversationId:self.currentRoster.rosterId content:@""];
+    msg.extension = [NSString jsonStringWithDictionary:configdic];
+    msg.deliveryQos = BMXMessage_DeliveryQos_AtMostOnce;
+    [[[BMXClient sharedClient] chatService] sendMessageWithMsg:msg completion:^(BMXError *aError) {
+    }];
 }
 
 - (void)beginEdit {
     MAXLog(@"正在编辑");
-    if (self.messageType == BMXMessageTypeGroup) {
+    if (self.messageType == BMXMessage_MessageType_Group) {
         return;
     }
     [self sendTypingMessage:@{@"input_status":@"typing"}];
 }
 
 - (void)getMyProfile {
-    [[[BMXClient sharedClient] userService] getProfileForceRefresh:NO completion:^(BMXUserProfile *profile, BMXError *aError) {
-        [self getSelfAvatar:profile];
+    [[[BMXClient sharedClient] userService] getProfile:NO completion:^(BMXUserProfile *profile, BMXError *error) {
+        if (!error) {
+            [self getSelfAvatar:profile];
+        }
     }];
 }
 
@@ -250,10 +297,11 @@ CLLocationManagerDelegate>
     if (avarat) {
         self.selfImage  = avarat;
     }else {
-        [[[BMXClient sharedClient] userService] downloadAvatarWithProfile:profile thumbnail:YES progress:^(int progress, BMXError *error) {
-        } completion:^(BMXUserProfile *profile, BMXError *error) {
-            UIImage *image = [UIImage imageWithContentsOfFile:profile.avatarThumbnailPath];
-            self.selfImage  = image;
+        [[[BMXClient sharedClient] userService] downloadAvatarWithProfile:profile thumbnail:YES callback:^(int progress) {} completion:^(BMXError *error) {
+            if (!error) {
+                UIImage *image = [UIImage imageWithContentsOfFile:profile.avatarThumbnailPath];
+                self.selfImage  = image;
+            }
         }];
     }
 }
@@ -289,7 +337,7 @@ CLLocationManagerDelegate>
     if (istyping == YES) {
         self.title = NSLocalizedString(@"Typing", @"正在输入...");
     } else {
-        self.title = [self.currentRoster.nickName length] ? self.currentRoster.nickName : self.currentRoster.userName;
+        self.title = [self.currentRoster.nickname length] ? self.currentRoster.nickname : self.currentRoster.username;
     }
 }
 
@@ -306,8 +354,8 @@ CLLocationManagerDelegate>
     }
 }
 
-- (BOOL)isHaveExtion:(BMXMessageObject *)model {
-    if ([model.extensionJson length]) {
+- (BOOL)isHaveExtion:(BMXMessage *)model {
+    if ([model.extension length]) {
         return YES;
     } else {
         return NO;
@@ -327,28 +375,24 @@ CLLocationManagerDelegate>
 
 - (void)loadMessages {
     BMXConversation *conversation;
-    if (self.messageType == BMXConversationGroup) {
+    if (self.messageType == BMXConversation_Type_Group) {
         self.conversationId =  self.conversationId ?self.conversationId : (NSInteger)self.currentGroup.groupId;
-        BMXConversation *groupConversation = [[[BMXClient sharedClient] chatService] openConversation:self.conversationId type:BMXConversationGroup createIfNotExist:YES];
-        
+        BMXConversation *groupConversation = [[[BMXClient sharedClient] chatService] openConversationWithConversationId:self.conversationId type:BMXConversation_Type_Group createIfNotExist:YES];
         conversation = groupConversation;
     } else {
         self.conversationId = self.conversationId ? self.conversationId: (NSInteger)self.currentRoster.rosterId;
-        BMXConversation *singleConversation = [[[BMXClient sharedClient] chatService] openConversation:self.conversationId type:BMXConversationSingle createIfNotExist:YES];
+        BMXConversation *singleConversation = [[[BMXClient sharedClient] chatService] openConversationWithConversationId:self.conversationId type:BMXConversation_Type_Single createIfNotExist:YES];
         conversation = singleConversation;
         
         UIImage *image = [UIImage imageWithContentsOfFile:self.currentRoster.avatarThumbnailPath];
-        if (!image) {
-            [[[BMXClient sharedClient] rosterService] downloadAvatarWithRoster:self.currentRoster isThumbnail:YES progress:^(int progress, BMXError *error) {
-            }  completion:^(BMXRoster *rosterObjc, BMXError *error) {
-                if (!error) {
-                    UIImage *image = [UIImage imageWithContentsOfFile:rosterObjc.avatarThumbnailPath];
-                    dispatch_async(dispatch_get_main_queue(), ^{
-                        
-                        self.deImage = image;
-                    });
-                }
-            }];
+        if (!image && self.currentRoster) {
+            BMXErrorCode error = [[[BMXClient sharedClient] rosterService]downloadAvatarWithItem:self.currentRoster thumbnail:YES callback:^(int progress) {}];
+            if (!error) {
+                UIImage *image = [UIImage imageWithContentsOfFile:self.currentRoster.avatarThumbnailPath];
+                dispatch_async(dispatch_get_main_queue(), ^{
+                    self.deImage = image;
+                });
+            }
         }else {
             self.deImage = image;
         }
@@ -356,69 +400,89 @@ CLLocationManagerDelegate>
     }
     self.conversation = conversation;
     
-    [[[BMXClient sharedClient] chatService] retrieveHistoryBMXconversation:self.conversation msgId:0 size:10 completion:^(NSArray *messageListms, BMXError *error) {
-        
-        
-        MAXLog(@"%lu", (unsigned long)messageListms.count);
-        messageListms =  [messageListms sortedArrayUsingComparator:^NSComparisonResult(BMXMessageObject *message1, BMXMessageObject *message2) {
-            return message1.serverTimestamp < message2.serverTimestamp;
-        }];
-        
-        [messageListms enumerateObjectsUsingBlock:^(BMXMessageObject *message, NSUInteger idx, BOOL * stop) {
-            
-            LHMessageModel *messageModel = [self changeUIModelWithBMXMessage:message];
-            
-            if (self.messageType == BMXMessageTypeSingle) {
-                [self ackMessagebyModel:messageModel];
-            } else {
-                if (self.currentGroup.enableReadAck == YES) {
-                    [self ackMessagebyModel:messageModel];
+    [[[BMXClient sharedClient] chatService] retrieveHistoryMessagesWithConversation:self.conversation refMsgId:0 size:10 completion:^(BMXMessageList *messageList, BMXError *error) {
+        if (!error) {
+            MAXLog(@"%lu", (unsigned long)messageList.size);
+            NSMutableArray *messageListms = [[NSMutableArray alloc] init];
+            for (int i=0; i<messageList.size; i++){
+                BMXMessage *msg = [messageList get:i];
+                if (msg) {
+                    [messageListms addObject: msg];
                 }
             }
+
+            NSArray *sortedMessages =  [messageListms sortedArrayUsingComparator:^NSComparisonResult(BMXMessage *message1, BMXMessage *message2) {
+                return message1.serverTimestamp < message2.serverTimestamp;
+            }];
             
-            NSString *time = [LHTools processingTimeWithDate:messageModel.date];
-            if (![self.lastTime isEqualToString:time]) {
-                [self.dataSource insertObject:time atIndex:0];
-                self.lastTime = time;
-            }
-        }];
-        
-        [self.tableView reloadData];
-        
-        
-        if (self.dataSource.count >  1) {
-            NSIndexPath *ip = [NSIndexPath indexPathForRow:self.dataSource.count - 1 inSection:0];
-            dispatch_async(dispatch_get_main_queue(), ^{
-                [self.tableView scrollToRowAtIndexPath:ip atScrollPosition:UITableViewScrollPositionBottom animated:NO ]; //滚动到最后一行
+            [sortedMessages enumerateObjectsUsingBlock:^(BMXMessage *message, NSUInteger idx, BOOL * stop) {
                 
-            });
+                LHMessageModel *messageModel = [self changeUIModelWithBMXMessage:message atIndex:0];
+                
+                if (self.messageType == BMXMessage_MessageType_Single) {
+                    [self ackMessagebyModel:messageModel];
+                } else {
+                    if (self.currentGroup.enableReadAck == YES) {
+                        [self ackMessagebyModel:messageModel];
+                    }
+                }
+                
+                NSString *time = [LHTools processingTimeWithDate:messageModel.date];
+                if (![self.lastTime isEqualToString:time]) {
+                    [self.dataSource insertObject:time atIndex:0];
+                    self.lastTime = time;
+                }
+            }];
+            
+            [self.tableView reloadData];
+            
+            
+            if (self.dataSource.count >  1) {
+                NSIndexPath *ip = [NSIndexPath indexPathForRow:self.dataSource.count - 1 inSection:0];
+                dispatch_async(dispatch_get_main_queue(), ^{
+                    [self.tableView scrollToRowAtIndexPath:ip atScrollPosition:UITableViewScrollPositionBottom animated:NO ]; //滚动到最后一行
+                    
+                });
+            }
         }
-        
-    }];
+   }];
 }
 
-- (LHMessageModel *)changeUIModelWithBMXMessage:(BMXMessageObject *)message {
+// 挂断消息在界面展示时需要伪装成以呼叫发起者身份发出
+- (BOOL)isSenderOfMessageModel: (LHMessageModel *)messageModel{
+    BMXMessage *message = messageModel.messageObjc;
+    NSString *fromidStr = [NSString stringWithFormat:@"%lld", message.fromId];
+    //非呼叫挂断类的消息，发送者为from
+    BOOL res = [fromidStr isEqualToString:self.account.usedId];
+    if ([message.config.getRTCAction isEqualToString: @"hangup"]) {
+        res = message.config.getRTCInitiator == [self.account.usedId longLongValue];
+    }
+    return res;
+}
+
+- (LHMessageModel *)changeUIModelWithBMXMessage:(BMXMessage *)message atIndex:(NSUInteger)index{
     NSString *date =  [NSString stringWithFormat:@"%lld", message.serverTimestamp];
     LHMessageModel *dbMessageModel = [[LHIMDBManager shareManager] searchModel:[LHMessageModel class] keyValues:@{@"date" : date, @"status" : @(MessageDeliveryState_Delivered)}];
     dbMessageModel.messageObjc = message;
     NSString *fromidStr = [NSString stringWithFormat:@"%lld", message.fromId];
-    dbMessageModel.isSender = [fromidStr isEqualToString:self.account.usedId];
+    BOOL isFrom = [fromidStr isEqualToString:self.account.usedId];
+    dbMessageModel.isSender = [self isSenderOfMessageModel:dbMessageModel];
     dbMessageModel.date = date;
     dbMessageModel.id = date;
-    switch ( message.deliverystatus) {
-        case BMXDeliveryStatusNew:
+    switch ( message.deliveryStatus) {
+        case BMXMessage_DeliveryStatus_New:
             dbMessageModel.status = MessageDeliveryState_Pending;
             break;
-        case BMXDeliveryStatusDelivering:
+        case BMXMessage_DeliveryStatus_Delivering:
             dbMessageModel.status = MessageDeliveryState_Delivering;
             break;
-        case BMXDeliveryStatusDeliveried:
+        case BMXMessage_DeliveryStatus_Deliveried:
             dbMessageModel.status = MessageDeliveryState_Delivered;
             break;
-        case BMXDeliveryStatusFailed:
+        case BMXMessage_DeliveryStatus_Failed:
             dbMessageModel.status = MessageDeliveryState_Failure;
             break;
-        case BMXDeliveryStatusRecalled:
+        case BMXMessage_DeliveryStatus_Recalled:
             dbMessageModel.status = MessageDeliveryState_Pending;
             break;
             
@@ -426,80 +490,149 @@ CLLocationManagerDelegate>
             break;
     }
     
-    if (message.contentType == BMXContentTypeText) {
+    if (message.contentType == BMXMessage_ContentType_Text) {
         dbMessageModel.content = message.content;
         dbMessageModel.type = MessageBodyType_Text;
-        [self.dataSource insertObject:dbMessageModel atIndex:0];
-        [self.messages insertObject:dbMessageModel atIndex:0];
-        
-    } else if (message.contentType == BMXContentTypeImage) {
+        if (index == 0) {
+            [self.dataSource insertObject:dbMessageModel atIndex:index];
+            [self.messages insertObject:dbMessageModel atIndex:index];
+        }else{
+            [self.dataSource addObject:dbMessageModel];
+            [self.messages addObject:dbMessageModel];
+        }
+    } else if (message.contentType == BMXMessage_ContentType_RTC) {
+        if ([message.config.getRTCAction isEqualToString: @"hangup"]) {
+            dbMessageModel.content = message.content;
+            dbMessageModel.type = MessageBodyType_Text;
+            if ([message.content isEqualToString:@"rejected"]) {
+                if (isFrom) {
+                    dbMessageModel.content = NSLocalizedString(@"call_rejected", @"通话已拒绝");
+                }else{
+                    dbMessageModel.content = NSLocalizedString(@"call_rejected_by_callee", @"通话已被对方拒绝");
+                }
+            } else if ([message.content isEqualToString:@"canceled"]) {
+                if (isFrom) {
+                    dbMessageModel.content = NSLocalizedString(@"call_canceled", @"通话已取消");
+                }else{
+                    dbMessageModel.content = NSLocalizedString(@"call_canceled_by_caller", @"通话已被对方取消");
+                }
+            } else if ([message.content isEqualToString:@"timeout"]) {
+                if (isFrom) {
+                    dbMessageModel.content = NSLocalizedString(@"callee_not_responding", @"对方未应答");
+                }else{
+                    dbMessageModel.content = NSLocalizedString(@"call_not_responding", @"未应答");
+                }
+            } else if ([message.content isEqualToString:@"busy"]) {
+                if (isFrom) {
+                    dbMessageModel.content = NSLocalizedString(@"call_busy", @"忙线未接听");
+                }else{
+                    dbMessageModel.content = NSLocalizedString(@"callee_busy", @"对方忙");
+                }
+            } else{
+                int sec = [dbMessageModel.content intValue]/1000;
+                dbMessageModel.content = [NSString stringWithFormat:NSLocalizedString(@"call_duration", @"通话时长：%02d:%02d"),sec/60, sec%60];
+            }
+            if (index == 0) {
+                [self.dataSource insertObject:dbMessageModel atIndex:index];
+                [self.messages insertObject:dbMessageModel atIndex:index];
+            }else{
+                [self.dataSource addObject:dbMessageModel];
+                [self.messages addObject:dbMessageModel];
+            }
+        }
+    } else if (message.contentType == BMXMessage_ContentType_Image) {
         dbMessageModel.type = MessageBodyType_Image;
-        BMXImageAttachment *imageAtt = (BMXImageAttachment *)message.attachment;
-        dbMessageModel.width = imageAtt.pictureSize.width;
-        dbMessageModel.height = imageAtt.pictureSize.height;
+        BMXImageAttachment *imageAtt = [BMXImageAttachment dynamicCastWithAttachment:message.attachment];
+        dbMessageModel.width = imageAtt.size.getMWidth;
+        dbMessageModel.height = imageAtt.size.getMHeight;
         dbMessageModel.imageRemoteURL = imageAtt.thumbnailPath;
-        [self.dataSource insertObject:dbMessageModel atIndex:0];
-        [self.messages insertObject:dbMessageModel atIndex:0];
-        
+        if (index == 0) {
+            [self.dataSource insertObject:dbMessageModel atIndex:index];
+            [self.messages insertObject:dbMessageModel atIndex:index];
+        }else{
+            [self.dataSource addObject:dbMessageModel];
+            [self.messages addObject:dbMessageModel];
+        }
+
         if (![[NSFileManager defaultManager] fileExistsAtPath:dbMessageModel.imageRemoteURL]) {
-            [[[BMXClient sharedClient] chatService] downloadThumbnail:message strategy:ThirdpartyServerCreate];
+            [[[BMXClient sharedClient] chatService] downloadThumbnailWithMsg:message strategy:BMXChatService_ThumbnailStrategy_ThirdpartyServerCreate completion:^(BMXError *aError) {
+            }];
         }else {
             
         }
         
-    } else if (message.contentType == BMXContentTypeVoice) {
+    } else if (message.contentType == BMXMessage_ContentType_Voice) {
         dbMessageModel.type = MessageBodyType_Voice;
-        
-        BMXVoiceAttachment *voiceAtt = (BMXVoiceAttachment *)message.attachment;
+        BMXVoiceAttachment *voiceAtt = [BMXVoiceAttachment dynamicCastWithAttachment:message.attachment];
         
         dbMessageModel.vociePath = voiceAtt.path;
         dbMessageModel.content = [NSString stringWithFormat:@"  %d s",voiceAtt.duration];
-        [self.dataSource insertObject:dbMessageModel atIndex:0];
-        [self.messages insertObject:dbMessageModel atIndex:0];
-        
+        if (index == 0) {
+            [self.dataSource insertObject:dbMessageModel atIndex:index];
+            [self.messages insertObject:dbMessageModel atIndex:index];
+        }else{
+            [self.dataSource addObject:dbMessageModel];
+            [self.messages addObject:dbMessageModel];
+        }
+
         if (![[NSFileManager defaultManager] fileExistsAtPath:dbMessageModel.vociePath]) {
-            
-            [[[BMXClient sharedClient] chatService] downloadAttachment:message];
+            [[[BMXClient sharedClient] chatService] downloadAttachmentWithMsg:message completion:^(BMXError *aError) {
+            }];
         }
         
-    }else if (message.contentType == BMXContentTypeLocation) {
-        BMXLocationAttachment *locationAttach = (BMXLocationAttachment *)message.attachment;
+    }else if (message.contentType == BMXMessage_ContentType_Location) {
+        BMXLocationAttachment *locationAttach = [BMXLocationAttachment dynamicCastWithAttachment: message.attachment];
         dbMessageModel.content = [NSString stringWithFormat:NSLocalizedString(@"Current_location", @"当前位置：%@"),locationAttach.address];
         dbMessageModel.status = MessageDeliveryState_Delivered;
         dbMessageModel.type = MessageBodyType_Location;
-        [self.dataSource insertObject:dbMessageModel atIndex:0];
-        [self.messages insertObject:dbMessageModel atIndex:0];
-        
-    } else if (message.contentType == BMXContentTypeFile) {
-        BMXFileAttachment *fileAtt = (BMXFileAttachment *)message.attachment;
+        if (index == 0) {
+            [self.dataSource insertObject:dbMessageModel atIndex:index];
+            [self.messages insertObject:dbMessageModel atIndex:index];
+        }else{
+            [self.dataSource addObject:dbMessageModel];
+            [self.messages addObject:dbMessageModel];
+        }
+    } else if (message.contentType == BMXMessage_ContentType_File) {
+        BMXFileAttachment *fileAtt = [BMXFileAttachment dynamicCastWithAttachment: message.attachment];
         dbMessageModel.content = fileAtt.displayName ? fileAtt.displayName : @"file";
         dbMessageModel.type = MessageBodyType_File;
         if (![[NSFileManager defaultManager] fileExistsAtPath:fileAtt.path]) {
-            
-            [[[BMXClient sharedClient] chatService] downloadAttachment:message];
+            [[[BMXClient sharedClient] chatService] downloadAttachmentWithMsg:message completion:^(BMXError *aError) {
+            }];
         }
-        [self.dataSource insertObject:dbMessageModel atIndex:0];
-        [self.messages insertObject:dbMessageModel atIndex:0];
-    } else if (message.contentType == BMXContentTypeVideo) {
-        BMXVideoAttachment *videoAtt = (BMXVideoAttachment *)message.attachment;
+        if (index == 0) {
+            [self.dataSource insertObject:dbMessageModel atIndex:index];
+            [self.messages insertObject:dbMessageModel atIndex:index];
+        }else{
+            [self.dataSource addObject:dbMessageModel];
+            [self.messages addObject:dbMessageModel];
+        }
+    } else if (message.contentType == BMXMessage_ContentType_Video) {
+        BMXVideoAttachment *videoAtt = [BMXVideoAttachment dynamicCastWithAttachment: message.attachment];
         dbMessageModel.content = videoAtt.displayName ? videoAtt.displayName : @"video";
         dbMessageModel.type = MessageBodyType_Video;
         
 //        MAXLog(@"%f, %f", videoAtt.size.width, videoAtt.size.height)
-        dbMessageModel.width = videoAtt.videoSize.width;
-        dbMessageModel.height = videoAtt.videoSize.height;
+        dbMessageModel.width = videoAtt.size.getMWidth;
+        dbMessageModel.height = videoAtt.size.getMHeight;
         dbMessageModel.imageRemoteURL = videoAtt.thumbnailPath;
         dbMessageModel.videoPath = videoAtt.path;
 
         if (![[NSFileManager defaultManager] fileExistsAtPath:dbMessageModel.imageRemoteURL]) {
-            [[[BMXClient sharedClient] chatService] downloadThumbnail:message strategy:ThirdpartyServerCreate];
+            [[[BMXClient sharedClient] chatService] downloadThumbnailWithMsg:message strategy:BMXChatService_ThumbnailStrategy_ThirdpartyServerCreate completion:^(BMXError *aError) {
+            }];
             
         }else {
 //            MAXLog(@"存在");
         }
         
-        [self.dataSource insertObject:dbMessageModel atIndex:0];
-        [self.messages insertObject:dbMessageModel atIndex:0];
+        if (index == 0) {
+            [self.dataSource insertObject:dbMessageModel atIndex:index];
+            [self.messages insertObject:dbMessageModel atIndex:index];
+        }else{
+            [self.dataSource addObject:dbMessageModel];
+            [self.messages addObject:dbMessageModel];
+        }
     }
     return dbMessageModel;
 }
@@ -601,19 +734,20 @@ CLLocationManagerDelegate>
     NSData *thumbNailData = UIImageJPEGRepresentation(image,1.0f);//第二个参数为压缩倍数
     NSData *data = [NSData dataWithContentsOfFile:path];
     NSDictionary *dic = @{@"videodata" : data,
-                          @"tumbnaildata" : thumbNailData,
+                          @"thumbnaildata" : thumbNailData,
                           @"thumbImage":image};
 
     [self p_configsendMessage:dic type:MessageBodyType_Video duartion:dur];
 }
 
-
 -(void)clickMoreButton {
+
+
     switch (self.messageType) {
-        case BMXMessageTypeGroup:
+        case BMXMessage_MessageType_Group:
             if(self.currentGroup != nil) {
                 if (self.currentGroup.groupStatus
-                    == BMXGroupNormal) {
+                    == BMXGroup_GroupStatus_Normal) {
                     GroupDetailViewController* ctrl = [[GroupDetailViewController alloc] initWithGroup:self.currentGroup];
                     ctrl.conversation = self.conversation;
                     [self.navigationController pushViewController:ctrl animated:YES];
@@ -622,12 +756,12 @@ CLLocationManagerDelegate>
                 }
             }
             break;
-        case BMXMessageTypeSingle:
+        case BMXMessage_MessageType_Single:
             if(self.currentRoster != nil) {
                 ChatRosterProfileViewController* vc = [[ChatRosterProfileViewController alloc] initWithRoster:self.currentRoster];
                 [self.navigationController pushViewController:vc animated:YES];
-                
-                
+
+
 //                [self testCommon];
             }
             break;
@@ -682,41 +816,44 @@ CLLocationManagerDelegate>
 // 撤回
 - (void)recallMessage {
     [[UIMenuController sharedMenuController] setMenuVisible:NO animated:YES];
-    [[[BMXClient sharedClient] chatService] recallMessage:self.currentMessage.messageObjc completion:nil];
-    [self.recallMessages addObject:self.currentMessage];
-    self.currentMessage = nil;
-    [[UIMenuController sharedMenuController] setMenuItems:@[]];
+    [[[BMXClient sharedClient] chatService] recallMessageWithMsg: self.currentMessage.messageObjc completion:^(BMXError *aError) {
+        [self.recallMessages addObject:self.currentMessage];
+        self.currentMessage = nil;
+        [[UIMenuController sharedMenuController] setMenuItems:@[]];
+    }];
 }
 
 // 设置未读
 - (void)setUnread {
-    [[[BMXClient sharedClient] chatService] readCancel:self.currentMessage.messageObjc];
-    [[UIMenuController sharedMenuController] setMenuItems:@[]];
+    [[[BMXClient sharedClient] chatService] readCancelWithMsg: self.currentMessage.messageObjc completion:^(BMXError *aError) {
+        [[UIMenuController sharedMenuController] setMenuItems:@[]];
+    }];
 }
 
 // 删除消息
 - (void)deleteMessage {
     [[UIMenuController sharedMenuController] setMenuVisible:NO animated:YES];
-    [[[BMXClient sharedClient] chatService] removeMessage:self.currentMessage.messageObjc synchronizeDeviceForce:YES];
-    [[UIMenuController sharedMenuController] setMenuItems:@[]];
-    
-    if(self.currentMessage.messageObjc) {
-        NSInteger index = -1;
-        if ([self.dataSource containsObject:self.currentMessage]) {
-            index = [self.dataSource indexOfObject:self.currentMessage];
-            [self.dataSource removeObject:self.currentMessage];
-        }
-        if ([self.messages containsObject:self.currentMessage]) {
-            [self.messages removeObject:self.currentMessage];
+    [[[BMXClient sharedClient] chatService] removeMessageWithMsg:self.currentMessage.messageObjc synchronize:YES completion:^(BMXError *aError) {
+        [[UIMenuController sharedMenuController] setMenuItems:@[]];
+
+        if(self.currentMessage.messageObjc) {
+            NSInteger index = -1;
+            if ([self.dataSource containsObject:self.currentMessage]) {
+                index = [self.dataSource indexOfObject:self.currentMessage];
+                [self.dataSource removeObject:self.currentMessage];
+            }
+            if ([self.messages containsObject:self.currentMessage]) {
+                [self.messages removeObject:self.currentMessage];
+            }
+            
+            dispatch_async(dispatch_get_main_queue(), ^{
+                [self.tableView reloadData];
+            });
+            MAXLog(@"删除");
         }
         
-        dispatch_async(dispatch_get_main_queue(), ^{
-            [self.tableView reloadData];
-        });
-        MAXLog(@"删除");
-    }
-    
-    self.currentMessage = nil;
+        self.currentMessage = nil;
+    }];
 }
 
 #pragma mark - Delegate BMXRecoderToolsProtocol
@@ -806,29 +943,33 @@ CLLocationManagerDelegate>
 
 
 #pragma mark - Delegate TransterMessageVC
-- (void)transterSlectedRoster:(BMXRoster *)roster {
+- (void)transterSlectedRoster:(BMXRosterItem *)roster {
     [self groupOwnerTransterVCdidSelect:roster];
 }
 
 - (void)transterSlectedGroup:(BMXGroup *)group {
-    BMXMessageObject *m = [[BMXMessageObject alloc] initWithForwardMessage:self.currentMessage.messageObjc fromId:[self.account.usedId longLongValue] toId:group.groupId type:BMXMessageTypeGroup conversationId:group.groupId];
-//    m.enableGroupAck = YES;
-    [[[BMXClient sharedClient] chatService] forwardMessage:m];
+    BMXMessage *m = [BMXMessage createForwardMessageWithMsg:self.currentMessage.messageObjc from:[self.account.usedId longLongValue] to:group.groupId type:BMXMessage_MessageType_Group conversationId:group.groupId];
+    [[[BMXClient sharedClient] chatService] forwardMessageWithMsg:m completion:^(BMXError *aError) {
+    }];
 }
 
 - (void)groupOwnerTransterVCdidSelect:(id)toModel {
-    BMXRoster *roster = toModel;
-    BMXMessageObject *m = [[BMXMessageObject alloc] initWithForwardMessage:self.currentMessage.messageObjc fromId:[self.account.usedId longLongValue] toId:roster.rosterId type:BMXMessageTypeSingle conversationId:roster.rosterId];
+    BMXRosterItem *roster = toModel;
+    BMXMessage *m = [BMXMessage createForwardMessageWithMsg:self.currentMessage.messageObjc from:[self.account.usedId longLongValue] to:roster.rosterId type:BMXMessage_MessageType_Single conversationId:roster.rosterId];
 //    m.enableGroupAck = YES;
-    [[[BMXClient sharedClient] chatService] forwardMessage:m];
+    [[[BMXClient sharedClient] chatService] forwardMessageWithMsg:m completion:^(BMXError *aError) {
+    }];
 }
 
 // video的bubble被点击
 - (void)chatVideoCellBubblePressed:(LHMessageModel *)model {
-    if (model.videoPath && ![model.videoPath isKindOfClass:[NSNull class]] && [[NSFileManager defaultManager] fileExistsAtPath:model.videoPath]) {
+    BOOL isNull = [model.videoPath isKindOfClass:[NSNull class]];
+    BOOL exist = [[NSFileManager defaultManager] fileExistsAtPath:model.videoPath];
+    if (model.videoPath && !isNull && exist) {
         [self videoPlay:model.videoPath];
     } else {
-        [[[BMXClient sharedClient] chatService] downloadAttachment:model.messageObjc];
+        [[[BMXClient sharedClient] chatService] downloadAttachmentWithMsg:model.messageObjc completion:^(BMXError *aError) {
+        }];
     }
 }
 
@@ -870,7 +1011,7 @@ CLLocationManagerDelegate>
 
 - (void)chatFileCellBubblePressed:(LHMessageModel *)model {
     NSLog(@"查看文件");
-    BMXFileAttachment *fileAtt = (BMXFileAttachment *)model.messageObjc.attachment;
+    BMXFileAttachment *fileAtt = [BMXFileAttachment dynamicCastWithAttachment: model.messageObjc.attachment];
     
     if (fileAtt.path) {
         self.documentIntertactionController = [UIDocumentInteractionController interactionControllerWithURL:[NSURL fileURLWithPath:fileAtt.path]];
@@ -901,7 +1042,8 @@ CLLocationManagerDelegate>
                                                     handler:^(UIAlertAction * action) {
                                                         if (message.messageObjc) {
                                                             //
-                                                            [[[BMXClient sharedClient] chatService] readCancel:message.messageObjc];
+                                                            [[[BMXClient sharedClient] chatService] readCancelWithMsg:message.messageObjc completion:^(BMXError *aError) {
+                                                            }];
                                                         }
                                                         
                                                     }];
@@ -1046,12 +1188,20 @@ CLLocationManagerDelegate>
         messageCell = [[LHChatViewCell alloc] initWithMessageModel:messageModel reuseIdentifier:cellIdentifier];
     }
     
+    long long callerId = messageModel.messageObjc.fromId;
+    BMXMessage *message = messageModel.messageObjc;
+    if (message.contentType == BMXMessage_ContentType_RTC) {
+        if ([message.config.getRTCAction isEqualToString: @"hangup"]) {
+            callerId = messageModel.messageObjc.config.getRTCInitiator;
+            messageModel.isSender = [self isSenderOfMessageModel:messageModel];
+        }
+    }
+
     if (messageModel.isSender) {
-        [messageCell setAvaratImage:self.selfImage];
         if (![self.deliveringMsgClientIds containsObject:[NSNumber numberWithLong:(long)messageModel.clientMsgId]]){
             messageCell.messageModel.status = MessageDeliveryState_Delivered;
         }
-        if (self.messageType == BMXMessageTypeSingle) {
+        if (self.messageType == BMXMessage_MessageType_Single) {
             // 配置是否已读
             if (messageModel.messageObjc.isReadAcked == YES) {
                 messageCell.readStatusLabel.text = NSLocalizedString(@"Read", @"已读");
@@ -1059,16 +1209,12 @@ CLLocationManagerDelegate>
                 messageCell.readStatusLabel.text = NSLocalizedString(@"Unread", @"未读");
             }
         } else {
-//            if (messageModel.messageObjct.enableGroupAck == YES) {
-                messageCell.readStatusLabel.text = [NSString stringWithFormat:NSLocalizedString(@"npersons_have_read", @"%d人已读"), messageModel.messageObjc.groupAckCount];
-//            } else {
-//                messageCell.readStatusLabel.text = @"";
-//
-//            }
+            messageCell.readStatusLabel.text = [NSString stringWithFormat:NSLocalizedString(@"npersons_have_read", @"%d人已读"), messageModel.messageObjc.groupAckCount];
         }
-    } else {
+    }
+    
         __weak  LHChatViewCell *weakCell = messageCell;
-        [[[BMXClient sharedClient] rosterService] searchByRosterId:messageModel.messageObjc.fromId forceRefresh:NO completion:^(BMXRoster *roster, BMXError *error) {
+        [[[BMXClient sharedClient] rosterService] searchWithRosterId:callerId forceRefresh:NO completion:^(BMXRosterItem *roster, BMXError *error) {
             if (!error) {
                 
                 if ([[NSFileManager defaultManager] fileExistsAtPath:roster.avatarThumbnailPath]) {
@@ -1076,9 +1222,9 @@ CLLocationManagerDelegate>
                     [weakCell setAvaratImage:avarat];
                 }else {
                     
-                    [[[BMXClient sharedClient] rosterService] downloadAvatarWithRoster:roster isThumbnail:YES progress:^(int progress, BMXError *error) {
+                    [[[BMXClient sharedClient] rosterService] downloadAvatarWithItem:roster thumbnail:YES callback:^(int progress) {
                         
-                    } completion:^(BMXRoster *roster, BMXError *error) {
+                    } completion:^(BMXError *error) {
                         if (!error) {
                             UIImage *avarat = [UIImage imageWithContentsOfFile:roster.avatarThumbnailPath];
                             [weakCell setAvaratImage:avarat];
@@ -1089,16 +1235,16 @@ CLLocationManagerDelegate>
                 }
             }
         }];
-    }
     
-    if (self.messageType == BMXMessageTypeGroup) {
+    
+    if (self.messageType == BMXMessage_MessageType_Group) {
         
         messageModel.isChatGroup = YES;
         
         __weak  LHChatViewCell *weakCell = messageCell;
-        [[[BMXClient sharedClient] rosterService] searchByRosterId:messageModel.messageObjc.fromId forceRefresh:NO completion:^(BMXRoster *roster, BMXError *error) {
+        [[[BMXClient sharedClient] rosterService] searchWithRosterId:messageModel.messageObjc.fromId forceRefresh:NO completion:^(BMXRosterItem *item, BMXError *error) {
             if (!error) {
-                messageModel.nickName = [roster.nickName length] ? roster.nickName : roster.userName;
+                messageModel.nickName = [item.nickname length] ? item.nickname : item.username;
                 [weakCell setMessageName:messageModel.nickName];
             }
         }];
@@ -1147,7 +1293,7 @@ CLLocationManagerDelegate>
     MAXLog(@" scrollViewDidEndDecelerating == %.2f", scrollView.contentOffset.y);
     [self p_dropDownLoadDataWithScrollView:scrollView];
     
-    if (self.messageType == BMXMessageTypeGroup) {
+    if (self.messageType == BMXMessage_MessageType_Group) {
         return;
     }
     // 屏幕内标记为已读
@@ -1164,7 +1310,7 @@ CLLocationManagerDelegate>
             }
         }
     }
-    if (self.messageType == BMXMessageTypeSingle) {
+    if (self.messageType == BMXMessage_MessageType_Single) {
         [self ackMessage:messageModelList];
     } else {
         if (self.currentGroup.enableReadAck == YES) {
@@ -1179,21 +1325,24 @@ CLLocationManagerDelegate>
             continue;
         }
         if (!model.isSender && model.messageObjc.isReadAcked == NO) {
-            [[[BMXClient sharedClient] chatService] ackMessage:model.messageObjc];
+            [[[BMXClient sharedClient] chatService] ackMessageWithMsg:model.messageObjc completion:^(BMXError *aError) {
+            }];
         }
     }
 }
 
 - (void)ackMessagebyModel:(LHMessageModel *)model {
     if (!model.isSender == YES && model.messageObjc.isReadAcked == NO) {
-        [[[BMXClient sharedClient] chatService] ackMessage:model.messageObjc];
+        [[[BMXClient sharedClient] chatService] ackMessageWithMsg:model.messageObjc completion:^(BMXError *aError) {
+        }];
     }
 }
 
-- (void)ackMessagebyMessageObject:(BMXMessageObject *)messageObject {
+- (void)ackMessagebyMessageObject:(BMXMessage *)messageObject {
     NSString *fromIdStr = [NSString stringWithFormat:@"%lld", messageObject.fromId];
     if (![fromIdStr isEqualToString:self.account.usedId] && messageObject.isRead == NO) {
-        [[[BMXClient sharedClient] chatService] ackMessage:messageObject];
+        [[[BMXClient sharedClient] chatService] ackMessageWithMsg:messageObject completion:^(BMXError *aError) {
+        }];
     }
 }
 
@@ -1281,7 +1430,7 @@ CLLocationManagerDelegate>
 
 #pragma mark - manager
 - (void)getHistoryMessage {
-    BMXMessageObject *firstMessage;
+    BMXMessage *firstMessage;
     for (int i = 0; i < self.dataSource.count;i++) {
         LHMessageModel *messageModel = self.dataSource[i];
         if ([messageModel isKindOfClass:[LHMessageModel class]]) {
@@ -1291,19 +1440,24 @@ CLLocationManagerDelegate>
     }
     long long firstMessageId = firstMessage? firstMessage.msgId : 0;
     
-    [[[BMXClient sharedClient] chatService] retrieveHistoryBMXconversation:self.conversation msgId:firstMessageId size:10 completion:^(NSArray *messageListms, BMXError *error) {
-        MAXLog(@"retrieveHistoryBMXconversation:%lu", (unsigned long)messageListms.count);
-        messageListms =  [messageListms sortedArrayUsingComparator:^NSComparisonResult(BMXMessageObject *message1, BMXMessageObject *message2) {
+    [[[BMXClient sharedClient] chatService] retrieveHistoryMessagesWithConversation:self.conversation refMsgId:firstMessageId size:10 completion:^(BMXMessageList *messageList, BMXError *error) {
+        MAXLog(@"retrieveHistoryBMXconversation:%lu", (unsigned long)messageList.size);
+        NSMutableArray *messageListms = [[NSMutableArray alloc] init];
+        for (int i=0; i<messageList.size; i++){
+            [messageListms addObject:[messageList get:i]];
+        }
+
+        NSArray *sortedMessages =  [messageListms sortedArrayUsingComparator:^NSComparisonResult(BMXMessage *message1, BMXMessage *message2) {
             return message1.serverTimestamp < message2.serverTimestamp;
         }];
         
-        [messageListms enumerateObjectsUsingBlock:^(BMXMessageObject *message, NSUInteger idx, BOOL * stop) {
-            if ([message.extensionJson isEqualToString:@"istyping"] || [message.extensionJson isEqualToString:@"endtyping"] ) {
+        [sortedMessages enumerateObjectsUsingBlock:^(BMXMessage *message, NSUInteger idx, BOOL * stop) {
+            if ([message.extension isEqualToString:@"istyping"] || [message.extension isEqualToString:@"endtyping"] ) {
                 [self dealWithidTyping:message];
                 
             }else {
                 
-                LHMessageModel *messageModel = [self changeUIModelWithBMXMessage:message];
+                LHMessageModel *messageModel = [self changeUIModelWithBMXMessage:message atIndex:0];
                 NSString *time = [LHTools processingTimeWithDate:messageModel.date];
                 if (![self.lastTime isEqualToString:time]) {
                     [self.dataSource insertObject:time atIndex:0];
@@ -1318,9 +1472,9 @@ CLLocationManagerDelegate>
 
 #pragma mark - listener
 //  消息状态发生变化
-- (void)messageStatusChanged:(BMXMessageObject *)message error:(BMXError *)error {
+- (void)messageStatusChanged:(BMXMessage *)message error:(BMXError *)error {
     if (error) {
-        [HQCustomToast showDialog:error.errorMessage];
+        [HQCustomToast showDialog:[error description]];
     }
     MAXLog(@"message content:%@", message.content);
     if ([self isHaveExtion:message]) {
@@ -1347,23 +1501,22 @@ CLLocationManagerDelegate>
                     }];
 
                 }
-                viewmodel.messageObjc.deliverystatus = message.deliverystatus;
-                MAXLogDebug(@"message delivery status:%d", message.deliverystatus);
+                viewmodel.messageObjc.deliveryStatus = message.deliveryStatus;
 
-                switch ( message.deliverystatus) {
-                    case BMXDeliveryStatusNew:
+                switch ( message.deliveryStatus) {
+                    case BMXMessage_DeliveryStatus_New:
                         messageCell.messageModel.status = MessageDeliveryState_Pending;
                         break;
-                    case BMXDeliveryStatusDelivering:
+                    case BMXMessage_DeliveryStatus_Delivering:
                         messageCell.messageModel.status = MessageDeliveryState_Delivering;
                         break;
-                    case BMXDeliveryStatusDeliveried:
+                    case BMXMessage_DeliveryStatus_Deliveried:
                         messageCell.messageModel.status = MessageDeliveryState_Delivered;
                         break;
-                    case BMXDeliveryStatusFailed:
+                    case BMXMessage_DeliveryStatus_Failed:
                         messageCell.messageModel.status = MessageDeliveryState_Failure;
                         break;
-                    case BMXDeliveryStatusRecalled:
+                    case BMXMessage_DeliveryStatus_Recalled:
                         messageCell.messageModel.status = MessageDeliveryState_Pending;
                         break;
     
@@ -1378,24 +1531,24 @@ CLLocationManagerDelegate>
     }
 }
 
-- (void)messageAttachmentUploadProgressChanged:(BMXMessageObject *)message percent:(int)percent {
+- (void)messageAttachmentUploadProgressChanged:(BMXMessage *)message percent:(int)percent {
     MAXLog(@"%d",percent);
 }
 
 // 收到消息
-- (void)receivedMessages:(NSArray<BMXMessageObject*> *)messages {
+- (void)receivedMessages:(NSArray<BMXMessage*> *)messages {
     MAXLog(@"11--11---收到");
     if (messages.count > 0) {
-        for (BMXMessageObject *message in messages) {
+        for (BMXMessage *message in messages) {
             [self dealWithMessage:message];
         }
     }
 }
 
-- (void)dealWithMessage:(BMXMessageObject *)message {
+- (void)dealWithMessage:(BMXMessage *)message {
 
-    if (message.messageType == BMXMessageTypeGroup) {
-        if (self.conversation.type != BMXMessageTypeGroup || message.toId != self.conversation.conversationId) {
+    if (message.type == BMXMessage_MessageType_Group) {
+        if (self.conversation.type != BMXConversation_Type_Group || message.toId != self.conversation.conversationId) {
             return;
         }
         
@@ -1403,7 +1556,7 @@ CLLocationManagerDelegate>
 
         
     } else {
-        if (message.fromId  != self.conversation.conversationId || message.messageType != BMXMessageTypeSingle) {
+        if (message.fromId  != self.conversation.conversationId || message.type != BMXMessage_MessageType_Single) {
             if (message.fromId == [self.account.usedId longLongValue] && message.toId == self.conversation.conversationId) {
 
             } else {
@@ -1413,12 +1566,12 @@ CLLocationManagerDelegate>
     }
     
     if ([self isHaveExtion:message] ) {
-        [self dealWithidTyping:[self isTypingOperationStatus:message.extensionJson]];
+        [self dealWithidTyping:[self isTypingOperationStatus:message.extension]];
         return;
     } else {
         
         
-        if (self.messageType == BMXMessageTypeSingle) {
+        if (self.messageType == BMXMessage_MessageType_Single) {
             [self ackMessagebyMessageObject:message];
         } else {
             if (self.currentGroup.enableReadAck == YES) {
@@ -1434,12 +1587,12 @@ CLLocationManagerDelegate>
         dbMessageModel.content = message.content;
         dbMessageModel.status = MessageDeliveryState_Delivering;
         NSString *fromIdStr = [NSString stringWithFormat:@"%lld", message.fromId];
-
-        dbMessageModel.isSender = [fromIdStr isEqualToString:self.account.usedId];
+        BOOL isFrom = [fromIdStr isEqualToString:self.account.usedId];
+        dbMessageModel.isSender = [self isSenderOfMessageModel:dbMessageModel];
         dbMessageModel.date = date;
         dbMessageModel.id = date;
         
-        if (message.contentType == BMXContentTypeText) {
+        if (message.contentType == BMXMessage_ContentType_Text) {
             dbMessageModel.content = message.content;
             dbMessageModel.status = MessageDeliveryState_Delivered;
             dbMessageModel.type = MessageBodyType_Text;
@@ -1450,18 +1603,20 @@ CLLocationManagerDelegate>
             [self.messages addObject:dbMessageModel];
             [self.tableView scrollToRowAtIndexPath:index atScrollPosition:UITableViewScrollPositionBottom animated:YES];
             
-        } else if (message.contentType == BMXContentTypeImage) {
-            [[[BMXClient sharedClient] chatService] downloadThumbnail:message strategy:ThirdpartyServerCreate];
+        } else if (message.contentType == BMXMessage_ContentType_Image) {
+            [[[BMXClient sharedClient] chatService] downloadThumbnailWithMsg:message strategy:BMXChatService_ThumbnailStrategy_ThirdpartyServerCreate completion:^(BMXError *aError) {
+            }];
             
-            [[[BMXClient sharedClient] chatService] downloadAttachment:message];
-        } else if (message.contentType == BMXContentTypeVoice) {
-            [[[BMXClient sharedClient] chatService] downloadAttachment:message];
+            [[[BMXClient sharedClient] chatService] downloadAttachmentWithMsg:message completion:^(BMXError *aError) {
+            }];
+        } else if (message.contentType == BMXMessage_ContentType_Voice) {
+            [[[BMXClient sharedClient] chatService] downloadAttachmentWithMsg:message completion:^(BMXError *aError) {
+            }];
             
-        } else if (message.contentType == BMXContentTypeLocation) {
-            BMXLocationAttachment *locationAttach = (BMXLocationAttachment *)message.attachment;
+        } else if (message.contentType == BMXMessage_ContentType_Location) {
+            BMXLocationAttachment *locationAttach = [BMXLocationAttachment dynamicCastWithAttachment: message.attachment];
             dbMessageModel.content = [NSString stringWithFormat:NSLocalizedString(@"Current_location", @"当前位置：%@"),locationAttach.address];
             dbMessageModel.status = MessageDeliveryState_Delivered;
-            dbMessageModel.isSender = NO;
             dbMessageModel.type = MessageBodyType_Location;
             dbMessageModel.messageObjc = message;
             [[LHIMDBManager shareManager] insertModel:dbMessageModel];
@@ -1469,24 +1624,67 @@ CLLocationManagerDelegate>
             [self.messages addObject:dbMessageModel];
             [self.tableView scrollToRowAtIndexPath:index atScrollPosition:UITableViewScrollPositionBottom animated:YES];
             
-        } else if (message.contentType == BMXContentTypeFile) {
-            [[[BMXClient sharedClient] chatService] downloadAttachment:message];
-        }else if (message.contentType == BMXContentTypeVideo) {
-            [[[BMXClient sharedClient] chatService] downloadThumbnail:message strategy:ThirdpartyServerCreate];
+        } else if (message.contentType == BMXMessage_ContentType_File) {
+            [[[BMXClient sharedClient] chatService] downloadAttachmentWithMsg:message completion:^(BMXError *aError) {
+            }];
+        }else if (message.contentType == BMXMessage_ContentType_Video) {
+            [[[BMXClient sharedClient] chatService] downloadThumbnailWithMsg:message strategy:BMXChatService_ThumbnailStrategy_ThirdpartyServerCreate completion:^(BMXError *aError) {
+            }];
+        }else if (message.contentType == BMXMessage_ContentType_RTC) {
+            if ([message.config.getRTCAction isEqualToString: @"hangup"]) {
+                dbMessageModel.content = message.content;
+                if ([message.content isEqualToString:@"rejected"]) {
+                    if (isFrom) {
+                        dbMessageModel.content = NSLocalizedString(@"call_rejected", @"通话已拒绝");
+                    }else{
+                        dbMessageModel.content = NSLocalizedString(@"call_rejected_by_callee", @"通话已被对方拒绝");
+                    }
+                } else if ([message.content isEqualToString:@"canceled"]) {
+                    if (isFrom) {
+                        dbMessageModel.content = NSLocalizedString(@"call_canceled", @"通话已取消");
+                    }else{
+                        dbMessageModel.content = NSLocalizedString(@"call_canceled_by_caller", @"通话已被对方取消");
+                    }
+                } else if ([message.content isEqualToString:@"timeout"]) {
+                    if (isFrom) {
+                        dbMessageModel.content = NSLocalizedString(@"callee_not_responding", @"对方未应答");
+                    }else{
+                        dbMessageModel.content = NSLocalizedString(@"call_not_responding", @"未应答");
+                    }
+                } else if ([message.content isEqualToString:@"busy"]) {
+                    if (isFrom) {
+                        dbMessageModel.content = NSLocalizedString(@"call_busy", @"忙线未接听");
+                    }else{
+                        dbMessageModel.content = NSLocalizedString(@"callee_busy", @"对方忙");
+                    }
+                } else{
+                    int sec = [dbMessageModel.content intValue]/1000;
+                    dbMessageModel.content = [NSString stringWithFormat:NSLocalizedString(@"call_duration", @"通话时长：%02d:%02d"),sec/60, sec%60];
+                }
+
+                dbMessageModel.status = MessageDeliveryState_Delivered;
+                dbMessageModel.type = MessageBodyType_Text;
+                
+                dbMessageModel.messageObjc = message;
+                [[LHIMDBManager shareManager] insertModel:dbMessageModel];
+                NSIndexPath *index = [self insertNewMessageOrTime:dbMessageModel];
+                [self.messages addObject:dbMessageModel];
+                [self.tableView scrollToRowAtIndexPath:index atScrollPosition:UITableViewScrollPositionBottom animated:YES];
+            }
         }
     }
 }
 
 //  附件下载状态发生变化
-- (void)messageAttachmentStatusDidChanged:(BMXMessageObject *)message
+- (void)messageAttachmentStatusDidChanged:(BMXMessage *)message
                                     error:(BMXError*)error
                                   percent:(int)percent {
-    if (message.messageType == BMXMessageTypeGroup) {
-        if (self.conversation.type != BMXMessageTypeGroup || message.toId != self.conversation.conversationId) {
+    if (message.type == BMXMessage_MessageType_Group) {
+        if (self.conversation.type != BMXConversation_Type_Group || message.toId != self.conversation.conversationId) {
             return;
         }
     } else {
-        if (message.fromId  != self.conversation.conversationId || message.messageType != BMXMessageTypeSingle) {
+        if (message.fromId  != self.conversation.conversationId || message.type != BMXMessage_MessageType_Single) {
             if (message.fromId == [self.account.usedId longLongValue] && message.toId == self.conversation.conversationId) {
                 
             } else {
@@ -1502,35 +1700,34 @@ CLLocationManagerDelegate>
         dbMessageModel.status = MessageDeliveryState_Delivered;
         dbMessageModel.messageObjc = message;
         NSString *fromIdStr = [NSString stringWithFormat:@"%lld", message.fromId];
-
-        dbMessageModel.isSender = [fromIdStr isEqualToString:self.account.usedId];
+        dbMessageModel.isSender = [self isSenderOfMessageModel:dbMessageModel];
         dbMessageModel.id = date;
         dbMessageModel.date = date;
         
-        if (message.contentType == BMXContentTypeImage) {
+        if (message.contentType == BMXMessage_ContentType_Image) {
             dbMessageModel.type = MessageBodyType_Image;
-            BMXImageAttachment *imageAtt = (BMXImageAttachment *)message.attachment;
+            BMXImageAttachment *imageAtt = [BMXImageAttachment dynamicCastWithAttachment: message.attachment];
             dbMessageModel.imageRemoteURL = imageAtt.thumbnailPath;
-            dbMessageModel.width = imageAtt.pictureSize.width;
-            dbMessageModel.height = imageAtt.pictureSize.height;
+            dbMessageModel.width = imageAtt.size.getMWidth;
+            dbMessageModel.height = imageAtt.size.getMHeight;
             
-        } else if (message.contentType == BMXContentTypeVoice) {
+        } else if (message.contentType == BMXMessage_ContentType_Voice) {
             dbMessageModel.type = MessageBodyType_Voice;
             
-            BMXVoiceAttachment *voiceAtt = (BMXVoiceAttachment *)message.attachment;
+            BMXVoiceAttachment *voiceAtt =[BMXVoiceAttachment dynamicCastWithAttachment:message.attachment];
             dbMessageModel.vociePath = voiceAtt.path;
             dbMessageModel.content = [NSString stringWithFormat:@"  %0.1d",voiceAtt.duration];
-        } else if (message.contentType == BMXContentTypeFile) {
+        } else if (message.contentType == BMXMessage_ContentType_File) {
             dbMessageModel.type = MessageBodyType_File;
             
-            BMXFileAttachment *fileAtt = (BMXFileAttachment *)message.attachment;
+            BMXFileAttachment *fileAtt = [BMXFileAttachment dynamicCastWithAttachment: message.attachment];
             dbMessageModel.content = fileAtt.displayName ? fileAtt.displayName : @"file";
-        }else if (message.contentType == BMXContentTypeVideo) {
+        }else if (message.contentType == BMXMessage_ContentType_Video) {
             dbMessageModel.type = MessageBodyType_Video;
-            BMXVideoAttachment *videoAtt = (BMXVideoAttachment *)message.attachment;
+            BMXVideoAttachment *videoAtt = [BMXVideoAttachment dynamicCastWithAttachment: message.attachment];
             dbMessageModel.imageRemoteURL = videoAtt.thumbnailPath;
-            dbMessageModel.width = videoAtt.videoSize.width;
-            dbMessageModel.height = videoAtt.videoSize.height;
+            dbMessageModel.width = videoAtt.size.getMWidth;
+            dbMessageModel.height = videoAtt.size.getMHeight;
             dbMessageModel.content = videoAtt.displayName ? videoAtt.displayName : @"video";
             dbMessageModel.videoPath = videoAtt.path;
 
@@ -1565,7 +1762,7 @@ CLLocationManagerDelegate>
 }
 
 //消息撤回状态改变
-- (void)messageRecallStatusDidChanged:(BMXMessageObject *)message error:(BMXError *)error {
+- (void)messageRecallStatusDidChanged:(BMXMessage *)message error:(BMXError *)error {
     MAXLog(@"消息撤回状态");
     
     if (!error) {
@@ -1599,23 +1796,23 @@ CLLocationManagerDelegate>
             MAXLog(@"删除");
         }
     } else {
-        [HQCustomToast showDialog:[NSString stringWithFormat:@"%@", error.errorMessage]];
+        [HQCustomToast showDialog:[NSString stringWithFormat:@"%@", error.description]];
     }
 }
 
 //收到撤回的消息
-- (void)receivedRecallMessages:(NSArray<BMXMessageObject *> *)messages{
+- (void)receivedRecallMessages:(NSArray<BMXMessage *> *)messages{
     for (LHMessageModel *lhModel in self.dataSource) {
         if (![lhModel isKindOfClass:[LHMessageModel class]]) {
             continue;
         }
-        BMXMessageObject *messageObjec = [messages firstObject];
+        BMXMessage *messageObjec = [messages firstObject];
         if (lhModel.messageObjc.msgId == messageObjec.msgId) {
             
             //更新撤回的信息的显示内容
             lhModel.content = NSLocalizedString(@"Withdrawn_by_the_other_party", @"对方已撤回");
             lhModel.type = MessageBodyType_Text;
-            messageObjec.contentType = BMXContentTypeText;
+//            messageObjec.contentType = BMXMessage_ContentType_Text;
             messageObjec.content = NSLocalizedString(@"Withdrawn_by_the_other_party", @"对方已撤回");
             
             [self.tableView reloadData];
@@ -1627,14 +1824,14 @@ CLLocationManagerDelegate>
 /**
  * 收到消息已读回执
  **/
-- (void)receivedReadAcks:(NSArray<BMXMessageObject*> *)messages {
+- (void)receivedReadAcks:(NSArray<BMXMessage*> *)messages {
     //会话列表页面 刷新已读未读状态
     //会话页面 刷新已读未读状态
     
     //更新未读数
     MAXLog(@"收到消息已读回执");
-    if (self.messageType == BMXMessageTypeSingle) {
-        for (BMXMessageObject *message in messages) {
+    if (self.messageType == BMXMessage_MessageType_Single) {
+        for (BMXMessage *message in messages) {
             for (LHMessageModel *viewmodel in self.dataSource) {
                 if ([viewmodel isKindOfClass:[LHMessageModel class]] &&  viewmodel.messageObjc.msgId  == message.msgId) {
                     NSInteger index = [self.dataSource indexOfObject:viewmodel];
@@ -1645,7 +1842,7 @@ CLLocationManagerDelegate>
             }
         }
     } else {
-            for (BMXMessageObject *message in messages) {
+            for (BMXMessage *message in messages) {
                 for (LHMessageModel *viewmodel in self.dataSource) {
                     if ([viewmodel isKindOfClass:[LHMessageModel class]] &&  viewmodel.messageObjc.msgId  == message.msgId) {
                         NSInteger index = [self.dataSource indexOfObject:viewmodel];
@@ -1780,37 +1977,30 @@ CLLocationManagerDelegate>
     }
 }
 
-- (BMXMessageObject *)configMessage:(id)message {
-    BMXMessageObject *messageObject;
-    NSInteger toId = 0;
+- (BMXMessage *)configMessage:(id)message {
+    BMXMessage *messageObject;
+    long long toId = 0;
     NSInteger conversationId = self.conversationId;
-    if (self.messageType == BMXMessageTypeSingle) {
+    if (self.messageType == BMXMessage_MessageType_Single) {
         toId = self.currentRoster.rosterId;
     }else {
         toId = self.currentGroup.groupId;
     }
     
     if ([message isKindOfClass:[NSString class]]) {
-        messageObject = [[BMXMessageObject alloc] initWithBMXMessageText:message
-                                                                  fromId:[self.account.usedId longLongValue]
-                                                                    toId:toId
-                                                                    type:self.messageType
-                                                          conversationId:conversationId];
-
+        messageObject = [BMXMessage createMessageWithFrom:[self.account.usedId longLongValue] to:toId type:self.messageType conversationId:conversationId content:message];
     }else {
-        messageObject = [[BMXMessageObject alloc] initWithBMXMessageAttachment:message
-                                                                        fromId:[self.account.usedId longLongValue]
-                                                                          toId:toId type:self.messageType
-                                                                conversationId:conversationId];
+        messageObject = [BMXMessage createMessageWithFrom:[self.account.usedId longLongValue] to:toId type:self.messageType conversationId:conversationId attachment:message];
     }
     return messageObject;
 }
 
 - (BMXMessageConfig *)dealtWithConfigjson {
-    BMXMessageConfig *config = [[BMXMessageConfig alloc] initConfigWithMentionAll:NO];
-    NSMutableArray *idArray = [NSMutableArray array];
-    for (BMXRoster *roster in self.atArray) {
-        [idArray addObject:[NSString stringWithFormat:@"%lld", roster.rosterId]];
+    BMXMessageConfig *config = [BMXMessageConfig createMessageConfigWithMentionAll:NO];
+    ListOfLongLong *idArray = [[ListOfLongLong alloc] init];
+    for (BMXRosterItem *roster in self.atArray) {
+        long long rosterId = roster.rosterId;
+        [idArray addWithX: &rosterId];
     }
     config.mentionList = idArray;
     config.mentionAll  = false;
@@ -1820,7 +2010,7 @@ CLLocationManagerDelegate>
 #pragma mark  - sendMessage
 - (void)p_configsendMessage:(id)content type:(MessageBodyType)type duartion:(int)duartion {
     // 发送消息
-    BMXMessageObject *messageObject;
+    BMXMessage *messageObject;
     __block LHMessageModel *messageModel = [LHMessageModel new];
     messageModel.isSender = YES;
     messageModel.status = MessageDeliveryState_Delivering;
@@ -1830,8 +2020,8 @@ CLLocationManagerDelegate>
             messageModel.content = content;
             NSString *messageText = content;
             messageObject = [self configMessage:messageText];
-            if (self.messageType == BMXMessageTypeGroup && self.groupAt == YES) {
-                messageObject.messageconfig = [self dealtWithConfigjson];
+            if (self.messageType == BMXMessage_MessageType_Group && self.groupAt == YES) {
+                messageObject.config = [self dealtWithConfigjson];
                 self.groupAt = NO;
             }
             
@@ -1845,20 +2035,17 @@ CLLocationManagerDelegate>
             
             NSData *imageData = UIImageJPEGRepresentation(image,1.0f);
             NSData *thumImageData =  UIImageJPEGRepresentation(image,1.0f);
-            BMXImageAttachment *imageAttachment = [[BMXImageAttachment alloc] initWithData:imageData thumbnailData:thumImageData imageSize:image.size conversationId:[NSString stringWithFormat:@"%ld",(long)self.conversationId]];
-            imageAttachment.pictureSize = CGSizeMake(image.size.width, image.size.height);
+            BMXMessageAttachmentSize *sz = [[BMXMessageAttachmentSize alloc] initWithWidth:image.size.width height:image.size.height];
+            BMXImageAttachment *imageAttachment = [[BMXImageAttachment alloc] initWithData:imageData thumbnailData:thumImageData imageSize:sz displayName:@"1" conversationId:(long)self.conversationId];
             messageObject = [self configMessage:imageAttachment];
-            messageObject.contentType = BMXContentTypeImage;
             messageModel.imageRemoteURL = [imageAttachment thumbnailPath];
             
             break;
         }
         case MessageBodyType_Voice: {
             NSString *voicePath = (NSString *)content;
-            
-            BMXVoiceAttachment *vocieAttachment = [[BMXVoiceAttachment alloc] initWithPath:voicePath displayName:@"voice" duration:duartion conversationId:[NSString stringWithFormat:@"%ld",(long)self.conversationId]];
+            BMXVoiceAttachment *vocieAttachment = [[BMXVoiceAttachment alloc] initWithPath:voicePath duration:duartion displayName:@"voice"];
             messageObject = [self configMessage:vocieAttachment];
-            messageObject.contentType = BMXContentTypeVoice;
             messageModel.vociePath = voicePath;
             messageModel.content = [NSString stringWithFormat:@"  %d s",duartion];
             
@@ -1872,33 +2059,27 @@ CLLocationManagerDelegate>
             
             BMXLocationAttachment *locationment = [[BMXLocationAttachment alloc] initWithLatitude:latitude longitude:longitude address:address];
             messageObject = [self configMessage:locationment];
-            messageObject.contentType = BMXContentTypeLocation;
             messageModel.content = [NSString stringWithFormat:NSLocalizedString(@"Current_location", @"当前位置：%@"),locationment.address];
             break;
         }
         case MessageBodyType_File: {
             NSDictionary *dic = [NSDictionary dictionaryWithDictionary:content];
-            BMXFileAttachment *fileAttachment = [[BMXFileAttachment alloc] initWithData:dic[@"data"] displayName:dic[@"displayName"] conversationId:[NSString stringWithFormat:@"%ld",(long)self.conversationId]];
+            BMXFileAttachment *fileAttachment = [[BMXFileAttachment alloc] initWithData:dic[@"data"] displayName:dic[@"displayName"] conversationId: (long)self.conversationId];
             messageObject = [self configMessage:fileAttachment];
-            messageObject.contentType = BMXContentTypeFile;
             messageModel.content = dic[@"displayName"];
             break;
         }
             
         case MessageBodyType_Video: {
             NSDictionary *dic = [NSDictionary dictionaryWithDictionary:content];
-//            int videoTime = (int)dic[@"videoduration"];
-            NSData *tumbnaildata = [NSData dataWithData:dic[@"tumbnaildata"]];
             UIImage *image = dic[@"thumbImage"];
+            BMXMessageAttachmentSize *sz = [[BMXMessageAttachmentSize alloc] initWithWidth:image.size.width height:image.size.height];
             BMXVideoAttachment *videoAttachment = [[BMXVideoAttachment alloc] initWithData:dic[@"videodata"]
+                                                                             thumbnailData:dic[@"thumbnaildata"]
                                                                                   duration:duartion
-                                                                                 videoSize:image.size
-                                                                               displayName:@""
-                                                                             thumbnailData:tumbnaildata
-                                                                            conversationId:[NSString stringWithFormat:@"%ld",(long)self.conversationId]];
-            videoAttachment.size = CGSizeMake(image.size.width, image.size.height);
+                                                                                      size:sz
+                                                                               displayName:@"1.mp4" conversationId:(long)self.conversationId];
             messageObject = [self configMessage:videoAttachment];
-            messageObject.contentType = BMXContentTypeVideo;
             messageModel.content = dic[@"displayName"];
             messageModel.width = image.size.width;
             messageModel.height = image.size.height;
@@ -1931,7 +2112,8 @@ CLLocationManagerDelegate>
     
     if (messageObject) {
         messageObject.clientTimestamp = [messageModel.date longLongValue];
-        [[[BMXClient sharedClient] chatService] sendMessage:messageObject];
+        [[[BMXClient sharedClient] chatService] sendMessageWithMsg: messageObject completion:^(BMXError *aError) {
+        }];
     }
 }
 
@@ -1943,6 +2125,42 @@ CLLocationManagerDelegate>
 #pragma mark - Delegate ChatBarProtocol
 - (void)chatViewSendLocation {
     [self p_StartLocate];
+}
+
+- (void)chatViewVideoCall {
+    CallViewController *videoCallViewController =
+        [[CallViewController alloc] initForRoom:[self.account.usedId longLongValue]
+                                                 callId:0
+                                                   myId:[self.account.usedId longLongValue]
+                                                 peerId:self.currentRoster.rosterId
+                                              messageId:0
+                                                    pin:@""
+                                               isCaller:YES
+                                               hasVideo:YES
+                                          currentRoster:_currentRoster];
+    videoCallViewController.modalTransitionStyle =  UIModalTransitionStyleCrossDissolve;
+    videoCallViewController.modalPresentationStyle = UIModalPresentationFullScreen;
+    [self presentViewController:videoCallViewController
+                       animated:NO
+                     completion:nil];
+}
+
+- (void)chatViewVoiceCall {
+    CallViewController *videoCallViewController =
+        [[CallViewController alloc] initForRoom:[self.account.usedId longLongValue]
+                                                 callId:0
+                                                   myId:[self.account.usedId longLongValue]
+                                                 peerId:self.currentRoster.rosterId
+                                              messageId:0
+                                                    pin:@""
+                                               isCaller:YES
+                                               hasVideo:NO
+                                          currentRoster:_currentRoster];
+    videoCallViewController.modalTransitionStyle =  UIModalTransitionStyleCrossDissolve;
+    videoCallViewController.modalPresentationStyle = UIModalPresentationFullScreen;
+    [self presentViewController:videoCallViewController
+                       animated:NO
+                     completion:nil];
 }
 
 - (void)p_StartLocate {
@@ -2014,7 +2232,7 @@ CLLocationManagerDelegate>
 
 //group mention event
 - (void)inputat {
-    if (self.messageType == BMXMessageTypeGroup) {
+    if (self.messageType == BMXMessage_MessageType_Group) {
         GroupCreateViewController  *vc = [[GroupCreateViewController alloc] initWithCurrentGroup:self.currentGroup];
         vc.isAt = YES;
         vc.delegate = self;
@@ -2023,10 +2241,10 @@ CLLocationManagerDelegate>
 }
 
 #pragma mark - GroupCreateViewControllerDelegate
-- (void)atgroupmemberVCdidPopToLastVC:(NSArray<BMXRoster *> *)rosterArray {
+- (void)atgroupmemberVCdidPopToLastVC:(NSArray<BMXRosterItem *> *)rosterArray {
     NSMutableArray *array = [NSMutableArray array];
-    for (BMXRoster *r in rosterArray) {
-        [array addObject:r.userName];
+    for (BMXRosterItem *r in rosterArray) {
+        [array addObject:r.username];
     }
     NSString *string = [array componentsJoinedByString:@",@"];
     self.chatBarView.textView.text = [self.chatBarView.textView.text stringByAppendingString:string];
@@ -2108,10 +2326,13 @@ CLLocationManagerDelegate>
 
 - (void)setUpNavItem{
     NSString *title ;
-    if (self.messageType == BMXMessageTypeGroup) {
+    if (self.messageType == BMXMessage_MessageType_Group) {
         title = self.currentGroup.name;
-    } else if (self.messageType == BMXMessageTypeSingle){
-        title = [self.currentRoster.nickName length] ? self.currentRoster.nickName : self.currentRoster.userName;
+    } else if (self.messageType == BMXMessage_MessageType_Single){
+        title = [self.currentRoster.nickname length] ? self.currentRoster.nickname : self.currentRoster.username;
+        if (!title) {
+            title = [NSString stringWithFormat:@"%lld", self.conversationId];
+        }
     } else {
         title = @"";
     }
@@ -2130,6 +2351,8 @@ CLLocationManagerDelegate>
     [self.tableView removeObserver:self forKeyPath:kTableViewFrame];
     [self.tableView removeObserver:self forKeyPath:kTableViewOffset];
     [[NSNotificationCenter defaultCenter] removeObserver:self];
+    [[[BMXClient sharedClient] chatService] removeDelegate:self];
+    [[[BMXClient sharedClient] rtcService] removeDelegate:self];
 }
 
 - (CLLocationManager *)locationManager {

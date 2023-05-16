@@ -9,9 +9,7 @@
 
 #import "ImageTitleBasicTableViewCell.h"
 #import "UIView+BMXframe.h"
-#import <floo-ios/BMXRoster.h>
-#import <floo-ios/BMXGroup.h>
-#import <floo-ios/BMXClient.h>
+#import <floo-ios/floo_proxy.h>
 
 static NSString *cellID = @"ImageTitleBasicTableViewCell";
 
@@ -76,25 +74,20 @@ static NSString *cellID = @"ImageTitleBasicTableViewCell";
     self.line.bmx_bottom = 60 - 0.5;
 }
 
-- (void)refresh:(BMXRoster *)roster {
+- (void)refresh:(BMXRosterItem *)roster {
     
     self.avatarImg.image = [UIImage imageNamed:@"contact_placeholder"];
     self.avatarImg.layer.borderWidth = 0.5;
     self.avatarImg.layer.borderColor = kColorC4_5.CGColor;
     
-    self.nicknameLabel.text = [[roster nickName] length] ?  roster.nickName : roster.userName;
+    self.nicknameLabel.text = [[roster nickname] length] ?  roster.nickname : roster.username;
     
     UIImage *image = [UIImage imageWithContentsOfFile:roster.avatarThumbnailPath];
     if (!image) {
-        [[[BMXClient sharedClient] rosterService] downloadAvatarWithRoster:roster isThumbnail:YES progress:^(int progress, BMXError *error) {
-            
-        }  completion:^(BMXRoster *rosterObjc, BMXError *error) {
-            if (!error) {
-                UIImage *image = [UIImage imageWithContentsOfFile:rosterObjc.avatarThumbnailPath];
-                
-                
-                MAXLog(@"%@", rosterObjc.avatarThumbnailPath);
-
+        [[[BMXClient sharedClient] rosterService] downloadAvatarWithItem:roster thumbnail:YES callback:^(int progress){} completion:^(BMXError *error) {
+            if (error.errorCode == BMXErrorCode_NoError) {
+                UIImage *image = [UIImage imageWithContentsOfFile:roster.avatarThumbnailPath];
+                MAXLog(@"%@", roster.avatarThumbnailPath);
                 dispatch_async(dispatch_get_main_queue(), ^{
                     self.avatarImg.image = image;
                 });
@@ -106,27 +99,25 @@ static NSString *cellID = @"ImageTitleBasicTableViewCell";
     
 }
 
-- (void)refreshSupportRoster:(BMXRoster *)roster {
+- (void)refreshSupportRoster:(BMXRosterItem *)roster {
     
     self.avatarImg.image = [UIImage imageNamed:@"contact_placeholder"];
     self.avatarImg.layer.borderWidth = 0.5;
     self.avatarImg.layer.borderColor = kColorC4_5.CGColor;
     
-    self.nicknameLabel.text = [[roster nickName] length] ?  roster.nickName : roster.userName;
+    self.nicknameLabel.text = [[roster nickname] length] ?  roster.nickname : roster.username;
     
-        [[[BMXClient sharedClient] rosterService] downloadAvatarWithRoster:roster isThumbnail:YES progress:^(int progress, BMXError *error) {
+    [[[BMXClient sharedClient] rosterService] downloadAvatarWithItem:roster thumbnail:YES callback:^(int progress){}completion:^(BMXError *error) {
+        if (!error) {
+            UIImage *image = [UIImage imageWithContentsOfFile:roster.avatarThumbnailPath];
             
-        }  completion:^(BMXRoster *rosterObjc, BMXError *error) {
-            if (!error) {
-                UIImage *image = [UIImage imageWithContentsOfFile:rosterObjc.avatarThumbnailPath];
-                
-                dispatch_async(dispatch_get_main_queue(), ^{
-                    self.avatarImg.image = image;
-                });
-            } else {
-                self.avatarImg.image = [UIImage imageNamed:@"contact_placeholder"];
-            }
-        }];
+            dispatch_async(dispatch_get_main_queue(), ^{
+                self.avatarImg.image = image;
+            });
+        } else {
+            self.avatarImg.image = [UIImage imageNamed:@"contact_placeholder"];
+        }
+    }];
 }
 
 - (void)refreshByGroup:(BMXGroup *)group {
@@ -137,13 +128,10 @@ static NSString *cellID = @"ImageTitleBasicTableViewCell";
     if (group.avatarThumbnailPath > 0 && [[NSFileManager defaultManager] fileExistsAtPath:group.avatarThumbnailPath]) {
         self.avatarImg.image = [UIImage imageWithContentsOfFile:group.avatarThumbnailPath];
     }else {
-        
-        [[[BMXClient sharedClient] groupService] downloadAvatarWithGroup:group progress:^(int progress, BMXError *error) {
-        } completion:^(BMXGroup *resultGroup, BMXError *error) {
-            if (error == nil) {
+        [[[BMXClient sharedClient] groupService] downloadAvatarWithGroup:group thumbnail:YES callback:^(int progress){} completion:^(BMXError *error) {
+            if (!error) {
                 dispatch_async(dispatch_get_main_queue(), ^{
-                    
-                    UIImage *image = [UIImage imageWithContentsOfFile:resultGroup.avatarThumbnailPath];
+                    UIImage *image = [UIImage imageWithContentsOfFile:group.avatarThumbnailPath];
                     self.avatarImg.image = image;
                     
                 });

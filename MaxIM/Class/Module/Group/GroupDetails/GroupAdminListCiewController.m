@@ -17,13 +17,11 @@
 #import "GroupAdminListCiewController.h"
 
 #import "GorupLittleCell.h"
-#import <floo-ios/BMXClient.h>
-#import <floo-ios/BMXGroupMember.h>
-#import <floo-ios/BMXRoster.h>
 
 #import "IMAcount.h"
 #import "IMAcountInfoStorage.h"
 #import "UIViewController+CustomNavigationBar.h"
+#import "MAXUtils.h"
 
 @interface GroupAdminListCiewController ()<UITableViewDelegate, UITableViewDataSource>
 
@@ -103,16 +101,16 @@
     }
     NSString* name = rosterId;
     NSString* avatar = rosterId;
-    BMXRoster* roster = [self.userHash objectForKey:rosterId];
+    BMXRosterItem* roster = [self.userHash objectForKey:rosterId];
     if(roster != nil) {
-        name = roster.nickName;
+        name = roster.nickname;
         if(!name || [@"" isEqualToString:name]) {
-            name = roster.userName;
+            name = roster.username;
         }
         avatar = roster.avatarUrl;
     }
+    [cell setAvatarUrl:avatar RosterName:name Selected:NO];
     if([@"" isEqualToString: avatar]){
-        [cell setAvatarUrl:avatar RosterName:name Selected:NO];
         [cell setDlownAvatar:roster Selected:NO];
     }
     return cell;
@@ -129,27 +127,34 @@
 -(void) dealWithMembersWithSection:(NSInteger) section Row:(NSInteger) row
 {
     if(section == 0) {// 取消管理
-        NSString* uid = [self.adminUidArray objectAtIndex:row];
-        NSNumber *uidnumber = [NSNumber numberWithLongLong:[uid longLongValue]];
-        [[[BMXClient sharedClient] groupService] removeAdmins:self.group admins:@[uidnumber] reason:NSLocalizedString(@"Add_admin", @"添加管理") completion:^(BMXError *error) {
+       
+        long long uid = [[self.adminUidArray objectAtIndex:row] longLongValue];
+        NSString *sUid = [self.adminUidArray objectAtIndex:row];
+        ListOfLongLong *admins = [[ListOfLongLong alloc] init];
+        [admins addWithX:&uid];
+
+        [[[BMXClient sharedClient] groupService] removeAdminsWithGroup:self.group admins:admins reason:NSLocalizedString(@"Add_admin", @"添加管理") completion:^(BMXError *error) {
             if(!error) {
-                [self.adminUidArray removeObject:uid];
-                [self.normalUidArray addObject:uid];
+                [self.adminUidArray removeObject:sUid];
+                [self.normalUidArray addObject:sUid];
                 [self.tableView reloadData];
             }else {
-                MAXLog(@"error : %ld", error.errorCode);
+                MAXLog(@"error : %ld", (long)error.errorCode);
             }
             
         }];
     }else { //添加管理
-        NSNumber* uid = [NSNumber numberWithLongLong:[[self.normalUidArray objectAtIndex:row] longLongValue]];
-        [[[BMXClient sharedClient] groupService] addAdmins:self.group admins:@[uid] message:NSLocalizedString(@"Cancellation_management", @"取消管理") completion:^(BMXError *error) {
+        long long uid = [[self.normalUidArray objectAtIndex:row] longLongValue];
+        NSString *sUid = [self.normalUidArray objectAtIndex:row];
+        ListOfLongLong *admins = [[ListOfLongLong alloc] init];
+        [admins addWithX:&uid];
+        [[[BMXClient sharedClient] groupService] addAdminsWithGroup:self.group admins:admins message:NSLocalizedString(@"Cancellation_management", @"取消管理") completion:^(BMXError *error) {
             if(!error) {
-                [self.normalUidArray removeObject:uid];
-                [self.adminUidArray addObject:uid];
+                [self.normalUidArray removeObject:sUid];
+                [self.adminUidArray addObject:sUid];
                 [self.tableView reloadData];
             }else {
-                MAXLog(@"error : %ld", error.errorCode);
+                MAXLog(@"error : %ld", (long)error.errorCode);
             }
         }];
     }
@@ -181,15 +186,13 @@
 // 获取管理员列表
 -(void) getManageList
 {
-    [[[BMXClient sharedClient] groupService] getAdmins:self.group forceRefresh:YES completion:^(NSArray<BMXGroupMember *> *adminList, BMXError *error) {
+    [[[BMXClient sharedClient] groupService] getAdmins:self.group forceRefresh:YES completion:^(BMXGroupMemberList *adminList, BMXError *aError) {
         NSMutableArray* adminMularr = [NSMutableArray array];
-        IMAcount* acc = [IMAcountInfoStorage loadObject];
-        NSString* currentUid  = acc.usedId;
-        for (BMXGroupMember* member in adminList) {
-            NSString* uidStr = [NSString stringWithFormat:@"%ld", member.uid];
-            if(![uidStr isEqualToString:currentUid]) {
-                [adminMularr addObject:uidStr];
-            }
+        unsigned long sz = adminList.size;
+        for (int i=0; i<sz; i++) {
+            BMXGroupMember* member = [adminList get:i];
+            NSString* uidStr = [NSString stringWithFormat:@"%lld", member.getMUid];
+            [adminMularr addObject:uidStr];
         }
         self.adminUidArray = [NSMutableArray arrayWithArray:adminMularr];
         [self configureNormalUids];
@@ -199,30 +202,25 @@
 
 // 获取群成员
 - (void)getMembers {
-    [[[BMXClient sharedClient] groupService] getMembers:self.group forceRefresh:YES completion:^(NSArray<BMXGroupMember *> *groupList, BMXError *error) {
-        MAXLog(@"%ld", groupList.count);
-        NSMutableArray* array = [NSMutableArray array];
-        NSMutableArray* normalMemberArr = [NSMutableArray array];
-        IMAcount* acc = [IMAcountInfoStorage loadObject];
-        NSString* currentUid  = acc.usedId;
-        for (BMXGroupMember* amember in groupList) {
-            NSString* uidStr = [NSString stringWithFormat:@"%ld", amember.uid];
-            if(![uidStr isEqualToString:currentUid]) {
-                [array addObject:uidStr];
-            }
-        }
-        self.allUidArray = [NSArray arrayWithArray:array];
+    [MAXUtils getMemberIdArrayWithGroup:self.group completion:^(NSArray *arr) {
+        self.allUidArray = arr;
         [self configureNormalUids];
-        [self getRostersByidArray:array];
+        ListOfLongLong *list = [[ListOfLongLong alloc] init];
+        for (NSString *sId in arr) {
+            long long lId = [sId longLongValue];
+            [list addWithX: &lId];
+        }
+        [self getRostersByidArray:list];
     }];
 }
 
 // 获取群成员详情
-- (void)getRostersByidArray:(NSArray *)idArray {
-    [[[BMXClient sharedClient] rosterService] searchRostersByRosterIdList:idArray forceRefresh:YES completion:^(NSArray<BMXRoster *> *rosterList, BMXError *error) {
-        MAXLog(@"%ld", rosterList.count);
+- (void)getRostersByidArray:(ListOfLongLong *)list {
+    [MAXUtils getRostersByidArray:list completion:^(NSArray *arr) {
+        unsigned long cnt = arr.count;
+        MAXLog(@"%lu", cnt);
         NSMutableDictionary* dict = [NSMutableDictionary dictionary];
-        for (BMXRoster* roster in rosterList) {
+        for (BMXRosterItem* roster in arr) {
             NSString* uid = [NSString stringWithFormat:@"%lld", roster.rosterId];
             [dict setObject:roster forKey:uid];
         }

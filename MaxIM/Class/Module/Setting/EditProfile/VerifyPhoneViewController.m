@@ -9,7 +9,7 @@
 #import "VerifyPhoneViewController.h"
 #import "BindPhoneView.h"
 #import "UIViewController+CustomNavigationBar.h"
-#import <floo-ios/BMXUserProfile.h>
+#import <floo-ios/floo_proxy.h>
 #import "UserMobilePrechangeByMobileApi.h"
 #import "CaptchaApi.h"
 #import "UserMobileChangeApi.h"

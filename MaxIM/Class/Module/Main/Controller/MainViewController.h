@@ -7,8 +7,8 @@
 //
 
 #import <UIKit/UIKit.h>
-#import <floo-ios/BMXGroup.h>
-#import <floo-ios/BMXMessageObject.h>
+
+#import <floo-ios/floo_proxy.h>
 
 @interface MainViewController : UIViewController
 
@@ -16,9 +16,11 @@
 
 - (void)getAllConversations;
 
-- (void)receiveNewMessage:(BMXMessageObject *)message;
+- (void)receiveNewMessage:(BMXMessage *)message;
 
-- (void)sendNewMessage:(BMXMessageObject *)message;
+- (void)receiveRTCCallMessage:(BMXMessage *)message;
+
+- (void)sendNewMessage:(BMXMessage *)message;
 
 
 @end

@@ -7,12 +7,11 @@
 //
 
 #import <UIKit/UIKit.h>
-#import <floo-ios/BMXGroup.h>
-#import <floo-ios/BMXRoster.h>
+#import <floo-ios/floo_proxy.h>
 
 @protocol TransterContactProtocol <NSObject>
 
-- (void)transterSlectedRoster:(BMXRoster *)roster;
+- (void)transterSlectedRoster:(BMXRosterItem *)roster;
 - (void)transterSlectedGroup:(BMXGroup *)group;
 
 @end

@@ -7,33 +7,41 @@
 //
 
 #import "GroupListTableViewAdapter.h"
-#import <floo-ios/BMXClient.h>
-#import <floo-ios/BMXGroup.h>
+#import <floo-ios/floo_proxy.h>
+
 @implementation GroupListTableViewAdapter
 
 + (void)getGroupListcompletion:(void(^)(NSArray <BMXGroup *>*group, NSString *errmsg))aCompletionBlock {
-    [[[BMXClient sharedClient] groupService] getGroupListForceRefresh:YES completion:^(NSArray *groupList, BMXError *error) {
+    [[[BMXClient sharedClient] groupService] get:YES completion:^(BMXGroupList *res, BMXError *error) {
         //        MAXLog(@"%ld", groupList.count);
         [HQCustomToast hideWating];
         
         if (!error) {
-            
             NSMutableArray *groupNormalArray = [NSMutableArray array];
-            for (BMXGroup *group in groupList) {
-                //                MAXLog(@"%@", group.name);
-                //                MAXLog(@"%d", group.groupStatus);
-                //                MAXLog(@"%d", group.isMember);
-                
-                if (group.groupStatus != BMXGroupDestroyed && group.roleType == BMXGroupMemberRoleTypeMember) {
+            unsigned long sz = res.size;
+            for (int i=0; i<sz; i++) {
+                BMXGroup *group = [res get:i];
+                if (group.groupStatus != BMXGroup_GroupStatus_Destroyed && group.isMember) {
                     [groupNormalArray addObject:group];
-                } else {
-                    //                    MAXLog(@"%lld", group.groupId);
                 }
             }
             return aCompletionBlock(groupNormalArray, nil);
-
         } else {
-            return aCompletionBlock(nil, error.errorMessage);
+            [[[BMXClient sharedClient] groupService] get:NO completion:^(BMXGroupList *res, BMXError *error) {
+                if (!error) {
+                    NSMutableArray *groupNormalArray = [NSMutableArray array];
+                    unsigned long sz = res.size;
+                    for (int i=0; i<sz; i++) {
+                        BMXGroup *group = [res get:i];
+                        if (group.groupStatus != BMXGroup_GroupStatus_Destroyed && group.isMember) {
+                            [groupNormalArray addObject:group];
+                        }
+                    }
+                    return aCompletionBlock(groupNormalArray, nil);
+                }else{
+                    return aCompletionBlock(nil, [error description]);
+                }
+            }];
         }
     }];
 }

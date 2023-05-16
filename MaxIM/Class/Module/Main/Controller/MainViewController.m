@@ -10,36 +10,30 @@
 #import "LHChatVC.h"
 #import "NSString+Extention.h"
 
-#import "MAXLoginViewController.h"
 #import "IMAcountInfoStorage.h"
-#import <floo-ios/BMXClient.h>
 
 #import "IMAcount.h"
 #import "IMAcountInfoStorage.h"
 
-#import <floo-ios/BMXClient.h>
-#import <floo-ios/BMXConversation.h>
 
 #import "MAXGlobalTool.h"
 
-#import <floo-ios/BMXConversation.h>
 #import "RecentConversaionTableViewCell.h"
-#import <floo-ios/BMXMessageObject.h>
 
 #import "BMXSearchView.h"
 #import "SearchContentViewController.h"
 #import "UIView+BMXframe.h"
-#import <floo-ios/BMXClient.h>
 
 #import "UIViewController+CustomNavigationBar.h"
 #import "ScanViewController.h"
 #import "SystemNotificationViewController.h"
 #import "MaxEmptyTipView.h"
 #import "UIControl+Category.h"
-#import <floo-ios/BMXChatManager.h>
+#import <floo-ios/floo_proxy.h>
+#import "CallViewController.h"
+#import <floo-rtc-ios/RTCEngineManager.h>
 
-#import <floo-ios/BMXPushManager.h>
-@interface MainViewController ()<UITableViewDelegate, UITableViewDataSource, UITextFieldDelegate, ChatVCDelegate, BMXChatServiceProtocol>
+@interface MainViewController ()<UITableViewDelegate, UITableViewDataSource, UITextFieldDelegate, ChatVCDelegate, BMXChatServiceProtocol,BMXRTCServiceProtocol>
 
 @property (nonatomic, strong) NSMutableArray<BMXConversation *> *conversatonList;
 @property (nonatomic, strong) NSMutableArray *profileArray;
@@ -49,6 +43,10 @@
 @property (nonatomic, strong) UIButton *searchbigButton;
 @property (nonatomic, strong) UILabel *headerLabel;
 @property (nonatomic, strong) MaxEmptyTipView *tipView;
+@property (nonatomic, strong) IMAcount *account;
+@property (nonatomic, strong) NSLock *profileLock;
+@property (nonatomic, strong) NSMutableSet *hungUpCalls;
+
 
 
 @end
@@ -57,23 +55,32 @@
 
 - (void)viewDidLoad {
     [super viewDidLoad];
+    _profileLock = [[NSLock alloc] init];
+    _hungUpCalls = [[NSMutableSet alloc] init];
     self.view.backgroundColor = [UIColor whiteColor];
     [self setUpNavItem];
     
     [[[BMXClient sharedClient] chatService] addChatListener:self];
-    
+    [[[BMXClient sharedClient] rtcService] addDelegate:self];
+
     [NetWorkingManager netWorkingManagerWithNetworkStatusListening];
     [self p_addObserver];
     
-    [[[BMXClient sharedClient] chatService] getAllConversationsUnreadCountWithCompletion:^(int count) {
-        [self showUnReadNumber:count];
-    }];
+    [self showUnReadNumber:[[[BMXClient sharedClient] chatService] getAllConversationsUnreadCount]];
     //
 //    [[[BMXClient sharedClient] pushService] sendMessage:@"pushmessagetest3"];
     
 //    [[[BMXClient sharedClient] pushService] setPushTimeStartHour:8 endHour:20];
     
 //    [[[BMXClient sharedClient] pushService] setSlienceTimeStartHour:8 endHour:20];
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(1 * NSEC_PER_SEC)),
+                   dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+        [self getAllConversations];
+    });
+    dispatch_async(dispatch_get_global_queue(0, 0), ^{
+        [self getAllConversations];
+    });
+    self.account = [IMAcountInfoStorage loadObject];
 }
 
 - (void)p_addObserver {
@@ -143,9 +150,12 @@
         [HQCustomToast showWating];
     });
     
-    [[[BMXClient sharedClient] chatService] getAllConversationsWithCompletion:^(NSArray *conversations) {
-        
+    [[[BMXClient sharedClient] chatService] getAllConversationsWithCompletion:^(BMXConversationList *res) {
         [HQCustomToast hideWating];
+        NSMutableArray *conversations = [NSMutableArray array];
+        for (int i=0; i<res.size; i++){
+            [conversations addObject:[res get: i]];
+        }
         if (conversations.count == 0) {
              //展示空白页
             [self.view insertSubview:self.tipView aboveSubview:self.tableview];
@@ -153,9 +163,8 @@
             [self.tipView removeFromSuperview];
             [self getProfiletWithConversations:conversations];
         }
-    }];
 
-    
+    }];
 }
 
 - (void)getProfiletWithConversations:(NSArray *)conversations {
@@ -169,54 +178,79 @@
 }
 
 - (void)getProfileWithConversatonList:(NSMutableArray *)conversatonList {
+    [_profileLock lock];
     NSMutableArray *tempProfileArray = [NSMutableArray array];
-       MAXLog(@"===开始获取资料");
+    MAXLog(@"===开始获取资料");
+
+    //profile列表为空时创建占位对象，确保conversationList与profileArray个数一致，初始时展示会话ID和默认头像
+    if(self.profileArray.count == 0){
+        dispatch_semaphore_t semaphore = dispatch_semaphore_create(0);
+        for (int i=0; i<conversatonList.count; i++) {
+            [tempProfileArray addObject:NSLocalizedString(@"Unable_to_access_profile", @"无法获取资料")];
+        }
+        dispatch_async(dispatch_get_main_queue(), ^{
+            @synchronized(self.profileArray) {
+                self.conversatonList = conversatonList;
+                self.profileArray = [NSMutableArray arrayWithArray:[tempProfileArray copy]];
+                [self.tableview reloadData];
+                [HQCustomToast hideWating];
+                dispatch_semaphore_signal(semaphore);
+            }
+        });
+        dispatch_semaphore_wait(semaphore, DISPATCH_TIME_FOREVER);
+    }
+//    self.conversatonList = conversatonList;
+    tempProfileArray = [NSMutableArray array];
     dispatch_queue_t queue = dispatch_queue_create("getProfile",DISPATCH_QUEUE_SERIAL);
     dispatch_semaphore_t semaphore = dispatch_semaphore_create(0);
-        for (BMXConversation *conversation in conversatonList) {
-            dispatch_async(queue, ^{
-                
-                if (conversation.type == BMXConversationSingle) {
-                    if (conversation.conversationId == 0) {
-                        dispatch_semaphore_signal(semaphore);
-                        [tempProfileArray addObject:[self getSystemProfile]];
-                    } else {
-                        [[[BMXClient sharedClient] rosterService] searchByRosterId:conversation.conversationId forceRefresh:NO completion:^(BMXRoster *roster, BMXError *error) {
-                            dispatch_semaphore_signal(semaphore);
-                            if (!error) {
-                                [tempProfileArray addObject:roster];
-                            }else {
-                                // 获取不到资料时，新建一个对象占位
-                                [tempProfileArray addObject:NSLocalizedString(@"Unable_to_access_profile", @"无法获取资料")];
-                            }
-                        }];
-                    }
-                   
-                     dispatch_semaphore_wait(semaphore, DISPATCH_TIME_FOREVER);
-                    
+
+    for (int i=0; i<conversatonList.count; i++) {
+        BMXConversation *conversation = [conversatonList objectAtIndex:i];
+        dispatch_async(queue, ^{
+            if (conversation.type == BMXConversation_Type_Single) {
+                if (conversation.conversationId == 0) {
+                    dispatch_semaphore_signal(semaphore);
+                    [tempProfileArray addObject:[self getSystemProfile]];
                 } else {
-                    [[[BMXClient sharedClient] groupService] getGroupInfoByGroupId:conversation.conversationId forceRefresh:NO completion:^(BMXGroup *group, BMXError *error) {
+                    [[[BMXClient sharedClient] rosterService] searchWithRosterId:conversation.conversationId forceRefresh:NO completion:^(BMXRosterItem *bmxRosterItem, BMXError *error) {
                         dispatch_semaphore_signal(semaphore);
                         if (!error) {
-                            [tempProfileArray addObject:group];
+                            [tempProfileArray addObject:bmxRosterItem];
                         }else {
-                             // 获取不到资料时，新建一个对象占位
+                            // 获取不到资料时，新建一个对象占位
                             [tempProfileArray addObject:NSLocalizedString(@"Unable_to_access_profile", @"无法获取资料")];
                         }
+
                     }];
-                     dispatch_semaphore_wait(semaphore, DISPATCH_TIME_FOREVER);
                 }
-            });
-        }
+                dispatch_semaphore_wait(semaphore, DISPATCH_TIME_FOREVER);
+            } else {
+                [[[BMXClient sharedClient] groupService] searchWithGroupId:conversation.conversationId forceRefresh:NO completion:^(BMXGroup *res, BMXError *error) {
+                    dispatch_semaphore_signal(semaphore);
+                    if (!error) {
+                        [tempProfileArray addObject:res];
+                    }else {
+                         // 获取不到资料时，新建一个对象占位
+                        [tempProfileArray addObject:NSLocalizedString(@"Unable_to_access_profile", @"无法获取资料")];
+                    }
+                }];
+                dispatch_semaphore_wait(semaphore, DISPATCH_TIME_FOREVER);
+            }
+        });
+    }
     
     dispatch_async(queue, ^{
         dispatch_async(dispatch_get_main_queue(), ^{
-            self.conversatonList = conversatonList;
-            self.profileArray = [NSMutableArray arrayWithArray:[tempProfileArray copy]];
-            [self.tableview reloadData];
-            [HQCustomToast hideWating];
+            @synchronized(self) {
+                self.conversatonList = conversatonList;
+                self.profileArray = [NSMutableArray arrayWithArray:[tempProfileArray copy]];
+                [self.tableview reloadData];
+                [HQCustomToast hideWating];
+            }
         });
     });
+
+    [_profileLock unlock];
 }
 
 - (NSDictionary *)getSystemProfile {
@@ -240,15 +274,15 @@
         //此处的规则含义为：若前一元素比后一元素小，则返回降序（即后一元素在前，为从大到小排列）
         BMXConversation *conversation1 = obj1;
         BMXConversation *conversation2 = obj2;
-        if (conversation1.lastMessage == nil) {
+        if (conversation1.lastMsg == nil) {
             return NSOrderedDescending;
         }
         
-        if (conversation2.lastMessage == nil) {
+        if (conversation2.lastMsg == nil) {
             return NSOrderedAscending;
         }
         //           NSLog(@"===排序");
-        if (conversation1.lastMessage.serverTimestamp < conversation2.lastMessage.serverTimestamp) {
+        if (conversation1.lastMsg.serverTimestamp < conversation2.lastMsg.serverTimestamp) {
             return NSOrderedDescending;
         }  else {
             return NSOrderedAscending;
@@ -259,10 +293,11 @@
     return [NSMutableArray arrayWithArray:sort];
 }
 
-- (void)receiveNewMessage:(BMXMessageObject *)message {
+- (void)receiveNewMessage:(BMXMessage *)message {
     long long conversationId = message.conversationId;
     BOOL hasConversation = NO;
-    NSArray *temp = [self.conversatonList copy];
+    NSMutableArray *temp = [[NSMutableArray alloc] init];
+    [temp addObjectsFromArray:self.conversatonList];
     for (BMXConversation *conversation in temp) {
         if (conversationId == conversation.conversationId) {
             hasConversation  = YES;
@@ -271,15 +306,16 @@
         }
     }
     if (!hasConversation) {
-        BMXConversationType type;
-        if (message.messageType == BMXMessageTypeSingle) {
-            type = BMXConversationSingle;
+        BMXConversation_Type type;
+        if (message.type == BMXMessage_MessageType_Single) {
+            type = BMXConversation_Type_Single;
         } else {
-            type = BMXConversationGroup;
+            type = BMXConversation_Type_Group;
         }
-        BMXConversation *conversation = [[[BMXClient sharedClient] chatService] openConversation:conversationId type:type createIfNotExist:YES];
+        BMXConversation *conversation = [[[BMXClient sharedClient] chatService] openConversationWithConversationId:conversationId type:type createIfNotExist:YES];
         [self.conversatonList insertObject:conversation atIndex:0];
-        [self getProfiletWithConversations:self.conversatonList];
+        [temp insertObject:conversation atIndex:0];
+        [self getProfiletWithConversations:temp];
         
         if (self.conversatonList.count > 0) {
             [self.tipView removeFromSuperview];
@@ -287,7 +323,68 @@
     }
 }
 
-- (void)sendNewMessage:(BMXMessageObject *)message {
+#pragma mark - BMXRTCServiceProtocol
+- (void)onRTCHangupMessageReceiveWithMsg:(BMXMessage*)msg {
+    [_hungUpCalls addObject:msg.config.getRTCCallId];
+}
+
+- (void)receiveRTCCallMessage:(BMXMessage *)message{
+    long long roomId = message.config.getRTCRoomId;
+    long long myId = [self.account.usedId longLongValue];
+    long long peerId = message.config.getRTCInitiator;
+    if (myId == peerId){
+        return;
+    }
+    NSString *pin = message.config.getRTCPin;
+    NSString *callId = message.config.getRTCCallId;
+    BOOL hasVideo = message.config.getRTCCallType == 1;
+    
+    if ([[RTCEngineManager engineWithType:kMaxEngine] isOnCall]) {
+        [self replyBusyWithCallId:callId myId:myId peerId:peerId];
+        return;
+    }
+
+    [[[BMXClient sharedClient] rosterService] searchWithRosterId:peerId forceRefresh:NO completion:^(BMXRosterItem *bmxRosterItem, BMXError *error) {
+        if (!error) {
+            if ([self->_hungUpCalls containsObject:callId]) {
+                [self->_hungUpCalls removeObject:callId];
+                return;
+            }
+
+            CallViewController *videoCallViewController =
+                [[CallViewController alloc] initForRoom:roomId
+                                                         callId:callId
+                                                           myId:myId
+                                                         peerId:peerId
+                                                      messageId:message.msgId
+                                                            pin:pin
+                                                       isCaller:NO
+                                                       hasVideo:hasVideo
+                                                    currentRoster:bmxRosterItem];
+            videoCallViewController.modalTransitionStyle =  UIModalTransitionStyleCrossDissolve;
+            videoCallViewController.modalPresentationStyle = UIModalPresentationFullScreen;
+            [self presentViewController:videoCallViewController
+                               animated:NO
+                             completion:nil];
+        }
+    }];
+}
+
+- (void)replyBusyWithCallId:(NSString*)callId myId:(long long)myId peerId:(long long) peerId{
+    // send rtc message
+    BMXMessageConfig *config = [BMXMessageConfig createMessageConfigWithMentionAll: NO];
+    [config setRTCHangupInfo:callId];
+    NSString *content = @"busy"; //Caller canceled
+    BMXMessage *msg = [BMXMessage createRTCMessageWithFrom:myId to:peerId type:BMXMessage_MessageType_Single conversationId:peerId content:content];
+    msg.config = config;
+    [[[BMXClient sharedClient] rtcService] sendRTCMessageWithMsg:msg completion:^(BMXError *aError) {
+        NSNotification *noti = [NSNotification notificationWithName:@"call" object:self userInfo:@{@"event":@"hangup"}];
+        //发送通知
+        [[NSNotificationCenter defaultCenter]postNotification:noti];
+    }];
+}
+
+- (void)sendNewMessage:(BMXMessage *)message {
     
     long long conversationId = message.conversationId;
     BOOL hasConversation = NO;
@@ -301,13 +398,13 @@
     }
     if (!hasConversation) {
         
-        BMXConversationType type;
-        if (message.messageType == BMXMessageTypeSingle) {
-            type = BMXConversationSingle;
+        BMXConversation_Type type;
+        if (message.type == BMXMessage_MessageType_Single) {
+            type = BMXConversation_Type_Single;
         } else {
-            type = BMXConversationGroup;
+            type = BMXConversation_Type_Group;
         }
-        BMXConversation *conversation = [[[BMXClient sharedClient] chatService] openConversation:conversationId type:type createIfNotExist:YES];
+        BMXConversation *conversation = [[[BMXClient sharedClient] chatService] openConversationWithConversationId:conversationId type:type createIfNotExist:YES];
         [self.conversatonList insertObject:conversation atIndex:0];
         [self getProfiletWithConversations:self.conversatonList];
     }
@@ -319,9 +416,7 @@
 }
 
 - (void)loadAllConversationDidFinished {
-    MAXLog(@"all");
-//    self.conversationFinish = YES;
-    [self getAllConversations];
+    MAXLog(@"loadAllConversationDidFinished");
 }
 
 
@@ -335,6 +430,7 @@
 }
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
+    MAXLog(@"conversationList:%ld profileArray:%ld",(long)self.conversatonList.count, (long)self.profileArray.count);
     return self.conversatonList.count > 0 ? self.conversatonList.count : 0;
 }
 
@@ -361,20 +457,32 @@
 //    MAXLog(@"%@",conversation.lastMessage.content);
 
     RecentConversaionTableViewCell *cell = [RecentConversaionTableViewCell cellWithTableview:tableView];
+    @synchronized(self.profileArray) {
     
-    
-    if ([NSStringFromClass([self.profileArray[indexPath.row] class]) isEqualToString:@"BMXRoster"]) {
-        BMXRoster *roster = self.profileArray[indexPath.row];
-        if (roster.rosterId == conversation.conversationId) {
+    id row;
+    @try {
+        row = self.profileArray[indexPath.row];
+    } @catch (NSException *exception) {
+        MAXLog(@"indexPath.row :%ld size:%ld exception:%@",(long)indexPath.row, self.profileArray.count, exception.description);
+    }
+    if (!row){
+        return cell;
+    }
+    if ([NSStringFromClass([row class]) isEqualToString:@"BMXRosterItem"]) {
+        BMXRosterItem *roster = nil;
+        @try{
+            roster = row;
+        }@catch(NSException *exception) {
+            MAXLog(@"indexPath.row :%ld exception:%@",(long)indexPath.row, exception.description);
+        }
+        if (roster && roster.rosterId == conversation.conversationId) {
             
-            cell.titleLabel.text = [roster.nickName length] ? roster.nickName : roster.userName;
+            cell.titleLabel.text = [roster.nickname length] ? roster.nickname : roster.username;
             cell.avatarImageView.image = [UIImage imageNamed:@"contact_placeholder"];
             UIImage *image = [UIImage imageWithContentsOfFile:roster.avatarThumbnailPath];
             if (!image) {
-                [[[BMXClient sharedClient] rosterService] downloadAvatarWithRoster:roster isThumbnail:YES progress:^(int progress, BMXError *error) {
-                    
-                }  completion:^(BMXRoster *roster, BMXError *error) {
-                    if (!error) {
+                [[[BMXClient sharedClient] rosterService] downloadAvatarWithItem:roster thumbnail:YES callback:^(int progress) {} completion:^(BMXError *error) {
+                    if (!error){
                         UIImage *image = [UIImage imageWithContentsOfFile:roster.avatarThumbnailPath];
                         
                         dispatch_async(dispatch_get_main_queue(), ^{
@@ -392,9 +500,9 @@
             cell.titleLabel.text = [NSString stringWithFormat:@"%lld", conversation.conversationId];
             cell.avatarImageView.image = [UIImage imageNamed:@"contact_placeholder"];
         }
-    } else if ([NSStringFromClass([self.profileArray[indexPath.row] class]) isEqualToString:@"BMXGroup"]) {
+    } else if ([NSStringFromClass([row class]) isEqualToString:@"BMXGroup"]) {
         
-        BMXGroup *group = self.profileArray[indexPath.row];
+        BMXGroup *group = row;
         if (group.groupId == conversation.conversationId) {
             
             cell.titleLabel.text = group.name != nil ? group.name : NSLocalizedString(@"No_name_for_now", @"暂无名字");
@@ -407,70 +515,68 @@
 //                MAXLog(@"group:%@", group.avatarThumbnailPath);
 
             }else {
-                [[[BMXClient sharedClient] groupService] downloadAvatarWithGroup:group progress:^(int progress, BMXError *error) {
-                } completion:^(BMXGroup *resultGroup, BMXError *error) {
-//                    MAXLog(@"groupR:%@", resultGroup.avatarThumbnailPath);
-
-                    if (error == nil) {
+                [[[BMXClient sharedClient] groupService]downloadAvatarWithGroup:group thumbnail:YES callback:^(int progress) {} completion:^(BMXError *error) {
+                    if(!error){
                         dispatch_async(dispatch_get_main_queue(), ^{
-                            
-                            UIImage *image = [UIImage imageWithContentsOfFile:resultGroup.avatarThumbnailPath];
+                            UIImage *image = [UIImage imageWithContentsOfFile:group.avatarThumbnailPath];
                             cell.avatarImageView.image = image;
-                            
                         });
                     }
                 }];
             }
-            
-
         }else {
             
             cell.titleLabel.text = [NSString stringWithFormat:@"%lld", conversation.conversationId];
             cell.avatarImageView.image = [UIImage imageNamed:@"group_placeHo"];
             
         }
-    }  else if ([self.profileArray[indexPath.row] isKindOfClass:[NSDictionary class]]) {
-        NSDictionary *profile = self.profileArray[indexPath.row];
+    }  else if ([row isKindOfClass:[NSDictionary class]]) {
+        NSDictionary *profile = row;
         cell.titleLabel.text = [NSString stringWithFormat:@"%@", profile[@"userName"]];
         cell.avatarImageView.image = [UIImage imageNamed:@"systemAvater"];
         
     } else {
         cell.titleLabel.text = [NSString stringWithFormat:@"%lld", conversation.conversationId];
-        cell.avatarImageView.image = [UIImage imageNamed:@"group_placeHo"];
+        if(conversation.type == BMXConversation_Type_Group){
+            cell.avatarImageView.image = [UIImage imageNamed:@"group_placeHo"];
+        }else{
+            cell.avatarImageView.image = [UIImage imageNamed:@"contact_placeholder"];
+        }
     }
     
-    if (conversation.lastMessage.contentType == BMXContentTypeText) {
+    if (conversation.lastMsg.contentType == BMXMessage_ContentType_Text) {
         NSString *str;
         if ([conversation.editMessage length]) {
             str = [NSString stringWithFormat:@"[草稿] %@", conversation.editMessage];
         } else {
-            str = conversation.lastMessage.content;
+            str = conversation.lastMsg.content;
         }
         
         cell.subtitleLabel.text = str;
-    } else if (conversation.lastMessage.contentType == BMXContentTypeImage) {
+    } else if (conversation.lastMsg.contentType == BMXMessage_ContentType_Image) {
         cell.subtitleLabel.text = @"[图片]";
-    } else if (conversation.lastMessage.contentType == BMXContentTypeFile) {
+    } else if (conversation.lastMsg.contentType == BMXMessage_ContentType_File) {
         cell.subtitleLabel.text = @"[文件]";
-    } else if (conversation.lastMessage.contentType == BMXContentTypeVoice) {
+    } else if (conversation.lastMsg.contentType == BMXMessage_ContentType_Voice) {
         cell.subtitleLabel.text = @"[语音]";
-    } else if (conversation.lastMessage.contentType == BMXContentTypeLocation) {
+    } else if (conversation.lastMsg.contentType == BMXMessage_ContentType_Location) {
         cell.subtitleLabel.text = @"[位置]";
-    } else if (conversation.lastMessage.contentType == BMXContentTypeVideo) {
+    } else if (conversation.lastMsg.contentType == BMXMessage_ContentType_Video) {
         cell.subtitleLabel.text = @"[视频]";
     }
     
-    if (conversation.lastMessage.serverTimestamp > 0) {
+    if (conversation.lastMsg.serverTimestamp > 0) {
         cell.timeLabel.hidden = NO;
-        cell.timeLabel.text = [self compareCurrentTime:[[NSDate date] timeIntervalSince1970] comepareDate:conversation.lastMessage.serverTimestamp * 0.001];;
+        cell.timeLabel.text = [self compareCurrentTime:[[NSDate date] timeIntervalSince1970] comepareDate:conversation.lastMsg.serverTimestamp * 0.001];;
     } else {
         cell.timeLabel.hidden = YES;
     }
-    
-    if (conversation.type == BMXConversationGroup) {
-        BMXGroup *group = self.profileArray[indexPath.row];
+    cell.dotLabel.hidden = YES;
+    NSString * t = [NSString stringWithFormat:@"%ld",(long)[conversation unreadNumber]];
+    if (conversation.type == BMXConversation_Type_Group) {
+        BMXGroup *group = row;
         if ([NSStringFromClass(group.class) isEqualToString:@"BMXGroup"]) {
-            if (group.msgMuteMode == BMXGroupMsgMuteModeMuteNotification) {
+            if (group.msgMuteMode == BMXGroup_MsgMuteMode_MuteNotification) {
                 if ([conversation unreadNumber] > 0) {
                     cell.dotLabel.hidden = YES;
                     cell.dotView.hidden = NO;
@@ -479,10 +585,10 @@
                     cell.dotLabel.hidden = YES;
                 }
                 cell.dotLabel.text  = @"";
-            } else if (group.msgMuteMode == BMXGroupMsgMuteModeNone){
+            } else if (group.msgMuteMode == BMXGroup_MsgMuteMode_None){
                 cell.dotLabel.hidden = [conversation unreadNumber] == 0;
                 cell.dotView.hidden = YES;
-                cell.dotLabel.text  = [NSString stringWithFormat:@"%ld",(long)[conversation unreadNumber]];
+                cell.dotLabel.text  = t;
                 
 //                MAXLog(@"%ld",(long)conversation.unreadNumber);
             } else {
@@ -490,9 +596,9 @@
                 cell.dotLabel.hidden = YES;
             }
         }
-    } else if (conversation.type == BMXConversationSingle){
-        BMXRoster *roster = self.profileArray[indexPath.row];
-        if ([NSStringFromClass(roster.class) isEqualToString:@"BMXRoster"]) {
+    } else if (conversation.type == BMXConversation_Type_Single){
+        BMXRosterItem *roster = row;
+        if ([NSStringFromClass(roster.class) isEqualToString:@"BMXRosterItem"]) {
             
             if (roster.isMuteNotification == YES) {
                 if ([conversation unreadNumber] > 0) {
@@ -505,14 +611,14 @@
                 cell.dotLabel.text  = @"";
             } else {
                 cell.dotLabel.hidden = [conversation unreadNumber] == 0;
-                cell.dotLabel.text  = [NSString stringWithFormat:@"%ld",(long)[conversation unreadNumber]];
+                cell.dotLabel.text  = t;
 //                MAXLog(@" %ld" ,(long)conversation.unreadNumber);
             }
         }else {
             
             cell.dotLabel.hidden = [conversation unreadNumber] == 0;
                    cell.dotView.hidden = YES;
-                   cell.dotLabel.text  = [NSString stringWithFormat:@"%ld",(long)[conversation unreadNumber]];
+                   cell.dotLabel.text  = t;
 //            cell.dotLabel.hidden = YES;
 //            cell.dotView.hidden = YES;
 //            cell.dotLabel.text  = @"";
@@ -521,10 +627,10 @@
         
         cell.dotLabel.hidden = [conversation unreadNumber] == 0;
         cell.dotView.hidden = YES;
-        cell.dotLabel.text  = [NSString stringWithFormat:@"%ld",(long)[conversation unreadNumber]];
+        cell.dotLabel.text  = t;
         
     }
-    
+    }
     return cell;
 }
 
@@ -547,7 +653,7 @@ forRowAtIndexPath:(NSIndexPath *)indexPath {
 }
 
 - (void)removeconversation:(BMXConversation *)conversation {
-    [[[BMXClient sharedClient]chatService] deleteConversationByConversationId:conversation.conversationId synchronize:YES];
+    [[[BMXClient sharedClient] chatService] deleteConversationWithConversationId:conversation.conversationId];
     [self.profileArray removeObjectAtIndex:[self.conversatonList indexOfObject:conversation]];
     [self.conversatonList removeObject:conversation];
     [self.tableview reloadData];
@@ -569,33 +675,44 @@ forRowAtIndexPath:(NSIndexPath *)indexPath {
     [tableView deselectRowAtIndexPath:indexPath animated:YES];
 
     LHChatVC *chatVC;
-    if ([NSStringFromClass([self.profileArray[indexPath.row] class]) isEqualToString:@"BMXRoster"]) {
-        BMXRoster *roster = self.profileArray[indexPath.row];
-        chatVC = [[LHChatVC alloc] initWithRoster:roster messageType:BMXMessageTypeSingle];
-        BMXConversation *conversation = self.conversatonList[indexPath.row];
-        if (conversation.unreadNumber > 0) {
-            [conversation setAllMessagesReadCompletion:^(BMXError * _Nonnull error) {
-            }];
-            RecentConversaionTableViewCell *cell = [tableView cellForRowAtIndexPath:indexPath];
-            cell.dotLabel.hidden = YES;
-        }
-        
-        
-        chatVC.delegate = self;
-        [chatVC setHidesBottomBarWhenPushed:YES];
-        [self.navigationController pushViewController:chatVC animated:YES];
-    } else if ([NSStringFromClass([self.profileArray[indexPath.row] class]) isEqualToString:@"BMXGroup"]) {
+    @synchronized(self.profileArray) {
+    id row;
+    @try {
+        row = self.profileArray[indexPath.row];
+    } @catch (NSException *exception) {
+        MAXLog(@"indexPath.row :%ld size:%ld exception:%@",(long)indexPath.row, self.profileArray.count, exception.description);
+    }
+    if (!row){
+        return;
+    }
 
-        BMXGroup *group = self.profileArray[indexPath.row];
-        chatVC = [[LHChatVC alloc] initWithGroupChat:(BMXGroup *)group messageType:BMXMessageTypeGroup];
+    if ([NSStringFromClass([row class]) isEqualToString:@"BMXRosterItem"]) {
+        BMXRosterItem *roster = row;
+        chatVC = [[LHChatVC alloc] initWithRoster:roster messageType:BMXMessage_MessageType_Single];
+        BMXConversation *conversation = self.conversatonList[indexPath.row];
+        if (conversation.unreadNumber > 0) {
+//            [conversation setAllMessagesReadCompletion:^(BMXError * _Nonnull error) {
+//            }];
+            [conversation setAllMessagesRead];
+            RecentConversaionTableViewCell *cell = [tableView cellForRowAtIndexPath:indexPath];
+            cell.dotLabel.hidden = YES;
+        }
+        
+        
+        chatVC.delegate = self;
+        [chatVC setHidesBottomBarWhenPushed:YES];
+        [self.navigationController pushViewController:chatVC animated:YES];
+    } else if ([NSStringFromClass([row class]) isEqualToString:@"BMXGroup"]) {
+
+        BMXGroup *group = row;
+        chatVC = [[LHChatVC alloc] initWithGroupChat:(BMXGroup *)group messageType:BMXMessage_MessageType_Group];
         
         BMXConversation *conversation = self.conversatonList[indexPath.row];
         if (conversation.unreadNumber > 0) {
             
-            if (conversation.lastMessage) {
-                [[[BMXClient sharedClient] chatService] readAllMessage:conversation.lastMessage];
+            if (conversation.lastMsg) {
+                [[[BMXClient sharedClient] chatService] readAllMessageWithMsg:conversation.lastMsg];
             }
-            [[[BMXClient sharedClient] chatService] readAllMessage:conversation.lastMessage];
             RecentConversaionTableViewCell *cell = [tableView cellForRowAtIndexPath:indexPath];
             cell.dotLabel.hidden = YES;
         }
@@ -603,14 +720,13 @@ forRowAtIndexPath:(NSIndexPath *)indexPath {
         chatVC.delegate = self;
         [chatVC setHidesBottomBarWhenPushed:YES];
         [self.navigationController pushViewController:chatVC animated:YES];
-    } else if ([self.profileArray[indexPath.row] isKindOfClass:[NSDictionary class]]) {
+    } else if ([row isKindOfClass:[NSDictionary class]]) {
         BMXConversation *conversation = self.conversatonList[indexPath.row];
         if (conversation.unreadNumber > 0) {
             
-            if (conversation.lastMessage) {
-                [[[BMXClient sharedClient] chatService] readAllMessage:conversation.lastMessage];
+            if (conversation.lastMsg) {
+                [[[BMXClient sharedClient] chatService] readAllMessageWithMsg:conversation.lastMsg];
             }
-            [[[BMXClient sharedClient] chatService] readAllMessage:conversation.lastMessage];
             RecentConversaionTableViewCell *cell = [tableView cellForRowAtIndexPath:indexPath];
             cell.dotLabel.hidden = YES;
         }
@@ -623,6 +739,23 @@ forRowAtIndexPath:(NSIndexPath *)indexPath {
         
     } else {
         [HQCustomToast showDialog:NSLocalizedString(@"Unable_to_access_conversation_profile", @"无法获取会话资料") time:1.0f];
+        BMXConversation *conversation = self.conversatonList[indexPath.row];
+        BMXMessage_MessageType messageType = BMXMessage_MessageType_Single;
+        if (conversation.type == BMXConversation_Type_Group) {
+            messageType = BMXMessage_MessageType_Group;
+        }
+        chatVC = [[LHChatVC alloc] initWithConversationId:conversation.conversationId messageType:messageType];
+        if (conversation.unreadNumber > 0) {
+            [conversation setAllMessagesRead];
+            RecentConversaionTableViewCell *cell = [tableView cellForRowAtIndexPath:indexPath];
+            cell.dotLabel.hidden = YES;
+        }
+        
+        
+        chatVC.delegate = self;
+        [chatVC setHidesBottomBarWhenPushed:YES];
+        [self.navigationController pushViewController:chatVC animated:YES];
+    }
     }
 }
 

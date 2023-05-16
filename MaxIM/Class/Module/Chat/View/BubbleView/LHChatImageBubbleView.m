@@ -74,8 +74,9 @@ CGFloat const MAX_SIZE = 120.0f;
 - (void)setMessageModel:(LHMessageModel *)messageModel {
     [super setMessageModel:messageModel];
     self.imageView.image = [UIImage imageNamed:@"imageCell_Placer"];
-    
-    if (messageModel.imageRemoteURL && ![messageModel.imageRemoteURL isKindOfClass:[NSNull class]] && [[NSFileManager defaultManager] fileExistsAtPath:messageModel.imageRemoteURL]) {
+    bool isNullClass = [messageModel.imageRemoteURL isKindOfClass:[NSNull class]];
+    bool isExist = [[NSFileManager defaultManager] fileExistsAtPath:messageModel.imageRemoteURL];
+    if (messageModel.imageRemoteURL && !isNullClass && isExist) {
             UIImage *image = [UIImage imageWithContentsOfFile:messageModel.imageRemoteURL];
             self.imageView.image = image;
         

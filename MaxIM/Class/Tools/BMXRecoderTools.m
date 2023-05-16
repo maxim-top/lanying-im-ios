@@ -7,7 +7,7 @@
 //
 
 #import "BMXRecoderTools.h"
-#import <floo-ios/BMXClient.h>
+#import <floo-ios/floo_proxy.h>
 #import "VoiceConverter.h"
 
 #define kChildPath @"Recoder"
@@ -176,7 +176,7 @@ typedef void(^RecordFinishBlock)(NSString *recordPath, int duration);
     
 //    NSString* dataDir = [NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES).firstObject stringByAppendingPathComponent:@"CWVoice"];
 
-    NSString *path = [[[[BMXClient sharedClient] chatService] getAttachmentDir] stringByAppendingPathComponent:kChildPath];
+    NSString *path = [[[[BMXClient sharedClient] chatService] attachmentDir] stringByAppendingPathComponent:kChildPath];
     NSFileManager *fileManager = [NSFileManager defaultManager];
     if (![fileManager fileExistsAtPath:path]) {
         [fileManager createDirectoryAtPath:path withIntermediateDirectories:YES attributes:nil error:nil];
