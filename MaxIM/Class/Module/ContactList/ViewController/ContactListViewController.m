@@ -346,8 +346,10 @@
             }
         }
     } else {
-        BMXRosterItem *roster = self.supportArray[indexPath.row];
-        [cell refreshSupportRoster:roster];
+        if (self.supportArray != nil && self.supportArray.count > 0){
+            BMXRosterItem *roster = self.supportArray[indexPath.row];
+            [cell refreshSupportRoster:roster];
+        }
     }
 
     return cell;

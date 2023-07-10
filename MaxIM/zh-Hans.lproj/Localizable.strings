@@ -483,3 +483,5 @@ call_not_responding = "未应答";
 call_duration = "通话时长 %02d:%02d";
 call_busy = "忙线未接听";
 callee_busy = "对方忙";
+call_in = "您收到一个通话请求";
+start_chat = "开始聊天";

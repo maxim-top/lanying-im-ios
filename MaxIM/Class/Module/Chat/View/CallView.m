@@ -25,13 +25,20 @@ static CGFloat const kLocalVideoViewPadding = 8;
 
 @interface CallView () <RTCVideoViewDelegate>
 @property (nonatomic, strong) UILabel *nameLabel;
-@property (nonatomic, strong) UIImageView *avatarImageView;
+@property (nonatomic, strong) UILabel *durationLabel;
+@property (nonatomic, strong) UIImageView *remoteImageView;
+@property (nonatomic, strong) UIImageView *myImageView;
 @property (nonatomic, strong) BMXRosterItem *currentRoster;
+@property(nonatomic, assign) bool cameraOn;//摄像头打开
+@property(nonatomic, assign) long duration;//通话计时（秒）
+@property (nonatomic, strong) NSTimer *timer; //通话计时器
 @end
 
 @implementation CallView {
-    UIButton *_routeChangeButton;
-    UIButton *_cameraSwitchButton;
+    UIButton *_cameraButton;
+    UIButton *_camerasSwitchButton;
+    UIButton *_micButton;
+    UIButton *_speakerButton;
     UIButton *_hangupButton;
     UIButton *_answerButton;
     CGSize _remoteVideoSize;
@@ -48,6 +55,7 @@ static CGFloat const kLocalVideoViewPadding = 8;
         _hasVideo = hasVideo;
         _isConnected = NO;
         _currentRoster = roster;
+        _cameraOn = YES;
         if (_hasVideo) {
 #if defined(RTC_SUPPORTS_METAL)
             _remoteVideoView = [[RTCMTLVideoView alloc] initWithFrame:CGRectZero];
@@ -68,34 +76,56 @@ static CGFloat const kLocalVideoViewPadding = 8;
             [self.nameLabel sizeToFit];
         }
 
-        self.avatarImageView.image = [UIImage imageNamed:@"profileavatar"];
         if ([self.currentRoster.avatarThumbnailPath length]) {
             UIImage *image = [UIImage imageWithContentsOfFile:self.currentRoster.avatarThumbnailPath];
-            self.avatarImageView.image = image ? image : [UIImage imageNamed:@"profileavatar"];
+            self.remoteImageView.image = image ? image : [UIImage imageNamed:@"profileavatar"];
         }
-        
-        _routeChangeButton = [UIButton buttonWithType:UIButtonTypeCustom];
-        _routeChangeButton.backgroundColor = [UIColor whiteColor];
-        _routeChangeButton.layer.cornerRadius = kButtonSize / 2;
-        _routeChangeButton.layer.masksToBounds = YES;
-        UIImage *image = [UIImage imageNamed:@"icon_call_switch_audio"];
-        [_routeChangeButton setImage:image forState:UIControlStateNormal];
-        [_routeChangeButton addTarget:self
-                               action:@selector(onRouteChange:)
+        self.myImageView.image = [UIImage imageNamed:@"profileavatar"];
+        self.myImageView.backgroundColor = [UIColor lh_colorWithHex:0xdddddd alpha:0.4];
+
+        _cameraButton = [UIButton buttonWithType:UIButtonTypeCustom];
+        _cameraButton.backgroundColor = [UIColor whiteColor];
+        _cameraButton.layer.cornerRadius = kButtonSize / 2;
+        _cameraButton.layer.masksToBounds = YES;
+        UIImage *image = [UIImage imageNamed:@"icon_call_camera"];
+        [_cameraButton setImage:image forState:UIControlStateNormal];
+        [_cameraButton addTarget:self
+                               action:@selector(onCamera:)
                      forControlEvents:UIControlEventTouchUpInside];
-        [self addSubview:_routeChangeButton];
+        [self addSubview:_cameraButton];
         
+        _micButton = [UIButton buttonWithType:UIButtonTypeCustom];
+        _micButton.backgroundColor = [UIColor whiteColor];
+        _micButton.layer.cornerRadius = kButtonSize / 2;
+        _micButton.layer.masksToBounds = YES;
+        image = [UIImage imageNamed:@"icon_call_mic"];
+        [_micButton setImage:image forState:UIControlStateNormal];
+        [_micButton addTarget:self
+                               action:@selector(onSwitchMic:)
+                     forControlEvents:UIControlEventTouchUpInside];
+        [self addSubview:_micButton];
+        
+        _speakerButton = [UIButton buttonWithType:UIButtonTypeCustom];
+        _speakerButton.backgroundColor = [UIColor whiteColor];
+        _speakerButton.layer.cornerRadius = kButtonSize / 2;
+        _speakerButton.layer.masksToBounds = YES;
+        image = [UIImage imageNamed:@"icon_call_speaker"];
+        [_speakerButton setImage:image forState:UIControlStateNormal];
+        [_speakerButton addTarget:self
+                               action:@selector(onSwitchSoundOutputDevice:)
+                     forControlEvents:UIControlEventTouchUpInside];
+        [self addSubview:_speakerButton];
+
         // TODO(tkchin): don't display this if we can't actually do camera switch.
-        _cameraSwitchButton = [UIButton buttonWithType:UIButtonTypeCustom];
-        _cameraSwitchButton.backgroundColor = [UIColor whiteColor];
-        _cameraSwitchButton.layer.cornerRadius = kButtonSize / 2;
-        _cameraSwitchButton.layer.masksToBounds = YES;
-        image = [UIImage imageNamed:@"icon_call_switch_camera"];
-        [_cameraSwitchButton setImage:image forState:UIControlStateNormal];
-        [_cameraSwitchButton addTarget:self
-                                action:@selector(onCameraSwitch:)
+        _camerasSwitchButton = [UIButton buttonWithType:UIButtonTypeCustom];
+        _camerasSwitchButton.layer.cornerRadius = kButtonSize / 2;
+        _camerasSwitchButton.layer.masksToBounds = YES;
+        image = [UIImage imageNamed:@"icon_call_switch_camera_big"];
+        [_camerasSwitchButton setImage:image forState:UIControlStateNormal];
+        [_camerasSwitchButton addTarget:self
+                                action:@selector(onCamerasSwitch:)
                       forControlEvents:UIControlEventTouchUpInside];
-        [self addSubview:_cameraSwitchButton];
+        [self addSubview:_camerasSwitchButton];
         
         _hangupButton = [UIButton buttonWithType:UIButtonTypeCustom];
         _hangupButton.backgroundColor = [UIColor redColor];
@@ -125,9 +155,37 @@ static CGFloat const kLocalVideoViewPadding = 8;
         [self addSubview:_statusLabel];
         
         [self nameLabel];
-        [self avatarImageView];
+        [self durationLabel];
+        [self remoteImageView];
+        [self myImageView];
     }
     return self;
+}
+
+- (void)dealloc {
+    if (_timer){
+        [_timer invalidate];
+        _timer  = nil;
+    }
+}
+
+- (void)setConnected:(BOOL)isConnected {
+    _isConnected = isConnected;
+    if (isConnected){
+        _duration = 0;
+        _timer = [NSTimer scheduledTimerWithTimeInterval:1.0 repeats:YES block:^(NSTimer * _Nonnull timer) {
+            _duration++;
+            _durationLabel.text = [NSString stringWithFormat:@"%02d:%02d",_duration/60, _duration%60];
+        }];
+    }
+}
+
+- (UILabel *)durationLabel {
+    if (!_durationLabel) {
+        _durationLabel = [[UILabel alloc] init];
+        [self addSubview:_durationLabel];
+    }
+    return _durationLabel;
 }
 
 - (UILabel *)nameLabel {
@@ -136,18 +194,26 @@ static CGFloat const kLocalVideoViewPadding = 8;
         [self addSubview:_nameLabel];
         CGFloat nameLabelRight = 15;
         _nameLabel.size = CGSizeMake(80, 30);
-        _nameLabel.bmx_top = self.avatarImageView.bmx_top + 3;
-        _nameLabel.bmx_left = self.avatarImageView.bmx_right + nameLabelRight;
+        _nameLabel.bmx_top = self.remoteImageView.bmx_top + 3;
+        _nameLabel.bmx_left = self.remoteImageView.bmx_right + nameLabelRight;
     }
     return _nameLabel;
 }
 
-- (UIImageView *)avatarImageView {
-    if (!_avatarImageView) {        
-        _avatarImageView = [[UIImageView alloc] init];
-        [self addSubview:_avatarImageView];
+- (UIImageView *)remoteImageView {
+    if (!_remoteImageView) {        
+        _remoteImageView = [[UIImageView alloc] init];
+        [self addSubview:_remoteImageView];
     }
-    return _avatarImageView;
+    return _remoteImageView;
+}
+
+- (UIImageView *)myImageView {
+    if (!_myImageView) {
+        _myImageView = [[UIImageView alloc] init];
+        [self addSubview:_myImageView];
+    }
+    return _myImageView;
 }
 
 - (void)layoutSubviews {
@@ -184,13 +250,24 @@ static CGFloat const kLocalVideoViewPadding = 8;
         _nameLabel.bmx_top = self.bmx_top + 100;
         _nameLabel.bmx_left = nameLabelLeft;
     }
+    
+    if (_durationLabel && _isConnected) {
+        _durationLabel.font = [UIFont fontWithName:@"PingFangSC-Semibold" size:20];
+        _durationLabel.textColor = [UIColor whiteColor];
+        _durationLabel.textAlignment = NSTextAlignmentCenter;
 
-    if (_avatarImageView) {
+        CGFloat labelLeft = self.bmx_centerX - 40;
+        _durationLabel.bmx_size = CGSizeMake(80, 30);
+        _durationLabel.bmx_top = self.bmx_top + 60;
+        _durationLabel.bmx_left = labelLeft;
+    }
+
+    if (_remoteImageView) {
         CGSize avatarImageViewSize = CGSizeMake(171, 171);
         CGFloat avatarImageViewLeft = self.bmx_centerX - avatarImageViewSize.width/2;
-        _avatarImageView.bmx_size = avatarImageViewSize;
-        _avatarImageView.bmx_top = self.bmx_top + 160;
-        _avatarImageView.bmx_left = avatarImageViewLeft;
+        _remoteImageView.bmx_size = avatarImageViewSize;
+        _remoteImageView.bmx_top = self.bmx_top + 160;
+        _remoteImageView.bmx_left = avatarImageViewLeft;
     }
 
     //small view
@@ -199,6 +276,10 @@ static CGFloat const kLocalVideoViewPadding = 8;
     smallVideoFrame.origin.x = CGRectGetMaxX(bounds) - smallVideoFrame.size.width - kLocalVideoViewPadding;
     smallVideoFrame.origin.y = kButtonPadding;
     
+    if (_myImageView) {
+        _myImageView.frame = smallVideoFrame;
+    }
+
     UIView *bigView = _localVideoView;
     UIView *smallView = _remoteVideoView;
     if (_isConnected) {
@@ -213,56 +294,71 @@ static CGFloat const kLocalVideoViewPadding = 8;
         [self exchangeSubviewAtIndex:smallIndex withSubviewAtIndex:bigIndex];
     }
     bigView.clipsToBounds = YES;
-    bigView.contentMode = UIViewContentModeScaleAspectFill;
     
     bigView.hidden = !_hasVideo;
     smallView.hidden = !_hasVideo || !_isConnected;
     
     _nameLabel.hidden = _hasVideo && _isConnected;
-    _avatarImageView.hidden = _hasVideo && _isConnected;
+    _durationLabel.hidden = !_isConnected;
+    _remoteImageView.hidden = _hasVideo && _isConnected;
+    _myImageView.hidden = _cameraOn;
+    _localVideoView.hidden = !_cameraOn;
     
+    UIImage *image = [UIImage imageNamed: _isConnected ? @"icon_call_switch_camera":@"icon_call_switch_camera_big"];
+    [_camerasSwitchButton setImage:image forState:UIControlStateNormal];
+
     CGFloat y = CGRectGetMaxY(bounds) - 2 * kButtonSize; //y pos of buttons
     CGRect rectCenterBtn = CGRectMake(CGRectGetMaxX(bounds)/2 - kButtonSize/2,
                                      y,
                                      kButtonSize,
                                      kButtonSize);
 
-    if (_isConnected) {
-        _answerButton.hidden = YES;
-        
-        _routeChangeButton.hidden = NO;
-        _cameraSwitchButton.hidden = NO;
-        _hangupButton.hidden = NO;
-        
-        _routeChangeButton.frame = rectCenterBtn;
-        _cameraSwitchButton.frame = rectCenterBtn;
-        _hangupButton.frame = rectCenterBtn;
+    _micButton.frame = rectCenterBtn;
+    _speakerButton.frame = rectCenterBtn;
+    _cameraButton.frame = rectCenterBtn;
+    _camerasSwitchButton.frame = rectCenterBtn;
+    _hangupButton.frame = rectCenterBtn;
+    _answerButton.frame = rectCenterBtn;
+    
+    _micButton.hidden = YES;
+    _speakerButton.hidden = YES;
+    _cameraButton.hidden = YES;
+    _camerasSwitchButton.hidden = YES;
+    _hangupButton.hidden = NO;
+    _answerButton.hidden = YES;
 
+    _speakerButton.x += kButtonSize + kButtonPadding;
+    _micButton.x -= kButtonSize + kButtonPadding;
+    if (_isConnected) {
         if (!_hasVideo) {
-            _routeChangeButton.hidden = YES;
-            _cameraSwitchButton.hidden = YES;
+            _micButton.hidden = NO;
+            _speakerButton.hidden = NO;
         }else{
-            _routeChangeButton.x -= kButtonSize + kButtonPadding;
-            _hangupButton.x += kButtonSize + kButtonPadding;
+            _micButton.hidden = NO;
+            _speakerButton.hidden = NO;
+            _cameraButton.hidden = NO;
+            _camerasSwitchButton.hidden = NO;
+            
+            _camerasSwitchButton.x += kButtonSize + kButtonPadding;
+            
+            _cameraButton.y -= kButtonSize + kButtonPadding;
+            _micButton.y -= kButtonSize + kButtonPadding;
+            _speakerButton.y -= kButtonSize + kButtonPadding;
         }
     }else{
         if (_isCaller) {
-            _routeChangeButton.hidden = YES;
-            _cameraSwitchButton.hidden = YES;
-            _answerButton.hidden = YES;
-
-            _hangupButton.hidden = NO;
-            _hangupButton.frame = rectCenterBtn;
-            
+            if (_hasVideo){
+                _cameraButton.hidden = NO;
+                _camerasSwitchButton.hidden = NO;
+                
+                _camerasSwitchButton.x += kButtonSize + kButtonPadding;
+                _cameraButton.x -= kButtonSize + kButtonPadding;
+            }else{
+                _micButton.hidden = NO;
+                _speakerButton.hidden = NO;
+            }
         }else{
-            _routeChangeButton.hidden = YES;
-            _cameraSwitchButton.hidden = YES;
-            
-            _hangupButton.hidden = NO;
             _answerButton.hidden = NO;
-            
-            _hangupButton.frame = rectCenterBtn;
-            _answerButton.frame = rectCenterBtn;
 
             _answerButton.x += kButtonSize + kButtonPadding;
             _hangupButton.x -= kButtonSize + kButtonPadding;
@@ -287,12 +383,28 @@ static CGFloat const kLocalVideoViewPadding = 8;
 
 #pragma mark - Private
 
-- (void)onCameraSwitch:(id)sender {
-    [_delegate videoCallViewDidSwitchCamera:self];
+- (void)onCamerasSwitch:(id)sender {
+    [_delegate videoCallViewDidSwitchCameras:self];
 }
 
-- (void)onRouteChange:(id)sender {
-    [_delegate videoCallViewDidSwitchToVoice:self];
+- (void)onCamera:(id)sender {
+    _cameraOn = [_delegate videoCallViewDidSwitchCamera:self];
+    UIImage *image = [UIImage imageNamed:_cameraOn ? @"icon_call_camera" : @"icon_call_camera_off"];
+    [_cameraButton setImage:image forState:UIControlStateNormal];
+    _localVideoView.hidden = !_cameraOn;
+    _myImageView.hidden = _cameraOn || !_isConnected;
+}
+
+- (void)onSwitchSoundOutputDevice:(id)sender {
+    bool speakerOn = [_delegate videoCallViewDidSwitchSoundOutputDevice:self];
+    UIImage *image = [UIImage imageNamed:speakerOn ? @"icon_call_speaker" : @"icon_call_speaker_off"];
+    [_speakerButton setImage:image forState:UIControlStateNormal];
+}
+
+- (void)onSwitchMic:(id)sender {
+    bool micOn = [_delegate videoCallViewDidSwitchMic:self];
+    UIImage *image = [UIImage imageNamed:micOn ? @"icon_call_mic" : @"icon_call_mic_off"];
+    [_micButton setImage:image forState:UIControlStateNormal];
 }
 
 - (void)onHangup:(id)sender {

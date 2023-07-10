@@ -376,6 +376,8 @@
     [config setRTCHangupInfo:callId];
     NSString *content = @"busy"; //Caller canceled
     BMXMessage *msg = [BMXMessage createRTCMessageWithFrom:myId to:peerId type:BMXMessage_MessageType_Single conversationId:peerId content:content];
+    [config setPushMessageLocKey:@"callee_busy"];
+
     msg.config = config;
     [[[BMXClient sharedClient] rtcService] sendRTCMessageWithMsg:msg completion:^(BMXError *aError) {
         NSNotification *noti = [NSNotification notificationWithName:@"call" object:self userInfo:@{@"event":@"hangup"}];
@@ -544,6 +546,7 @@
         }
     }
     
+    cell.subtitleLabel.text = @"";
     if (conversation.lastMsg.contentType == BMXMessage_ContentType_Text) {
         NSString *str;
         if ([conversation.editMessage length]) {
@@ -563,6 +566,40 @@
         cell.subtitleLabel.text = @"[位置]";
     } else if (conversation.lastMsg.contentType == BMXMessage_ContentType_Video) {
         cell.subtitleLabel.text = @"[视频]";
+    } else if (conversation.lastMsg.contentType == BMXMessage_ContentType_RTC) {
+        cell.subtitleLabel.text = @"[通话]";
+        BMXMessage *message = conversation.lastMsg;
+        if ([message.config.getRTCAction isEqualToString: @"hangup"]) {
+            BOOL isFrom = message.fromId == [self.account.usedId longLongValue] ;
+            if ([message.content isEqualToString:@"rejected"]) {
+                if (isFrom) {
+                    cell.subtitleLabel.text = NSLocalizedString(@"call_rejected", @"通话已拒绝");
+                }else{
+                    cell.subtitleLabel.text = NSLocalizedString(@"call_rejected_by_callee", @"通话已被对方拒绝");
+                }
+            } else if ([message.content isEqualToString:@"canceled"]) {
+                if (isFrom) {
+                    cell.subtitleLabel.text = NSLocalizedString(@"call_canceled", @"通话已取消");
+                }else{
+                    cell.subtitleLabel.text = NSLocalizedString(@"call_canceled_by_caller", @"通话已被对方取消");
+                }
+            } else if ([message.content isEqualToString:@"timeout"]) {
+                if (isFrom) {
+                    cell.subtitleLabel.text = NSLocalizedString(@"callee_not_responding", @"对方未应答");
+                }else{
+                    cell.subtitleLabel.text = NSLocalizedString(@"call_not_responding", @"未应答");
+                }
+            } else if ([message.content isEqualToString:@"busy"]) {
+                if (isFrom) {
+                    cell.subtitleLabel.text = NSLocalizedString(@"call_busy", @"忙线未接听");
+                }else{
+                    cell.subtitleLabel.text = NSLocalizedString(@"callee_busy", @"对方忙");
+                }
+            } else{
+                int sec = [message.content intValue]/1000;
+                cell.subtitleLabel.text = [NSString stringWithFormat:NSLocalizedString(@"call_duration", @"通话时长：%02d:%02d"),sec/60, sec%60];
+            }
+        }
     }
     
     if (conversation.lastMsg.serverTimestamp > 0) {

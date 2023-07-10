@@ -98,7 +98,7 @@
     
     if (!_textfield) {
         _textfield = [[UITextField alloc] init];
-        _textfield.keyboardType = UIKeyboardTypePhonePad;
+        _textfield.secureTextEntry = YES;
         _textfield.font = [UIFont systemFontOfSize:14];
         _textfield.placeholder = NSLocalizedString(@"Enter_login_password", @"输入登录密码");
         _textfield.clearButtonMode = UITextFieldViewModeWhileEditing;

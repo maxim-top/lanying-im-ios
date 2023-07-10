@@ -91,29 +91,31 @@
 
 #pragma mark - piv
 - (void)showReminderWithContent:(NSString *)content {
-    UIView *reminderView = [[UIView alloc] initWithFrame:CGRectMake((CGRectGetWidth(self.view.frame)-250*0.5)/2, (CGRectGetHeight(self.view.frame)-220*0.5)*0.5, 250*0.5, 220*0.5)];
-    reminderView.layer.cornerRadius = 8;
-    reminderView.layer.masksToBounds = YES;
-    reminderView.backgroundColor = [UIColor colorWithWhite:0 alpha:0.85f];
-    
-    UILabel *label = [[UILabel alloc]initWithFrame:CGRectZero];
-    label.font = [UIFont systemFontOfSize:12.0f];
-    label.textAlignment = NSTextAlignmentCenter;
-    label.text = content;
-    label.numberOfLines = 0;
-    label.textColor = [UIColor whiteColor];
-    [reminderView addSubview:label];
-    
-    UIImageView *imageView = [[UIImageView alloc] initWithImage:[UIImage imageWithContentsOfFile:[[NSString alloc] initWithFormat:@"%@/%@",recourcesPath,@"icon_success_hite"]]];
-    [reminderView addSubview:imageView];
-    imageView.frame = CGRectMake((CGRectGetWidth(reminderView.frame)-69*0.5)*0.5, (CGRectGetHeight(reminderView.frame)-69*0.5)*0.5-20, 69*0.5, 69*0.5);
-    
-    label.frame = CGRectMake(0, CGRectGetMaxY(imageView.frame)+5, CGRectGetWidth(reminderView.frame), 45);
-    
-    [self.view addSubview:reminderView];
-    
-    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(1.50f * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
-        [reminderView removeFromSuperview];
+    dispatch_async(dispatch_get_main_queue(), ^{
+        UIView *reminderView = [[UIView alloc] initWithFrame:CGRectMake((CGRectGetWidth(self.view.frame)-250*0.5)/2, (CGRectGetHeight(self.view.frame)-220*0.5)*0.5, 250*0.5, 220*0.5)];
+        reminderView.layer.cornerRadius = 8;
+        reminderView.layer.masksToBounds = YES;
+        reminderView.backgroundColor = [UIColor colorWithWhite:0 alpha:0.85f];
+        
+        UILabel *label = [[UILabel alloc]initWithFrame:CGRectZero];
+        label.font = [UIFont systemFontOfSize:12.0f];
+        label.textAlignment = NSTextAlignmentCenter;
+        label.text = content;
+        label.numberOfLines = 0;
+        label.textColor = [UIColor whiteColor];
+        [reminderView addSubview:label];
+        
+        UIImageView *imageView = [[UIImageView alloc] initWithImage:[UIImage imageWithContentsOfFile:[[NSString alloc] initWithFormat:@"%@/%@",recourcesPath,@"icon_success_hite"]]];
+        [reminderView addSubview:imageView];
+        imageView.frame = CGRectMake((CGRectGetWidth(reminderView.frame)-69*0.5)*0.5, (CGRectGetHeight(reminderView.frame)-69*0.5)*0.5-20, 69*0.5, 69*0.5);
+        
+        label.frame = CGRectMake(0, CGRectGetMaxY(imageView.frame)+5, CGRectGetWidth(reminderView.frame), 45);
+        
+        [self.view addSubview:reminderView];
+        
+        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(1.50f * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+            [reminderView removeFromSuperview];
+        });
     });
 }
 
@@ -166,10 +168,6 @@
                                 [weakSelf showReminderWithContent:NSLocalizedString(@"Image_saved_to_album", @"图片已保存到相册")];
                             }
                         }];
-//                        UIImageWriteToSavedPhotosAlbum(image, nil, nil,nil);
-                        dispatch_sync(dispatch_get_main_queue(), ^{
-                            [weakSelf showReminderWithContent:NSLocalizedString(@"Image_saved_to_album", @"图片已保存到相册")];
-                        });
                     });
                     
                 }

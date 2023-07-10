@@ -483,3 +483,5 @@ call_not_responding = "Not responding";
 call_duration = "Duration: %02d:%02d";
 call_busy = "Call is busy";
 callee_busy = "Callee is busy";
+call_in = "You have an incoming call";
+start_chat = "Start Chat";

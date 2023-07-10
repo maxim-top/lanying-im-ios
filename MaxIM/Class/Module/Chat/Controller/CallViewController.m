@@ -5,6 +5,9 @@
 #import "NSString+Extention.h"
 #import "AppDelegate.h"
 #import "AVFoundation/AVFoundation.h"
+#import <WebRTC/RTCDispatcher.h>
+#import <WebRTC/RTCAudioSession.h>
+#import <WebRTC/RTCLogging.h>
 
 @interface CallViewController () <
     CallViewDelegate,
@@ -14,8 +17,11 @@
 @property(nonatomic, readonly) CallView *videoCallView;
 @property(nonatomic, strong) BMXRosterItem *currentRoster;
 @property(nonatomic, strong, nullable) dispatch_source_t vibrationTimer;//振动计时器
-@property(nonatomic, assign) int ringTimes;
-@property(nonatomic, assign) NSTimeInterval pickupTimestamp;
+@property(nonatomic, assign) int ringTimes;//剩余振动次数
+@property(nonatomic, assign) NSTimeInterval pickupTimestamp;//接听时间
+@property(nonatomic, assign) bool micOn;//麦克风打开
+@property(nonatomic, assign) bool cameraOn;//摄像头打开
+@property(nonatomic, assign) bool speakerOn;//扬声器打开
 @end
 
 @implementation CallViewController 
@@ -40,6 +46,9 @@
       _hasVideo = hasVideo;
       _currentRoster = roster;
       _ringTimes = 20;
+      _micOn = true;
+      _speakerOn = false;
+      _cameraOn = _hasVideo;
       [[RTCEngineManager engineWithType:kMaxEngine] addDelegate:self];
       [[[BMXClient sharedClient] chatService] addDelegate:self delegateQueue:dispatch_get_main_queue()];
       [[[BMXClient sharedClient] rtcService] addDelegate:self];
@@ -57,8 +66,8 @@
 - (BMXErrorCode)joinRoomWithUserId:(long long) userId pin:(NSString*) pin{
     if (_hasVideo) {
         BMXVideoConfig *videoConfig = [[BMXVideoConfig alloc] init];
-        [videoConfig setWidth:240];
-        [videoConfig setHeight:360];
+        [videoConfig setWidth:720];
+        [videoConfig setHeight:1280];
         [[RTCEngineManager engineWithType:kMaxEngine] setVideoProfile:videoConfig];
     }
     BMXRoomAuth *auth = [[BMXRoomAuth alloc] init];
@@ -114,17 +123,12 @@
     BMXMessageConfig *config = [BMXMessageConfig createMessageConfigWithMentionAll: NO];
     [config setRTCCallInfo:_hasVideo?BMXMessageConfig_RTCCallType_VideoCall:BMXMessageConfig_RTCCallType_AudioCall roomId:_roomId initiator:_myId roomType:BMXMessageConfig_RTCRoomType_Broadcast pin:_pin];
     _callId = config.getRTCCallId;
-    BMXMessage *msg = [BMXMessage createRTCMessageWithFrom:_myId to:_peerId type:BMXMessage_MessageType_Single conversationId:_peerId content:@"new call"];
+    NSString *iosConfig = [NSString stringWithFormat:@"{\"mutable_content\":true}"];
+    [config setIOSConfig:iosConfig];
+    [config setPushMessageLocKey:@"call_in"];
+    BMXMessage *msg = [BMXMessage createRTCMessageWithFrom:_myId to:_peerId type:BMXMessage_MessageType_Single conversationId:_peerId content:@""];
     msg.config = config;
     [msg setExtension:@"{\"rtc\":\"call\"}"];
-    [[[BMXClient sharedClient] rtcService] sendRTCMessageWithMsg:msg completion:^(BMXError *aError) {
-    }];
-}
-
-- (void)sendSwitchToVoiceCall{
-    BMXMessage *msg = [BMXMessage createRTCMessageWithFrom:_myId to:_peerId type:BMXMessage_MessageType_Single conversationId:_peerId content:@""];
-    msg.extension = [NSString jsonStringWithDictionary:@{@"rtc_cmd":@"switch_audio"}];
-    msg.deliveryQos = BMXMessage_DeliveryQos_AtMostOnce;
     [[[BMXClient sharedClient] rtcService] sendRTCMessageWithMsg:msg completion:^(BMXError *aError) {
     }];
 }
@@ -147,11 +151,15 @@
     }
     NSTimeInterval duration = 0.0;
     NSString *content = @"canceled"; //Caller canceled
+    NSString *pushMessageLocKey = @"call_canceled_by_caller";
+    NSString *pushMessageLocArgs = @"";
     if (!_isCaller) {
         content = @"rejected"; //Callee rejected
+        pushMessageLocKey = @"call_rejected_by_callee";
     }else{
         if (_ringTimes == 0) { //Callee not responding
             content = @"timeout";
+            pushMessageLocKey = @"callee_not_responding}";
         }
     }
     if (_pickupTimestamp > 1.0) {
@@ -159,7 +167,13 @@
     }
     if (duration > 1.0) {
         content = [NSString stringWithFormat:@"%.0f", duration];
+        int sec = [content intValue]/1000;
+        pushMessageLocKey = @"call_duration";
+        pushMessageLocArgs = [NSString stringWithFormat:@"[%d,%d]",sec/60, sec%60];
+        [config setPushMessageLocArgs:pushMessageLocArgs];
     }
+    
+    [config setPushMessageLocKey:pushMessageLocKey];
     BMXMessage *msg = [BMXMessage createRTCMessageWithFrom:_myId to:_peerId type:BMXMessage_MessageType_Single conversationId:_peerId content:content];
     msg.config = config;
     [[[BMXClient sharedClient] rtcService] sendRTCMessageWithMsg:msg completion:^(BMXError *aError) {
@@ -207,17 +221,18 @@
         NSString *cmd = dic[@"rtc_cmd"];
         if ([cmd isEqualToString:@"switch_audio"]){
             if (message.fromId == _peerId) {
-                [self muteVideo];
+                [self muteVideo:YES];
             }
         }
     }
 }
 
-- (void)muteVideo{
-    _hasVideo = NO;
-    _videoCallView.hasVideo = NO;
-    [[RTCEngineManager engineWithType:kMaxEngine] muteLocalVideoWithType:BMXVideoMediaType_Camera mute:YES];
-    [_videoCallView layoutSubviews];
+- (void)muteVideo:(BOOL)mute {
+    [[RTCEngineManager engineWithType:kMaxEngine] muteLocalVideoWithType:BMXVideoMediaType_Camera mute:mute];
+}
+
+- (void)muteAudio:(BOOL)mute{
+    [[RTCEngineManager engineWithType:kMaxEngine] muteLocalAudioWithMute:mute];
 }
 
 #pragma mark - BMXRTCServiceProtocol
@@ -256,9 +271,10 @@
     self.view = _videoCallView;
 }
 
-- (void)switchToVoiceCall{
-    [self muteVideo];
-    [self sendSwitchToVoiceCall];
+- (bool)switchCamera{
+    _cameraOn = !_cameraOn;
+    [self muteVideo:!_cameraOn];
+    return _cameraOn;
 }
 
 - (UIInterfaceOrientationMask)supportedInterfaceOrientations {
@@ -283,22 +299,16 @@
     BOOL hasVideo = [stream getMEnableVideo];
     if (hasVideo) {
         BMXVideoCanvas *canvas = [[BMXVideoCanvas alloc] init];
-        [canvas setMStream:stream];
         [canvas setMUserId:[stream getMUserId]];
         [canvas setMView:(void*)_videoCallView.remoteVideoView];
+        [canvas setMRenderMode:BMXRenderMode_Fit];
         [[RTCEngineManager engineWithType:kMaxEngine] startRemoteViewWithCanvas:canvas];
     }
-    _videoCallView.isConnected = YES;
+    [_videoCallView setConnected:YES];
     [_videoCallView layoutSubviews];
     _ringTimes = -1;
     _pickupTimestamp = [self getTimeStamp];
-}
-
-- (void)onRemotePublishWithStream:(BMXStream*)stream info:(NSString*)info error:(BMXErrorCode)error{
-    if (error != BMXErrorCode_NoError) {
-        return;
-    }
-    [[RTCEngineManager engineWithType:kMaxEngine] subscribeWithStream:stream];
+    [self switchSoundOutputDevice];
 }
 
 #pragma mark - CallViewDelegate
@@ -316,12 +326,42 @@
     [self sendPickupMessage];
 }
 
-- (void)videoCallViewDidSwitchCamera:(CallView *)view {
+- (void)videoCallViewDidSwitchCameras:(CallView *)view {
     [[RTCEngineManager engineWithType:kMaxEngine] switchCamera];
 }
 
-- (void)videoCallViewDidSwitchToVoice:(CallView *)view {
-    [self switchToVoiceCall];
+- (bool)videoCallViewDidSwitchCamera:(CallView *)view {
+    return [self switchCamera];
+}
+
+- (bool)videoCallViewDidSwitchSoundOutputDevice:(CallView *)view {
+    return [self switchSoundOutputDevice];
+}
+
+- (bool)videoCallViewDidSwitchMic:(CallView *)view {
+    _micOn = !_micOn;
+    [self muteAudio:!_micOn];
+    return _micOn;
+}
+
+- (bool)switchSoundOutputDevice{
+    _speakerOn = !_speakerOn;
+    AVAudioSessionPortOverride override = _speakerOn? AVAudioSessionPortOverrideSpeaker: AVAudioSessionPortOverrideNone;
+    __weak typeof(self) weakSelf = self;
+    [RTCDispatcher dispatchAsyncOnType:RTCDispatcherTypeAudioSession
+                                 block:^{
+      typeof(self) strongSelf = weakSelf;
+      RTCAudioSession *session = [RTCAudioSession sharedInstance];
+      [session lockForConfiguration];
+      NSError *error = nil;
+      if (![session overrideOutputAudioPort:override error:&error]) {
+        strongSelf.speakerOn = !strongSelf.speakerOn;
+        RTCLogError(@"Error overriding output port: %@",
+                    error.localizedDescription);
+      }
+      [session unlockForConfiguration];
+    }];
+    return _speakerOn;
 }
 
 - (void)viewDidLoad {
@@ -329,6 +369,7 @@
     if (_hasVideo) {
         BMXVideoCanvas *canvas = [[BMXVideoCanvas alloc] init];
         [canvas setMView:(void*)_videoCallView.localVideoView];
+        [canvas setMRenderMode:BMXRenderMode_Fit];
         [[RTCEngineManager engineWithType:kMaxEngine] startPreviewWithCanvas:canvas];
     }
 }

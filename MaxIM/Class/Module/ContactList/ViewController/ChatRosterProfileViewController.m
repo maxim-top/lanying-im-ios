@@ -19,6 +19,10 @@
 
 #import <floo-ios/floo_proxy.h>
 #import "UIViewController+CustomNavigationBar.h"
+#import "LHChatVC.h"
+#import "CallViewController.h"
+#import "IMAcount.h"
+#import "IMAcountInfoStorage.h"
 
 @interface ChatRosterProfileViewController ()<UITableViewDelegate, UITableViewDataSource, TitleSwitchTableViewCellDelegate>
 
@@ -31,6 +35,7 @@
 @property (nonatomic, strong) UILabel *userIDLabel;
 @property (nonatomic, strong) NSArray *cellDataArray;
 @property (nonatomic, strong) BMXRosterItem *currentRoster;
+@property (nonatomic, strong) IMAcount *account;
 
 @end
 
@@ -67,6 +72,7 @@
     [self.tableView reloadData];
     
     [self getRosterInfo];
+    self.account = [IMAcountInfoStorage loadObject];
 }
 
 - (void)setalias:(NSString *)name {
@@ -149,6 +155,12 @@
             cell.accessoryType = UITableViewCellAccessoryNone;
         }
         [cell.mswitch setOn:self.currentRoster.isMuteNotification];
+    } else  if ([dic[@"type"] isEqualToString:NSLocalizedString(@"start_chat", @"开始聊天")]) {
+        cell.accessoryType = UITableViewCellAccessoryDisclosureIndicator; //显示最右边的箭头
+    } else  if ([dic[@"type"] isEqualToString:NSLocalizedString(@"Video_call", @"视频通话")]) {
+        cell.accessoryType = UITableViewCellAccessoryDisclosureIndicator; //显示最右边的箭头
+    } else  if ([dic[@"type"] isEqualToString:NSLocalizedString(@"Voice_call", @"语音通话")]) {
+        cell.accessoryType = UITableViewCellAccessoryDisclosureIndicator; //显示最右边的箭头
     }
     return cell;
 }
@@ -238,7 +250,51 @@
         [alert addAction:okAction];
         [alert addAction:cancelAction];
         [self presentViewController:alert animated:YES completion:nil];
+    } else if ([dic[@"type"] isEqualToString:NSLocalizedString(@"start_chat", @"开始聊天")]) {
+        LHChatVC *chatVC = [[LHChatVC alloc] initWithRoster:self.currentRoster messageType:BMXMessage_MessageType_Single];
+        [chatVC setHidesBottomBarWhenPushed:YES];
+        [self.navigationController pushViewController:chatVC animated:YES];
+    } else if ([dic[@"type"] isEqualToString:NSLocalizedString(@"Video_call", @"视频通话")]) {
+        [self videoCall];
+    } else if ([dic[@"type"] isEqualToString:NSLocalizedString(@"Voice_call", @"语音通话")]) {
+        [self voiceCall];
     }
+}
+
+- (void)videoCall {
+    CallViewController *videoCallViewController =
+        [[CallViewController alloc] initForRoom:[self.account.usedId longLongValue]
+                                                 callId:0
+                                                   myId:[self.account.usedId longLongValue]
+                                                 peerId:self.currentRoster.rosterId
+                                              messageId:0
+                                                    pin:@""
+                                               isCaller:YES
+                                               hasVideo:YES
+                                          currentRoster:_currentRoster];
+    videoCallViewController.modalTransitionStyle =  UIModalTransitionStyleCrossDissolve;
+    videoCallViewController.modalPresentationStyle = UIModalPresentationFullScreen;
+    [self presentViewController:videoCallViewController
+                       animated:NO
+                     completion:nil];
+}
+
+- (void)voiceCall {
+    CallViewController *videoCallViewController =
+        [[CallViewController alloc] initForRoom:[self.account.usedId longLongValue]
+                                                 callId:0
+                                                   myId:[self.account.usedId longLongValue]
+                                                 peerId:self.currentRoster.rosterId
+                                              messageId:0
+                                                    pin:@""
+                                               isCaller:YES
+                                               hasVideo:NO
+                                          currentRoster:_currentRoster];
+    videoCallViewController.modalTransitionStyle =  UIModalTransitionStyleCrossDissolve;
+    videoCallViewController.modalPresentationStyle = UIModalPresentationFullScreen;
+    [self presentViewController:videoCallViewController
+                       animated:NO
+                     completion:nil];
 }
 
 - (UITableView *)tableView {

@@ -15,9 +15,13 @@
 @class CallView;
 @protocol CallViewDelegate <NSObject>
 
-- (void)videoCallViewDidSwitchCamera:(CallView *)view;
+- (void)videoCallViewDidSwitchCameras:(CallView *)view;
 
-- (void)videoCallViewDidSwitchToVoice:(CallView *)view;
+- (bool)videoCallViewDidSwitchSoundOutputDevice:(CallView *)view;
+
+- (bool)videoCallViewDidSwitchMic:(CallView *)view;
+
+- (bool)videoCallViewDidSwitchCamera:(CallView *)view;
 
 - (void)videoCallViewDidHangup:(CallView *)view;
 
@@ -40,4 +44,5 @@
                      isCaller:(BOOL)isCaller
                      hasVideo:(BOOL)hasVideo
                 currentRoster:(BMXRosterItem *)roster;
+- (void)setConnected:(BOOL)isConnected;
 @end

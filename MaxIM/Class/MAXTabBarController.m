@@ -293,7 +293,7 @@ typedef enum : NSUInteger {
 
 - (void)userSignOut:(BMXError *)error userId:(long long)userId {
     MAXLog(@"用户登出");
-    if (!error){
+    if (!error || [error errorCode] == BMXErrorCode_UserAuthFailed){
         [AppIDManager clearAppid];
         AppDelegate *appDelegate = [UIApplication sharedApplication].delegate;
         [appDelegate reloadAppID:BMXAppID];

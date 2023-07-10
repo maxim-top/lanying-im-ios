@@ -20,6 +20,18 @@
         {
             "type": "Do-Not-Disturb",
             "control": "1"
+        },
+        {
+            "type": "Start Chat",
+            "control": "0"
+        },
+        {
+            "type": "Video Call",
+            "control": "0"
+        },
+        {
+            "type": "Voice Call",
+            "control": "0"
         }
     ]
 }
