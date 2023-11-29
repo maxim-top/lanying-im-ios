@@ -8,6 +8,7 @@
 
 #import "AccountManagementManager.h"
 #import "AccountListStorage.h"
+#import "AppIDListStorage.h"
 #import "IMAcount.h"
 #import "HostConfigManager.h"
 
@@ -44,6 +45,18 @@
     [mArr addObject:account];
     
     [AccountListStorage saveObject:[NSArray arrayWithArray:mArr]];
+    [self addAppid:appid];
+}
+
+- (void)addAppid:(NSString *)appid {
+        
+    NSArray * array = [NSArray arrayWithArray: [AppIDListStorage loadObject]];
+    NSMutableArray *mArr = [NSMutableArray arrayWithArray:array];
+    if ([array containsObject:appid]){
+        [mArr removeObject:appid];
+    }
+    [mArr insertObject:appid atIndex:0];
+    [AppIDListStorage saveObject:[NSArray arrayWithArray:mArr]];
 }
 
 @end

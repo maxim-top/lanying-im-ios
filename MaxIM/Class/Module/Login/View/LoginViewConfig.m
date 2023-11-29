@@ -13,7 +13,6 @@
 
 @interface LoginViewConfig () <LoginViewProtocol>
 
-@property (nonatomic, strong) LoginView *loginView;
 
 @end
 
@@ -37,14 +36,10 @@
             loginView = [LoginView createLoginVieWithTitle:NSLocalizedString(@"Login_with_password", @"密码登录")];
             [loginView setPlaceHoderWithText:NSLocalizedString(@"Username_Phone_number", @"用户名/手机号") SecondText:NSLocalizedString(@"Password", @"密码")];
             [loginView setConfirmButtonTitle:NSLocalizedString(@"Login", @"登录")];
+            [loginView addPrivacyLabel];
             [loginView addJumpButtonLeftButton:NSLocalizedString(@"Login_with_captcha", @"验证码登录") rightButton:NSLocalizedString(@"Register", @"注册")];
-            if ([WXApi isWXAppInstalled] && [AppIDManager isDefaultAppID]) {
-                [loginView addWechatButton];
-            }
             [loginView addScanConsuleButton];
-            
-            [loginView addLogButton];
-
+            [loginView addWechatButton];
         }
             
             break;
@@ -55,6 +50,8 @@
             [loginView setConfirmButtonTitle:NSLocalizedString(@"Continue", @"继续")];
             [loginView addPrivacyLabel];
             [loginView addJumpButtonLeftButton:NSLocalizedString(@"Already_have_an_account_login", @"已有账号，去登录") rightButton:@""];
+            [loginView addScanConsuleButton];
+            [loginView addWechatButton];
         }
             
             break;
@@ -64,11 +61,10 @@
             [loginView setPlaceHoderWithText:NSLocalizedString(@"Phone_number", @"手机号") SecondText:NSLocalizedString(@"Captcha", @"验证码")];
             [loginView addJumpButtonLeftButton:NSLocalizedString(@"Login_with_password", @"密码登录") rightButton:NSLocalizedString(@"Register", @"注册")];
             [loginView setConfirmButtonTitle:NSLocalizedString(@"Continue", @"继续")];
+            [loginView addPrivacyLabel];
             [loginView showCaptchButton];
-            if ([WXApi isWXAppInstalled] && [AppIDManager isDefaultAppID]) {
-                [loginView addWechatButton];
-            }
             [loginView addScanConsuleButton];
+            [loginView addWechatButton];
         }
             
             break;
@@ -127,6 +123,11 @@
     [self.loginView inputUserName:name];
 }
 
+- (void)setPassword:(NSString *)password {
+    
+    [self.loginView inputPassword:password];
+}
+
 - (void)showWechatButton:(BOOL)show {
     if (show) {
         [self.loginView addWechatButton];
@@ -142,6 +143,20 @@
     
     if (self.delegate && [self.delegate respondsToSelector:@selector(showUserPrivacy)]) {
         [self.delegate showUserPrivacy];
+    }
+    
+}
+
+- (void)privacyLinkClick:(NSString *)url {
+    if (self.delegate && [self.delegate respondsToSelector:@selector(privacyLinkClick:)]) {
+        [self.delegate privacyLinkClick:url];
+    }
+}
+
+- (void)privacyCheckButtonClick {
+    
+    if (self.delegate && [self.delegate respondsToSelector:@selector(privacyCheckButtonClick)]) {
+        [self.delegate privacyCheckButtonClick];
     }
     
 }
@@ -217,6 +232,7 @@
         case LoginVCTypeBindUserWithPhone: {
             if (self.delegate && [self.delegate respondsToSelector:@selector(bindPhoneWithName:password:)]) {
                 [self.delegate bindPhoneWithName:firstText password:secondText];
+                [self.delegate signByName:firstText password:secondText];
             }
         }
             
@@ -245,17 +261,20 @@
 - (void)leftJumpButtonClick {
     
     if (self.viewType == LoginVCTypePasswordLogin) {
-        if (self.delegate && [self.delegate respondsToSelector:@selector(pushToSmsLogin)]) {
-            [self.delegate pushToSmsLogin];
+        if (self.delegate && [self.delegate respondsToSelector:@selector(smsLogin)]) {
+            [self.delegate smsLogin];
+            self.viewType = LoginVCTypeCaptchLogin;
         }
     }else if (self.viewType == LoginVCTypeCaptchLogin) {
-        if (self.delegate && [self.delegate respondsToSelector:@selector(popViewController)]) {
-            [self.delegate popViewController];
+        if (self.delegate && [self.delegate respondsToSelector:@selector(passwordLogin)]) {
+            [self.delegate passwordLogin];
+            self.viewType = LoginVCTypePasswordLogin;
         }
     }
     else if (self.viewType == LoginVCTypeRegister) {
-        if (self.delegate && [self.delegate respondsToSelector:@selector(popRootViewController)]) {
-            [self.delegate popRootViewController];
+        if (self.delegate && [self.delegate respondsToSelector:@selector(smsLogin)]) {
+            [self.delegate smsLogin];
+            self.viewType = LoginVCTypeCaptchLogin;
         }
     }
     else if (self.viewType == LoginVCTypeRegisterAndBindWechat) {
@@ -283,7 +302,8 @@
 - (void)rightJumpButtonClick {
     
     if (self.delegate && [self.delegate respondsToSelector:@selector(pushToRegister)]) {
-        [self.delegate pushToRegister];
+        [self.delegate signUp];
+        self.viewType = LoginVCTypeRegister;
     }
 }
 

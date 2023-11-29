@@ -1,0 +1,10 @@
+
+/* Class = "UIButton"; normalTitle = "继续"; ObjectID = "9oU-n1-XkT"; */
+"9oU-n1-XkT.normalTitle" = "Continue";
+"9oU-n1-XkT.disabledTitle" = "Continue";
+
+/* Class = "UIButton"; normalTitle = "Button"; ObjectID = "JxH-Zd-YAK"; */
+"JxH-Zd-YAK.normalTitle" = "Button";
+
+/* Class = "UILabel"; text = "请输入App ID"; ObjectID = "no9-EJ-h8i"; */
+"no9-EJ-h8i.text" = "Input App ID";

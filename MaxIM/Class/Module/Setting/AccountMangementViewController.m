@@ -283,7 +283,6 @@
     
     cell.titleLabel.text = [NSString stringWithFormat:@"%@ (AppID:%@)",account.userName, account.appid];
     cell.subtitleLabel.text = account.usedId;
-    MAXLog(@"====%@",NSStringFromCGRect(cell.titleLabel.frame));
     return cell;
 }
 

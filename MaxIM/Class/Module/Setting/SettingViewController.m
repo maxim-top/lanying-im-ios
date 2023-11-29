@@ -25,7 +25,7 @@
     [super viewWillAppear:animated];
     //状态栏改为白色
     [UIApplication sharedApplication].statusBarStyle = UIStatusBarStyleLightContent;
-    
+    [self getprofile];
 }
 
 

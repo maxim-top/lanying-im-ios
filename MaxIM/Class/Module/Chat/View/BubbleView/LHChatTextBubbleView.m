@@ -7,24 +7,23 @@
 //
 
 #import "LHChatTextBubbleView.h"
-#import "YYLabel.h"
+#import "YYTextView.h"
 #import "YYImage.h"
 #import "YYAnimatedImageView.h"
 #import "NSAttributedString+YYText.h"
 #import "FaceDefine.h"
+#import <MMMarkdown/MMMarkdown.h>
+#import "TextLayoutCache.h"
 
 //　textLaebl 最大宽度
-CGFloat const TEXTLABEL_MAX_WIDTH = 200.0f;
 CGFloat const LABEL_FONT_SIZE = 15.0f;
-
-static CGSize kTextBoundingSize;
 
 @interface LHChatTextBubbleView () {
     NSDataDetector *_detector;
     NSArray *_urlMatches;
 }
 
-@property (nonatomic, strong) YYLabel *textLabel;
+@property (nonatomic, strong) YYTextView *textLabel;
 
 @end
 
@@ -32,17 +31,14 @@ static CGSize kTextBoundingSize;
 
 - (instancetype)initWithFrame:(CGRect)frame {
     if (self = [super initWithFrame:frame]) {
-        _textLabel = [[YYLabel alloc] initWithFrame:CGRectZero];
+        _textLabel = [[YYTextView alloc] initWithFrame:CGRectZero];
         _textLabel.userInteractionEnabled = YES;
-        _textLabel.numberOfLines = 0;
-        _textLabel.lineBreakMode = NSLineBreakByCharWrapping;
         _textLabel.font = [UIFont systemFontOfSize:LABEL_FONT_SIZE];
-//        _textLabel.backgroundColor = [UIColor clearColor];
-        _textLabel.userInteractionEnabled = NO;
         _textLabel.multipleTouchEnabled = NO;
-        _textLabel.textColor = [UIColor blackColor];
         _textLabel.tag = 1000;
         _textLabel.textVerticalAlignment = YYTextVerticalAlignmentTop;
+        _textLabel.scrollEnabled = NO;
+        _textLabel.textContainerInset = UIEdgeInsetsZero;
         [self addSubview:_textLabel];
         
         _detector = [NSDataDetector dataDetectorWithTypes:NSTextCheckingTypeLink error:nil];
@@ -69,28 +65,39 @@ static CGSize kTextBoundingSize;
 
 #pragma mark - setter
 
++ (CGSize)getSizeWithKey:(LHMessageModel *)object{
+    NSString *key = object.content;
+    YYTextLayout *textLayout = [[TextLayoutCache sharedInstance] layoutForKey: key];
+    return textLayout.textBoundingSize;
+}
+
+- (void)handleTap:(UITapGestureRecognizer *)gestureRecognizer {
+    YYTextView *label = (YYTextView *)gestureRecognizer.view;
+    NSAttributedString *attributedText = label.attributedText;
+    if (!label || !attributedText) {
+        return;
+    }
+
+    // 检查点击的位置是否在某个链接范围内
+    CGPoint location = [gestureRecognizer locationInView:label];
+    NSInteger characterIndex = [self characterIndexAt:location attributedText:attributedText];
+    NSDictionary *attributes = [attributedText attributesAtIndex:characterIndex effectiveRange:nil];
+    NSURL *url = attributes[NSLinkAttributeName];
+    if (url) {
+        NSString *urlString = url.absoluteString;
+        [self routerEventWithName:kRouterEventTextURLTapEventName
+                         userInfo:@{@"url" : urlString}];
+    }
+}
+
 - (void)setMessageModel:(LHMessageModel *)messageModel {
     [super setMessageModel:messageModel];
-    
-//    self.imageView.image = [UIImage imageNamed:@"imageCell_Placer"];
-//    
-//    if (messageModel.imageRemoteURL && ![messageModel.imageRemoteURL isKindOfClass:[NSNull class]] && [[NSFileManager defaultManager] fileExistsAtPath:messageModel.imageRemoteURL]) {
-//        UIImage *image = [UIImage imageWithContentsOfFile:messageModel.imageRemoteURL];
-//        self.imageView.image = image;
-//        
-//    }else {
-//        self.imageView.image = [UIImage imageNamed:@"imageCell_Placer"];
-//    }
-//    
-    
-    NSAttributedString *text = [LHChatTextBubbleView processModel:self.messageModel];
-    YYTextContainer *container = [YYTextContainer containerWithSize:CGSizeMake(TEXTLABEL_MAX_WIDTH, MAXFLOAT)];
-    YYTextLayout *textLayout = [YYTextLayout layoutWithContainer:container text:text];
-    
-    _textLabel.textLayout = textLayout;
+    NSMutableAttributedString *attributedString = [[TextLayoutCache sharedInstance] attributedStringForKey: self.messageModel.content];
+    self.textLabel.attributedText = attributedString;
+    YYTextLayout *textLayout = [[TextLayoutCache sharedInstance] layoutForKey: self.messageModel.content];
+    UITapGestureRecognizer *tapGesture = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(handleTap:)];
+    [_textLabel addGestureRecognizer:tapGesture];
     _textLabel.size = textLayout.textBoundingSize;
-    kTextBoundingSize = textLayout.textBoundingSize;
-     _textLabel.textColor = messageModel.isSender ? [UIColor blackColor] : [UIColor blackColor];
 }
 
 #pragma mark - 私有
@@ -157,21 +164,19 @@ static CGSize kTextBoundingSize;
 }
 
 + (CGFloat)heightForBubbleWithObject:(LHMessageModel *)object {
-    
-    NSAttributedString *text = [self processModel:object];
-    YYTextContainer *container = [YYTextContainer containerWithSize:CGSizeMake(TEXTLABEL_MAX_WIDTH, MAXFLOAT)];
-    YYTextLayout *textLayout = [YYTextLayout layoutWithContainer:container text:text];
-    return 2 * BUBBLE_VIEW_PADDING + textLayout.textBoundingSize.height + 30;
+    CGSize textBoundingSize = [LHChatTextBubbleView getSizeWithKey:object];
+    CGFloat height = 2 * BUBBLE_VIEW_PADDING + textBoundingSize.height + 30;
+    return height;
 }
 
 - (CGSize)sizeThatFits:(CGSize)size {
-    CGFloat height = 40;
-    if (2*BUBBLE_VIEW_PADDING + kTextBoundingSize.height > height) {
-        height = 2*BUBBLE_VIEW_PADDING + kTextBoundingSize.height;
+    CGSize textBoundingSize = [LHChatTextBubbleView getSizeWithKey:self.messageModel];
+    CGFloat height = 2*BUBBLE_VIEW_PADDING + textBoundingSize.height;
+    if (height < 40) {
+        height = 40;
     }
     
-    
-    CGFloat width = kTextBoundingSize.width + BUBBLE_VIEW_PADDING*2 + BUBBLE_VIEW_PADDING;
+    CGFloat width = textBoundingSize.width + BUBBLE_VIEW_PADDING*2 + BUBBLE_VIEW_PADDING;
     if (width < 46.5) {
         width = 46.5;
     }
@@ -205,115 +210,19 @@ static CGSize kTextBoundingSize;
     _textLabel.attributedText = attributedString;
 }
 
-- (CFIndex)characterIndexAtPoint:(CGPoint)point {
-    NSMutableAttributedString* optimizedAttributedText = [self.textLabel.attributedText mutableCopy];
-    
-    // use label's font and lineBreakMode properties in case the attributedText does not contain such attributes
-    [self.textLabel.attributedText enumerateAttributesInRange:NSMakeRange(0, [self.textLabel.attributedText length]) options:0 usingBlock:^(NSDictionary *attrs, NSRange range, BOOL *stop) {
-        
-        if (!attrs[(NSString*)kCTFontAttributeName]) {
-            [optimizedAttributedText addAttribute:(NSString*)kCTFontAttributeName value:self.textLabel.font range:NSMakeRange(0, [self.textLabel.attributedText length])];
-        }
-        
-        if (!attrs[(NSString*)kCTParagraphStyleAttributeName]) {
-            NSMutableParagraphStyle *paragraphStyle = [[NSMutableParagraphStyle alloc] init];
-            [paragraphStyle setLineBreakMode:self.textLabel.lineBreakMode];
-            
-            [optimizedAttributedText addAttribute:(NSString*)kCTParagraphStyleAttributeName value:paragraphStyle range:range];
-        }
-    }];
-    
-    // modify kCTLineBreakByTruncatingTail lineBreakMode to kCTLineBreakByWordWrapping
-    [optimizedAttributedText enumerateAttribute:(NSString*)kCTParagraphStyleAttributeName inRange:NSMakeRange(0, [optimizedAttributedText length]) options:0 usingBlock:^(id value, NSRange range, BOOL *stop) {
-         NSMutableParagraphStyle* paragraphStyle = [value mutableCopy];
-         
-         if ([paragraphStyle lineBreakMode] == NSLineBreakByTruncatingTail) {
-             [paragraphStyle setLineBreakMode:NSLineBreakByWordWrapping];
-         }
-         
-         [optimizedAttributedText removeAttribute:(NSString*)kCTParagraphStyleAttributeName range:range];
-         [optimizedAttributedText addAttribute:(NSString*)kCTParagraphStyleAttributeName value:paragraphStyle range:range];
-     }];
-    
-    if (!CGRectContainsPoint(self.bounds, point)) {
-        return NSNotFound;
-    }
-    
-    CGRect textRect = self.textLabel.frame;
-    
-    if (!CGRectContainsPoint(textRect, point)) {
-        return NSNotFound;
-    }
-    
-    // Offset tap coordinates by textRect origin to make them relative to the origin of frame
-    point = CGPointMake(point.x - textRect.origin.x, point.y - textRect.origin.y);
-    // Convert tap coordinates (start at top left) to CT coordinates (start at bottom left)
-    point = CGPointMake(point.x, textRect.size.height - point.y);
-    
-    CTFramesetterRef framesetter = CTFramesetterCreateWithAttributedString((__bridge CFAttributedStringRef)optimizedAttributedText);
-    
-    CGMutablePathRef path = CGPathCreateMutable();
-    CGPathAddRect(path, NULL, textRect);
-    
-    CTFrameRef frame = CTFramesetterCreateFrame(framesetter, CFRangeMake(0, [self.textLabel.attributedText length]), path, NULL);
-    
-    if (frame == NULL) {
-        CFRelease(path);
-        return NSNotFound;
-    }
-    
-    CFArrayRef lines = CTFrameGetLines(frame);
-    
-    NSInteger numberOfLines = self.textLabel.numberOfLines > 0 ? MIN(self.textLabel.numberOfLines, CFArrayGetCount(lines)) : CFArrayGetCount(lines);
-    
-    //MAXLog(@"num lines: %d", numberOfLines);
-    
-    if (numberOfLines == 0) {
-        CFRelease(frame);
-        CFRelease(path);
-        return NSNotFound;
-    }
-    
-    NSUInteger idx = NSNotFound;
-    
-    CGPoint lineOrigins[numberOfLines];
-    CTFrameGetLineOrigins(frame, CFRangeMake(0, numberOfLines), lineOrigins);
-    
-    for (CFIndex lineIndex = 0; lineIndex < numberOfLines; lineIndex++) {
-        
-        CGPoint lineOrigin = lineOrigins[lineIndex];
-        CTLineRef line = CFArrayGetValueAtIndex(lines, lineIndex);
-        
-        // Get bounding information of line
-        CGFloat ascent, descent, leading, width;
-        width = CTLineGetTypographicBounds(line, &ascent, &descent, &leading);
-        CGFloat yMin = floor(lineOrigin.y - descent);
-        CGFloat yMax = ceil(lineOrigin.y + ascent);
-        
-        // Check if we've already passed the line
-        if (point.y > yMax) {
-            break;
-        }
-        
-        // Check if the point is within this line vertically
-        if (point.y >= yMin) {
-            
-            // Check if the point is within this line horizontally
-            if (point.x >= lineOrigin.x && point.x <= lineOrigin.x + width) {
-                
-                // Convert CT coordinates to line-relative coordinates
-                CGPoint relativePoint = CGPointMake(point.x - lineOrigin.x, point.y - lineOrigin.y);
-                idx = CTLineGetStringIndexForPosition(line, relativePoint);
-                
-                break;
-            }
-        }
-    }
-    
-    CFRelease(frame);
-    CFRelease(path);
-    
-    return idx;
+- (NSInteger)characterIndexAt:(CGPoint)point attributedText:(NSAttributedString *)attributedText {
+    NSTextStorage *textStorage = [[NSTextStorage alloc] initWithAttributedString:attributedText];
+    NSLayoutManager *layoutManager = [[NSLayoutManager alloc] init];
+    [textStorage addLayoutManager:layoutManager];
+
+    NSTextContainer *textContainer = [[NSTextContainer alloc] initWithSize:CGSizeMake(TEXTLABEL_MAX_WIDTH, MAXFLOAT)];
+    [layoutManager addTextContainer:textContainer];
+    textContainer.lineFragmentPadding = 0;
+
+    NSUInteger glyphIndex = [layoutManager glyphIndexForPoint:point inTextContainer:textContainer];
+    NSInteger characterIndex = [layoutManager characterIndexForGlyphAtIndex:glyphIndex];
+
+    return characterIndex;
 }
 
 
@@ -324,7 +233,7 @@ static CGSize kTextBoundingSize;
     NSMutableAttributedString* attributedString = [[NSMutableAttributedString alloc]initWithAttributedString:_textLabel.attributedText];
         NSRange matchRange = NSMakeRange(0, _textLabel.text.length);
         [attributedString addAttribute:NSBackgroundColorAttributeName
-                                 value:[UIColor blueColor]
+                                 value:[UIColor lh_colorWithHexString:@"54B8FA"]
                                  range:matchRange];
 //    [attributedString yy_setBackgroundColor:[UIColor blueColor] range:matchRange];
     _textLabel.attributedText = attributedString;

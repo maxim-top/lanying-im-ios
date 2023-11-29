@@ -108,7 +108,7 @@
         if(strongSelf.ringTimes <= 0){
             dispatch_cancel(strongSelf.vibrationTimer);
             if (strongSelf.ringTimes == 0) {
-                [self hangupByMe:YES];
+                [self hangupByMe:YES peerDrop:NO];
                 return;
             }
         }
@@ -143,10 +143,10 @@
     [self ackMessageWithMessageId:_messageId];
 }
 
-- (void)sendHangupMessage{
+- (void)sendHangupMessageWithPeerDrop:(BOOL)peerDrop{
     BMXMessageConfig *config = [BMXMessageConfig createMessageConfigWithMentionAll: NO];
     if (_callId) {
-        [config setRTCHangupInfo:_callId];
+        [config setRTCHangupInfo:_callId peerDrop:peerDrop];
         _callId = nil;
     }
     NSTimeInterval duration = 0.0;
@@ -168,7 +168,7 @@
     if (duration > 1.0) {
         content = [NSString stringWithFormat:@"%.0f", duration];
         int sec = [content intValue]/1000;
-        pushMessageLocKey = @"call_duration";
+        pushMessageLocKey = peerDrop? @"call_ended" : @"call_duration";
         pushMessageLocArgs = [NSString stringWithFormat:@"[%d,%d]",sec/60, sec%60];
         [config setPushMessageLocArgs:pushMessageLocArgs];
     }
@@ -189,9 +189,9 @@
     return [timeStamp timeIntervalSince1970]*1000;
 }
 
-- (void)hangupByMe:(BOOL)byMe{
+- (void)hangupByMe:(BOOL)byMe peerDrop:(BOOL)peerDrop{
     if (byMe) {
-        [self sendHangupMessage];
+        [self sendHangupMessageWithPeerDrop:peerDrop];
     }
     [[RTCEngineManager engineWithType:kMaxEngine] leaveRoom];
     [[RTCEngineManager engineWithType:kMaxEngine] removeDelegate:self];
@@ -241,7 +241,7 @@
     if ([msg.config.getRTCCallId isEqualToString: _callId] &&
         (msg.fromId == otherId || [msg.content isEqualToString:@"busy"]
          || [msg.content isEqualToString:@"rejected"] || ![[RTCEngineManager engineWithType:kMaxEngine] isOnCall])) {
-        [self hangupByMe:NO];
+        [self hangupByMe:NO peerDrop:NO];
         _ringTimes = -1;
         [self ackMessageWithMessageId:msg.msgId];
     }
@@ -249,7 +249,7 @@
 
 - (void)onRTCPickupMessageReceiveWithMsg:(BMXMessage*)msg{
     if ([msg.config.getRTCCallId isEqualToString: _callId] && msg.fromId == _myId) {
-        [self hangupByMe:NO];
+        [self hangupByMe:NO peerDrop:NO];
         _ringTimes = -1;
         [self ackMessageWithMessageId:msg.msgId];
     }
@@ -311,11 +311,20 @@
     [self switchSoundOutputDevice];
 }
 
+- (void)onLeaveRoomWithInfo:(NSString*)info roomId:(long long)roomId error:(BMXErrorCode)error reason:(NSString*)reason{
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(1.0 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+        if([[RTCEngineManager engineWithType:kMaxEngine] isOnCall]){
+            [self hangupByMe:YES peerDrop:YES];
+            self->_ringTimes = -1;
+        }
+    });
+}
+
 #pragma mark - CallViewDelegate
 
 - (void)videoCallViewDidHangup:(CallView *)view {
     _ringTimes = -1;
-    [self hangupByMe:YES];
+    [self hangupByMe:YES peerDrop:NO];
     if (_pickupTimestamp < 1.0) {
         [self ackMessageWithMessageId:_messageId];
     }

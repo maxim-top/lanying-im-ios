@@ -42,7 +42,7 @@
     self.titleLabel.size = CGSizeMake(330, self.bmx_height);
 
     self.contentLabel.bmx_left = nickNameleft + 80;
-    self.contentLabel.size = CGSizeMake(MAXScreenW - nickNameleft * 2  -  80, self.bmx_height);
+    self.contentLabel.size = CGSizeMake(200, self.bmx_height);
    
     self.mswitch.bmx_right = MAXScreenW - 15 ;
     self.mswitch.size = CGSizeMake(40, self.bmx_height);

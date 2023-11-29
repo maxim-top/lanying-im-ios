@@ -18,11 +18,16 @@
 #import "AppIDManager.h"
 #import "IMAcountInfoStorage.h"
 #import "UIViewController+CustomNavigationBar.h"
+#import "UIView+BMXframe.h"
+#import "LHTools.h"
+#import "IMAcount.h"
+#import "IMAcountInfoStorage.h"
 
 #define ScreenWidth [UIScreen mainScreen].bounds.size.width
 #define ScreenHigh [UIScreen mainScreen].bounds.size.height - 64
 
-@interface ScanViewController ()<AVCaptureMetadataOutputObjectsDelegate>
+@interface ScanViewController ()<AVCaptureMetadataOutputObjectsDelegate,
+    UINavigationControllerDelegate, UIImagePickerControllerDelegate>
 {
     int num;
     BOOL upOrdown;
@@ -62,6 +67,7 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
     self.view.backgroundColor = [UIColor blackColor];
+    [self.navigationController setNavigationBarHidden:YES animated:NO];
 }
 
 - (void)viewDidAppear:(BOOL)animated {
@@ -80,7 +86,7 @@
     self.bgroundimageview.userInteractionEnabled = YES;
     [self.view addSubview:self.bgroundimageview];
 
-    UILabel *label = [[UILabel alloc] initWithFrame:CGRectMake(40/3.0, 114/3.0, 300, 20)];
+    UILabel *label = [[UILabel alloc] initWithFrame:CGRectMake(40/3.0, 114/3.0+15, 300, 20)];
     label.font = [UIFont systemFontOfSize:17];
     label.text = NSLocalizedString(@"scan_QR_Code", @"请扫描二维码");
     label.textColor = [UIColor whiteColor];
@@ -92,13 +98,67 @@
     label3.textColor = [UIColor whiteColor];
     [self.bgroundimageview addSubview:label3];
     
-    UIButton *btn = [[UIButton alloc] initWithFrame:CGRectMake(MAXScreenW - 42/3.0-50, 30, 50, 30)];
+    UIButton *btn = [[UIButton alloc] initWithFrame:CGRectMake(MAXScreenW - 42/3.0-50, 30+15, 50, 30)];
     [btn setTitle:NSLocalizedString(@"Close", @"关闭") forState:UIControlStateNormal];
-    [btn addTarget:self action:@selector(closwBtnClick) forControlEvents:UIControlEventTouchUpInside];
+    [btn addTarget:self action:@selector(closeBtnClick) forControlEvents:UIControlEventTouchUpInside];
     [self.bgroundimageview addSubview:btn];
+    
+    UIImage *image = [UIImage imageNamed:@"scan_picture"];
+    UIButton *btnPicture = [UIButton buttonWithType:UIButtonTypeCustom];
+    [btnPicture setImage:image forState:UIControlStateNormal];
+    btnPicture.frame = CGRectMake(0, 0, 60, 60);
+    btnPicture.centerX = MAXScreenW/2.0;
+    btnPicture.bmx_top = 550;
+    [btnPicture addTarget:self action:@selector(onAlbum) forControlEvents:UIControlEventTouchUpInside];
+    [self.bgroundimageview addSubview:btnPicture];
+    
+    UILabel *labelAlbum = [[UILabel alloc] initWithFrame:CGRectMake(0, 620, 300, 20)];
+    labelAlbum.font = [UIFont systemFontOfSize:17];
+    labelAlbum.text = NSLocalizedString(@"album", @"相册");
+    labelAlbum.textColor = [UIColor whiteColor];
+    [labelAlbum sizeToFit];
+    labelAlbum.bmx_centerX = MAXScreenW /2.0;
+
+    [self.bgroundimageview addSubview:labelAlbum];
 }
 
-- (void)closwBtnClick {
+#pragma mark - UIImagePickerControllerDelegate
+
+- (void)imagePickerController:(UIImagePickerController *)picker didFinishPickingMediaWithInfo:(NSDictionary *)info {
+    UIImage *pickedImage = info[UIImagePickerControllerEditedImage] ?: info[UIImagePickerControllerOriginalImage];
+    CIImage *detectImage = [CIImage imageWithData:UIImagePNGRepresentation(pickedImage)];
+    
+    CIDetector *detector = [CIDetector detectorOfType:CIDetectorTypeQRCode context:nil options:@{CIDetectorAccuracy: CIDetectorAccuracyLow}];
+    CIQRCodeFeature *feature = (CIQRCodeFeature *)[detector featuresInImage:detectImage options:nil].firstObject;
+    
+    [picker dismissViewControllerAnimated:YES completion:^{
+        if (feature.messageString) {
+            NSDictionary *configDic = [self dictionaryWithJsonString:feature.messageString];
+            [self dealWithCodeJson:configDic];
+        }
+    }];
+}
+
+- (void)imagePickerControllerDidCancel:(UIImagePickerController *)picker {
+    [picker dismissViewControllerAnimated:YES completion:nil];
+}
+
+
+- (void)onAlbum {
+    if (![LHTools photoLimit]) {
+        UIAlertView * alertView = [[UIAlertView alloc] initWithTitle:nil message:NSLocalizedString(@"allow_LHChatUI_to_access_your_photos", @"请在iPhone的设置-隐私-照片选项中,允许LHChatUI访问你的照片") delegate:nil cancelButtonTitle:NSLocalizedString(@"Confirm", @"确定") otherButtonTitles:nil, nil];
+        [alertView show];
+        return;
+    }
+    UIImagePickerController *picker = [[UIImagePickerController alloc]init];
+    [picker setSourceType:UIImagePickerControllerSourceTypePhotoLibrary];
+    [picker setModalPresentationStyle:UIModalPresentationFullScreen];
+    [picker setAllowsEditing:YES];
+    [picker setDelegate:self];
+    [self presentViewController:picker animated:YES completion:nil];
+}
+
+- (void)closeBtnClick {
     if (self.navigationController) {
         [self.navigationController popViewControllerAnimated:YES];
     } else {
@@ -132,17 +192,66 @@
     }
 }
 
+- (void)dealWithLogoutWithAction:(NSString *)actionString infoDic:(NSDictionary *)dic {
+    [AppIDManager clearAppid];
+    AppDelegate *appDelegate = [UIApplication sharedApplication].delegate;
+    NSString *appId = [NSString stringWithFormat:@"%@", dic[@"appId"]];
+    [appDelegate reloadAppID:appId];
+    [IMAcountInfoStorage clearObject];
+    [appDelegate userLogout];
+
+    [self closeBtnClick];
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.3 * NSEC_PER_SEC)),
+                   dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+        [[NSNotificationCenter defaultCenter] postNotificationName:@"ScanConsule" object:dic];
+    });
+}
+
+- (void)logoutWithAction:(NSString *)actionString infoDic:(NSDictionary *)dic{
+    [HQCustomToast showWating];
+    IMAcount *account = [IMAcountInfoStorage loadObject];
+    
+    [[BMXClient sharedClient] signOutWithUid:(NSInteger)account.usedId ignoreUnbindDevice:NO completion:^(BMXError * _Nonnull error) {
+
+        if (!error) {
+            [HQCustomToast hideWating];
+            
+            [self dealWithLogoutWithAction:actionString infoDic:dic];
+        } else {
+            
+            [[BMXClient sharedClient] signOutWithUid:(NSInteger)account.usedId ignoreUnbindDevice:YES completion:^(BMXError * _Nonnull error) {
+                [self dealWithLogoutWithAction:actionString infoDic:dic];
+            }];
+            
+            [HQCustomToast hideWating];
+        }
+    }];
+
+}
+
 - (void)p_dealWithConsoleQRcodeWithAction:(NSString *)action infoDic:(NSDictionary *)dic {
-    if ([action isEqualToString:@"login"] && ![self isLogin]) {
+    if ([action isEqualToString:@"login"]) {
         NSString *appId = [NSString stringWithFormat:@"%@", dic[@"app_id"]];
         NSString *uid = [NSString stringWithFormat:@"%@",dic[@"uid"]];
         NSString *userName = [NSString stringWithFormat:@"%@", dic[@"username"]];
+        NSString *password = [NSString stringWithFormat:@"%@", dic[@"password"]];
         NSDictionary *dic = @{@"appId": appId,
                               @"uid": uid,
-                              @"userName": userName};
-        [self reloadAppID:appId];
-        [[NSNotificationCenter defaultCenter] postNotificationName:@"ScanConsule" object:dic];
-        [self closwBtnClick];
+                              @"userName": userName,
+                              @"password": password};
+        if (![self isLogin]){
+            [self reloadAppID:appId];
+            [[NSNotificationCenter defaultCenter] postNotificationName:@"ScanConsule" object:dic];
+            [self closeBtnClick];
+        }else{
+            NSString *currentAppId = [AppIDManager sharedManager].appid.appId;
+            if (![currentAppId isEqualToString:appId]){
+                [self showAlertWithAction:action infoDic:dic];
+            }else {
+                [HQCustomToast showDialog:NSLocalizedString(@"logout_first", @"请先登出当前账号，再扫码登录")];
+                [self.navigationController popToRootViewControllerAnimated:YES];
+            }
+        }
         
     } else if ([action isEqualToString:@"upload_device_token"] && [self isLogin]) {
         [self configUploadDeviceTokenWithInfo:dic];
@@ -153,7 +262,7 @@
             NSDictionary *dic = @{@"appId": appId};
             [self reloadAppID:appId];
             [[NSNotificationCenter defaultCenter] postNotificationName:@"ScanConsule" object:dic];
-            [self closwBtnClick];
+            [self closeBtnClick];
             NSString *tip = [NSString stringWithFormat:@"%@%@",
                              NSLocalizedString(@"appid_changed", @"成功切换Appid为："), appId];
             [HQCustomToast showDialog:tip];
@@ -173,26 +282,7 @@
         [self.navigationController popToRootViewControllerAnimated:YES];
     }]];
     [alertController addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Confirm", @"确定") style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
-        
-        if ([actionString isEqualToString:@"login"]) {
-            NSString *appId = [NSString stringWithFormat:@"%@", dic[@"app_id"]];
-            NSString *uid = [NSString stringWithFormat:@"%@",dic[@"uid"]];
-            NSString *userName = [NSString stringWithFormat:@"%@", dic[@"username"]];
-            NSDictionary *dic = @{@"appId": appId,
-                                  @"uid": uid,
-                                  @"userName": userName};
-            [self reloadAppID:appId];
-            [[NSNotificationCenter defaultCenter] postNotificationName:@"ScanConsule" object:dic];
-            [self closwBtnClick];
-            
-        } else {
-            NSString *appId = [NSString stringWithFormat:@"%@", dic[@"app_id"]];
-            NSDictionary *dic = @{@"appId": appId};
-            [self reloadAppID:appId];
-            [[NSNotificationCenter defaultCenter] postNotificationName:@"ScanConsule" object:dic];
-            [self closwBtnClick];
-        }
-        
+        [self logoutWithAction:actionString infoDic:dic];
     }]];
     
     [self presentViewController:alertController animated:YES completion:nil];
@@ -249,7 +339,7 @@
     upOrdown = NO;
     num = 0;
     _line = [[UIImageView alloc] initWithFrame:imageView.frame];
-    _line.image = [UIImage imageNamed:@"scan"];
+    _line.image = [UIImage imageNamed:@"scan_line"];
     [self.view addSubview:self.line];
     
     timer = [NSTimer scheduledTimerWithTimeInterval:.02 target:self selector:@selector(animation1) userInfo:nil repeats:YES];
@@ -283,7 +373,7 @@
 - (void)animation1 {
     if (upOrdown == NO) {
         num ++;
-        _line.frame = CGRectMake(self.view.bounds.size.width /2 - 279/2-1, 2*num+50, 280  ,110);
+        _line.frame = CGRectMake(self.view.bounds.size.width /2 - 279/2-1, 2*num+155, 280  ,6);
         if (2 * num == 290) {
             upOrdown = YES;
         }

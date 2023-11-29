@@ -489,7 +489,6 @@ static CGFloat nameLabelleft = 36;
     [self idLabel];
 //    [self subTitleLabel];
     [self avatarImageView];
-    [self editImageView];
 }
 
 - (void)setupFooterView {
@@ -542,7 +541,7 @@ static CGFloat nameLabelleft = 36;
         _avatarImageView.clipsToBounds = YES;
         _avatarImageView.layer.cornerRadius = 50;
         _avatarImageView.bmx_size = avatarImageViewSize;
-        _avatarImageView.bmx_top =  self.headerView.size.height - 95 - 18;
+        _avatarImageView.bmx_top =  self.headerView.size.height - 95 - 30;
         _avatarImageView.bmx_right = MAXScreenW - 16;
         _avatarImageView.image = [UIImage imageNamed:@"mine_avater_placoholder"];
         

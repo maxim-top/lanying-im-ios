@@ -9,6 +9,9 @@
 #import "LHChatViewBaseCell.h"
 #import <floo-ios/floo_proxy.h>
 #import "ChatRosterProfileViewController.h"
+@interface LHChatViewBaseCell ()
+@property (nonatomic, strong) UIImage *headImage;
+@end
 
 @implementation LHChatViewBaseCell
 
@@ -24,13 +27,17 @@
 - (void)setMessageModel:(LHMessageModel *)messageModel {
     _messageModel = messageModel;
     _nameLabel.hidden = !messageModel.isChatGroup;
-    NSString *imgaeName = nil;
-    if (_messageModel.isSender) {
-        imgaeName = @"contact_placeholder";
-    } else {
-        imgaeName = @"contact_placeholder";
+    if(_headImage){
+        self.headImageView.image = _headImage;
+    }else{
+        NSString *imgaeName = nil;
+        if (_messageModel.isSender) {
+            imgaeName = @"contact_placeholder";
+        } else {
+            imgaeName = @"contact_placeholder";
+        }
+        self.headImageView.image = [UIImage imageNamed:imgaeName];
     }
-    self.headImageView.image = [UIImage imageNamed:imgaeName];
 }
 
 - (void)setMessageName:(NSString *)name {
@@ -42,6 +49,7 @@
     
     if (image) {
         dispatch_async(dispatch_get_main_queue(), ^{
+            _headImage = image;
             self.headImageView.image = image;
         });
     } else {
@@ -52,8 +60,8 @@
         } else {
             imgaeName = @"contact_placeholder";
         }
-        self.headImageView.image = [UIImage imageNamed:imgaeName];
-
+        _headImage = [UIImage imageNamed:imgaeName];
+        self.headImageView.image = _headImage;
     }
    
 }

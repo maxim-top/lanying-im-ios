@@ -38,7 +38,7 @@
 //@property (nonatomic, strong) UIView *smsTextFieldLine;
 //@property (nonatomic, strong) UIButton *getSmsButton;
 
-@property (nonatomic, strong) UILabel *privacyLabel;
+@property (nonatomic, strong) UITextView *privacyLabel;
 @property (nonatomic, strong) UIButton *privacyButton;
 
 @property (nonatomic, strong) UIButton *termsButton;
@@ -51,9 +51,6 @@
 @property (nonatomic, strong) UIButton *rightControlBttton;
 @property (nonatomic, strong) UIView *verticalSepLine;
 
-@property (nonatomic, strong) UIView *wechatLine;
-@property (nonatomic, strong) UIView *wechatLine1;
-@property (nonatomic, strong) UILabel *wechatLabel;
 @property (nonatomic, strong) UIButton *otherLoginButton;
 
 @property (nonatomic,copy) NSString *title;
@@ -93,7 +90,7 @@
     
     self.backgroundColor = [UIColor whiteColor];
     
-    self.titleLabel.bmx_top = NavHeight + 60;
+    self.titleLabel.bmx_top = NavHeight + 80;
     self.titleLabel.bmx_size = CGSizeMake(280, 40);
     self.titleLabel.bmx_left = 48;
     
@@ -121,7 +118,7 @@
     self.errorLabel.bmx_left = self.usernameTextFieldLine.bmx_left;
     self.errorLabel.bmx_top = self.usernameTextFieldLine.bmx_top + 2;
     
-    self.confirmButton.bmx_top = self.passwordTextField.bmx_bottom + 66;
+    self.confirmButton.bmx_top = self.passwordTextField.bmx_bottom + 86;
     self.confirmButton.bmx_left = self.usernameTextField.bmx_left;
     self.confirmButton.bmx_width = self.usernameTextField.bmx_width;
     self.confirmButton.bmx_height = 55;
@@ -138,6 +135,16 @@
     [self.passwordTextField addTarget:self action:@selector(textFieldDidChange:) forControlEvents:UIControlEventEditingChanged];
 }
 
+- (void)updateConfirmButton{
+    if (self.username.length > 0 && self.password.length > 0 &&(!_privacyLabel ||  _privacyCheckButton.selected)) {
+        self.confirmButton.enabled = YES;
+        self.confirmButton.backgroundColor = BMXCOLOR_HEX(0x0079F4);
+    }else {
+        self.confirmButton.enabled = NO;
+        self.confirmButton.backgroundColor = [BMXCOLOR_HEX(0x0079F4) colorWithAlphaComponent:0.1];
+    }
+}
+
 - (void)textFieldDidChange:(UITextField *)textField {
     if (textField.tag == kUsernameTextFieldTag) {
         self.username = textField.text;
@@ -148,15 +155,7 @@
     if (textField.tag == kUsernameTextFieldTag && [textField.text length] > 0) {
         self.captchButton.enabled = YES;
     }
-    
-    
-    if (self.username.length > 0 && self.password.length > 0) {
-        self.confirmButton.enabled = YES;
-        self.confirmButton.backgroundColor = BMXCOLOR_HEX(0x0079F4);
-    }else {
-        self.confirmButton.enabled = NO;
-        self.confirmButton.backgroundColor = [BMXCOLOR_HEX(0x0079F4) colorWithAlphaComponent:0.1];
-    }
+    [self updateConfirmButton];
 }
 
 - (void)smsButtonClicked:(UIButton *)button {
@@ -234,26 +233,19 @@
 
 - (void)addAppIDLabelButtonClickWithAppid:(NSString *)appId {
     
-    self.appIDLabel.text = [NSString stringWithFormat:@"APPID: %@", appId];
+    self.appIDLabel.text = [NSString stringWithFormat:@"%@", appId];
     self.appIDLabel.bmx_size = CGSizeMake(200, 30);
     [self.appIDLabel sizeToFit];
     
-
-    
-    self.appIDLabel.bmx_top = NavHeight + 4  ;
-    self.appIDLabel.bmx_left = 48;
-    
-    self.editButton.bmx_size = CGSizeMake(50, 30);
-    self.editButton.bmx_centerY =  self.appIDLabel.bmx_centerY;
-    self.editButton.bmx_left = self.appIDLabel.bmx_right + 5;
-    
+    self.appIDLabel.bmx_top = self.otherLoginButton.bmx_bottom + 10  ;
+    self.appIDLabel.bmx_centerX = self.centerX;
 }
 
 - (void)addScanConsuleButton {
-    self.scanConsuleButton.bmx_width = 30;
-    self.scanConsuleButton.bmx_height = 30;
-    self.scanConsuleButton.bmx_top = NavHeight -3 ;
-    self.scanConsuleButton.bmx_left = MAXScreenW - 100;
+    self.scanConsuleButton.bmx_width = 50;
+    self.scanConsuleButton.bmx_height = 50;
+    self.scanConsuleButton.bmx_top = MAXScreenH - 120;
+    self.scanConsuleButton.bmx_centerX = self.centerX;
 }
 
 - (void)addLogButton {
@@ -303,7 +295,7 @@
         leftButton.frame = CGRectMake(0, 0, 180, 20);
         leftButton.titleLabel.textAlignment = NSTextAlignmentRight;
         leftButton.titleLabel.font = [UIFont systemFontOfSize:14.0];
-
+        [leftButton sizeToFit];
         [self addSubview:leftButton];
         
         UIButton *rightButton = [UIButton buttonWithType:UIButtonTypeCustom];
@@ -314,6 +306,8 @@
         rightButton.titleLabel.font = [UIFont systemFontOfSize:14.0];
 
         rightButton.frame = CGRectMake(0, 0, 60, 20);
+        [rightButton sizeToFit];
+
         [self addSubview:rightButton];
         
         
@@ -321,67 +315,48 @@
         line.backgroundColor = BMXCOLOR_HEX(0x576B95);
         [self addSubview:line];
         
-        line.bmx_top = self.confirmButton.bmx_bottom + 18;
-        line.bmx_centerX = self.bmx_centerX + 30;
+        int padding = 10;
+        int lineWidth = 1;
+        int width = leftButton.bmx_width + rightButton.bmx_width + padding * 2 + lineWidth;
+        int left = (MAXScreenW - width) / 2;
         
         leftButton.bmx_top = self.confirmButton.bmx_bottom + 18;
-        leftButton.bmx_right = line.bmx_left + 3;
+        leftButton.bmx_left = left;
+
+        line.bmx_top = self.confirmButton.bmx_bottom + 21;
+        line.bmx_centerX = leftButton.bmx_right + padding;
         
         rightButton.bmx_top = self.confirmButton.bmx_bottom + 18;
-        rightButton.bmx_left = line.bmx_right + 3;
+        rightButton.bmx_left = line.bmx_right + padding;
         
     }
 }
 
 - (void)addWechatButton {
-    
-    
-    UIImage *image = [UIImage imageNamed:@"wechat"];
-    self.otherLoginButton.bmx_top = MAXScreenH - 41 - image.size.height;
-    self.otherLoginButton.bmx_width = image.size.width;
-    self.otherLoginButton.bmx_centerX = self.centerX;
-    self.otherLoginButton.bmx_height = image.size.height;
-    
-    self.wechatLine.bmx_left = 11;
-    self.wechatLine.bmx_width = MAXScreenW / 2.0 - 11 * 2 - 40;
-    self.wechatLine.bmx_top =  self.otherLoginButton.bmx_origin.y - 30;
-    self.wechatLine.bmx_height = 0.5;
-    
-    self.wechatLine1.bmx_width = MAXScreenW / 2.0 - 11 * 2 - 25;
-    self.wechatLine1.bmx_height = 0.5;
-    self.wechatLine1.bmx_right = MAXScreenW - 11 ;
-    self.wechatLine1.bmx_top = self.otherLoginButton.bmx_origin.y - 30;
-    
-    self.wechatLabel.bmx_height = 22;
-    self.wechatLabel.bmx_width = 90;
-    self.wechatLabel.bmx_centerX = self.centerX;
-    self.wechatLabel.bmx_centerY = self.wechatLine.bmx_centerY;
+    self.otherLoginButton.bmx_top = self.scanConsuleButton.bmx_top;
+    self.otherLoginButton.bmx_right = self.scanConsuleButton.bmx_left - self.scanConsuleButton.bmx_width - 50;
+    self.otherLoginButton.bmx_width = self.scanConsuleButton.bmx_width;
+    self.otherLoginButton.bmx_height = self.scanConsuleButton.bmx_height;
+
+    self.editButton.bmx_size = self.scanConsuleButton.size;
+    self.editButton.bmx_top =  self.scanConsuleButton.bmx_top;
+    self.editButton.bmx_left = self.scanConsuleButton.bmx_right + 50;
 }
 
 - (void)removeWechatButton {
     [self.otherLoginButton removeFromSuperview];
-    [self.wechatLine removeFromSuperview];
-    [self.wechatLine1 removeFromSuperview];
-    [self.wechatLabel removeFromSuperview];
-    
     _otherLoginButton = nil;
-    _wechatLine = nil;
-    _wechatLine1 = nil;
-    _wechatLabel = nil;
-    
 }
 
 - (void)addPrivacyLabel {
     
-    self.privacyLabel.bmx_bottom = self.confirmButton.bmx_top - 25;
-    self.privacyLabel.bmx_left = self.confirmButton.bmx_left;
+    self.privacyCheckButton.bmx_top = self.confirmButton.bmx_top - 48;
+    self.privacyCheckButton.bmx_left = self.confirmButton.bmx_left;
     
-    self.privacyButton.bmx_centerY = self.privacyLabel.bmx_centerY + 20;
-    self.privacyButton.bmx_left = self.privacyLabel.bmx_left + 40;
-    
-    self.termsButton.bmx_centerY = self.privacyLabel.bmx_centerY + 20;
-    self.termsButton.bmx_left = self.privacyButton.right;
-
+    self.privacyLabel.bmx_top = self.confirmButton.bmx_top - 53;
+    self.privacyLabel.bmx_left = self.privacyCheckButton.bmx_right + 10;
+    self.privacyLabel.textContainer.lineFragmentPadding = 0;
+    self.privacyLabel.textContainerInset = UIEdgeInsetsZero;
 }
 
 - (void)addSkipButton {
@@ -391,10 +366,10 @@
     button.frame = CGRectMake(0, 0, 35, 25);
     button.titleLabel.font = [UIFont systemFontOfSize:16];
     [button setTitle:NSLocalizedString(@"Skip", @"跳过") forState:UIControlStateNormal];
-    [button setTitleColor:BMXCOLOR_HEX(0x333333) forState:UIControlStateNormal];
+    [button setTitleColor:BMXCOLOR_HEX(0x666666) forState:UIControlStateNormal];
     [self addSubview:button];
 
-    button.bmx_top = NavHeight - 12 ;
+    button.bmx_top = self.confirmButton.bmx_bottom + 30 ;
     button.bmx_left = MAXScreenW - 100;
     
 }
@@ -422,6 +397,12 @@
     
     self.usernameTextField.text = name;
     self.username = name;
+}
+
+- (void)inputPassword:(NSString *)password {
+    
+    self.passwordTextField.text = password;
+    self.password = password;
 }
 
 
@@ -458,10 +439,24 @@
     }
 }
 
+- (void)privacyLinkClick:(NSString *)url{
+    if (self.delegate && [self.delegate respondsToSelector:@selector(privacyLinkClick:)]) {
+        [self.delegate privacyLinkClick:url];
+    }
+}
+
 - (void)privacyButtonClick {
     
     if (self.delegate && [self.delegate respondsToSelector:@selector(privacyButtonClick)]) {
         [self.delegate privacyButtonClick];
+    }
+}
+
+- (void)privacyCheckButtonClick:(UIButton *)sender {
+    sender.selected = !sender.selected;
+    [self updateConfirmButton];
+    if (self.delegate && [self.delegate respondsToSelector:@selector(privacyCheckButtonClick)]) {
+        [self.delegate privacyCheckButtonClick];
     }
 }
 
@@ -473,7 +468,10 @@
 }
 
 - (void)otherLoginButtonClick {
-    
+    if (_privacyCheckButton && !_privacyCheckButton.selected) {
+        [HQCustomToast showDialog:NSLocalizedString(@"check_first", @"请先点击勾选“我已阅读并同意《用户隐私协议》《用户服务条款》”")];
+        return;
+    }
     if (self.delegate && [self.delegate respondsToSelector:@selector(wechatButtonClick)]) {
         [self.delegate wechatButtonClick];
     }
@@ -538,27 +536,109 @@
     if (!_appIDLabel) {
         _appIDLabel = [[UILabel alloc] init];
         _appIDLabel.textAlignment = NSTextAlignmentLeft;
-        _appIDLabel.font = [UIFont systemFontOfSize:12];
-        _appIDLabel.textColor = BMXCOLOR_HEX(0x333333);
+        _appIDLabel.font = [UIFont systemFontOfSize:16];
+        _appIDLabel.textColor = BMXCOLOR_HEX(0x888888);
         [self addSubview:_appIDLabel];
     }
     return _appIDLabel;
 }
 
-- (UILabel *)privacyLabel {
+- (UIButton *)privacyCheckButton {
+    
+    if (!_privacyCheckButton) {
+        _privacyCheckButton = [UIButton buttonWithType:UIButtonTypeCustom];
+        [_privacyCheckButton setFrame:CGRectMake(0, 0, 20, 20)];
+        [_privacyCheckButton setImage:[UIImage imageNamed:@"checkbox_circle_gray"] forState:UIControlStateNormal];
+        [_privacyCheckButton setImage:[UIImage imageNamed:@"checkbox_selected_circle"] forState:UIControlStateSelected];
+        [_privacyCheckButton addTarget:self action:@selector(privacyCheckButtonClick:) forControlEvents:UIControlEventTouchUpInside];
+
+        [self addSubview:_privacyCheckButton];
+    }
+    return _privacyCheckButton;
+}
+
+- (UITextView *)privacyLabel {
     
     if (!_privacyLabel) {
-        _privacyLabel = [[UILabel alloc] init];
+        _privacyLabel = [[UITextView alloc] init];
         _privacyLabel.textAlignment = NSTextAlignmentLeft;
-        _privacyLabel.frame = CGRectMake(0, 0, 250, 18);
+        _privacyLabel.frame = CGRectMake(0, 0, 250, 36);
         _privacyLabel.font = [UIFont systemFontOfSize:12];
-        _privacyLabel.textColor = BMXCOLOR_HEX(0x4A4A4A);
-        _privacyLabel.text = NSLocalizedString(@"Registration_signifies_your_acceptance", @"注册即代表您同意");
+        NSString *text = NSLocalizedString(@"Registration_signifies_your_acceptance", @"我已阅读并同意《用户隐私协议》和《用户服务条款》");
+        
+        _privacyLabel.linkTextAttributes = @{};
+
+        NSMutableAttributedString *attributedText = [[NSMutableAttributedString alloc] initWithString:text];
+        
+        //Set font color
+        [attributedText addAttribute:NSForegroundColorAttributeName value:BMXCOLOR_HEX(0x555555) range:NSMakeRange(0, attributedText.length)];
+
+        //Set paragraph line spaceing
+        NSMutableParagraphStyle *paragraphStyle = [[NSMutableParagraphStyle alloc] init];
+        paragraphStyle.lineSpacing = 6;
+        [attributedText addAttribute:NSParagraphStyleAttributeName value:paragraphStyle range:NSMakeRange(0, attributedText.length)];
+        
+        NSRange linkRange = [text rangeOfString:NSLocalizedString(@"Doc_User_Privacy_Agreement", @"《用户隐私协议》") options:NSCaseInsensitiveSearch];
+
+        if (linkRange.location != NSNotFound) {
+            NSURL *url = [NSURL URLWithString:NSLocalizedString(@"protocol_privacy", @"https://www.lanyingim.com/privacy")];
+            [attributedText addAttribute:NSLinkAttributeName value:url range:linkRange];
+        }
+        
+        [attributedText addAttribute:NSForegroundColorAttributeName value:BMXCOLOR_HEX(0x4A90E2) range:linkRange];
+
+        linkRange = [text rangeOfString:NSLocalizedString(@"User_Services_Agreement_bookname", @"《用户服务条款》") options:NSCaseInsensitiveSearch];
+
+        if (linkRange.location != NSNotFound) {
+            NSURL *url = [NSURL URLWithString:NSLocalizedString(@"protocol_terms", @"https://www.lanyingim.com/terms")];
+            [attributedText addAttribute:NSLinkAttributeName value:url range:linkRange];
+        }
+        
+        [attributedText addAttribute:NSForegroundColorAttributeName value:BMXCOLOR_HEX(0x4A90E2) range:linkRange];
+
+        [_privacyLabel setUserInteractionEnabled:YES];  // 允许用户交互以启用超链接
+        _privacyLabel.attributedText = attributedText;
+
+        UITapGestureRecognizer *tapGesture = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(handleTap:)];
+        [_privacyLabel addGestureRecognizer:tapGesture];
+        
         [self addSubview:_privacyLabel];
     
     }
     return _privacyLabel;
     
+}
+
+- (NSInteger)characterIndexAt:(CGPoint)point attributedText:(NSAttributedString *)attributedText {
+    NSTextStorage *textStorage = [[NSTextStorage alloc] initWithAttributedString:attributedText];
+    NSLayoutManager *layoutManager = [[NSLayoutManager alloc] init];
+    [textStorage addLayoutManager:layoutManager];
+    
+    NSTextContainer *textContainer = [[NSTextContainer alloc] initWithSize:CGSizeMake(CGFLOAT_MAX, CGFLOAT_MAX)];
+    [layoutManager addTextContainer:textContainer];
+    textContainer.lineFragmentPadding = 0;
+    
+    NSUInteger glyphIndex = [layoutManager glyphIndexForPoint:point inTextContainer:textContainer];
+    NSInteger characterIndex = [layoutManager characterIndexForGlyphAtIndex:glyphIndex];
+    
+    return characterIndex;
+}
+
+- (void)handleTap:(UITapGestureRecognizer *)gestureRecognizer {
+    UILabel *label = (UILabel *)gestureRecognizer.view;
+    NSAttributedString *attributedText = label.attributedText;
+    if (!label || !attributedText) {
+        return;
+    }
+
+    // 检查点击的位置是否在某个链接范围内
+    CGPoint location = [gestureRecognizer locationInView:label];
+    NSInteger characterIndex = [self characterIndexAt:location attributedText:attributedText];
+    NSDictionary *attributes = [attributedText attributesAtIndex:characterIndex effectiveRange:nil];
+    NSURL *url = attributes[NSLinkAttributeName];
+    if (url) {
+        [self privacyLinkClick: url.absoluteString];
+    }
 }
 
 - (UIButton *)privacyButton {
@@ -596,10 +676,9 @@
 - (UIButton *)editButton {
     if (!_editButton) {
         _editButton = [UIButton buttonWithType:UIButtonTypeCustom];
-        [_editButton setImage:[UIImage imageNamed:@"appidedit"] forState:UIControlStateNormal];
+        [_editButton setBackgroundImage:[UIImage imageNamed:@"settings"] forState:UIControlStateNormal];
         [_editButton addTarget:self action:@selector(editButtonClick) forControlEvents:UIControlEventTouchUpInside];
         _editButton.layer.masksToBounds = YES;
-        _editButton.layer.cornerRadius = 7;
         _editButton.titleLabel.font = [UIFont systemFontOfSize:12];
         [_editButton setTitleColor:BMXCOLOR_HEX(0x0079F4) forState:UIControlStateNormal];
         
@@ -611,11 +690,10 @@
 - (UIButton *)scanConsuleButton {
     if (!_scanConsuleButton) {
         _scanConsuleButton = [UIButton buttonWithType:UIButtonTypeCustom];
-        [_scanConsuleButton setImage:[UIImage imageNamed:@"scanbutton"] forState:UIControlStateNormal];;
+        [_scanConsuleButton setBackgroundImage:[UIImage imageNamed:@"scan"] forState:UIControlStateNormal];;
         [_scanConsuleButton setTitleColor:BMXCOLOR_HEX(0x333333) forState:UIControlStateNormal];
         [_scanConsuleButton addTarget:self action:@selector(scanConsuleButtonClicked) forControlEvents:UIControlEventTouchUpInside];
         _scanConsuleButton.layer.masksToBounds = YES;
-        _scanConsuleButton.layer.cornerRadius = 12;
         [self addSubview:_scanConsuleButton];
     }
     return _scanConsuleButton;
@@ -797,42 +875,10 @@
 //    return _getSmsButton;
 //}
 
-// 微信登录Block
-- (UIView *)wechatLine1 {
-    if (!_wechatLine1) {
-        _wechatLine1 = [[UIView alloc] init];
-        _wechatLine1.backgroundColor = kColorC4_5;
-        [self addSubview:_wechatLine1];
-    }
-    return _wechatLine1;
-}
-
-- (UIView *)wechatLine {
-    if (!_wechatLine) {
-        _wechatLine = [[UIView alloc] init];
-        _wechatLine.backgroundColor = kColorC4_5;
-        [self addSubview:_wechatLine];
-    }
-    return _wechatLine;
-    
-}
-
-- (UILabel *)wechatLabel {
-    if (!_wechatLabel) {
-        _wechatLabel = [[UILabel alloc] init];
-        _wechatLabel.textColor = BMXCOLOR_HEX(0xAFAFAF);
-        _wechatLabel.font = [UIFont systemFontOfSize:14];
-        _wechatLabel.text = NSLocalizedString(@"Quick_login", @"快捷登录");
-        [self addSubview:_wechatLabel];
-    }
-    return _wechatLabel;
-    
-}
-
 - (UIButton *)otherLoginButton {
     if (!_otherLoginButton) {
         _otherLoginButton = [UIButton buttonWithType:UIButtonTypeCustom];
-        [_otherLoginButton setImage:[UIImage imageNamed:@"wechat"] forState:UIControlStateNormal];
+        [_otherLoginButton setBackgroundImage:[UIImage imageNamed:@"wechat"] forState:UIControlStateNormal];
         [_otherLoginButton addTarget:self action:@selector(otherLoginButtonClick) forControlEvents:UIControlEventTouchUpInside];
         _otherLoginButton.layer.masksToBounds = YES;
         _otherLoginButton.layer.cornerRadius = 12;

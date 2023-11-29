@@ -115,13 +115,17 @@ CGFloat const kChatBatItemWH = 26.0f;
     CGRect endRect = [[userInfo objectForKey:UIKeyboardFrameEndUserInfoKey] CGRectValue];
     if(!(beginRect.size.height > 0 && ( fabs(beginRect.origin.y - endRect.origin.y) > 0))) return;
     
+    UIApplicationState appState = [[UIApplication sharedApplication] applicationState];
+    if (appState != UIApplicationStateActive) {
+        return;
+    }
     _animationDuration = [userInfo[UIKeyboardAnimationDurationUserInfoKey] floatValue];
     _animationCurve = [userInfo[UIKeyboardAnimationCurveUserInfoKey] integerValue];
     
     [UIView animateWithDuration:_animationDuration delay:0 options:(_animationCurve << 16 | UIViewAnimationOptionBeginFromCurrentState) animations:^{
         // 修改frame
-        self.y = MAXScreenH - self.height - _keyboardHeight;
-        _tableView.height = self.y - kNavBarHeight;
+        self.y = MAXScreenH - self.height - self->_keyboardHeight;
+        self->_tableView.height = self.y - kNavBarHeight;
 //        [_conversationChatVC scrollToBottomAnimated:NO refresh:NO];
     } completion:nil];
     
@@ -467,7 +471,7 @@ CGFloat const kChatBatItemWH = 26.0f;
     [UIView animateWithDuration:_animationDuration delay:0 options:(_animationCurve << 16 | UIViewAnimationOptionBeginFromCurrentState) animations:^{
         // 调整整个InputToolBar 的高度
         self.height = (15 + size.height) - kChatBarHeight < 5 ? kChatBarHeight : 15 + size.height;
-        CGFloat keyboardHeight = _keyboardHeight;
+        CGFloat keyboardHeight = self->_keyboardHeight;
         if (self.moreBtn.selected) {
             keyboardHeight = kChatMoreHeight;
         }
@@ -476,7 +480,7 @@ CGFloat const kChatBatItemWH = 26.0f;
         }
         
         self.y = MAXScreenH - self.height - keyboardHeight;
-        _tableView.height = self.y - kNavBarHeight;
+        self->_tableView.height = self.y - kNavBarHeight;
         [self layoutIfNeeded];
     } completion:nil];
 }

@@ -48,7 +48,10 @@
     CGFloat nickNameleft = 10;
     CGFloat top = 10;
     CGFloat subtitleLabeltop = 7;
-    
+    CGFloat paddingRight = 20;
+    CGFloat rowHeight = 22;
+    CGFloat timeWidth = 70;
+
     self.avatarImageView.bmx_left = avatarLeft;
     self.avatarImageView.bmx_size = CGSizeMake(48, 48);
     self.avatarImageView.bmx_top = top;
@@ -64,19 +67,19 @@
     
     
     self.titleLabel.bmx_left = nickNameleft + self.avatarImageView.bmx_right;
-    self.titleLabel.size = CGSizeMake(MAXScreenH - nickNameleft * 2  - self.avatarImageView.width , 22);
+    self.titleLabel.size = CGSizeMake(MAXScreenW - paddingRight*2 - timeWidth - self.titleLabel.bmx_left , rowHeight);
     self.titleLabel.bmx_top = top;
     
     self.subtitleLabel.bmx_left = nickNameleft + self.avatarImageView.bmx_right;
-    self.subtitleLabel.size = CGSizeMake(MAXScreenH - nickNameleft * 2  - self.avatarImageView.width , 22);
-    self.subtitleLabel.bmx_top = top + subtitleLabeltop + 22;
+    self.subtitleLabel.size = CGSizeMake(MAXScreenW - paddingRight - self.subtitleLabel.bmx_left, rowHeight);
+    self.subtitleLabel.bmx_top = top + subtitleLabeltop + rowHeight;
     
-    self.timeLabel.bmx_size = CGSizeMake(120, 22);
-    self.timeLabel.bmx_right = MAXScreenW-20;
+    self.timeLabel.bmx_size = CGSizeMake(timeWidth, rowHeight);
+    self.timeLabel.bmx_right = MAXScreenW - paddingRight;
     self.timeLabel.bmx_top = self.titleLabel.bmx_top;
     
-    self.line.bmx_size = CGSizeMake(MAXScreenW - 40 - 35, 0.5);
     self.line.bmx_left = self.avatarImageView.bmx_right + 5;
+    self.line.bmx_size = CGSizeMake(MAXScreenW - self.line.bmx_left, 0.5);
     self.line.bmx_right = MAXScreenW;
     self.line.bmx_bottom = 68-1;
 

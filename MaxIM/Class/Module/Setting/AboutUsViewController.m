@@ -40,7 +40,8 @@
     label1.font = [UIFont systemFontOfSize:14];
     NSDictionary *infoDictionary = [[NSBundle mainBundle] infoDictionary];
     NSString *app_Version = [infoDictionary objectForKey:@"CFBundleShortVersionString"];
-    label1.text = [NSString stringWithFormat:NSLocalizedString(@"Maximtop_IM__v", @"蓝莺IM v%@"), app_Version];
+    NSString *build_Version = [infoDictionary objectForKey:@"CFBundleVersion"];
+    label1.text = [NSString stringWithFormat:NSLocalizedString(@"Maximtop_IM__v", @"蓝莺IM v%@.%@"), app_Version, build_Version];
     [self.view addSubview:label1];
 
     
@@ -82,7 +83,14 @@
     label7.userInteractionEnabled = YES;
     UITapGestureRecognizer *phoneTap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(callAction)];
     [label7 addGestureRecognizer:phoneTap];
-    
+
+    UILabel *label8 = [[UILabel alloc] init];
+    label8.text = NSLocalizedString(@"icp_no", @"京ICP备19033149号-11A");
+    label8.textAlignment = NSTextAlignmentCenter;
+    label8.numberOfLines = 0;
+    label8.font = [UIFont systemFontOfSize:15];
+    [self.view addSubview:label8];
+
     UILabel *bottom_label= [[UILabel alloc] init];
     bottom_label.text = NSLocalizedString(@"copyright_Maximtop", @"© 2019-2022 美信拓扑");
     bottom_label.textAlignment = NSTextAlignmentCenter;
@@ -116,6 +124,12 @@
     label2.bmx_size =  CGSizeMake(100, 20);
     label2.bmx_centerX =  self.view.bmx_centerX;
     label2.bmx_top = label1.bmx_bottom + 5;
+    
+    label8.bmx_width = MAXScreenW - 20;
+    label8.bmx_top =  label2.bmx_bottom + 10;
+    label8.bmx_height = 20;
+    label8.bmx_centerX = self.view.bmx_centerX;
+
     [label1 sizeToFit];
     [label2 sizeToFit];
 

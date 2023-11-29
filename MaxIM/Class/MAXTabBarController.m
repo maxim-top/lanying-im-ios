@@ -257,9 +257,11 @@ typedef enum : NSUInteger {
 - (void)receiveReadAllMessages:(NSArray<BMXMessage *> *)messages {
     UINavigationController *navigation = (UINavigationController *)[self.childViewControllers firstObject];
     if ([NSStringFromClass([navigation.childViewControllers firstObject].class) isEqualToString:@"MainViewController"] ) {
-        
-        MainViewController *mainVC = [navigation.childViewControllers firstObject];
-        [mainVC receiveNewMessage:[messages lastObject]];
+        dispatch_queue_t serialQueue = dispatch_queue_create("top.maxim.receiveNewMessage", DISPATCH_QUEUE_SERIAL);
+        dispatch_async(serialQueue, ^{
+            MainViewController *mainVC = [navigation.childViewControllers firstObject];
+            [mainVC receiveNewMessage:[messages lastObject]];
+        });
     }
     MAXLog(@"已经readall");
 

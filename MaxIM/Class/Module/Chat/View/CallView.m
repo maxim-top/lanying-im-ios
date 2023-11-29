@@ -22,6 +22,7 @@
 static CGFloat const kButtonPadding = 40;
 static CGFloat const kButtonSize = 60;
 static CGFloat const kLocalVideoViewPadding = 8;
+static CGFloat const kAvatarSize = 120;
 
 @interface CallView () <RTCVideoViewDelegate>
 @property (nonatomic, strong) UILabel *nameLabel;
@@ -71,9 +72,9 @@ static CGFloat const kLocalVideoViewPadding = 8;
             [self addSubview:_localVideoView];
         }
         
+        self.remoteImageView.image = [UIImage imageNamed:@"profileavatar"];
         if ([self.currentRoster.username length]) {
             self.nameLabel.text = [NSString stringWithFormat:@"%@", [self.currentRoster.nickname length] ? self.currentRoster.nickname : self.currentRoster.username];
-            [self.nameLabel sizeToFit];
         }
 
         if ([self.currentRoster.avatarThumbnailPath length]) {
@@ -84,7 +85,7 @@ static CGFloat const kLocalVideoViewPadding = 8;
         self.myImageView.backgroundColor = [UIColor lh_colorWithHex:0xdddddd alpha:0.4];
 
         _cameraButton = [UIButton buttonWithType:UIButtonTypeCustom];
-        _cameraButton.backgroundColor = [UIColor whiteColor];
+        _cameraButton.backgroundColor = [UIColor colorWithRed:1.0 green:1.0 blue:1.0 alpha:0.0];
         _cameraButton.layer.cornerRadius = kButtonSize / 2;
         _cameraButton.layer.masksToBounds = YES;
         UIImage *image = [UIImage imageNamed:@"icon_call_camera"];
@@ -95,7 +96,7 @@ static CGFloat const kLocalVideoViewPadding = 8;
         [self addSubview:_cameraButton];
         
         _micButton = [UIButton buttonWithType:UIButtonTypeCustom];
-        _micButton.backgroundColor = [UIColor whiteColor];
+        _micButton.backgroundColor = [UIColor colorWithRed:1.0 green:1.0 blue:1.0 alpha:0.0];
         _micButton.layer.cornerRadius = kButtonSize / 2;
         _micButton.layer.masksToBounds = YES;
         image = [UIImage imageNamed:@"icon_call_mic"];
@@ -106,7 +107,7 @@ static CGFloat const kLocalVideoViewPadding = 8;
         [self addSubview:_micButton];
         
         _speakerButton = [UIButton buttonWithType:UIButtonTypeCustom];
-        _speakerButton.backgroundColor = [UIColor whiteColor];
+        _speakerButton.backgroundColor = [UIColor colorWithRed:1.0 green:1.0 blue:1.0 alpha:0.0];
         _speakerButton.layer.cornerRadius = kButtonSize / 2;
         _speakerButton.layer.masksToBounds = YES;
         image = [UIImage imageNamed:@"icon_call_speaker"];
@@ -118,6 +119,7 @@ static CGFloat const kLocalVideoViewPadding = 8;
 
         // TODO(tkchin): don't display this if we can't actually do camera switch.
         _camerasSwitchButton = [UIButton buttonWithType:UIButtonTypeCustom];
+        _speakerButton.backgroundColor = [UIColor colorWithRed:1.0 green:1.0 blue:1.0 alpha:0.0];
         _camerasSwitchButton.layer.cornerRadius = kButtonSize / 2;
         _camerasSwitchButton.layer.masksToBounds = YES;
         image = [UIImage imageNamed:@"icon_call_switch_camera_big"];
@@ -128,7 +130,7 @@ static CGFloat const kLocalVideoViewPadding = 8;
         [self addSubview:_camerasSwitchButton];
         
         _hangupButton = [UIButton buttonWithType:UIButtonTypeCustom];
-        _hangupButton.backgroundColor = [UIColor redColor];
+        _hangupButton.backgroundColor = [UIColor colorWithRed:1.0 green:1.0 blue:1.0 alpha:0.0];
         _hangupButton.layer.cornerRadius = kButtonSize / 2;
         _hangupButton.layer.masksToBounds = YES;
         image = [UIImage imageNamed:@"icon_call_hangup"];
@@ -139,7 +141,7 @@ static CGFloat const kLocalVideoViewPadding = 8;
         [self addSubview:_hangupButton];
         
         _answerButton = [UIButton buttonWithType:UIButtonTypeCustom];
-        _answerButton.backgroundColor = [UIColor redColor];
+        _answerButton.backgroundColor = [UIColor colorWithRed:1.0 green:1.0 blue:1.0 alpha:0.0];
         _answerButton.layer.cornerRadius = kButtonSize / 2;
         _answerButton.layer.masksToBounds = YES;
         image = [UIImage imageNamed:@"icon_call_answer"];
@@ -193,7 +195,7 @@ static CGFloat const kLocalVideoViewPadding = 8;
         _nameLabel = [[UILabel alloc] init];
         [self addSubview:_nameLabel];
         CGFloat nameLabelRight = 15;
-        _nameLabel.size = CGSizeMake(80, 30);
+        _nameLabel.size = CGSizeMake(180, 30);
         _nameLabel.bmx_top = self.remoteImageView.bmx_top + 3;
         _nameLabel.bmx_left = self.remoteImageView.bmx_right + nameLabelRight;
     }
@@ -241,12 +243,12 @@ static CGFloat const kLocalVideoViewPadding = 8;
     }
     
     if (_nameLabel) {
-        _nameLabel.font = [UIFont fontWithName:@"PingFangSC-Semibold" size:20];
+        _nameLabel.font = [UIFont fontWithName:@"PingFangSC-Semibold" size:22];
         _nameLabel.textColor = [UIColor whiteColor];
         _nameLabel.textAlignment = NSTextAlignmentCenter;
 
-        CGFloat nameLabelLeft = self.bmx_centerX - 40;
-        _nameLabel.bmx_size = CGSizeMake(80, 30);
+        CGFloat nameLabelLeft = self.bmx_centerX - 90;
+        _nameLabel.bmx_size = CGSizeMake(180, 30);
         _nameLabel.bmx_top = self.bmx_top + 100;
         _nameLabel.bmx_left = nameLabelLeft;
     }
@@ -263,11 +265,14 @@ static CGFloat const kLocalVideoViewPadding = 8;
     }
 
     if (_remoteImageView) {
-        CGSize avatarImageViewSize = CGSizeMake(171, 171);
+        CGSize avatarImageViewSize = CGSizeMake(kAvatarSize, kAvatarSize);
         CGFloat avatarImageViewLeft = self.bmx_centerX - avatarImageViewSize.width/2;
         _remoteImageView.bmx_size = avatarImageViewSize;
         _remoteImageView.bmx_top = self.bmx_top + 160;
         _remoteImageView.bmx_left = avatarImageViewLeft;
+        _remoteImageView.backgroundColor = [UIColor colorWithRed:1.0 green:1.0 blue:1.0 alpha:0.0];
+        _remoteImageView.layer.cornerRadius = kAvatarSize / 2;
+        _remoteImageView.layer.masksToBounds = YES;
     }
 
     //small view

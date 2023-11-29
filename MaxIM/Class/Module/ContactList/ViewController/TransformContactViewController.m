@@ -7,7 +7,6 @@
 //
 
 #import "TransformContactViewController.h"
-#import "RosterSearchViewController.h"
 #import "RosterDetailViewController.h"
 #import "ImageTitleBasicTableViewCell.h"
 #import "LHChatVC.h"

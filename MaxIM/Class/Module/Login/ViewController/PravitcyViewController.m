@@ -42,6 +42,7 @@
 }
 
 - (void)setNav {
+    [self.navigationController setNavigationBarHidden:YES animated:NO];
     [self setNavigationBarTitle:self.navtitle navLeftButtonIcon:@"blackback"];
 }
 

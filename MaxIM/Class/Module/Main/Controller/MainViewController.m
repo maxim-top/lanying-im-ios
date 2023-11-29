@@ -32,6 +32,7 @@
 #import <floo-ios/floo_proxy.h>
 #import "CallViewController.h"
 #import <floo-rtc-ios/RTCEngineManager.h>
+#import "LHTools.h"
 
 @interface MainViewController ()<UITableViewDelegate, UITableViewDataSource, UITextFieldDelegate, ChatVCDelegate, BMXChatServiceProtocol,BMXRTCServiceProtocol>
 
@@ -328,9 +329,26 @@
     [_hungUpCalls addObject:msg.config.getRTCCallId];
 }
 
+- (void)onRTCRecordMessageReceiveWithMsg:(BMXMessage*)message {
+    if(message == nil){
+        return;
+    }
+    if (message.fromId == [self.account.usedId longLongValue] ||
+        (![message.content isEqualToString:@"canceled"] &&
+         ![message.content isEqualToString:@"timeout"] &&
+         ![message.content isEqualToString:@"busy"]
+         )) {
+        [[[BMXClient sharedClient] chatService] ackMessageWithMsg:message];
+    }
+}
+
 - (void)receiveRTCCallMessage:(BMXMessage *)message{
     long long roomId = message.config.getRTCRoomId;
+    if (self.account == nil){
+        self.account = [IMAcountInfoStorage loadObject];
+    }
     long long myId = [self.account.usedId longLongValue];
+    MAXLog(@"myId:%lld", myId);
     long long peerId = message.config.getRTCInitiator;
     if (myId == peerId){
         return;
@@ -373,16 +391,13 @@
 - (void)replyBusyWithCallId:(NSString*)callId myId:(long long)myId peerId:(long long) peerId{
     // send rtc message
     BMXMessageConfig *config = [BMXMessageConfig createMessageConfigWithMentionAll: NO];
-    [config setRTCHangupInfo:callId];
+    [config setRTCHangupInfo:callId peerDrop:NO];
     NSString *content = @"busy"; //Caller canceled
     BMXMessage *msg = [BMXMessage createRTCMessageWithFrom:myId to:peerId type:BMXMessage_MessageType_Single conversationId:peerId content:content];
     [config setPushMessageLocKey:@"callee_busy"];
 
     msg.config = config;
     [[[BMXClient sharedClient] rtcService] sendRTCMessageWithMsg:msg completion:^(BMXError *aError) {
-        NSNotification *noti = [NSNotification notificationWithName:@"call" object:self userInfo:@{@"event":@"hangup"}];
-        //发送通知
-        [[NSNotificationCenter defaultCenter]postNotification:noti];
     }];
 }
 
@@ -567,12 +582,12 @@
     } else if (conversation.lastMsg.contentType == BMXMessage_ContentType_Video) {
         cell.subtitleLabel.text = @"[视频]";
     } else if (conversation.lastMsg.contentType == BMXMessage_ContentType_RTC) {
-        cell.subtitleLabel.text = @"[通话]";
         BMXMessage *message = conversation.lastMsg;
-        if ([message.config.getRTCAction isEqualToString: @"hangup"]) {
+        if ([message.config.getRTCAction isEqualToString: @"record"]) {
+            cell.subtitleLabel.text = @"[通话]";
             BOOL isFrom = message.fromId == [self.account.usedId longLongValue] ;
             if ([message.content isEqualToString:@"rejected"]) {
-                if (isFrom) {
+                if (!isFrom) {
                     cell.subtitleLabel.text = NSLocalizedString(@"call_rejected", @"通话已拒绝");
                 }else{
                     cell.subtitleLabel.text = NSLocalizedString(@"call_rejected_by_callee", @"通话已被对方拒绝");
@@ -590,21 +605,25 @@
                     cell.subtitleLabel.text = NSLocalizedString(@"call_not_responding", @"未应答");
                 }
             } else if ([message.content isEqualToString:@"busy"]) {
-                if (isFrom) {
+                if (!isFrom) {
                     cell.subtitleLabel.text = NSLocalizedString(@"call_busy", @"忙线未接听");
                 }else{
                     cell.subtitleLabel.text = NSLocalizedString(@"callee_busy", @"对方忙");
                 }
             } else{
                 int sec = [message.content intValue]/1000;
-                cell.subtitleLabel.text = [NSString stringWithFormat:NSLocalizedString(@"call_duration", @"通话时长：%02d:%02d"),sec/60, sec%60];
+                NSString *format = message.config.isPeerDrop?
+                NSLocalizedString(@"call_ended", @"通话中断：%02d:%02d"):
+                NSLocalizedString(@"call_duration", @"通话时长：%02d:%02d");
+                cell.subtitleLabel.text = [NSString stringWithFormat:format, sec/60, sec%60];
             }
         }
     }
     
     if (conversation.lastMsg.serverTimestamp > 0) {
         cell.timeLabel.hidden = NO;
-        cell.timeLabel.text = [self compareCurrentTime:[[NSDate date] timeIntervalSince1970] comepareDate:conversation.lastMsg.serverTimestamp * 0.001];;
+        NSString *date = [NSString stringWithFormat:@"%lld", conversation.lastMsg.serverTimestamp];
+        cell.timeLabel.text = [LHTools dayStringOnConversationListWithDate:date];
     } else {
         cell.timeLabel.hidden = YES;
     }

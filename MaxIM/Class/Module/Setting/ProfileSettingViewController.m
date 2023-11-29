@@ -28,6 +28,7 @@
 #import "WechatIsBindApi.h"
 #import "AppWechatUnbindApi.h"
 #import "LogViewController.h"
+#import "WXApi.h"
 
 @interface ProfileSettingViewController ()<UITableViewDataSource, UITableViewDelegate, ChangeMobileAlertDelegate>
 
@@ -52,11 +53,13 @@
     self.view.backgroundColor = [UIColor whiteColor];
     [self setUpNavItem];
     self.dataArray = [self getSettingConfigDataArray];
-    [self getprofile];
+    [self getprofile:NO];
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.5 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+        [self getprofile:YES];
+    });
     [self checkWechatBind];
     [self setupHeaderView];
-    
-    
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(wechatBound) name:@"wechatBound" object:nil];
 }
 
 - (void)checkWechatBind {
@@ -78,8 +81,8 @@
 }
 
 #pragma mark - manager
-- (void)getprofile {
-    [[[BMXClient sharedClient] userService] getProfile:NO completion:^(BMXUserProfile *bmxUserProfile, BMXError *error) {
+- (void)getprofile:(BOOL)forceUpdate {
+    [[[BMXClient sharedClient] userService] getProfile:forceUpdate completion:^(BMXUserProfile *bmxUserProfile, BMXError *error) {
         if (!error){
             self.profile = bmxUserProfile;
             if (self.profile.addFriendAuthMode != BMXUserProfile_AddFriendAuthMode_AnswerQuestion) {
@@ -164,7 +167,7 @@
         if (!error) {
             [HQCustomToast showDialog:NSLocalizedString(@"Set_successfully", @"设置成功")];
             MAXLog(@"%@", error);
-            [self getprofile];
+            [self getprofile:YES];
         }
     }];
 }
@@ -177,7 +180,7 @@
         if (!error) {
             [HQCustomToast showDialog:NSLocalizedString(@"Set_successfully", @"设置成功")];
             MAXLog(@"%@", error);
-            [self getprofile];
+            [self getprofile:YES];
         }
     }];
 }
@@ -189,7 +192,7 @@
         if (!error) {
             [HQCustomToast showDialog:NSLocalizedString(@"Set_successfully", @"设置成功")];
             MAXLog(@"%@", error);
-            [self getprofile];
+            [self getprofile:YES];
         }
     }];
 }
@@ -199,7 +202,7 @@
     [[[BMXClient sharedClient] userService] setAddFriendAuthMode:mode completion:^(BMXError *error) {
         if (!error) {
             [HQCustomToast showDialog:NSLocalizedString(@"Set_successfully", @"设置成功")];
-            [self getprofile];
+            [self getprofile:YES];
         }
     }];
 }
@@ -211,7 +214,7 @@
     [[[BMXClient sharedClient] userService] setAuthQuestion: authQuestion completion:^(BMXError *error) {
         if (!error) {
             [HQCustomToast showDialog:NSLocalizedString(@"Set_successfully", @"设置成功")];
-            [self getprofile];
+            [self getprofile:YES];
         }
     }];
 }
@@ -331,6 +334,28 @@
     } failureBlock:^(NSError * _Nullable error) {
         
     }];
+}
+// 微信登录
+- (void)clickBindWechat {
+ 
+    //        方法一：只有手机安装了微信才能使用
+    if ([WXApi isWXAppInstalled]) {
+        SendAuthReq *req = [[SendAuthReq alloc] init];
+        //这里是按照官方文档的说明来的此处我要获取的是个人信息内容
+        req.scope = @"snsapi_userinfo";
+        req.state = @"bindInProfile";
+        //向微信终端发起SendAuthReq消息
+        [WXApi sendReq:req completion:^(BOOL success) {
+            
+        }];
+    } else {
+        [HQCustomToast showDialog:NSLocalizedString(@"install_WeChat_client", @"请安装微信客户端")];
+        MAXLog(@"安装微信客户端");
+    }
+}
+
+-(void)wechatBound {
+    [self checkWechatBind];
 }
 
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView {
@@ -459,7 +484,7 @@
     } else if ([dic[@"type"] isEqualToString:NSLocalizedString(@"WeChat", @"微信")]) {
         
         UIAlertController* alert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Remind", @"提醒")
-                                                                       message:NSLocalizedString(@"Confirm_to_unbind_the_WeChat_account", @"确定解绑微信？")
+                                                                       message:self.isbindWechat ? NSLocalizedString(@"Confirm_to_unbind_the_WeChat_account", @"确定解绑微信？") : NSLocalizedString(@"Go_to_bind", @"去绑定")
                                                                 preferredStyle:UIAlertControllerStyleAlert];
         
         UIAlertAction* okAction = [UIAlertAction actionWithTitle:NSLocalizedString(@"Confirm", @"确定") style:UIAlertActionStyleDefault
@@ -467,7 +492,7 @@
                                                              //响应事件
                                                              //得到文本信息
                                                              
-                                                             [self clickunbindWechat];
+            self.isbindWechat ? [self clickunbindWechat]:[self clickBindWechat];
                                                              
                                                          }];
         UIAlertAction* cancelAction = [UIAlertAction actionWithTitle:NSLocalizedString(@"Cancel", @"取消") style:UIAlertActionStyleCancel
@@ -658,14 +683,12 @@
             localPath = [[[[BMXClient sharedClient] getSDKConfig] getCacheDir] stringByAppendingPathComponent:fileName];
             [imageData writeToFile:localPath atomically:YES];
         }
-        [[[BMXClient sharedClient] userService] uploadAvatarWithAvatarPath:localPath callback:^(int progress) {
-            MAXLog(@"%d",progress);
-            if (progress == 100) {
-                [HQCustomToast showDialog:NSLocalizedString(@"Upload_successfully", @"上传成功")];
-            }
-        } completion:^(BMXError *error) {
+        [[[BMXClient sharedClient] userService] uploadAvatarWithAvatarPath:localPath callback:^(int progress) {} completion:^(BMXError *error) {
             if (error) {
-                [HQCustomToast showDialog:NSLocalizedString(@"Upload_successfully", @"上传失败")];
+                [HQCustomToast showDialog:NSLocalizedString(@"Upload_falied", @"上传失败")];
+            } else {
+                [HQCustomToast showDialog:NSLocalizedString(@"Upload_successfully", @"上传成功")];
+                [self getprofile:YES];
             }
         }];
     }];

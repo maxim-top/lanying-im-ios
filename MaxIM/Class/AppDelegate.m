@@ -32,6 +32,8 @@
 #import <floo-ios/floo_proxy.h>
 #import "AppDelegate+PushService.h"
 #import <floo-rtc-ios/RTCEngineManager.h>
+#import "BindOpenIdApi.h"
+#import "AppIDViewController.h"
 
 @interface AppDelegate ()<UNUserNotificationCenterDelegate, BMXUserServiceProtocol, WXApiDelegate, BMXPushServiceProtocol>
 
@@ -327,22 +329,13 @@
     self.maintabController = [[MAXTabBarController alloc] initWithNibName:nil bundle:nil];
     [MAXGlobalTool share].rootViewController = self.maintabController;
     
-//    BOOL firstLauch = [[NSUserDefaults standardUserDefaults] boolForKey:@"MAXFirstLauch"];
-//    if (!firstLauch) {
-//
-//        MAXLauchVideoViewController *lauchVideoViewController = [[MAXLauchVideoViewController alloc] init];
-//        self.window.rootViewController = lauchVideoViewController;
-//        [[NSUserDefaults standardUserDefaults] setBool:YES forKey:@"MAXFirstLauch"];
-//        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(changeRootViewController) name:@"LauchVideoPlayeFinish" object:nil];
-//
-//    }else {
-    
-        if (![IMAcountInfoStorage isHaveLocalData]) {
-            self.window.rootViewController = [LoginViewController loginViewWithViewControllerWithNavigation];
-        }else {
-            self.window.rootViewController = self.maintabController;
-        }
-//    }
+    if (![IMAcountInfoStorage isHaveLocalData]) {
+        UIViewController *vc = [[AppIDViewController alloc] initWithNibName:nil bundle:nil];
+        UINavigationController *nav = [[UINavigationController alloc] initWithRootViewController:vc];
+        self.window.rootViewController = nav;
+    }else {
+        self.window.rootViewController = self.maintabController;
+    }
 }
 - (void)changeRootViewController {
     
@@ -361,6 +354,10 @@
     }else{
         UIViewController *currVC = [self getCurrentViewController];
         UINavigationController *nav = [currVC navigationController];
+        BMXSignInStatus *status = [[BMXClient sharedClient] signInStatus];
+        if(status != BMXSignInStatus_SignIn){
+            nav = [self.maintabController.childViewControllers firstObject];
+        }
         UIViewController *popVC;
         if(self.maintabController) {
             if ([url.absoluteString hasPrefix:@"MaxIMExtension://Roster"]) {
@@ -391,18 +388,48 @@
                 MAXLogDebug(@"WXAPI:onResp3");
                 if ( result.isOK) {
                     MAXLogDebug(@"WXAPI:onResp4");
-                    if (!result.resultData[@"password"] ) {
-                       //  注册登录
-                        [HQCustomToast showDialog:NSLocalizedString(@"login_with_your_registered_WeChat_account", @"请登录注册绑定微信")];
-                        [[NSNotificationCenter defaultCenter] postNotificationName:@"wechatloginsuccess_newuser" object:result.resultData];
-                    } else {
-                        MAXLogDebug(@"WXAPI:onResp5 %@ %@", result.resultData[@"user_id"], result.resultData[@"username"]);
-                        IMAcount *account = [[IMAcount alloc] init];
-                        account.usedId  = [NSString stringWithFormat:@"%@",result.resultData[@"user_id"]];
-                        account.password = result.resultData[@"password"];
-                        account.userName = result.resultData[@"username"];
-                        [IMAcountInfoStorage saveObject:account];
-                        [[NSNotificationCenter defaultCenter] postNotificationName:@"wechatloginsuccess" object:nil];
+                    if ([temp.state isEqualToString:@"bindInProfile"]){
+                        NSString *openId = [result.resultData objectForKey:@"openid"];
+                        IMAcount *account = [IMAcountInfoStorage loadObject];
+                        GetTokenApi *api = [[GetTokenApi alloc] initWithName:account.userName password:account.password];
+                        [api startWithSuccessBlock:^(ApiResult * _Nullable result) {
+                            if (result.isOK) {
+                                IMAcount *account = [IMAcountInfoStorage loadObject];
+                                NSDictionary *dic = result.resultData;
+                                account.token = dic[@"token"];
+                                [IMAcountInfoStorage saveObject:account];
+                                
+                                BindOpenIdApi *api = [[BindOpenIdApi alloc] initWithopenId:openId];
+                                [api startWithSuccessBlock:^(ApiResult * _Nullable result) {
+                                    if (result.isOK) {
+                                        [HQCustomToast showDialog:NSLocalizedString(@"Bind_successfully", @"绑定成功")];
+                                    } else {
+                                        [HQCustomToast showDialog:result.errmsg];
+                                    }
+                                    [[NSNotificationCenter defaultCenter] postNotificationName:@"wechatBound" object:nil];
+                                } failureBlock:^(NSError * _Nullable error) {
+                                    [HQCustomToast showDialog:NSLocalizedString(@"Failed_to_bind", @"绑定失败")];
+                                    [[NSNotificationCenter defaultCenter] postNotificationName:@"wechatBound" object:nil];
+                                }];
+
+                            }
+                        } failureBlock:^(NSError * _Nullable error) {
+                            
+                        }];
+                    }else{
+                        if (!result.resultData[@"password"] ) {
+                           //  注册登录
+                            [HQCustomToast showDialog:NSLocalizedString(@"login_with_your_registered_WeChat_account", @"请登录注册绑定微信")];
+                            [[NSNotificationCenter defaultCenter] postNotificationName:@"wechatloginsuccess_newuser" object:result.resultData];
+                        } else {
+                            MAXLogDebug(@"WXAPI:onResp5 %@ %@", result.resultData[@"user_id"], result.resultData[@"username"]);
+                            IMAcount *account = [[IMAcount alloc] init];
+                            account.usedId  = [NSString stringWithFormat:@"%@",result.resultData[@"user_id"]];
+                            account.password = result.resultData[@"password"];
+                            account.userName = result.resultData[@"username"];
+                            [IMAcountInfoStorage saveObject:account];
+                            [[NSNotificationCenter defaultCenter] postNotificationName:@"wechatloginsuccess" object:nil];
+                        }
                     }
                 }
 

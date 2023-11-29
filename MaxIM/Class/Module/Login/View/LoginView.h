@@ -14,7 +14,9 @@ NS_ASSUME_NONNULL_BEGIN
 
 @optional
 
+- (void)privacyLinkClick:(NSString *)url;
 - (void)privacyButtonClick;
+- (void)privacyCheckButtonClick;
 - (void)termsButtonClick;
 - (void)confirmButtonClick;
 - (void)leftJumpButtonClick;
@@ -33,6 +35,7 @@ NS_ASSUME_NONNULL_BEGIN
 @interface LoginView : UIView
 
 @property (nonatomic, assign) id<LoginViewProtocol> delegate;
+@property (nonatomic, strong) UIButton *privacyCheckButton;
 
 + (instancetype)createLoginVieWithTitle:(NSString *)title;
 
@@ -64,7 +67,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 - (void)inputUserName:(NSString *)name;
 
-
+- (void)inputPassword:(NSString *)password;
 
 - (NSString *)firstTextfieldText;
 

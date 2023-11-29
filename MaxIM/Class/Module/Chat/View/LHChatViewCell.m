@@ -16,7 +16,8 @@ CGFloat const SEND_STATUS_SIZE = 20.0f;
 @interface LHChatViewCell ()
 
 @property (nonatomic, strong) UIButton *readStatusButton;
-
+@property (nonatomic, strong) NSString *content;
+@property (nonatomic, assign) MessageDeliveryState status;
 @end
 
 @implementation LHChatViewCell
@@ -37,7 +38,12 @@ CGFloat const SEND_STATUS_SIZE = 20.0f;
 
 - (void)layoutSubviews {
     [super layoutSubviews];
-    
+    if([_content isEqualToString:self.messageModel.content] &&
+       self.messageModel.status == _status){
+        return;
+    }
+    _content = self.messageModel.content;
+    _status = self.messageModel.status;
     CGRect bubbleFrame = _bubbleView.frame;
     bubbleFrame.origin.y = self.headImageView.frame.origin.y ;
     

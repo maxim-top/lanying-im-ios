@@ -65,7 +65,7 @@ static NSString *cellID = @"ImageTitleBasicTableViewCell";
     self.avatarImg.bmx_centerY = self.contentView.bmx_centerY;
     
     self.nicknameLabel.bmx_left = nickNameleft + self.avatarImg.bmx_right;
-    self.nicknameLabel.size = CGSizeMake(MAXScreenH - nickNameleft * 2  - self.avatarImg.width , 40);
+    self.nicknameLabel.size = CGSizeMake(MAXScreenW - nickNameleft * 2  - self.nicknameLabel.bmx_left , 40);
     self.nicknameLabel.bmx_top = top;
     
     self.line.bmx_size = CGSizeMake(MAXScreenW - 40 - 35, 0.5);
@@ -152,7 +152,7 @@ static NSString *cellID = @"ImageTitleBasicTableViewCell";
     self.avatarImg.bmx_centerY = self.contentView.bmx_centerY;
     
     self.nicknameLabel.bmx_left = nickNameleft + self.avatarImg.bmx_right;
-    self.nicknameLabel.size = CGSizeMake(MAXScreenH - nickNameleft * 2  - self.avatarImg.width , 40);
+    self.nicknameLabel.size = CGSizeMake(MAXScreenW - nickNameleft * 2  - self.nicknameLabel.bmx_left, 40);
     self.nicknameLabel.bmx_top = top;
     
     
@@ -185,7 +185,6 @@ static NSString *cellID = @"ImageTitleBasicTableViewCell";
         _nicknameLabel.font = [UIFont fontWithName:@"PingFangSC-Semibold" size:16];
         _nicknameLabel.textColor = [UIColor colorWithRed:51/255.0 green:51/255.0 blue:51/255.0 alpha:1/1.0];
         [self.contentView addSubview:_nicknameLabel];
-        [_nicknameLabel sizeToFit];
     }
     return _nicknameLabel;
 }

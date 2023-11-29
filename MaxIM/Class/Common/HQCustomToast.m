@@ -22,7 +22,16 @@ static bool isShowing = NO;
 @implementation HQCustomToast
 
 + (void)showDialog:(NSString *)string {
-    [HQCustomToast showToastWithInfo:string];
+    if ([NSThread isMainThread]) {
+        [HQCustomToast showToastWithInfo:string];
+    }else{
+        dispatch_semaphore_t semaphore = dispatch_semaphore_create(0);
+        dispatch_async(dispatch_get_main_queue(), ^{
+            [HQCustomToast showToastWithInfo:string];
+            dispatch_semaphore_signal(semaphore);
+        });
+        dispatch_semaphore_wait(semaphore, DISPATCH_TIME_FOREVER);
+    }
 }
 
 + (void)showDialog:(NSString *)string time:(CGFloat)seconds {

@@ -28,6 +28,12 @@ typedef enum : NSUInteger {
 
 @optional
 
+- (void)smsLogin;
+
+- (void)passwordLogin;
+
+- (void)signUp;
+
 - (void)pushToSmsLogin;
 
 - (void)pushToRegister;
@@ -45,6 +51,10 @@ typedef enum : NSUInteger {
 - (void)editAppid;
 
 - (void)showUserPrivacy;
+
+- (void)privacyLinkClick:(NSString *)url;
+
+- (void)privacyCheckButtonClick;
 
 - (void)showUserTerms;
 
@@ -90,6 +100,7 @@ typedef enum : NSUInteger {
 @property (nonatomic, copy) NSString *wechatOpenId;
 @property (nonatomic, copy) NSString *phone;
 @property (nonatomic, copy) NSString *sign;
+@property (nonatomic, strong) LoginView *loginView;
 
 
 - (instancetype)initWithViewType:(LoginVCType)viewType;
@@ -101,6 +112,8 @@ typedef enum : NSUInteger {
 - (void)showErrorText:(NSString *)errorText;
 
 - (void)setUserName:(NSString *)name;
+
+- (void)setPassword:(NSString *)password;
 
 - (void)showWechatButton:(BOOL)show;
 

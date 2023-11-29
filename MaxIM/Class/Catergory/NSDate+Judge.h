@@ -18,6 +18,12 @@
 /** 是否是昨天 */
 - (BOOL)lh_isInYesterday;
 
+/** 今年之前返回“年/月/日 时:分”；今天返回“时:分”；一周内返回“昨天 时:分”或者“星期X 时:分”；否则返回“/月/日 时:分”*/
+- (NSString *)lh_dayString;
+
+/** 今年之前返回“年/月/日”；今天返回“时:分”；一周内返回“昨天 时:分”或者“星期X”；否则返回“/月/日”*/
+- (NSString *)lh_dayStringOnConversationList;
+
 /** 是否是今年 */
 - (BOOL)lh_isInThisYear;
 @end

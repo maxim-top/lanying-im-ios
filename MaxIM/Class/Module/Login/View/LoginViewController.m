@@ -7,7 +7,8 @@
 //
 
 #import "LoginViewController.h"
-#import "PravitcyViewController.h"
+#import "UIViewController+CustomNavigationBar.h"
+#import <SafariServices/SFSafariViewController.h>
 #import "ScanViewController.h"
 #import "LoginView.h"
 #import "AppDelegate.h"
@@ -39,6 +40,11 @@
 @property (nonatomic, strong) LoginViewConfig *config;
 @property (nonatomic,copy) NSString *scanConsuleUserName;
 @property (nonatomic, strong) NSDictionary *scanConsuleResultDic;
+@property (nonatomic, strong) LoginView *loginView_Password;
+@property (nonatomic, strong) LoginView *loginView_Captcha;
+@property (nonatomic, strong) LoginView *loginView_Register;
+@property (nonatomic, strong) LoginView *loginView;
+@property (nonatomic, assign) BOOL privacyChecked;
 
 @end
 
@@ -65,14 +71,37 @@
 }
 
 - (void)setupUI {
-    
-    LoginView *loginView = [self.config creteLoginView];
-    [self.view addSubview:loginView];
+    if(self.config.viewType == LoginVCTypeCaptchLogin ||
+       self.config.viewType == LoginVCTypePasswordLogin ||
+       self.config.viewType == LoginVCTypeRegister){
+        self.config.viewType = LoginVCTypeRegister;
+        self.loginView_Register = [self.config creteLoginView];
+        
+        self.config.viewType = LoginVCTypePasswordLogin;
+        self.loginView_Password = [self.config creteLoginView];
+        
+        self.config.viewType = LoginVCTypeCaptchLogin;
+        self.loginView_Captcha = [self.config creteLoginView];
+        [self.view addSubview:self.loginView_Captcha];
+        self.loginView = self.loginView_Captcha;
+    }else{
+        LoginView *loginView = [self.config creteLoginView];
+        [self.view addSubview:loginView];
+    }
 }
 
 - (void)viewWillAppear:(BOOL)animated {
     [super viewWillAppear:animated];
     [self.navigationController setNavigationBarHidden:YES animated:NO];
+    self.navigationController.interactivePopGestureRecognizer.enabled = YES;
+    self.navigationController.interactivePopGestureRecognizer.delegate = self;
+}
+
+- (BOOL)gestureRecognizerShouldBegin:(UIGestureRecognizer*)gestureRecognizer {
+    if(self.navigationController.viewControllers.count <=1) {
+        return NO;
+    }
+    return YES;
 }
 
 - (void)viewDidLoad {
@@ -93,8 +122,7 @@
         keyWindow = [UIApplication sharedApplication].keyWindow;
     }
     [PrivacyView showPrivacyWithMaxTimeInterval:-1 view:self.view staticKey:@"maxim_privacy" privacyUrl:NSLocalizedString(@"protocol_privacy", @"https://www.lanyingim.com/privacy") delegate:self];
-
-    
+    _privacyChecked = false;
 }
 
 #pragma mark - delegate
@@ -109,6 +137,33 @@
     [self.navigationController popToRootViewControllerAnimated:YES];
 }
 
+- (void)smsLogin{
+    [UIView transitionFromView:self.loginView toView:self.loginView_Captcha duration:0.5 options:UIViewAnimationOptionTransitionFlipFromLeft completion:nil];
+    self.loginView = self.loginView_Captcha;
+    self.config.loginView = self.loginView;
+    self.loginView.delegate = self.config;
+    [self.config setAppid:[AppIDManager sharedManager].appid.appId];
+    [self reloadLocalAppID:[AppIDManager sharedManager].appid.appId];
+}
+
+- (void)passwordLogin{
+    [UIView transitionFromView:self.loginView toView:self.loginView_Password duration:0.5 options:UIViewAnimationOptionTransitionFlipFromLeft completion:nil];
+    self.loginView = self.loginView_Password;
+    self.config.loginView = self.loginView;
+    self.loginView.delegate = self.config;
+    [self.config setAppid:[AppIDManager sharedManager].appid.appId];
+    [self reloadLocalAppID:[AppIDManager sharedManager].appid.appId];
+}
+
+- (void)signUp{
+    [UIView transitionFromView:self.loginView toView:self.loginView_Register duration:0.5 options:UIViewAnimationOptionTransitionFlipFromLeft completion:nil];
+    self.loginView = self.loginView_Register;
+    self.config.loginView = self.loginView;
+    self.loginView.delegate = self.config;
+    [self.config setAppid:[AppIDManager sharedManager].appid.appId];
+    [self reloadLocalAppID:[AppIDManager sharedManager].appid.appId];
+}
+
 - (void)pushToSmsLogin {
     
     LoginViewController *smsLoginViewController = [[LoginViewController alloc] initWithViewType:LoginVCTypeCaptchLogin];
@@ -121,14 +176,34 @@
     [self.navigationController pushViewController:regiesterViewController animated:YES];
 }
 
+- (void)showWebViewWithUrl: (NSString*)target {
+    @try{
+        NSURL *url = [NSURL URLWithString:target];
+        SFSafariViewController *safariViewController = [[SFSafariViewController alloc] initWithURL:url];
+        safariViewController.delegate = self;
+        [self presentViewController:safariViewController animated:YES completion:nil];
+    }@catch (NSException *exception) {
+        MAXLog(@"%@",exception.description);
+    }
+}
+
 - (void)showUserPrivacy {
-    PravitcyViewController *vc =  [[PravitcyViewController alloc] initWithTitle:NSLocalizedString(@"User_Privacy_Agreement", @"用户隐私协议") url:NSLocalizedString(@"protocol_privacy", @"https://www.lanyingim.com/privacy")];
-    [self.navigationController pushViewController:vc animated:YES];
+    [self showWebViewWithUrl:NSLocalizedString(@"protocol_privacy", @"https://www.lanyingim.com/privacy")];
+}
+
+- (void)privacyLinkClick:(NSString *)url{
+    [self showWebViewWithUrl:url];
+}
+
+- (void)privacyCheckButtonClick {
+    _privacyChecked = !_privacyChecked;
+    _loginView_Captcha.privacyCheckButton.selected = _privacyChecked;
+    _loginView_Password.privacyCheckButton.selected = _privacyChecked;
+    _loginView_Register.privacyCheckButton.selected = _privacyChecked;
 }
 
 - (void)showUserTerms {
-    PravitcyViewController *vc =  [[PravitcyViewController alloc] initWithTitle:NSLocalizedString(@"User_Services_Agreement", @"用户服务条款") url:NSLocalizedString(@"protocol_terms", @"https://www.lanyingim.com/terms")];
-    [self.navigationController pushViewController:vc animated:YES];
+    [self showWebViewWithUrl:NSLocalizedString(@"protocol_terms", @"https://www.lanyingim.com/terms")];
 }
 
 - (void)beginScanQRCode {
@@ -338,8 +413,6 @@
 
 - (void)sdkconfigdidClickReturn {
     [self.config setAppid:[AppIDManager sharedManager].appid.appId];
-    [self.config showWechatButton:[AppIDManager isDefaultAppID]];
-
 }
 
 - (void)pushToBindNickNameWithWechatOpenId:(NSString *)wechatOpenId {
@@ -400,12 +473,24 @@
     }
 }
 - (void)inputUserTextFeild:(NSNotification *)noti {
+    if (self.config.viewType != LoginVCTypePasswordLogin){
+        [self passwordLogin];
+        self.config.viewType = LoginVCTypePasswordLogin;
+    }
     NSDictionary *dic = noti.object;
     if (dic) {
-        self.scanConsuleUserName = dic[@"userName"];
-        [self reloadLocalAppID:dic[@"appId"]];
-        [self.config setAppid:dic[@"appId"]];
-        [self.config setUserName:self.scanConsuleUserName];
+        NSString *username = dic[@"userName"];
+        NSString *password = dic[@"password"];
+        NSString *appId = dic[@"appId"];
+
+        self.scanConsuleUserName = username;
+        [self reloadLocalAppID:appId];
+        [self.config setAppid:appId];
+        [self.config setUserName:username];
+        [self.config setPassword:password];
+        if(username.length > 0 && password.length > 0){
+            [self signByName:username password:password];
+        }
     }
     self.scanConsuleResultDic = dic;
 }
@@ -432,7 +517,7 @@
                                                              MAXLog(@"action = %@", alert.textFields);
                                                          }];
     [alert addTextFieldWithConfigurationHandler:^(UITextField *textField) {
-        textField.placeholder = NSLocalizedString(@"enter_AppID", @"请输入AppID");
+        textField.placeholder = NSLocalizedString(@"enter_AppID", @"请输入App ID");
         textField.text = [AppIDManager sharedManager].appid.appId;
     }];
     
@@ -445,8 +530,6 @@
     
     AppDelegate *appDelegate = [UIApplication sharedApplication].delegate;
     [appDelegate reloadAppID:appid];
-
-    [self.config showWechatButton:[AppIDManager isDefaultAppID]];
 }
 
 
@@ -514,6 +597,12 @@
     [api startWithSuccessBlock:^(ApiResult * _Nullable result) {
         if (result.isOK) {
             IMAcount *account = [IMAcountInfoStorage loadObject];
+            if(!account){
+                account = [[IMAcount alloc] init];
+                account.usedId  = [NSString stringWithFormat:@"%@",result.resultData[@"user_id"]];
+                account.password = password;
+                account.userName = userName;
+            }
             NSDictionary *dic = result.resultData;
             account.token = dic[@"token"];
             [IMAcountInfoStorage saveObject:account];

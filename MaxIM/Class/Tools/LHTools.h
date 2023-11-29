@@ -28,10 +28,16 @@
 
 /**
  时间处理
-
  @param date 时间戳
- @return 处理后的格式 yyyy/MM/dd HH:mm
+ @return 处理后的格式
  */
-+ (NSString *)processingTimeWithDate:(NSString *)date;
++ (NSString *)dayStringWithDate:(NSString *)date;
+
+/**
+ 时间处理
+ @param date 时间戳
+ @return 处理后的格式
+ */
++ (NSString *)dayStringOnConversationListWithDate:(NSString *)date;
 
 @end

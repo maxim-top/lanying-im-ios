@@ -47,8 +47,43 @@
     }];
 }
 
+- (void)addRoster {
+    BMXRosterItem *roster = self.roster;
+    NSString *authQuestion = roster.authQuestion;
+    UIAlertController* alert = [UIAlertController alertControllerWithTitle:authQuestion.length>0 ? NSLocalizedString(@"Friend_verification_question", @"好友验证问题") : NSLocalizedString(@"Leave_a_message", @"留言")
+                                                                   message:authQuestion
+                                                            preferredStyle:UIAlertControllerStyleAlert];
+    
+    UIAlertAction* okAction = [UIAlertAction actionWithTitle:NSLocalizedString(@"Confirm", @"确定") style:UIAlertActionStyleDefault
+                                                     handler:^(UIAlertAction * action) {
+                                                         //响应事件
+                                                         //得到文本信息
+                                                         for(UITextField *text in alert.textFields){
+                                                             MAXLog(@"text = %@", text.text);
+                                                             if (authQuestion.length>0){
+                                                                 [self addRosterId:roster.rosterId authAnswer:[text.text length] ? text.text : @""];
+                                                             }else{
+                                                                 [self addRosterId:roster.rosterId reason:[text.text length] ? text.text : @""];
+                                                             }
+                                                         }
+                                                     }];
+    UIAlertAction* cancelAction = [UIAlertAction actionWithTitle:NSLocalizedString(@"Cancel", @"取消") style:UIAlertActionStyleCancel
+                                                         handler:^(UIAlertAction * action) {
+                                                             //响应事件
+                                                             MAXLog(@"action = %@", alert.textFields);
+                                                         }];
+    [alert addTextFieldWithConfigurationHandler:^(UITextField *textField) {
+        textField.placeholder = authQuestion.length>0 ? NSLocalizedString(@"enter_answer", @"请输入答案") : NSLocalizedString(@"enter_message_for_group_application", @"请输入申请的留言信息");
+    }];
+    
+    [alert addAction:okAction];
+    [alert addAction:cancelAction];
+    [self presentViewController:alert animated:YES completion:nil];
+    
+}
+
 - (void)joinBtnClick:(UIButton *)button {
-    [self addRosterId:self.roster.rosterId reason:@""];
+    [self addRoster];
 }
 
 - (void)returnButtonClick {
@@ -79,6 +114,19 @@
     }];
 }
 
+// 添加好友
+- (void)addRosterId:(long long)rosterId authAnswer:(NSString *)authAnswer {
+    [[[BMXClient sharedClient] rosterService] applyWithRosterId:rosterId message:@"" authAnswer:authAnswer completion:^(BMXError *error) {
+        MAXLog(@"%lld", rosterId);
+        if (!error) {
+            [HQCustomToast showDialog:NSLocalizedString(@"Friend_request_sent", @"已发送添加好友申请")];
+            [self.navigationController popViewControllerAnimated:YES];
+
+        } else {
+            [HQCustomToast showDialog:[error description]];
+        }
+    }];
+}
 
 - (NSArray *)getSettingConfigDataArray {
     NSDictionary *configDic = [NSDictionary dictionaryWithDictionary:[self readLocalFileWithName:@"searchDetailProfiledetail"]];

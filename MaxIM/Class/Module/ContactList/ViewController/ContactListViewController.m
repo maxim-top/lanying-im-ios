@@ -174,6 +174,11 @@
     }];
 }
 
+// 获取好友列表
+- (void)getAllRosterForceRefresh {
+    [self getAllRoster:YES];
+}
+
 // 批量搜索用户
 - (void)searchRostersByidArray:(ListOfLongLong *)idList forceRefresh:(BOOL)forceRefresh {
     [[[BMXClient sharedClient] rosterService] searchWithRosterIdList:idList forceRefresh:forceRefresh completion:^(BMXRosterItemList *list, BMXError *error) {
@@ -736,7 +741,7 @@
 - (void) setNotifications {
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(onGrouplistChange) name:@"KGroupListModified" object:nil];
     
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(getAllRoster:) name:@"RefreshContactList" object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(getAllRosterForceRefresh) name:@"RefreshContactList" object:nil];
     
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(hideMenu) name:@"HideMenu" object:nil];
 }

@@ -24,10 +24,13 @@
 #import "IMAcount.h"
 #import "IMAcountInfoStorage.h"
 
+static const float FOOTER_BUTTON_HEIGHT = 50.0f;
+static const float FOOTER_BUTTON_PADDING = 10.0f;
+
 @interface ChatRosterProfileViewController ()<UITableViewDelegate, UITableViewDataSource, TitleSwitchTableViewCellDelegate>
 
 @property (nonatomic, strong) UITableView *tableView;
-@property (nonatomic, strong) UIView *footView;
+@property (nonatomic, strong) UIView *footerView;
 @property (nonatomic, strong) UIView *headerView;
 @property (nonatomic, strong) UIButton *beginChatButton;
 @property (nonatomic, strong) UIImageView *avatarImageView;
@@ -36,6 +39,9 @@
 @property (nonatomic, strong) NSArray *cellDataArray;
 @property (nonatomic, strong) BMXRosterItem *currentRoster;
 @property (nonatomic, strong) IMAcount *account;
+@property (nonatomic, strong) UIButton *startChatButton;
+@property (nonatomic, strong) UIButton *videoCallButton;
+@property (nonatomic, strong) UIButton *voiceCallButton;
 
 @end
 
@@ -62,7 +68,6 @@
     
     if ([self.currentRoster.username length]) {
         self.nameLabel.text = [NSString stringWithFormat:@"%@", [self.currentRoster.nickname length] ? self.currentRoster.nickname : self.currentRoster.username];
-        [self.nameLabel sizeToFit];
     }
     
     self.userIDLabel.text = [NSString stringWithFormat:@"ID:%lld", self.currentRoster.rosterId];
@@ -71,7 +76,10 @@
     self.cellDataArray = [self getSettingConfigDataArray];
     [self.tableView reloadData];
     
-    [self getRosterInfo];
+    [self getRosterInfo:NO];
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.5 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+        [self getRosterInfo:YES];
+    });
     self.account = [IMAcountInfoStorage loadObject];
 }
 
@@ -100,8 +108,8 @@
     }];
 }
 
-- (void)getRosterInfo {
-    [[[BMXClient sharedClient] rosterService] searchWithRosterId:self.currentRoster.rosterId forceRefresh:YES completion:^(BMXRosterItem *item, BMXError *error) {
+- (void)getRosterInfo:(BOOL)forceUpdate {
+    [[[BMXClient sharedClient] rosterService] searchWithRosterId:self.currentRoster.rosterId forceRefresh:forceUpdate completion:^(BMXRosterItem *item, BMXError *error) {
         if (!error) {
             self.currentRoster = item;
             [self.tableView reloadData];
@@ -155,12 +163,6 @@
             cell.accessoryType = UITableViewCellAccessoryNone;
         }
         [cell.mswitch setOn:self.currentRoster.isMuteNotification];
-    } else  if ([dic[@"type"] isEqualToString:NSLocalizedString(@"start_chat", @"开始聊天")]) {
-        cell.accessoryType = UITableViewCellAccessoryDisclosureIndicator; //显示最右边的箭头
-    } else  if ([dic[@"type"] isEqualToString:NSLocalizedString(@"Video_call", @"视频通话")]) {
-        cell.accessoryType = UITableViewCellAccessoryDisclosureIndicator; //显示最右边的箭头
-    } else  if ([dic[@"type"] isEqualToString:NSLocalizedString(@"Voice_call", @"语音通话")]) {
-        cell.accessoryType = UITableViewCellAccessoryDisclosureIndicator; //显示最右边的箭头
     }
     return cell;
 }
@@ -224,20 +226,15 @@
         [alert addAction:cancelAction];
         [self presentViewController:alert animated:YES completion:nil];
     } else if ([dic[@"type"] isEqualToString:NSLocalizedString(@"Set_extension_info", @"设置扩展信息")]) {
+        NSString *message = [NSString stringWithFormat:@"%@\n\n\n\n\n",NSLocalizedString(@"ext_info_message", @"好友的扩展信息，可用于实现打标签之类的功能")];
         UIAlertController* alert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Set_extension_info", @"设置扩展信息")
-                                                                       message:NSLocalizedString(@"ext_info_message", @"好友的扩展信息，可用于实现打标签之类的功能")
+                                                                       message:message
                                                                 preferredStyle:UIAlertControllerStyleAlert];
         
         UIAlertAction* okAction = [UIAlertAction actionWithTitle:NSLocalizedString(@"Confirm", @"确定") style:UIAlertActionStyleDefault
-                                                         handler:^(UIAlertAction * action) {
-                                                             //响应事件
-                                                             //得到文本信息
-                                                             for(UITextField *text in alert.textFields){
-                                                                 MAXLog(@"text = %@", text.text);
-                                                                 [self setExtension:text.text];
-                                                                 
-                                                             }
-                                                         }];
+            handler:^(UIAlertAction * action) {
+                [self setExtension:((UITextView *)alert.view.subviews[1]).text];
+            }];
         UIAlertAction* cancelAction = [UIAlertAction actionWithTitle:NSLocalizedString(@"Cancel", @"取消") style:UIAlertActionStyleCancel
                                                              handler:^(UIAlertAction * action) {
                                                                  //响应事件
@@ -246,18 +243,26 @@
         [alert addTextFieldWithConfigurationHandler:^(UITextField *textField) {
             textField.placeholder = NSLocalizedString(@"Input_extension_info", @"请输入扩展信息");
         }];
+        alert.textFields.firstObject.borderStyle = UITextBorderStyleNone;
         
+        UITextView *textView = [[UITextView alloc] initWithFrame:CGRectZero];
+        textView.translatesAutoresizingMaskIntoConstraints = NO;
+        textView.layer.borderWidth = 1.0;
+        textView.layer.borderColor = [UIColor lh_colorWithHexString:@"DDDDDD"].CGColor;
+        textView.font = [UIFont systemFontOfSize:15];
+        
+        NSLayoutConstraint *leadConstraint = [NSLayoutConstraint constraintWithItem:alert.view attribute:NSLayoutAttributeLeading relatedBy:NSLayoutRelationEqual toItem:textView attribute:NSLayoutAttributeLeading multiplier:1.0 constant:-14.0];
+        NSLayoutConstraint *trailConstraint = [NSLayoutConstraint constraintWithItem:alert.view attribute:NSLayoutAttributeTrailing relatedBy:NSLayoutRelationEqual toItem:textView attribute:NSLayoutAttributeTrailing multiplier:1.0 constant:14.0];
+        NSLayoutConstraint *topConstraint = [NSLayoutConstraint constraintWithItem:alert.view attribute:NSLayoutAttributeTop relatedBy:NSLayoutRelationEqual toItem:textView attribute:NSLayoutAttributeTop multiplier:1.0 constant:-95.0];
+        NSLayoutConstraint *bottomConstraint = [NSLayoutConstraint constraintWithItem:alert.view attribute:NSLayoutAttributeBottom relatedBy:NSLayoutRelationEqual toItem:textView attribute:NSLayoutAttributeBottom multiplier:1.0 constant:55.0];
+        [alert.view addSubview:textView];
+        textView.text = self.currentRoster.ext;
+        
+        [NSLayoutConstraint activateConstraints:@[leadConstraint, trailConstraint, topConstraint, bottomConstraint]];
+
         [alert addAction:okAction];
         [alert addAction:cancelAction];
         [self presentViewController:alert animated:YES completion:nil];
-    } else if ([dic[@"type"] isEqualToString:NSLocalizedString(@"start_chat", @"开始聊天")]) {
-        LHChatVC *chatVC = [[LHChatVC alloc] initWithRoster:self.currentRoster messageType:BMXMessage_MessageType_Single];
-        [chatVC setHidesBottomBarWhenPushed:YES];
-        [self.navigationController pushViewController:chatVC animated:YES];
-    } else if ([dic[@"type"] isEqualToString:NSLocalizedString(@"Video_call", @"视频通话")]) {
-        [self videoCall];
-    } else if ([dic[@"type"] isEqualToString:NSLocalizedString(@"Voice_call", @"语音通话")]) {
-        [self voiceCall];
     }
 }
 
@@ -305,8 +310,11 @@
         
         [self setupHeaderView];
         _tableView.tableHeaderView = self.headerView;
-        
         _tableView.tableHeaderView.bmx_height = 120.f;
+        [self setupFooterView];
+        _tableView.tableFooterView = self.footerView;
+        _tableView.tableFooterView.bmx_height = FOOTER_BUTTON_HEIGHT*3 + FOOTER_BUTTON_PADDING*4;
+
         [self.view addSubview:_tableView];
     }
     return _tableView;
@@ -330,6 +338,68 @@
     [self avatarImageView];
     [self nameLabel];
     [self userIDLabel];
+}
+
+- (void)setupFooterView {
+    self.footerView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, MAXScreenW, 120.f)];
+    self.footerView.backgroundColor = [UIColor lh_colorWithHex:0xf8f8f8];
+    [self startChatButton];
+    [self videoCallButton];
+    [self voiceCallButton];
+}
+
+- (void)startChat{
+    LHChatVC *chatVC = [[LHChatVC alloc] initWithRoster:self.currentRoster messageType:BMXMessage_MessageType_Single];
+    [chatVC setHidesBottomBarWhenPushed:YES];
+    [self.navigationController pushViewController:chatVC animated:YES];
+}
+
+- (UIButton *)startChatButton {
+    if (!_startChatButton) {
+        _startChatButton = [UIButton buttonWithType:UIButtonTypeCustom];
+        [_startChatButton addTarget:self action:@selector(startChat) forControlEvents:UIControlEventTouchUpInside];
+        [self.footerView addSubview:_startChatButton];
+        [_startChatButton setTitle:NSLocalizedString(@"start_chat", @"开始聊天") forState:UIControlStateNormal];
+        [_startChatButton setTitleColor:[UIColor blackColor] forState:UIControlStateNormal];
+        [_startChatButton setBackgroundColor:[UIColor whiteColor]];
+        _startChatButton.titleLabel.font =  [UIFont fontWithName:@"PingFangSC-Regular" size:17];
+        _startChatButton.bmx_size = CGSizeMake(MAXScreenW, FOOTER_BUTTON_HEIGHT);
+        _startChatButton.bmx_centerX = MAXScreenW / 2.0;
+        _startChatButton.bmx_centerY = FOOTER_BUTTON_HEIGHT / 2.0 + FOOTER_BUTTON_PADDING;
+    }
+    return _startChatButton;
+}
+
+- (UIButton *)videoCallButton {
+    if (!_videoCallButton) {
+        _videoCallButton = [UIButton buttonWithType:UIButtonTypeCustom];
+        [_videoCallButton addTarget:self action:@selector(videoCall) forControlEvents:UIControlEventTouchUpInside];
+        [self.footerView addSubview:_videoCallButton];
+        [_videoCallButton setTitle:NSLocalizedString(@"Video_call", @"视频通话") forState:UIControlStateNormal];
+        [_videoCallButton setTitleColor:[UIColor blackColor] forState:UIControlStateNormal];
+        [_videoCallButton setBackgroundColor:[UIColor whiteColor]];
+        _videoCallButton.titleLabel.font =  [UIFont fontWithName:@"PingFangSC-Regular" size:17];
+        _videoCallButton.bmx_size = CGSizeMake(MAXScreenW, FOOTER_BUTTON_HEIGHT);
+        _videoCallButton.bmx_centerX = MAXScreenW / 2.0;
+        _videoCallButton.bmx_centerY = FOOTER_BUTTON_HEIGHT / 2.0 + FOOTER_BUTTON_HEIGHT + FOOTER_BUTTON_PADDING * 2;
+    }
+    return _videoCallButton;
+}
+
+- (UIButton *)voiceCallButton {
+    if (!_voiceCallButton) {
+        _voiceCallButton = [UIButton buttonWithType:UIButtonTypeCustom];
+        [_voiceCallButton addTarget:self action:@selector(voiceCall) forControlEvents:UIControlEventTouchUpInside];
+        [self.footerView addSubview:_voiceCallButton];
+        [_voiceCallButton setTitle:NSLocalizedString(@"Voice_call", @"语音通话") forState:UIControlStateNormal];
+        [_voiceCallButton setTitleColor:[UIColor blackColor] forState:UIControlStateNormal];
+        [_voiceCallButton setBackgroundColor:[UIColor whiteColor]];
+        _voiceCallButton.titleLabel.font =  [UIFont fontWithName:@"PingFangSC-Regular" size:17];
+        _voiceCallButton.bmx_size = CGSizeMake(MAXScreenW, FOOTER_BUTTON_HEIGHT);
+        _voiceCallButton.bmx_centerX = MAXScreenW / 2.0;
+        _voiceCallButton.bmx_centerY = FOOTER_BUTTON_HEIGHT / 2.0 + FOOTER_BUTTON_HEIGHT * 2 + FOOTER_BUTTON_PADDING * 3;
+    }
+    return _voiceCallButton;
 }
 
 #pragma mark - lazy load
@@ -358,12 +428,12 @@
         _nameLabel.font = [UIFont fontWithName:@"PingFangSC-Semibold" size:20];
         _nameLabel.textColor = [UIColor blackColor];
         _nameLabel.textAlignment = NSTextAlignmentLeft;
-        [_nameLabel sizeToFit];
         
         CGFloat nameLabelRight = 15;
-        _nameLabel.size = CGSizeMake(80, 30);
-        _nameLabel.bmx_top = self.avatarImageView.bmx_top + 3;
+
         _nameLabel.bmx_left = self.avatarImageView.bmx_right + nameLabelRight;
+        _nameLabel.size = CGSizeMake(MAXScreenW - nameLabelRight * 2 - _nameLabel.bmx_left, 30);
+        _nameLabel.bmx_top = self.avatarImageView.bmx_top + 3;
     }
     return _nameLabel;
 }

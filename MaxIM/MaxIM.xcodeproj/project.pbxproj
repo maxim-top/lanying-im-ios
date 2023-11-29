@@ -36,19 +36,27 @@
 		AF3E6C4F27D3BAED00D016C7 /* chatdetailproiledetail.json in Resources */ = {isa = PBXBuildFile; fileRef = AF3E6C5127D3BAED00D016C7 /* chatdetailproiledetail.json */; };
 		AF3E6C5327D3BB3400D016C7 /* searchDetailProfiledetail.json in Resources */ = {isa = PBXBuildFile; fileRef = AF3E6C5527D3BB3400D016C7 /* searchDetailProfiledetail.json */; };
 		AF3E6C5727D3BB6200D016C7 /* SystemRosterProfile.json in Resources */ = {isa = PBXBuildFile; fileRef = AF3E6C5927D3BB6200D016C7 /* SystemRosterProfile.json */; };
+		AF48D9B32AB1BF1200C14967 /* MMMarkdown.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AF48D9AF2AB1B80400C14967 /* MMMarkdown.framework */; };
+		AF48D9B42AB1BF1200C14967 /* MMMarkdown.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = AF48D9AF2AB1B80400C14967 /* MMMarkdown.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		AF4B381228C1B6EE0043ADA4 /* MAXUtils.m in Sources */ = {isa = PBXBuildFile; fileRef = AF4B380828C1B6EE0043ADA4 /* MAXUtils.m */; };
 		AF4C019728461BC400B8913D /* LanyingLangManager.m in Sources */ = {isa = PBXBuildFile; fileRef = AF4C019328461ACC00B8913D /* LanyingLangManager.m */; };
 		AF4C80A729261BC200ADBA82 /* CallView.m in Sources */ = {isa = PBXBuildFile; fileRef = AF3CC7D028E599BE0026EF89 /* CallView.m */; };
 		AF4C80A829261BC600ADBA82 /* CallViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = AF3CC7D128E599BE0026EF89 /* CallViewController.m */; };
+		AF4EA2392AACCDF4004486AC /* AppIDListStorage.m in Sources */ = {isa = PBXBuildFile; fileRef = AF4EA2372AACCDF3004486AC /* AppIDListStorage.m */; };
 		AF51DDEB29CEDAA8006656CD /* bell.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = AF51DDEA29CEDAA8006656CD /* bell.mp3 */; };
 		AF51DDEC29CEDAA8006656CD /* bell.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = AF51DDEA29CEDAA8006656CD /* bell.mp3 */; };
 		AF5780BC29C22F8F002CC192 /* NotificationService.m in Sources */ = {isa = PBXBuildFile; fileRef = AF5780BB29C22F8F002CC192 /* NotificationService.m */; };
 		AF5780C029C22F8F002CC192 /* MaxIMNotification.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = AF5780B829C22F8F002CC192 /* MaxIMNotification.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		AF5DB35129AE617500E1367B /* CopyableLabel.m in Sources */ = {isa = PBXBuildFile; fileRef = AF5DB35029AE617500E1367B /* CopyableLabel.m */; };
 		AF88CF0B2848AC7300013713 /* NSBundle+LanyingLanguage.m in Sources */ = {isa = PBXBuildFile; fileRef = AF88CF0A2848AC7300013713 /* NSBundle+LanyingLanguage.m */; };
+		AF8E57F92AA7428A00CD2C3F /* AppIDViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = AF8E57F82AA7428A00CD2C3F /* AppIDViewController.m */; };
 		AF8F120D27D2045D000C4104 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = AF8F120F27D2045D000C4104 /* InfoPlist.strings */; };
 		AF8F121327D20C90000C4104 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = AF8F121527D20C90000C4104 /* Localizable.strings */; };
 		AF923D17281B0725002875A3 /* splash.png in Resources */ = {isa = PBXBuildFile; fileRef = AF923D16281B0724002875A3 /* splash.png */; };
+		AF9376692B1475CA00686883 /* SafariServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AF9376682B1475CA00686883 /* SafariServices.framework */; };
+		AFC3EFB22AB9B030006AB98D /* AppIDViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = AFC3EFB42AB9B030006AB98D /* AppIDViewController.xib */; };
+		AFC92E002AE28A8E00EA3EF0 /* TextLayoutCacheNode.m in Sources */ = {isa = PBXBuildFile; fileRef = AFC92DFF2AE28A8E00EA3EF0 /* TextLayoutCacheNode.m */; };
+		AFC92E0D2AE28B6100EA3EF0 /* TextLayoutCache.m in Sources */ = {isa = PBXBuildFile; fileRef = AFC92E0C2AE28B6100EA3EF0 /* TextLayoutCache.m */; };
 		AFED17F929A3E15B001A5F8B /* SupportsStorage.m in Sources */ = {isa = PBXBuildFile; fileRef = AFED17F829A3E15B001A5F8B /* SupportsStorage.m */; };
 		B321D07F2B7F3BE8404603F6 /* libPods-MaxIM.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 0817B35A699F1BD1DD697481 /* libPods-MaxIM.a */; };
 		B500050821D508DA00CD1CF8 /* RecentConversaionTableViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = B500050621D508DA00CD1CF8 /* RecentConversaionTableViewCell.m */; };
@@ -353,22 +361,13 @@
 			name = "Embed App Extensions";
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		B532178721C15C2E0042F403 /* Embed Frameworks */ = {
-			isa = PBXCopyFilesBuildPhase;
-			buildActionMask = 2147483647;
-			dstPath = "";
-			dstSubfolderSpec = 10;
-			files = (
-			);
-			name = "Embed Frameworks";
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 		B54BBA81247C0C3200862CE2 /* CopyFiles */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
+				AF48D9B42AB1BF1200C14967 /* MMMarkdown.framework in CopyFiles */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -449,10 +448,13 @@
 		AF3E6C5627D3BB3700D016C7 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.json; name = en; path = en.lproj/searchDetailProfiledetail.json; sourceTree = "<group>"; };
 		AF3E6C5827D3BB6200D016C7 /* zh-Hans */ = {isa = PBXFileReference; lastKnownFileType = text.json; name = "zh-Hans"; path = "zh-Hans.lproj/SystemRosterProfile.json"; sourceTree = "<group>"; };
 		AF3E6C5A27D3BB6300D016C7 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.json; name = en; path = en.lproj/SystemRosterProfile.json; sourceTree = "<group>"; };
+		AF48D9AF2AB1B80400C14967 /* MMMarkdown.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = MMMarkdown.framework; sourceTree = "<group>"; };
 		AF4B380828C1B6EE0043ADA4 /* MAXUtils.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MAXUtils.m; sourceTree = "<group>"; };
 		AF4B381128C1B6EE0043ADA4 /* MAXUtils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MAXUtils.h; sourceTree = "<group>"; };
 		AF4C018A28461ACB00B8913D /* LanyingLangManager.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = LanyingLangManager.h; sourceTree = "<group>"; };
 		AF4C019328461ACC00B8913D /* LanyingLangManager.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = LanyingLangManager.m; sourceTree = "<group>"; };
+		AF4EA2372AACCDF3004486AC /* AppIDListStorage.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AppIDListStorage.m; sourceTree = "<group>"; };
+		AF4EA2382AACCDF4004486AC /* AppIDListStorage.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AppIDListStorage.h; sourceTree = "<group>"; };
 		AF51DDEA29CEDAA8006656CD /* bell.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = bell.mp3; sourceTree = "<group>"; };
 		AF5780B829C22F8F002CC192 /* MaxIMNotification.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = MaxIMNotification.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		AF5780BA29C22F8F002CC192 /* NotificationService.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = NotificationService.h; sourceTree = "<group>"; };
@@ -462,11 +464,21 @@
 		AF5DB35029AE617500E1367B /* CopyableLabel.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CopyableLabel.m; sourceTree = "<group>"; };
 		AF88CF092848AC7300013713 /* NSBundle+LanyingLanguage.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSBundle+LanyingLanguage.h"; sourceTree = "<group>"; };
 		AF88CF0A2848AC7300013713 /* NSBundle+LanyingLanguage.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSBundle+LanyingLanguage.m"; sourceTree = "<group>"; };
+		AF8E57F72AA7428A00CD2C3F /* AppIDViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppIDViewController.h; sourceTree = "<group>"; };
+		AF8E57F82AA7428A00CD2C3F /* AppIDViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppIDViewController.m; sourceTree = "<group>"; };
 		AF8F120E27D2045D000C4104 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		AF8F121027D20468000C4104 /* zh-Hans */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hans"; path = "zh-Hans.lproj/InfoPlist.strings"; sourceTree = "<group>"; };
 		AF8F121427D20C90000C4104 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/Localizable.strings; sourceTree = "<group>"; };
 		AF8F121627D20C93000C4104 /* zh-Hans */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hans"; path = "zh-Hans.lproj/Localizable.strings"; sourceTree = "<group>"; };
 		AF923D16281B0724002875A3 /* splash.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = splash.png; sourceTree = "<group>"; };
+		AF9376682B1475CA00686883 /* SafariServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SafariServices.framework; path = System/Library/Frameworks/SafariServices.framework; sourceTree = SDKROOT; };
+		AFC3EFB32AB9B030006AB98D /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = Base; path = Base.lproj/AppIDViewController.xib; sourceTree = "<group>"; };
+		AFC3EFB62AB9B036006AB98D /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/AppIDViewController.strings; sourceTree = "<group>"; };
+		AFC3EFB82AB9B039006AB98D /* zh-Hans */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hans"; path = "zh-Hans.lproj/AppIDViewController.strings"; sourceTree = "<group>"; };
+		AFC92DFE2AE28A8E00EA3EF0 /* TextLayoutCacheNode.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = TextLayoutCacheNode.h; sourceTree = "<group>"; };
+		AFC92DFF2AE28A8E00EA3EF0 /* TextLayoutCacheNode.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = TextLayoutCacheNode.m; sourceTree = "<group>"; };
+		AFC92E0B2AE28B6100EA3EF0 /* TextLayoutCache.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = TextLayoutCache.h; sourceTree = "<group>"; };
+		AFC92E0C2AE28B6100EA3EF0 /* TextLayoutCache.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = TextLayoutCache.m; sourceTree = "<group>"; };
 		AFED17EF29A3E15B001A5F8B /* SupportsStorage.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SupportsStorage.h; sourceTree = "<group>"; };
 		AFED17F829A3E15B001A5F8B /* SupportsStorage.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SupportsStorage.m; sourceTree = "<group>"; };
 		AFF48A6C25CF1FE300634E80 /* MobileRTC.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = MobileRTC.framework; sourceTree = "<group>"; };
@@ -974,6 +986,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				AF9376692B1475CA00686883 /* SafariServices.framework in Frameworks */,
 				4832593321CE74870061D47F /* libopencore-amrnb.a in Frameworks */,
 				B5BD4D2922C22F6E00B971A7 /* CoreTelephony.framework in Frameworks */,
 				B570FDCF2497562400445598 /* libWeChatSDK.a in Frameworks */,
@@ -989,6 +1002,7 @@
 				B55FFC6D2240E3F500DF0BAB /* AVFoundation.framework in Frameworks */,
 				B5142F2321CF74510013DBBD /* UserNotificationsUI.framework in Frameworks */,
 				B5142F2121CF744B0013DBBD /* UserNotifications.framework in Frameworks */,
+				AF48D9B32AB1BF1200C14967 /* MMMarkdown.framework in Frameworks */,
 				B5FF65E021C8CDAA00BAD31C /* libresolv.tbd in Frameworks */,
 				B535A5E921C008E6002FBECD /* libz.tbd in Frameworks */,
 				B535A5E821C00893002FBECD /* libc++.tbd in Frameworks */,
@@ -1201,6 +1215,7 @@
 		48FB3E642193F4FC007740F4 = {
 			isa = PBXGroup;
 			children = (
+				AFC3EFB42AB9B030006AB98D /* AppIDViewController.xib */,
 				AF923D16281B0724002875A3 /* splash.png */,
 				B570FDD0249769B600445598 /* MaxIMDebug.entitlements */,
 				B5142F1F21CF73530013DBBD /* MaxIM.entitlements */,
@@ -1418,6 +1433,8 @@
 				B53FB37922C5F7F1002A4B1F /* consule */,
 				B53D1ED423A8CDAE004E01BA /* AccountListStorage.h */,
 				B53D1ED523A8CDAE004E01BA /* AccountListStorage.m */,
+				AF4EA2382AACCDF4004486AC /* AppIDListStorage.h */,
+				AF4EA2372AACCDF3004486AC /* AppIDListStorage.m */,
 				B557D49D24529A8E0035D60E /* HostConfigStorage.h */,
 				B557D49E24529A8E0035D60E /* HostConfigStorage.m */,
 				B5160A532216A53A00483883 /* BaseArchiverModel.h */,
@@ -1520,6 +1537,8 @@
 				B5577C9823BF2E6600ED76E6 /* DropdownListView.m */,
 				B5EC8846243F4A6900C3344D /* SDKConfigViewController.h */,
 				B5EC8847243F4A6900C3344D /* SDKConfigViewController.m */,
+				AF8E57F72AA7428A00CD2C3F /* AppIDViewController.h */,
+				AF8E57F82AA7428A00CD2C3F /* AppIDViewController.m */,
 			);
 			path = View;
 			sourceTree = "<group>";
@@ -1592,6 +1611,10 @@
 				B539D66121BFDD370011D30E /* Controller */,
 				B539D66421BFDD370011D30E /* Model */,
 				B539D66921BFDD370011D30E /* View */,
+				AFC92DFE2AE28A8E00EA3EF0 /* TextLayoutCacheNode.h */,
+				AFC92DFF2AE28A8E00EA3EF0 /* TextLayoutCacheNode.m */,
+				AFC92E0B2AE28B6100EA3EF0 /* TextLayoutCache.h */,
+				AFC92E0C2AE28B6100EA3EF0 /* TextLayoutCache.m */,
 			);
 			path = Chat;
 			sourceTree = "<group>";
@@ -2094,6 +2117,8 @@
 		B5738D927166D01AB0CE4043 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				AF9376682B1475CA00686883 /* SafariServices.framework */,
+				AF48D9AF2AB1B80400C14967 /* MMMarkdown.framework */,
 				B5BD4D2822C22F6E00B971A7 /* CoreTelephony.framework */,
 				AFF48A6C25CF1FE300634E80 /* MobileRTC.framework */,
 				B55FFC7A2240E79500DF0BAB /* UIKit.framework */,
@@ -2265,7 +2290,6 @@
 				48FB3E6A2193F4FC007740F4 /* Frameworks */,
 				48FB3E6B2193F4FC007740F4 /* Resources */,
 				996B9906F676BBCF0988783D /* [CP] Copy Pods Resources */,
-				B532178721C15C2E0042F403 /* Embed Frameworks */,
 				B511684F228E9817001B2AE7 /* Embed App Extensions */,
 				B54BBA81247C0C3200862CE2 /* CopyFiles */,
 				D6F7801DFC6C90B43B873797 /* [CP] Embed Pods Frameworks */,
@@ -2359,6 +2383,9 @@
 			isa = PBXProject;
 			attributes = {
 				DefaultBuildSystemTypeForWorkspace = Original;
+				KnownAssetTags = (
+					Popup,
+				);
 				LastUpgradeCheck = 1010;
 				ORGANIZATIONNAME = hyt;
 				TargetAttributes = {
@@ -2444,6 +2471,7 @@
 				AF3E6C4727D3813A00D016C7 /* group.json in Resources */,
 				AF51DDEB29CEDAA8006656CD /* bell.mp3 in Resources */,
 				B5AAD8F9238E4EA50000C7FA /* lauchVideo_1125.mp4 in Resources */,
+				AFC3EFB22AB9B030006AB98D /* AppIDViewController.xib in Resources */,
 				AF3E6C4327D37FC300D016C7 /* setting.json in Resources */,
 				B570FDCE2497562400445598 /* README.txt in Resources */,
 				AF3E6C4B27D3BA6D00D016C7 /* profilesetting.json in Resources */,
@@ -2612,6 +2640,7 @@
 				B593DFCA22D5C03A008AF2E2 /* RosterListViewController.m in Sources */,
 				B55900AF22D0A7A1003FDA76 /* GroupCommonCell.m in Sources */,
 				B5D09C3B23191F2100CFD13F /* AboutUsViewController.m in Sources */,
+				AF8E57F92AA7428A00CD2C3F /* AppIDViewController.m in Sources */,
 				B55900A222D0A7A1003FDA76 /* GroupApplyViewController.m in Sources */,
 				B539D6C621BFDD370011D30E /* LHChatLocationBubbleView.m in Sources */,
 				B5D9F46821D74E5700B31AC3 /* HQLoadingAnimation.m in Sources */,
@@ -2670,6 +2699,7 @@
 				B51FFBF32398148D00E82887 /* VerifyPasswordView.m in Sources */,
 				B539D6C921BFDD370011D30E /* IMConst.m in Sources */,
 				B55900A122D0A7A1003FDA76 /* GroupAlertView.m in Sources */,
+				AFC92E002AE28A8E00EA3EF0 /* TextLayoutCacheNode.m in Sources */,
 				B539D6D921BFDD370011D30E /* KeyboardEmojiAttachment.m in Sources */,
 				B559005022D0A64B003FDA76 /* NSAttributedString+YYText.m in Sources */,
 				AF88CF0B2848AC7300013713 /* NSBundle+LanyingLanguage.m in Sources */,
@@ -2739,6 +2769,7 @@
 				4832593421CE74870061D47F /* amrFileCodec.mm in Sources */,
 				B539D6C421BFDD370011D30E /* LHChatAudioBubbleView.m in Sources */,
 				B539D6B821BFDD370011D30E /* UIViewController+Set.m in Sources */,
+				AF4EA2392AACCDF4004486AC /* AppIDListStorage.m in Sources */,
 				B5AFB2F22271C32500C23559 /* QRCodeLoginViewController.m in Sources */,
 				B58A17ED244D5FF9006A7BEA /* PwdChangeApi.m in Sources */,
 				B564294C22BA1A890022076C /* PravitcyViewController.m in Sources */,
@@ -2785,6 +2816,7 @@
 				B55900BF22D0A7BA003FDA76 /* ChatRosterProfileViewController.m in Sources */,
 				B5119BBC2397F0F3005F68A0 /* BindPhoneViewController.m in Sources */,
 				B539D6C021BFDD370011D30E /* LHChatViewCell.m in Sources */,
+				AFC92E0D2AE28B6100EA3EF0 /* TextLayoutCache.m in Sources */,
 				B52243A22371E747002C61AE /* MaxEmptyTipView.m in Sources */,
 				B55900AB22D0A7A1003FDA76 /* AnounceCel.m in Sources */,
 				B559FF9122D0A60B003FDA76 /* NSObject+DebugDescription.m in Sources */,
@@ -2998,6 +3030,16 @@
 			name = Localizable.strings;
 			sourceTree = "<group>";
 		};
+		AFC3EFB42AB9B030006AB98D /* AppIDViewController.xib */ = {
+			isa = PBXVariantGroup;
+			children = (
+				AFC3EFB32AB9B030006AB98D /* Base */,
+				AFC3EFB62AB9B036006AB98D /* en */,
+				AFC3EFB82AB9B039006AB98D /* zh-Hans */,
+			);
+			name = AppIDViewController.xib;
+			sourceTree = "<group>";
+		};
 		B5116845228E9817001B2AE7 /* MainInterface.storyboard */ = {
 			isa = PBXVariantGroup;
 			children = (
@@ -3126,7 +3168,7 @@
 				CODE_SIGN_ENTITLEMENTS = MaxIMDebug.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 3;
 				DEVELOPMENT_TEAM = 963BX74UXU;
 				ENABLE_BITCODE = NO;
 				FRAMEWORK_SEARCH_PATHS = (
@@ -3177,7 +3219,7 @@
 					"$(PROJECT_DIR)/Class/Vendor/OpenSDK1.8.7.1_NoPay",
 				);
 				MACH_O_TYPE = mh_execute;
-				MARKETING_VERSION = 4.5;
+				MARKETING_VERSION = 4.9;
 				OTHER_LDFLAGS = (
 					"$(inherited)",
 					"-ObjC",
@@ -3211,7 +3253,7 @@
 				CODE_SIGN_ENTITLEMENTS = MaxIM.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 3;
 				DEVELOPMENT_TEAM = 963BX74UXU;
 				ENABLE_BITCODE = NO;
 				FRAMEWORK_SEARCH_PATHS = (
@@ -3262,7 +3304,7 @@
 					"$(PROJECT_DIR)/Class/Vendor/OpenSDK1.8.7.1_NoPay",
 				);
 				MACH_O_TYPE = mh_execute;
-				MARKETING_VERSION = 4.5;
+				MARKETING_VERSION = 4.9;
 				OTHER_LDFLAGS = (
 					"$(inherited)",
 					"-ObjC",
