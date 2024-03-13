@@ -48,12 +48,14 @@
 		AF5780BC29C22F8F002CC192 /* NotificationService.m in Sources */ = {isa = PBXBuildFile; fileRef = AF5780BB29C22F8F002CC192 /* NotificationService.m */; };
 		AF5780C029C22F8F002CC192 /* MaxIMNotification.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = AF5780B829C22F8F002CC192 /* MaxIMNotification.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		AF5DB35129AE617500E1367B /* CopyableLabel.m in Sources */ = {isa = PBXBuildFile; fileRef = AF5DB35029AE617500E1367B /* CopyableLabel.m */; };
+		AF5F6B8F2B21C276006C35E1 /* SchemURIStorage.m in Sources */ = {isa = PBXBuildFile; fileRef = AF5F6B8E2B21C276006C35E1 /* SchemURIStorage.m */; };
 		AF88CF0B2848AC7300013713 /* NSBundle+LanyingLanguage.m in Sources */ = {isa = PBXBuildFile; fileRef = AF88CF0A2848AC7300013713 /* NSBundle+LanyingLanguage.m */; };
 		AF8E57F92AA7428A00CD2C3F /* AppIDViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = AF8E57F82AA7428A00CD2C3F /* AppIDViewController.m */; };
 		AF8F120D27D2045D000C4104 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = AF8F120F27D2045D000C4104 /* InfoPlist.strings */; };
 		AF8F121327D20C90000C4104 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = AF8F121527D20C90000C4104 /* Localizable.strings */; };
 		AF923D17281B0725002875A3 /* splash.png in Resources */ = {isa = PBXBuildFile; fileRef = AF923D16281B0724002875A3 /* splash.png */; };
 		AF9376692B1475CA00686883 /* SafariServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AF9376682B1475CA00686883 /* SafariServices.framework */; };
+		AFAA124D2B9A18B100FACC79 /* TextRenderStorage.m in Sources */ = {isa = PBXBuildFile; fileRef = AFAA124C2B9A18B100FACC79 /* TextRenderStorage.m */; };
 		AFC3EFB22AB9B030006AB98D /* AppIDViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = AFC3EFB42AB9B030006AB98D /* AppIDViewController.xib */; };
 		AFC92E002AE28A8E00EA3EF0 /* TextLayoutCacheNode.m in Sources */ = {isa = PBXBuildFile; fileRef = AFC92DFF2AE28A8E00EA3EF0 /* TextLayoutCacheNode.m */; };
 		AFC92E0D2AE28B6100EA3EF0 /* TextLayoutCache.m in Sources */ = {isa = PBXBuildFile; fileRef = AFC92E0C2AE28B6100EA3EF0 /* TextLayoutCache.m */; };
@@ -462,6 +464,8 @@
 		AF5780BD29C22F8F002CC192 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		AF5DB34F29AE617500E1367B /* CopyableLabel.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CopyableLabel.h; sourceTree = "<group>"; };
 		AF5DB35029AE617500E1367B /* CopyableLabel.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CopyableLabel.m; sourceTree = "<group>"; };
+		AF5F6B8D2B21C275006C35E1 /* SchemURIStorage.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SchemURIStorage.h; sourceTree = "<group>"; };
+		AF5F6B8E2B21C276006C35E1 /* SchemURIStorage.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SchemURIStorage.m; sourceTree = "<group>"; };
 		AF88CF092848AC7300013713 /* NSBundle+LanyingLanguage.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSBundle+LanyingLanguage.h"; sourceTree = "<group>"; };
 		AF88CF0A2848AC7300013713 /* NSBundle+LanyingLanguage.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSBundle+LanyingLanguage.m"; sourceTree = "<group>"; };
 		AF8E57F72AA7428A00CD2C3F /* AppIDViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppIDViewController.h; sourceTree = "<group>"; };
@@ -472,6 +476,8 @@
 		AF8F121627D20C93000C4104 /* zh-Hans */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hans"; path = "zh-Hans.lproj/Localizable.strings"; sourceTree = "<group>"; };
 		AF923D16281B0724002875A3 /* splash.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = splash.png; sourceTree = "<group>"; };
 		AF9376682B1475CA00686883 /* SafariServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SafariServices.framework; path = System/Library/Frameworks/SafariServices.framework; sourceTree = SDKROOT; };
+		AFAA124B2B9A18B100FACC79 /* TextRenderStorage.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TextRenderStorage.h; sourceTree = "<group>"; };
+		AFAA124C2B9A18B100FACC79 /* TextRenderStorage.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TextRenderStorage.m; sourceTree = "<group>"; };
 		AFC3EFB32AB9B030006AB98D /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = Base; path = Base.lproj/AppIDViewController.xib; sourceTree = "<group>"; };
 		AFC3EFB62AB9B036006AB98D /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/AppIDViewController.strings; sourceTree = "<group>"; };
 		AFC3EFB82AB9B039006AB98D /* zh-Hans */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hans"; path = "zh-Hans.lproj/AppIDViewController.strings"; sourceTree = "<group>"; };
@@ -1435,6 +1441,10 @@
 				B53D1ED523A8CDAE004E01BA /* AccountListStorage.m */,
 				AF4EA2382AACCDF4004486AC /* AppIDListStorage.h */,
 				AF4EA2372AACCDF3004486AC /* AppIDListStorage.m */,
+				AF5F6B8D2B21C275006C35E1 /* SchemURIStorage.h */,
+				AF5F6B8E2B21C276006C35E1 /* SchemURIStorage.m */,
+				AFAA124B2B9A18B100FACC79 /* TextRenderStorage.h */,
+				AFAA124C2B9A18B100FACC79 /* TextRenderStorage.m */,
 				B557D49D24529A8E0035D60E /* HostConfigStorage.h */,
 				B557D49E24529A8E0035D60E /* HostConfigStorage.m */,
 				B5160A532216A53A00483883 /* BaseArchiverModel.h */,
@@ -2759,6 +2769,7 @@
 				B55DF4B623A7615B00AF1BF9 /* WechatIsBindApi.m in Sources */,
 				B5144F0B233DC0CF00CF163E /* GroupListTableViewAdapter.m in Sources */,
 				B53D1ED923AA12C2004E01BA /* AccountInfoTableViewCell.m in Sources */,
+				AFAA124D2B9A18B100FACC79 /* TextRenderStorage.m in Sources */,
 				B539D6AC21BFDD370011D30E /* XSBrowserTransition.m in Sources */,
 				B55900B522D0A7A1003FDA76 /* GroupAdminListCiewController.m in Sources */,
 				B5A7882B2387DDDC00A3730D /* AppWechatUnbindApi.m in Sources */,
@@ -2820,6 +2831,7 @@
 				B52243A22371E747002C61AE /* MaxEmptyTipView.m in Sources */,
 				B55900AB22D0A7A1003FDA76 /* AnounceCel.m in Sources */,
 				B559FF9122D0A60B003FDA76 /* NSObject+DebugDescription.m in Sources */,
+				AF5F6B8F2B21C276006C35E1 /* SchemURIStorage.m in Sources */,
 				B559003F22D0A64B003FDA76 /* YYTextMagnifier.m in Sources */,
 				B5F17B8921C2551A00B613A9 /* ContactListViewController.m in Sources */,
 				B539D6AF21BFDD370011D30E /* LHIMDBManager.m in Sources */,
@@ -3168,7 +3180,7 @@
 				CODE_SIGN_ENTITLEMENTS = MaxIMDebug.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 3;
+				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 963BX74UXU;
 				ENABLE_BITCODE = NO;
 				FRAMEWORK_SEARCH_PATHS = (
@@ -3219,7 +3231,7 @@
 					"$(PROJECT_DIR)/Class/Vendor/OpenSDK1.8.7.1_NoPay",
 				);
 				MACH_O_TYPE = mh_execute;
-				MARKETING_VERSION = 4.9;
+				MARKETING_VERSION = 4.10;
 				OTHER_LDFLAGS = (
 					"$(inherited)",
 					"-ObjC",
@@ -3253,7 +3265,7 @@
 				CODE_SIGN_ENTITLEMENTS = MaxIM.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 3;
+				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 963BX74UXU;
 				ENABLE_BITCODE = NO;
 				FRAMEWORK_SEARCH_PATHS = (
@@ -3304,7 +3316,7 @@
 					"$(PROJECT_DIR)/Class/Vendor/OpenSDK1.8.7.1_NoPay",
 				);
 				MACH_O_TYPE = mh_execute;
-				MARKETING_VERSION = 4.9;
+				MARKETING_VERSION = 4.10;
 				OTHER_LDFLAGS = (
 					"$(inherited)",
 					"-ObjC",

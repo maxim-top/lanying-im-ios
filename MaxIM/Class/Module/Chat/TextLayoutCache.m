@@ -96,7 +96,12 @@ CGFloat const TEXTLABEL_MAX_WIDTH = 260.0f;
 }
 
 + (NSMutableAttributedString *)attributedStringOfContent:(NSString *)content{
-    NSString *html = [MMMarkdown HTMLStringWithMarkdown:content error:nil];
+    NSString *html = @"";
+    @try{
+        html = [MMMarkdown HTMLStringWithMarkdown:content error:nil];
+    }@catch (NSException *exception) {
+        MAXLog(@"%@",exception.description);
+    }
     NSString *htmlString = [NSString stringWithFormat:@"<head> <style> body { font-family: \"Arial\", sans-serif; font-size: 15%; color: black} </style> </head> %@",html];
     NSData *htmlData = [htmlString dataUsingEncoding:NSUTF8StringEncoding];
     NSMutableAttributedString *attributedString = [[NSMutableAttributedString alloc] initWithData:htmlData options:@{NSDocumentTypeDocumentAttribute: NSHTMLTextDocumentType, NSCharacterEncodingDocumentAttribute: @(NSUTF8StringEncoding)} documentAttributes:nil error:nil];

@@ -26,6 +26,7 @@
 #import "IMAcountInfoStorage.h"
 #import "CopyableLabel.h"
 #import <floo-ios/floo_proxy.h>
+#include "TextRenderStorage.h"
 
 //#import <ZXingObjC.h>
 static CGFloat nameLabelleft = 36;
@@ -251,6 +252,9 @@ static CGFloat nameLabelleft = 36;
         [cell.mswitch setOn:self.profile.messageSetting.getMNotificationVibrate];
     } else if ([cell.titleLabel.text isEqualToString:NSLocalizedString(@"Sound", @"声音")]) {
         [cell.mswitch setOn:self.profile.messageSetting.getMNotificationSound];
+    } else if ([cell.titleLabel.text isEqualToString:NSLocalizedString(@"Whether_to_render_text_in_markdown", @"自动识别Markdown消息")]) {
+        NSString *renderType  = [TextRenderStorage loadObject];
+        [cell.mswitch setOn:![renderType isEqualToString:@"0"]];
     } else if ([cell.titleLabel.text isEqualToString:NSLocalizedString(@"Whether_to_download_thumbnail_attachments_automatically", @"是否自动下载缩略图附件")]) {
         [cell.mswitch setOn:self.profile.messageSetting.getMAutoDownloadAttachment];
     } else if ([cell.titleLabel.text isEqualToString:NSLocalizedString(@"Whether_to_accept_group_invitation_automatically", @"是否自动接受群邀请")]) {
@@ -317,6 +321,10 @@ static CGFloat nameLabelleft = 36;
                 [HQCustomToast showDialog:NSLocalizedString(@"Set_successfully", @"设置成功")];
             }
         }];
+    } else if ([str isEqualToString:NSLocalizedString(@"Whether_to_render_text_in_markdown", @"自动识别Markdown消息")]) {
+        NSString *renderType  = [TextRenderStorage loadObject];
+        NSString *newType = [renderType isEqualToString:@"0"] ? @"1" : @"0";
+        [TextRenderStorage saveObject: newType];
     } else if ([str isEqualToString:NSLocalizedString(@"Whether_to_download_thumbnail_attachments_automatically", @"是否自动下载缩略图附件")]) {
         [[[BMXClient sharedClient] userService] setAutoDownloadAttachment:state completion:^(BMXError *error) {
             if (!error) {

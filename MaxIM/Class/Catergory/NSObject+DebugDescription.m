@@ -25,8 +25,10 @@
     {
         objc_property_t property = properties[i];
         NSString *name = @(property_getName(property));
-        id value = [self valueForKey:name]?:@"nil"; // 默认值为nil字符串
-        [dictionary setObject:value forKey:name];
+        if(![name isEqualToString:@"debugDescription"]){
+            id value = [self valueForKey:name]?:@"nil"; // 默认值为nil字符串
+            [dictionary setObject:value forKey:name];
+        }
     }
     free(properties);
     return [NSString stringWithFormat:@"<%@: %p> -- %@", [self class], self, dictionary];

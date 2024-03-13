@@ -140,7 +140,7 @@
                             UIResponder *responder = self;
                             while ((responder = [responder nextResponder]) != nil) {
                                 if ([responder respondsToSelector:@selector(openURL:)] == YES) {
-                                    [responder performSelector:@selector(openURL:) withObject:[NSURL URLWithString:[NSString stringWithFormat:@"MaxIMExtension://Roster"]]];
+                                    [responder performSelector:@selector(openURL:) withObject:[NSURL URLWithString:[NSString stringWithFormat:@"maximextension://Roster"]]];
                                 }
                             }
                             
@@ -149,7 +149,7 @@
                             UIResponder *responder = self;
                             while ((responder = [responder nextResponder]) != nil) {
                                 if ([responder respondsToSelector:@selector(openURL:)] == YES) {
-                                    [responder performSelector:@selector(openURL:) withObject:[NSURL URLWithString:[NSString stringWithFormat:@"MaxIMExtension://Group"]]];
+                                    [responder performSelector:@selector(openURL:) withObject:[NSURL URLWithString:[NSString stringWithFormat:@"maximextension://Group"]]];
                                 }
                             }
                             

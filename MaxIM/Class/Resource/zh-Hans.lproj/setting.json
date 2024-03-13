@@ -21,6 +21,10 @@
         "control": "1"
     },
     {
+        "type": "自动识别Markdown消息",
+        "control": "1"
+    },
+    {
         "type": "自动下载缩略图和语音",
         "control": "1"
     },

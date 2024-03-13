@@ -34,6 +34,8 @@
 #import <floo-rtc-ios/RTCEngineManager.h>
 #import "BindOpenIdApi.h"
 #import "AppIDViewController.h"
+#import "LHChatVC.h"
+#import "SchemURIStorage.h"
 
 @interface AppDelegate ()<UNUserNotificationCenterDelegate, BMXUserServiceProtocol, WXApiDelegate, BMXPushServiceProtocol>
 
@@ -240,7 +242,16 @@
 
 
 - (BOOL)application:(UIApplication *)application continueUserActivity:(NSUserActivity *)userActivity restorationHandler:(void (^)(NSArray<id<UIUserActivityRestoring>> * _Nullable))restorationHandler {
-    
+    NSString *url = userActivity.webpageURL.absoluteString;
+    NSString *package = @"https://package.maximtop.com/";
+    if ([url hasPrefix:package]) {
+        if([IMAcountInfoStorage isHaveLocalData]) {
+            NSString *path = [url substringFromIndex:package.length];
+            return [self processExternalLinkWithPath: path];
+        }else{
+            [SchemURIStorage saveObject:url];
+        }
+    }
     return [WXApi handleOpenUniversalLink:userActivity delegate:self];
 }
 
@@ -347,28 +358,100 @@
     [[NSNotificationCenter defaultCenter] removeObserver:self name:@"LauchVideoPlayeFinish" object:nil];
 }
 
+- (void)pushViewControllerWithVC:(UIViewController*) popVC{
+    UIViewController *currVC = [self getCurrentViewController];
+    UINavigationController *nav = [currVC navigationController];
+    BMXSignInStatus status = [[BMXClient sharedClient] signInStatus];
+    if(status != BMXSignInStatus_SignIn){
+        nav = [self.maintabController.childViewControllers firstObject];
+    }
+    popVC.hidesBottomBarWhenPushed = YES;
+    [nav pushViewController:popVC animated:YES];
+}
+
+- (BOOL)processExternalLinkWithPath:(NSString *)path{
+    NSArray *words = [path componentsSeparatedByString:@"?"];
+    if(words.count != 2){
+        return YES;
+    }
+    NSString *target = words[0];
+    NSString *wechat = @"apple-app-site-association/wx96edf8b1e48af083/";
+    if([target hasPrefix:wechat]){
+        return YES;
+    }
+    NSString *parameters = words[1];
+    NSArray *paramArray = [parameters componentsSeparatedByString:@"&"];
+    NSMutableDictionary *kvDict = [[NSMutableDictionary alloc] init];
+    for (NSString *param in paramArray) {
+        NSArray *kv = [param componentsSeparatedByString:@"="];
+        if(kv.count != 2){
+            continue;
+        }
+        kvDict[kv[0]] = kv[1];
+    }
+    NSString *appId = kvDict[@"aid"];
+    if(appId.length == 0 ){
+        [HQCustomToast showDialog:NSLocalizedString(@"app_id_required", @"缺少App ID")];
+        return YES;
+    }
+    NSString *currAppId = [[BMXClient sharedClient] getSDKConfig].getAppID;
+    if(![appId isEqualToString:currAppId]){
+        NSString *alert = [NSString stringWithFormat:@"%@%@", NSLocalizedString(@"change_app_id_to", @"请退出当前账号并切换到App ID到"), appId];
+        [HQCustomToast showDialog:alert];
+        return YES;
+    }
+    long long conversationId;
+    NSScanner *scanner = [NSScanner scannerWithString:kvDict[@"cid"]];
+    [scanner setScanLocation:0];
+    [scanner scanLongLong:&conversationId];
+
+    if([target isEqualToString:@"sc"]){
+        [[[BMXClient sharedClient] rosterService] searchWithRosterId:conversationId forceRefresh:NO completion:^(BMXRosterItem *item, BMXError *error) {
+            if (!error) {
+                UIViewController *popVC = [[LHChatVC alloc] initWithRoster:item messageType:BMXMessage_MessageType_Single];
+                [self pushViewControllerWithVC:popVC];
+            }
+        }];
+    }else if([target isEqualToString:@"gc"]){
+        [[[BMXClient sharedClient] groupService] fetchGroupByIdWithGroupId:conversationId forceRefresh:NO completion:^(BMXGroup *group, BMXError *error) {
+            if (!error) {
+                UIViewController *popVC = [[LHChatVC alloc] initWithGroupChat:group messageType:BMXMessage_MessageType_Group];
+                [self pushViewControllerWithVC:popVC];
+            }
+        }];
+    }
+    return YES;
+}
+
+- (BOOL)processSchemeWithURL:(NSString *)url{
+    NSString *maxIMExtersion = @"maximextension://";
+    NSString *lanying = @"lanying:";
+    if ([url hasPrefix:maxIMExtersion]) {
+        UIViewController *popVC;
+        NSString *path = [url substringFromIndex:maxIMExtersion.length];
+        if([path isEqualToString:@"Roster"]){
+            popVC = [[RosterListViewController alloc] init];
+        }else {
+            popVC = [[GroupListSelectViewController alloc] init];
+        }
+        [self pushViewControllerWithVC:popVC];
+    } else if ([url hasPrefix:lanying]) {
+        NSString *path = [url substringFromIndex:lanying.length];
+        return [self processExternalLinkWithPath: path];
+    }
+    return YES;
+}
+
 - (BOOL)application:(UIApplication *)app openURL:(NSURL *)url options:(NSDictionary<UIApplicationOpenURLOptionsKey,id> *)options {
     
     if ([url.absoluteString containsString:@"login"]) {
         [WXApi handleOpenURL:url delegate:self];
     }else{
-        UIViewController *currVC = [self getCurrentViewController];
-        UINavigationController *nav = [currVC navigationController];
-        BMXSignInStatus *status = [[BMXClient sharedClient] signInStatus];
-        if(status != BMXSignInStatus_SignIn){
-            nav = [self.maintabController.childViewControllers firstObject];
+        if([IMAcountInfoStorage isHaveLocalData]) {
+            return [self processSchemeWithURL:url.absoluteString];
+        }else{
+            [SchemURIStorage saveObject:url.absoluteString];
         }
-        UIViewController *popVC;
-        if(self.maintabController) {
-            if ([url.absoluteString hasPrefix:@"MaxIMExtension://Roster"]) {
-                popVC = [[RosterListViewController alloc] init];
-                popVC.hidesBottomBarWhenPushed = YES;
-            } else {
-                popVC = [[GroupListSelectViewController alloc] init];
-                popVC.hidesBottomBarWhenPushed = YES;
-            }
-            [nav pushViewController:popVC animated:YES];
-       }
     }
     return YES;
 }
@@ -423,12 +506,23 @@
                             [[NSNotificationCenter defaultCenter] postNotificationName:@"wechatloginsuccess_newuser" object:result.resultData];
                         } else {
                             MAXLogDebug(@"WXAPI:onResp5 %@ %@", result.resultData[@"user_id"], result.resultData[@"username"]);
-                            IMAcount *account = [[IMAcount alloc] init];
-                            account.usedId  = [NSString stringWithFormat:@"%@",result.resultData[@"user_id"]];
-                            account.password = result.resultData[@"password"];
-                            account.userName = result.resultData[@"username"];
-                            [IMAcountInfoStorage saveObject:account];
-                            [[NSNotificationCenter defaultCenter] postNotificationName:@"wechatloginsuccess" object:nil];
+//                            BOOL official_account_followed = [result.resultData objectForKey:@"official_account_followed"]; //todo 等待联调；修改launchMiniProgramReq.path；弹出小程序；引导关注公众号
+                            BOOL official_account_followed = TRUE;
+                            if(!official_account_followed){
+                                WXLaunchMiniProgramReq *launchMiniProgramReq = [WXLaunchMiniProgramReq object];
+                                launchMiniProgramReq.userName = @"gh_11b8debeb062";
+                                launchMiniProgramReq.path = @"";
+                                launchMiniProgramReq.miniProgramType = WXMiniProgramTypeRelease;
+                                [WXApi sendReq:launchMiniProgramReq completion:^(BOOL success) {
+                                }];
+                            }else{
+                                IMAcount *account = [[IMAcount alloc] init];
+                                account.usedId  = [NSString stringWithFormat:@"%@",result.resultData[@"user_id"]];
+                                account.password = result.resultData[@"password"];
+                                account.userName = result.resultData[@"username"];
+                                [IMAcountInfoStorage saveObject:account];
+                                [[NSNotificationCenter defaultCenter] postNotificationName:@"wechatloginsuccess" object:nil];
+                            }
                         }
                     }
                 }

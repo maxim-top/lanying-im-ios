@@ -25,6 +25,10 @@
         "control": "1"
     },
     {
+        "type": "Render text message in markdown format",
+        "control": "1"
+    },
+    {
         "type": "Accept Group Invitation",
         "control": "1"
     },

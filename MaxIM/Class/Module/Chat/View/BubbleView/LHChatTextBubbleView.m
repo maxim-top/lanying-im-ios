@@ -14,9 +14,11 @@
 #import "FaceDefine.h"
 #import <MMMarkdown/MMMarkdown.h>
 #import "TextLayoutCache.h"
+#import "TextRenderStorage.h"
 
 //　textLaebl 最大宽度
 CGFloat const LABEL_FONT_SIZE = 15.0f;
+static CGSize kTextBoundingSize;
 
 @interface LHChatTextBubbleView () {
     NSDataDetector *_detector;
@@ -93,9 +95,19 @@ CGFloat const LABEL_FONT_SIZE = 15.0f;
 - (void)setMessageModel:(LHMessageModel *)messageModel {
     [super setMessageModel:messageModel];
     NSMutableAttributedString *attributedString = [[TextLayoutCache sharedInstance] attributedStringForKey: self.messageModel.content];
-    self.textLabel.attributedText = attributedString;
+    NSString *renderType  = [TextRenderStorage loadObject];
+    if (!renderType || [renderType isEqualToString:@"1"]) {
+        self.textLabel.attributedText = attributedString;
+    }
     YYTextLayout *textLayout = [[TextLayoutCache sharedInstance] layoutForKey: self.messageModel.content];
     UITapGestureRecognizer *tapGesture = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(handleTap:)];
+    if ([renderType isEqualToString:@"0"]) {
+        NSAttributedString *text = [LHChatTextBubbleView processModel:self.messageModel];
+        YYTextContainer *container = [YYTextContainer containerWithSize:CGSizeMake(TEXTLABEL_MAX_WIDTH, MAXFLOAT)];
+        textLayout = [YYTextLayout layoutWithContainer:container text:text];
+        _textLabel.text = self.messageModel.content;
+        kTextBoundingSize = textLayout.textBoundingSize;
+    }
     [_textLabel addGestureRecognizer:tapGesture];
     _textLabel.size = textLayout.textBoundingSize;
 }
@@ -165,12 +177,20 @@ CGFloat const LABEL_FONT_SIZE = 15.0f;
 
 + (CGFloat)heightForBubbleWithObject:(LHMessageModel *)object {
     CGSize textBoundingSize = [LHChatTextBubbleView getSizeWithKey:object];
+    NSString *renderType  = [TextRenderStorage loadObject];
+    if ([renderType isEqualToString:@"0"]) {
+        textBoundingSize = kTextBoundingSize;
+    }
     CGFloat height = 2 * BUBBLE_VIEW_PADDING + textBoundingSize.height + 30;
     return height;
 }
 
 - (CGSize)sizeThatFits:(CGSize)size {
     CGSize textBoundingSize = [LHChatTextBubbleView getSizeWithKey:self.messageModel];
+    NSString *renderType  = [TextRenderStorage loadObject];
+    if ([renderType isEqualToString:@"0"]) {
+        textBoundingSize = kTextBoundingSize;
+    }
     CGFloat height = 2*BUBBLE_VIEW_PADDING + textBoundingSize.height;
     if (height < 40) {
         height = 40;

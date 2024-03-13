@@ -2534,6 +2534,13 @@ CLLocationManagerDelegate>
 
 - (void)dealloc {
     MAXLog(@"销毁");
+    if (self.chatBarView.textView.text && [self.chatBarView.textView.text  length]) {
+        self.conversation.editMessage = self.chatBarView.textView.text;
+    } else {
+        self.conversation.editMessage = @"";
+    }
+    [[NSNotificationCenter defaultCenter] postNotificationName:@"RefreshConversation" object:self.conversation];
+
     self.documentIntertactionController.delegate = nil;
     [self timerInvalue];
     [self.tableView removeObserver:self forKeyPath:kTableViewFrame];

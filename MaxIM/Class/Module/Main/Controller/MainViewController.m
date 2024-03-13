@@ -33,6 +33,7 @@
 #import "CallViewController.h"
 #import <floo-rtc-ios/RTCEngineManager.h>
 #import "LHTools.h"
+#import "SchemURIStorage.h"
 
 @interface MainViewController ()<UITableViewDelegate, UITableViewDataSource, UITextFieldDelegate, ChatVCDelegate, BMXChatServiceProtocol,BMXRTCServiceProtocol>
 
@@ -82,6 +83,20 @@
         [self getAllConversations];
     });
     self.account = [IMAcountInfoStorage loadObject];
+    NSString *url = [SchemURIStorage loadObject];
+    if(url.length > 0){
+        AppDelegate *appDelegate = [UIApplication sharedApplication].delegate;
+        NSString *package = @"https://package.maximtop.com/";
+        NSString *lanying = @"lanying:";
+        NSString *path;
+        if ([url hasPrefix:package]) {
+            path = [url substringFromIndex:package.length];
+        } else if ([url hasPrefix:lanying]) {
+            path = [url substringFromIndex:lanying.length];
+        }
+        [appDelegate processExternalLinkWithPath: path];
+        [SchemURIStorage clearObject];
+    }
 }
 
 - (void)p_addObserver {
@@ -99,6 +114,10 @@
                     selector:@selector(p_networkStatusDidChanged:)
                         name:disConnectionNetworkNotifation
                       object:nil];
+    [notifCenter addObserver:self
+                    selector:@selector(RefreshConversation:)
+                        name:@"RefreshConversation"
+                      object:nil];
 }
 
 
@@ -112,6 +131,17 @@
     } else {
          [[UIApplication sharedApplication] setApplicationIconBadgeNumber:num];
         [self.tabBarController.tabBar.items[0] setBadgeValue:[NSString stringWithFormat:@"%d",num]];
+    }
+}
+
+- (void)RefreshConversation:(NSNotification *)notify {
+    BMXConversation *conversation = notify.object;
+    for (int i=0; i<self.conversatonList.count; i++) {
+        BMXConversation *c = [self.conversatonList objectAtIndex:i];
+        if(c.conversationId == conversation.conversationId){
+            NSIndexPath *ip = [NSIndexPath indexPathForRow:i inSection:0];
+            [self.tableview reloadRowsAtIndexPaths:@[ip] withRowAnimation:(UITableViewRowAnimation)UITableViewRowAnimationNone];
+        }
     }
 }
 
@@ -562,7 +592,7 @@
     }
     
     cell.subtitleLabel.text = @"";
-    if (conversation.lastMsg.contentType == BMXMessage_ContentType_Text) {
+    if (conversation.lastMsg.contentType == BMXMessage_ContentType_Text || conversation.lastMsg.contentType == BMXMessage_ContentType_RTC) {
         NSString *str;
         if ([conversation.editMessage length]) {
             str = [NSString stringWithFormat:@"[草稿] %@", conversation.editMessage];

@@ -53,7 +53,7 @@ CGFloat const SEND_STATUS_SIZE = 20.0f;
     if (self.messageModel.isSender) {
         bubbleFrame.origin.y = self.headImageView.frame.origin.y;
         // 菊花状态 （因不确定菊花具体位置，要在子类中实现位置的修改）
-        switch (self.messageModel.status) {
+        switch (self.messageModel.messageObjc.deliveryStatus) {
             case MessageDeliveryState_Delivering:
             {
                 [_activityView setHidden:NO];

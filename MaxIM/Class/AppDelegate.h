@@ -19,5 +19,9 @@
 - (void)userLogout;
 
 - (void)reloadAppID:(NSString *)appid;
+
+- (BOOL)processSchemeWithURL:(NSString *)url;
+
+- (BOOL)processExternalLinkWithPath:(NSString *)path;
 @end
 
