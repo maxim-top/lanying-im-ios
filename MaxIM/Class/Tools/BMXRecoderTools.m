@@ -237,8 +237,12 @@ typedef void(^RecordFinishBlock)(NSString *recordPath, int duration);
     
     AVAudioSession *audioSession = [AVAudioSession sharedInstance];
     NSError *err = nil;
-    [audioSession setCategory :AVAudioSessionCategoryPlayback error:&err];
-    
+    @try {
+        [audioSession setCategory :AVAudioSessionCategoryPlayback error:&err];
+    } @catch (NSException *exception) {
+        MAXLog(@"startPlayRecorder exception.%@",exception.description);
+    }
+
     NSString *wavPath = [[recorderPath stringByDeletingPathExtension] stringByAppendingPathExtension:kRecoderType];
     [VoiceConverter ConvertAmrToWav:recorderPath wavSavePath:wavPath];
     

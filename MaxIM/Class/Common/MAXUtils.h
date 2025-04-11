@@ -26,5 +26,10 @@
 + (void)getMemberIdArrayWithGroup: (BMXGroup *) group completion:(void (^)(NSArray *arr)) resBlock;
 // 获取群成员详情
 + (void)getRostersByidArray:(ListOfLongLong *)idList completion:(void (^)(NSArray *arr)) resBlock;
-
+// 获取字符串的MD5值
++ (NSString *)MD5Hash:(NSString *)input;
+// 获取字符串的MD5值（base64格式）
++ (NSString *)MD5InBase64:(NSString *)input;
+// 获取AppConfig开关
++ (bool)getAppSwitch:(NSString *)key;
 @end

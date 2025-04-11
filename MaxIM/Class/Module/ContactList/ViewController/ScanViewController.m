@@ -22,6 +22,7 @@
 #import "LHTools.h"
 #import "IMAcount.h"
 #import "IMAcountInfoStorage.h"
+#import "AllowLoginWithQRCodeApi.h"
 
 #define ScreenWidth [UIScreen mainScreen].bounds.size.width
 #define ScreenHigh [UIScreen mainScreen].bounds.size.height - 64
@@ -170,7 +171,9 @@
     NSString *source = dic[@"source"];
     if ([source isEqualToString:@"app"]) {
         [self p_dealWithAppQRcodeWithAction:dic[@"action"] infoDic:dic[@"info"] ];
-    } else {
+    } else if ([source isEqualToString:@"web"]){
+        [self p_dealWithWebQRcodeWithAction:dic[@"action"] infoDic:dic[@"info"] ];
+    } else{
         [self p_dealWithConsoleQRcodeWithAction:dic[@"action"] infoDic:dic[@"info"]];
     }
 }
@@ -186,6 +189,30 @@
         NSString *groupID = dic[@"group_id"];
         [self searcGroupById:[groupID integerValue] WithInfo:dic[@"info"]];
         
+    } else {
+        [HQCustomToast showDialog:NSLocalizedString(@"use_the_correct_device_to_scan", @"请使用正确设备扫描")];
+        [self.navigationController popToRootViewControllerAnimated:YES];
+    }
+}
+
+- (void)p_dealWithWebQRcodeWithAction:(NSString *)action infoDic:(NSDictionary *)dic {
+    if (![self isLogin]) {
+        [HQCustomToast showDialog:NSLocalizedString(@"login_pls", @"请登录")];
+        [self.navigationController popToRootViewControllerAnimated:YES];
+        return;
+    }
+    if ([action isEqualToString:@"login"] ) {
+        NSString *qrcode = dic[@"qrcode"];
+        NSString *appId = dic[@"app_id"];
+        NSString *currentAppId = [AppIDManager sharedManager].appid.appId;
+        if (![currentAppId isEqualToString:appId]){
+            [self showPCLoginAlertWithQrCode:(NSString*)qrcode];
+        }else {
+            NSString *alert = [NSString stringWithFormat:@"%@%@", NSLocalizedString(@"change_app_id_to", @"请退出当前账号并切换到App ID到"), appId];
+            [HQCustomToast showDialog:alert];
+            [self.navigationController popToRootViewControllerAnimated:YES];
+        }
+
     } else {
         [HQCustomToast showDialog:NSLocalizedString(@"use_the_correct_device_to_scan", @"请使用正确设备扫描")];
         [self.navigationController popToRootViewControllerAnimated:YES];
@@ -286,6 +313,29 @@
     }]];
     
     [self presentViewController:alertController animated:YES completion:nil];
+}
+
+-(void)showPCLoginAlertWithQrCode:(NSString*)qrcode{
+    UIAlertController *alertController = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"webim_login_ack_title", @"Web IM登录确认") message:NSLocalizedString(@"webim_login_ack_body", @"您正在请求在Web版蓝莺IM登录，请确认是您本人登录以免信息泄漏。") preferredStyle:UIAlertControllerStyleAlert];
+    [alertController addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Cancel", @"取消") style:UIAlertActionStyleCancel handler:^(UIAlertAction * _Nonnull action) {
+        [self.navigationController popToRootViewControllerAnimated:YES];
+    }]];
+    [alertController addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Confirm", @"确定") style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+        [self allowPCLoginWithQrCode:qrcode];
+    }]];
+    
+    [self presentViewController:alertController animated:YES completion:nil];
+}
+
+- (void)allowPCLoginWithQrCode:(NSString*)qrcode {
+    AllowLoginWithQRCodeApi *api = [[AllowLoginWithQRCodeApi alloc] initWithQrCode:qrcode];
+    [api startWithSuccessBlock:^(ApiResult * _Nullable result) {
+//        if ([result isOK]) {
+            [self closeBtnClick];
+//        }
+    } failureBlock:^(NSError * _Nullable error) {
+        [HQCustomToast showDialog:NSLocalizedString(@"Network_exception", @"网路异常")];
+    }];
 }
 
 - (void)setupCamera {

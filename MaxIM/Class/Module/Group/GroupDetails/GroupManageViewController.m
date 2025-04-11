@@ -27,6 +27,7 @@
 #import "IMAcount.h"
 #import "IMAcountInfoStorage.h"
 #import "UIViewController+CustomNavigationBar.h"
+#import "MAXUtils.h"
 
 @interface GroupManageViewController ()<UITableViewDelegate, UITableViewDelegate>
 {
@@ -36,6 +37,7 @@
 @property (nonatomic ,strong) UITableView* tableView;
 @property (nonatomic, strong) BMXUserProfile* profile;
 @property (nonatomic,assign) BOOL isGroupBanned;
+@property (nonatomic,assign) BOOL hideMemberInfo;
 @end
 
 @implementation GroupManageViewController
@@ -47,7 +49,6 @@
     [self setNavigationBarTitle:NSLocalizedString(@"Group_settings", @"群设置") navLeftButtonIcon:@"blackback"];
     
     _tableTitleArray = @[NSLocalizedString(@"Upload_group_avatar", @"上传群头像"),
-                         NSLocalizedString(@"Block_group_message", @"屏蔽群消息"),
                          NSLocalizedString(@"Join_group_application", @"入群申请"),
                          NSLocalizedString(@"Group_message_notification_mode", @"群消息通知模式"),
                          NSLocalizedString(@"Join_group_approval_mode", @"入群审批模式"),
@@ -57,6 +58,7 @@
                          NSLocalizedString(@"Set_whether_to_send_read_acknowledgement", @"设置是否发送已读回执"),
                          NSLocalizedString(@"Group_owner_permission_transferred", @"群主管理权转让"),
                          NSLocalizedString(@"Ban_all_group_members", @"全群禁言"),
+                         NSLocalizedString(@"Hide_member_info", @"隐藏群成员信息"),
                          ];
     [self initViews];
     [self getGroupDetailInfo];
@@ -120,32 +122,12 @@
         
         
         
-    }else if(row == 1) {
-        [cell.avatarImageView setHidden:YES];
-        [cell showAccesor:YES];
-        
-        NSString *modeStr = @"";
-        switch (self.group.msgMuteMode) {
-            case BMXGroup_MsgMuteMode_None:
-                modeStr = NSLocalizedString(@"Accept_and_alert_message", @"接受并提醒消息");
-                break;
-            case BMXGroup_MsgMuteMode_MuteNotification:
-                modeStr = NSLocalizedString(@"Accept_but_not_alert_message", @"接受但不提醒消息");
-                break;
-            case BMXGroup_MsgMuteMode_MuteChat:
-                modeStr = NSLocalizedString(@"Do_not_receive_any_messages", @"不接收任何消息");
-                break;
-                
-            default:
-                break;
-        }
-        [cell setMainText:tableTitle detailText:modeStr switcherFlag:NO switcherTarget:nil switcherSelector:nil];
-    }else if(row ==2) {
+    }else if(row ==1) {
         [cell.avatarImageView setHidden:YES];
 
         [cell setMainText:tableTitle detailText:@"" switcherFlag:NO switcherTarget:nil switcherSelector:nil];
         [cell showAccesor:YES];
-    }else if(row ==3) {
+    }else if(row ==2) {
         [cell.avatarImageView setHidden:YES];
 
         NSString *modeStr = @"";
@@ -171,7 +153,7 @@
         }
         [cell setMainText:tableTitle detailText:modeStr switcherFlag:NO switcherTarget:nil switcherSelector:nil];
         [cell showAccesor:YES];
-    }else if(row ==4) {
+    }else if(row ==3) {
         [cell.avatarImageView setHidden:YES];
 
         NSString *modeStr = @"";
@@ -191,7 +173,7 @@
         }
         [cell setMainText:tableTitle detailText:modeStr switcherFlag:NO switcherTarget:nil switcherSelector:nil];
         [cell showAccesor:YES];
-    }else if(row ==5) {
+    }else if(row ==4) {
         [cell.avatarImageView setHidden:YES];
 
         NSString *modeStr = @"";
@@ -207,24 +189,29 @@
         }
         [cell setMainText:tableTitle detailText:modeStr switcherFlag:NO switcherTarget:nil switcherSelector:nil];
         [cell showAccesor:YES];
-    } else if(row ==6) {
+    } else if(row ==5) {
         [cell.avatarImageView setHidden:YES];
         [cell setMainText:tableTitle detailText:@"" switcherFlag:NO switcherTarget:nil switcherSelector:nil];
         [cell showAccesor:YES];
-    }else if(row ==7) {
+    }else if(row ==6) {
         [cell.avatarImageView setHidden:YES];
         [cell setMainText:tableTitle detailText:@"" switcherFlag:NO switcherTarget:nil switcherSelector:nil];
         [cell showAccesor:YES];
         [cell showSepLine:NO];
-    } else if (row == 8) {
+    } else if (row == 7) {
         [cell showAccesor:NO];
         [cell setMainText:NSLocalizedString(@"Set_whether_to_send_read_acknowledgement", @"设置是否发送已读回执") detailText:nil switcherFlag:self.group.enableReadAck switcherTarget:self switcherSelector:@selector(p_configEnableRecieveAck)];
         
-    } else if (row == 10) {
+    } else if (row == 9) {
         [cell showAccesor:NO];
         long long currentTime = (long long) [[NSDate date] timeIntervalSince1970];
         self.isGroupBanned = self.group.banExpireTime > currentTime;
         [cell setMainText:NSLocalizedString(@"Ban_all_group_members", @"全群禁言") detailText:nil switcherFlag:self.isGroupBanned switcherTarget:self switcherSelector:@selector(p_configBanGroup)];
+
+    } else if (row == 10) {
+        [cell showAccesor:NO];
+        self.hideMemberInfo = self.group.hideMemberInfo;
+        [cell setMainText:NSLocalizedString(@"Hide_member_info", @"隐藏群成员信息") detailText:nil switcherFlag:self.hideMemberInfo switcherTarget:self switcherSelector:@selector(p_configHideMemberInfo)];
 
     } else {
         [cell.avatarImageView setHidden:YES];
@@ -250,32 +237,29 @@
         
         [self choiseImage];
         
-    }else if(row == 1) {
-        
-        [self showPushModealert];
-    }else if(row == 2) { //入群申请
-        GroupApplyViewController* ctrl = [[GroupApplyViewController alloc] initWithGroup:self.group];
+    }else if(row == 1) { //入群申请
+        GroupApplyViewController* ctrl = [[GroupApplyViewController alloc] initWithGroup:self.group hideMemberInfo:NO];
         [ctrl hidesBottomBarWhenPushed];
         [self.navigationController pushViewController:ctrl animated:YES];
-    } else if (row == 4) {
-        [self showAuthJoinAlert];
     } else if (row == 3) {
+        [self showAuthJoinAlert];
+    } else if (row == 2) {
         [self showsetNotifyAlert];
-    } else if (row == 5) {
+    } else if (row == 4) {
         [self showInviteModeAlert];
+    } else if(row == 5) {
+        GroupBlackListViewController* ctrl = [[GroupBlackListViewController alloc] initWithGroup:self.group hideMemberInfo:NO];
+        [ctrl hidesBottomBarWhenPushed];
+        [self.navigationController pushViewController:ctrl animated:YES];
     } else if(row == 6) {
-        GroupBlackListViewController* ctrl = [[GroupBlackListViewController alloc] initWithGroup:self.group];
+        GroupMuteListViewController* ctrl = [[GroupMuteListViewController alloc] initWithGroup:self.group hideMemberInfo:NO];
         [ctrl hidesBottomBarWhenPushed];
         [self.navigationController pushViewController:ctrl animated:YES];
     } else if(row == 7) {
-        GroupMuteListViewController* ctrl = [[GroupMuteListViewController alloc] initWithGroup:self.group];
-        [ctrl hidesBottomBarWhenPushed];
-        [self.navigationController pushViewController:ctrl animated:YES];
+        
+        
     } else if(row == 8) {
-        
-        
-    } else if(row == 9) {
-        GroupOwnerTransterViewController* ctrl = [[GroupOwnerTransterViewController alloc] initWithGroup:self.group];
+        GroupOwnerTransterViewController* ctrl = [[GroupOwnerTransterViewController alloc] initWithGroup:self.group hideMemberInfo:NO];
         [ctrl hidesBottomBarWhenPushed];
         [self.navigationController pushViewController:ctrl animated:YES];
     }
@@ -342,42 +326,6 @@
     [self presentViewController:imagePickerVc animated:YES completion:nil];
 }
 
-- (void)showPushModealert {
-    UIAlertController* alert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Set_group_message_blocking_mode", @"设置群消息屏蔽模式") message:nil preferredStyle:UIAlertControllerStyleActionSheet];
-    UIAlertAction* action1 = [UIAlertAction actionWithTitle:NSLocalizedString(@"Accept_and_alert_message", @"接受并提醒消息") style:UIAlertActionStyleDefault
-                                                    handler:^(UIAlertAction * action) {
-                                                        //响应事件
-                                                        [self setMsgMuteModeBy:BMXGroup_MsgMuteMode_None];
-//                                                        [self invitmodeWith:BMXGroup_InviteMode_Open];
-                                                    }];
-    UIAlertAction* action2 = [UIAlertAction actionWithTitle:NSLocalizedString(@"Accept_but_not_alert_message", @"接受但不提醒消息") style:UIAlertActionStyleDefault
-                                                    handler:^(UIAlertAction * action) {
-                                                        //响应事件
-                                                        [self setMsgMuteModeBy:BMXGroup_MsgMuteMode_MuteNotification];
-
-                                                    }];
-    UIAlertAction* action3 = [UIAlertAction actionWithTitle:NSLocalizedString(@"Do_not_receive_any_messages", @"不接收任何消息") style:UIAlertActionStyleDefault
-                                                    handler:^(UIAlertAction * action) {
-                                                        //响应事件
-                                                        [self setMsgMuteModeBy:BMXGroup_MsgMuteMode_MuteChat];
-                                                    }];
-    
-    UIAlertAction* cancelAction = [UIAlertAction actionWithTitle:NSLocalizedString(@"Cancel", @"取消") style:UIAlertActionStyleCancel
-                                                         handler:^(UIAlertAction * action) {
-                                                             //响应事件
-                                                             //
-                                                             
-                                                         }];
-    [alert addAction:action1];
-    [alert addAction:action2];
-    [alert addAction:action3];
-
-    [alert addAction:cancelAction];
-    [self presentViewController:alert animated:YES completion:nil];
-    
-    
-}
-
 - (void)p_configEnableRecieveAck {
     [[[BMXClient sharedClient] groupService] setEnableReadAck:self.group enable:!self.group.enableReadAck completion:^(BMXError *error) {
         MAXLog(@"设置成功");
@@ -407,6 +355,35 @@
         [[[BMXClient sharedClient] groupService] banGroupWithGroup:self.group duration:600 completion:aCompletionBlock];
     }
     self.isGroupBanned = !self.isGroupBanned;
+}
+
+-(void)showAlertForPermissionError {
+    UIAlertController *alertController = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"permission_required", @"权限不足") message:NSLocalizedString(@"permission_need_enabled", @"此业务需要开通，请联系App管理员。") preferredStyle:UIAlertControllerStyleAlert];
+    [alertController addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Confirm", @"确定") style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+        
+    }]];
+    
+    [self presentViewController:alertController animated:YES completion:nil];
+}
+
+- (void)p_configHideMemberInfo {
+    bool hideMemberInfo = [MAXUtils getAppSwitch:@"hide_member_info"];
+    if (hideMemberInfo) {
+        [self showAlertForPermissionError];
+        [self.tableView reloadData];
+        return;
+    }
+    void(^aCompletionBlock)(BMXError *error) =^(BMXError *error) {
+        if (error == nil) {
+            MAXLog(@"设置成功");
+            self.hideMemberInfo = !self.hideMemberInfo;
+            [HQCustomToast showDialog:NSLocalizedString(@"Set_successfully", @"设置成功")];
+            [self.tableView reloadData];
+        } else {
+            [HQCustomToast showDialog:error.description];
+        }
+    };
+    [[[BMXClient sharedClient] groupService] setHideMemberInfo:self.group enable:!self.hideMemberInfo completion:aCompletionBlock];
 }
 
 - (void)showInviteModeAlert {
@@ -559,16 +536,6 @@
 
         }else {
             [HQCustomToast showDialog:[NSString stringWithFormat:@"%@", error.description]];
-        }
-    }];
-}
-
--(void)setMsgMuteModeBy:(BMXGroup_MsgMuteMode)mode {
-    [[[BMXClient sharedClient] groupService] muteMessageWithGroup:self.group mode:mode completion:^(BMXError *error) {
-        if (error == nil) {
-            [HQCustomToast showDialog:NSLocalizedString(@"Set_successfully", @"设置成功")];
-            [self getGroupDetailInfo];
-            [self.tableView reloadData];
         }
     }];
 }

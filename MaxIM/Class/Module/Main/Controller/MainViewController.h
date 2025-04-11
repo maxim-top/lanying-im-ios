@@ -16,6 +16,8 @@
 
 - (void)getAllConversations;
 
+- (void)updateConversationWithRosterItem:(BMXRosterItem *)roster;
+
 - (void)receiveNewMessage:(BMXMessage *)message;
 
 - (void)receiveRTCCallMessage:(BMXMessage *)message;

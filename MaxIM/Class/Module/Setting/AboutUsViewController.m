@@ -92,7 +92,11 @@
     [self.view addSubview:label8];
 
     UILabel *bottom_label= [[UILabel alloc] init];
-    bottom_label.text = NSLocalizedString(@"copyright_Maximtop", @"© 2019-2022 美信拓扑");
+    NSDateFormatter *formatter = [[NSDateFormatter alloc] init];
+    [formatter setDateFormat:@"yyyy"];
+    NSString *year = [formatter stringFromDate:[NSDate date]];
+
+    bottom_label.text = [NSString stringWithFormat:NSLocalizedString(@"copyright_Maximtop", @"© 2019-%@ 美信拓扑"), year];
     bottom_label.textAlignment = NSTextAlignmentCenter;
     bottom_label.numberOfLines = 0;
     bottom_label.font = [UIFont systemFontOfSize:15];

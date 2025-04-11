@@ -8,6 +8,7 @@
 
 #import "PrivacyView.h"
 #import "PrivacyWebView.h"
+#import <SafariServices/SFSafariViewController.h>
 
 #define PYScreenBounds ([UIScreen mainScreen].bounds)
 #define PYScreenWidth  ([UIScreen mainScreen].bounds.size.width)
@@ -168,13 +169,24 @@ static NSString *userStaticKey;
     [[UIApplication sharedApplication].delegate.window.rootViewController presentViewController:alert animated:true completion:nil];
 }
 
+- (void)showWebViewWithUrl: (NSString*)target {
+    @try{
+        NSURL *url = [NSURL URLWithString:target];
+        SFSafariViewController *safariViewController = [[SFSafariViewController alloc] initWithURL:url];
+        safariViewController.delegate = self.viewController;
+        [self.viewController presentViewController:safariViewController animated:YES completion:nil];
+    }@catch (NSException *exception) {
+        MAXLog(@"%@",exception.description);
+    }
+}
+
 #pragma mark - TYAttributedLabelDelegate
 - (void)touchButtonClick:(UIButton *)btn {
     if (self.delegate && [self.delegate respondsToSelector:@selector(linkClick:)]) {
         [self.delegate linkClick:self];
     } else {
         if (self.privacyUrl.length > 0) {
-            [self showWbview];
+            [self showWebViewWithUrl:self.privacyUrl];
         }
     }
 }

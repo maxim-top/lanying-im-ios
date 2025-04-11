@@ -123,7 +123,7 @@
     
      [alertController addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Confirm", @"确定") style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
          UITextField *textField = alertController.textFields.firstObject;
-         NSString *newValue = textField.text;
+         NSString *newValue = [textField.text stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
          if (newValue.length == 0 ) {
              [HQCustomToast showDialog:NSLocalizedString(@"Input_cannot_be_empty", @"输入不能为空")];
              return;

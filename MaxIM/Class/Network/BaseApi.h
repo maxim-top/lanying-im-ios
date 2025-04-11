@@ -23,7 +23,8 @@ typedef NS_ENUM(NSInteger , HQRequestMethod) {
 
 typedef NS_ENUM(NSInteger , MaxIMRequestBaseURLType) {
     MaxIMRequestApp = 0,
-    MaxIMRequestConsule
+    MaxIMRequestConsule,
+    MaxIMRequestLanyingLink
 };
 
 typedef void (^AFConstructingBlock)(id <AFMultipartFormData> _Nonnull formData);

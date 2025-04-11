@@ -24,7 +24,6 @@
 #import "MaxGlobalTool.h"
 #import "IMAcount.h"
 #import "IMAcountInfoStorage.h"
-#import "CopyableLabel.h"
 #import <floo-ios/floo_proxy.h>
 #include "TextRenderStorage.h"
 
@@ -44,7 +43,8 @@ static CGFloat nameLabelleft = 36;
 @property (nonatomic, strong) BMXUserProfile *profile;
 @property (nonatomic, strong) UILabel *idLabelCaption;
 @property (nonatomic, strong) CopyableLabel *idLabel;
-@property (nonatomic, strong) UILabel *nickNameLabel;
+@property (nonatomic, strong) UILabel *nickNameLabelCaption;
+@property (nonatomic, strong) CopyableLabel *nickNameLabel;
 //@property (nonatomic, strong) UILabel *subTitleLabel;
 
 @end
@@ -152,7 +152,7 @@ static CGFloat nameLabelleft = 36;
         nickname = [NSString stringWithFormat:@"%@...", [nickname substringToIndex: MAX_NICKNAME_LENGTH]];
     }
     self.nameLabel.text = [profile.nickname length] ? [NSString stringWithFormat:@"%@", nickname] : NSLocalizedString(@"Click_to_set_nickname", @"点击设置昵称");
-    self.nickNameLabel.text = [NSString stringWithFormat:NSLocalizedString(@"Username_name", @"用户名：%@"), profile.username];
+    self.nickNameLabel.text = profile.username;
     [self.nickNameLabel sizeToFit];
 
     self.idLabel.text = [NSString stringWithFormat:@"%lld", profile.userId];
@@ -348,7 +348,7 @@ static CGFloat nameLabelleft = 36;
         case 1:
             return 2;
         case 2:
-            return 8;
+            return 9;
         default:
             return 0;
     }
@@ -492,6 +492,7 @@ static CGFloat nameLabelleft = 36;
     
     [self nameLabel];
     [self codeButton];
+    [self nickNameLabelCaption];
     [self nickNameLabel];
     [self idLabelCaption];
     [self idLabel];
@@ -557,9 +558,9 @@ static CGFloat nameLabelleft = 36;
     return _avatarImageView;
 }
 
-- (UILabel *)nameLabel {
+- (CopyableLabel *)nameLabel {
     if (!_nameLabel) {
-        _nameLabel = [[UILabel alloc] init];
+        _nameLabel = [[CopyableLabel alloc] init];
         [self.headerView addSubview:_nameLabel];
         _nameLabel.text = @"Nick";
         _nameLabel.font = [UIFont fontWithName:@"PingFangSC-Semibold" size:20];
@@ -625,19 +626,36 @@ static CGFloat nameLabelleft = 36;
     return _idLabel;
 }
 
-- (UILabel *)nickNameLabel {
+- (UILabel *)nickNameLabelCaption {
+    if (!_nickNameLabelCaption) {
+        _nickNameLabelCaption = [[UILabel alloc] init];
+        [self.headerView addSubview:_nickNameLabelCaption];
+        _nickNameLabelCaption.text = NSLocalizedString(@"Username_colon", @"用户名：");
+        _nickNameLabelCaption.font = [UIFont fontWithName:@"PingFangSC-Regular" size:12];
+        _nickNameLabelCaption.textColor = [UIColor colorWithRed:255/255.0 green:255/255.0 blue:255/255.0 alpha:1/1.0];
+        _nickNameLabelCaption.textAlignment = NSTextAlignmentLeft;
+        [_nickNameLabelCaption sizeToFit];
+        
+        _nickNameLabelCaption.bmx_top =  _nameLabel.bmx_bottom + 15;
+        _nickNameLabelCaption.bmx_left = nameLabelleft;
+        
+    }
+    return _idLabelCaption;
+}
+
+- (CopyableLabel *)nickNameLabel {
     if (!_nickNameLabel) {
-        _nickNameLabel = [[UILabel alloc] init];
+        _nickNameLabel = [[CopyableLabel alloc] init];
         [self.headerView addSubview:_nickNameLabel];
-        _nickNameLabel.text = @"nick";
+        _nickNameLabel.text = @"";
         _nickNameLabel.font = [UIFont fontWithName:@"PingFangSC-Regular" size:12];
         _nickNameLabel.textColor = [UIColor colorWithRed:255/255.0 green:255/255.0 blue:255/255.0 alpha:1/1.0];
         _nickNameLabel.textAlignment = NSTextAlignmentLeft;
         [_nickNameLabel sizeToFit];
         
         _nickNameLabel.size = CGSizeMake(80,20);
-        _nickNameLabel.bmx_top =  _nameLabel.bmx_bottom + 15;
-        _nickNameLabel.bmx_left = nameLabelleft;
+        _nickNameLabel.bmx_top =  _nickNameLabelCaption.bmx_top;
+        _nickNameLabel.bmx_left = _nickNameLabelCaption.bmx_right + 2;
         
     }
     return _nickNameLabel;

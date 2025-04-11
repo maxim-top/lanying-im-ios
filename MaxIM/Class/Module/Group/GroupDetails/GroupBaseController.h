@@ -21,8 +21,9 @@
 @interface GroupBaseController : UIViewController
 
 @property (nonatomic, strong) BMXGroup *group;
+@property (nonatomic, assign) BOOL *hideMemberInfo;
 
-- (instancetype)initWithGroup:(BMXGroup *)group;
+- (instancetype)initWithGroup:(BMXGroup *)group hideMemberInfo:(BOOL)hideMemberInfo;
 
 
 - (BOOL) isOwner;

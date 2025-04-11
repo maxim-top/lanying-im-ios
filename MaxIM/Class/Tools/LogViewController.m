@@ -9,6 +9,8 @@
 #import "LogViewController.h"
 #import "UIViewController+CustomNavigationBar.h"
 #import <floo-ios/floo_proxy.h>
+#import <SSZipArchive.h>
+
 static const NSUInteger kLineNum = 200;
 
 @interface LogViewController ()
@@ -44,29 +46,25 @@ static const NSUInteger kLineNum = 200;
 - (void)setUpNavItem{
     [self setNavigationBarTitle:NSLocalizedString(@"Log", @"日志") navLeftButtonIcon:@"blackback"];
     
-    UIImage *moreImage = [UIImage imageNamed:@"file"];
+    UIImage *moreImage = [UIImage imageNamed:@"share"];
     UIButton *moreButton = [UIButton buttonWithType:UIButtonTypeCustom];
     [self.navigationBar addSubview:moreButton];
     [moreButton setImage:moreImage forState:UIControlStateNormal];
-    moreButton.frame = CGRectMake(MAXScreenW - 10 - 30 - 5, NavHeight - 5 -30, 30, 30);
+    moreButton.frame = CGRectMake(MAXScreenW - 10 - 30 - 5, NavHeight - 5 -30, 20, 20);
     [moreButton addTarget:self action:@selector(clickMoreButton:) forControlEvents:UIControlEventTouchUpInside];
 }
 
 - (void)clickMoreButton:(UIButton *)button {
     dispatch_async(dispatch_get_main_queue(), ^{
         NSMutableArray *itemsArr = [[NSMutableArray alloc]init];
-        for(id logger in [DDLog allLoggers]){
-            if([logger isKindOfClass:[DDFileLogger class]]){
-                DDFileLogger *fileLogger = (DDFileLogger*) logger;
-                for(NSString *path in [[fileLogger logFileManager] sortedLogFilePaths]){
-                    NSURL *logUrl = [NSURL fileURLWithPath:path];
-                    [itemsArr addObject: logUrl];
-                }
-            }
-        }
-        self.logPath =  [NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES).firstObject stringByAppendingPathComponent:[NSString stringWithFormat:@"ChatData/%@/flooLog/floo.log", [BMXClient sharedClient].getSDKConfig.getAppID]];
-        NSURL *flooLogUrl = [NSURL fileURLWithPath:self.logPath];
-        [itemsArr addObject: flooLogUrl];
+        NSString *chatDataPath =[NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES).firstObject stringByAppendingPathComponent:@"ChatData/"];
+        NSString *chatDataZip =[NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES).firstObject stringByAppendingPathComponent:@"ChatData.zip"];
+
+        [SSZipArchive createZipFileAtPath:chatDataZip withContentsOfDirectory:chatDataPath];
+        
+
+        NSURL *chatDataUrl = [NSURL fileURLWithPath:chatDataZip];
+        [itemsArr addObject: chatDataUrl];
         
         UIActivityViewController *activityViewController = [[UIActivityViewController alloc] initWithActivityItems:itemsArr applicationActivities:nil];
         

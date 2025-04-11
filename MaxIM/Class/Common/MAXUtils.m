@@ -13,6 +13,8 @@
 //  ----------------------------------------------------------------------
 
 #import "MAXUtils.h"
+#import <CommonCrypto/CommonCrypto.h>
+
 @interface MAXUtils ()
 @end
 
@@ -121,5 +123,40 @@
     }
 }
 
+NSString *HEXStringFromData(NSData *data) {
+    const unsigned char *dataBuffer = (const unsigned char *)[data bytes];
+    NSMutableString *hexString = [NSMutableString stringWithCapacity:[data length] * 2];
+    for (NSUInteger i = 0; i < [data length]; ++i) {
+        [hexString appendFormat:@"%02x", dataBuffer[i]];
+    }
+    return hexString;
+}
 
+// 计算字符串的MD5值
++ (NSString *)MD5Hash:(NSString *)input {
+    const char *cStr = [input UTF8String];
+    unsigned char digest[16];
+    CC_MD5(cStr, (unsigned int)strlen(cStr), digest); // 进行MD5加密
+    
+    NSData *digestData = [NSData dataWithBytes:digest length:sizeof(digest)];
+    return HEXStringFromData(digestData);
+}
+
+// 计算字符串的MD5值
++ (NSString *)MD5InBase64:(NSString *)input {
+    const char *cStr = [input UTF8String];
+    unsigned char digest[16];
+    CC_MD5(cStr, (unsigned int)strlen(cStr), digest); // 进行MD5加密
+    
+    NSData *digestData = [NSData dataWithBytes:digest length:sizeof(digest)];
+    return [digestData base64EncodedStringWithOptions:NSDataBase64Encoding64CharacterLineLength];
+}
+
++ (bool)getAppSwitch:(NSString *)key {
+    BMXSDKConfig *sdkconfig = [[BMXClient sharedClient] getSDKConfig];
+    NSData *data = [sdkconfig.getAppConfig dataUsingEncoding:NSUTF8StringEncoding];
+    NSDictionary *configDic = [NSJSONSerialization JSONObjectWithData:data options:kNilOptions error:nil];
+    bool value = [[configDic objectForKey:key] boolValue];
+    return value;
+}
 @end

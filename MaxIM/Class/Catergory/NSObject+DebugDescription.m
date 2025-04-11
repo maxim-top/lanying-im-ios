@@ -16,7 +16,7 @@
 - (NSString *)debugDescription {
     if ([self isKindOfClass:[NSArray class]] || [self isKindOfClass:[NSDictionary class]] || [self isKindOfClass:[NSNumber class]] || [self isKindOfClass:[NSString class]])
     {
-        return self.debugDescription;
+        return @"";
     }
     NSMutableDictionary *dictionary = [NSMutableDictionary dictionary];
     uint count;

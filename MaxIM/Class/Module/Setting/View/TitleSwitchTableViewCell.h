@@ -7,6 +7,7 @@
 //
 
 #import <UIKit/UIKit.h>
+#import "CopyableLabel.h"
 @class TitleSwitchTableViewCell;
 NS_ASSUME_NONNULL_BEGIN
 
@@ -20,7 +21,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 @property (nonatomic, strong) UILabel *titleLabel;
 @property (nonatomic, strong) UISwitch *mswitch;
-@property (nonatomic, strong) UILabel *contentLabel;
+@property (nonatomic, strong) CopyableLabel *contentLabel;
 @property (nonatomic,weak) id<TitleSwitchTableViewCellDelegate> delegate;
 + (instancetype)cellWithTableView:(UITableView *)tableview;
 

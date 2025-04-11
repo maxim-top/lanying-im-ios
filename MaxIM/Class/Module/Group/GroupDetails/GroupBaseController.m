@@ -27,9 +27,10 @@
 
 @implementation GroupBaseController
 
-- (instancetype)initWithGroup:(BMXGroup *)group {
+- (instancetype)initWithGroup:(BMXGroup *)group hideMemberInfo:(BOOL)hideMemberInfo {
     if (self = [super init]) {
         self.group = group;
+        self.hideMemberInfo = hideMemberInfo;
         MAXLog(@"%lld", self.group.groupId);
     }
     return self;

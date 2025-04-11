@@ -66,7 +66,11 @@ CGFloat const TEXTLABEL_MAX_WIDTH = 260.0f;
     NSMutableString *output = [NSMutableString stringWithCapacity:CC_MD5_DIGEST_LENGTH * 2];
     
     for (int i = 0; i < CC_MD5_DIGEST_LENGTH; i++) {
-        [output appendFormat:@"%02x", digest[i]];
+        @try {
+            [output appendFormat:@"%02x", digest[i]];
+        } @catch (NSException *exception) {
+            MAXLog(@"MD5HashOfString exception:%@",exception.description);
+        }
     }
     
     return output;

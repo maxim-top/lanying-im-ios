@@ -91,12 +91,6 @@ typedef enum : NSUInteger {
     if ([notifiaction.name isEqualToString:@"disConnectionNetworkNotifation"]) {
         [[BMXClient sharedClient] onNetworkChangedWithType: BMXNetworkType_None reconnect:NO];
         MAXLog(@"无网络");
-    } else if ([notifiaction.name isEqualToString:@"connectingIPhoneNetworkNotifation"]) {
-        [[BMXClient sharedClient] onNetworkChangedWithType: BMXNetworkType_Mobile reconnect:YES];
-        MAXLog(@"蜂窝");
-    } else if ([notifiaction.name isEqualToString:@"connectingInWifiNetworkNotifation"]) {
-        [[BMXClient sharedClient] onNetworkChangedWithType: BMXNetworkType_Wifi reconnect:YES];
-        MAXLog(@"WIFI");
     }
 }
 
@@ -257,11 +251,8 @@ typedef enum : NSUInteger {
 - (void)receiveReadAllMessages:(NSArray<BMXMessage *> *)messages {
     UINavigationController *navigation = (UINavigationController *)[self.childViewControllers firstObject];
     if ([NSStringFromClass([navigation.childViewControllers firstObject].class) isEqualToString:@"MainViewController"] ) {
-        dispatch_queue_t serialQueue = dispatch_queue_create("top.maxim.receiveNewMessage", DISPATCH_QUEUE_SERIAL);
-        dispatch_async(serialQueue, ^{
-            MainViewController *mainVC = [navigation.childViewControllers firstObject];
-            [mainVC receiveNewMessage:[messages lastObject]];
-        });
+        MainViewController *mainVC = [navigation.childViewControllers firstObject];
+        [mainVC receiveNewMessage:[messages lastObject]];
     }
     MAXLog(@"已经readall");
 
@@ -323,7 +314,7 @@ typedef enum : NSUInteger {
             UINavigationController *navigation = (UINavigationController *)[self.childViewControllers firstObject];
             if ([NSStringFromClass([navigation.childViewControllers firstObject].class) isEqualToString:@"MainViewController"] ) {
                 MainViewController *mainVC = [navigation.childViewControllers firstObject];
-                [mainVC getAllConversations];
+                [mainVC updateConversationWithRosterItem:roster];
             }
         }
     }];
@@ -397,6 +388,16 @@ typedef enum : NSUInteger {
         [mainVC receiveNewMessage:[messages lastObject]];
     }
     MAXLog(@"已经收到消息 %@", [messages firstObject]);
+}
+
+- (void)receiveDeleteMessages:(NSArray<BMXMessage*> *)messages{
+    UINavigationController *navigation = (UINavigationController *)[self.childViewControllers firstObject];
+    if ([NSStringFromClass([navigation.childViewControllers firstObject].class) isEqualToString:@"MainViewController"] ) {
+        
+        MainViewController *mainVC = [navigation.childViewControllers firstObject];
+        
+        [mainVC receiveNewMessage:[messages lastObject]];
+    }
 }
 
 - (void)receivedCommandMessages:(NSArray<BMXMessage *> *)messages {

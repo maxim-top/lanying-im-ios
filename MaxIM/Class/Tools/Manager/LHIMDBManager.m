@@ -173,11 +173,17 @@ SingleM(Manager)
                 }
                 return updataSuccess;
             } else {
-                BOOL insertSuccess = [self.dataBase executeUpdate:[self createInsertSQL:model]];
-                // 最后一步操作完毕，询问是否需要关闭
-                if (autoCloseDB) {
-                    [self.dataBase close];
+                BOOL insertSuccess = NO;
+                @try{
+                    insertSuccess = [self.dataBase executeUpdate:[self createInsertSQL:model]];
+                    // 最后一步操作完毕，询问是否需要关闭
+                    if (autoCloseDB) {
+                        [self.dataBase close];
+                    }
+                }@catch(NSException *exception) {
+                    MAXLog(@"exception:%@", exception.description);
                 }
+                
                 return insertSuccess;
             }
         }

@@ -11,6 +11,7 @@
 #import "UIView+BMXframe.h"
 #import "CaptchaApi.h"
 #import "DropdownListView.h"
+#import "WXApi.h"
 
 #define kUsernameTextFieldTag 1000
 #define kPasswordTextFieldTag 1001
@@ -148,6 +149,7 @@
 - (void)textFieldDidChange:(UITextField *)textField {
     if (textField.tag == kUsernameTextFieldTag) {
         self.username = textField.text;
+        [self showErrorText:@""];
     }else if (textField.tag == kPasswordTextFieldTag){
         self.password = textField.text;
     }
@@ -237,7 +239,7 @@
     self.appIDLabel.bmx_size = CGSizeMake(200, 30);
     [self.appIDLabel sizeToFit];
     
-    self.appIDLabel.bmx_top = self.otherLoginButton.bmx_bottom + 10  ;
+    self.appIDLabel.bmx_top = self.scanConsuleButton.bmx_bottom + 10  ;
     self.appIDLabel.bmx_centerX = self.centerX;
 }
 
@@ -245,7 +247,7 @@
     self.scanConsuleButton.bmx_width = 50;
     self.scanConsuleButton.bmx_height = 50;
     self.scanConsuleButton.bmx_top = MAXScreenH - 120;
-    self.scanConsuleButton.bmx_centerX = self.centerX;
+    self.scanConsuleButton.bmx_centerX = self.centerX - ([WXApi isWXAppInstalled] ? 0 : 50);
 }
 
 - (void)addLogButton {
@@ -340,7 +342,7 @@
 
     self.editButton.bmx_size = self.scanConsuleButton.size;
     self.editButton.bmx_top =  self.scanConsuleButton.bmx_top;
-    self.editButton.bmx_left = self.scanConsuleButton.bmx_right + 50;
+    self.editButton.bmx_left = self.scanConsuleButton.bmx_right + ([WXApi isWXAppInstalled] ? 50 : 50);
 }
 
 - (void)removeWechatButton {
@@ -390,7 +392,7 @@
 - (void)showErrorText:(NSString *)errorText {
     
     self.errorLabel.text = errorText;
-    
+    _usernameTextField.layer.borderWidth = errorText.length > 0 ? 1.0 : 0;
 }
 
 - (void)inputUserName:(NSString *)name {
@@ -723,6 +725,12 @@
         _usernameTextField.leftViewMode = UITextFieldViewModeAlways;
         _usernameTextField.layer.masksToBounds = YES;
         _usernameTextField.layer.cornerRadius = 12;
+        _usernameTextField.borderStyle = UITextBorderStyleNone;
+        UIView *leftView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 8, _usernameTextField.frame.size.height)];
+        _usernameTextField.leftView = leftView;
+        _usernameTextField.leftViewMode = UITextFieldViewModeAlways;
+        _usernameTextField.layer.cornerRadius = 5.0;
+        _usernameTextField.layer.borderColor = [UIColor redColor].CGColor;
         UIButton *button = [UIButton buttonWithType:UIButtonTypeCustom];
         [button setTitle:@"" forState:UIControlStateNormal];
         [button setBackgroundColor:[UIColor redColor]];
@@ -741,6 +749,9 @@
         _passwordTextField.leftViewMode = UITextFieldViewModeAlways;
         _passwordTextField.layer.masksToBounds = YES;
         _passwordTextField.layer.cornerRadius = 12;
+        UIView *leftView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 8, _usernameTextField.frame.size.height)];
+        _passwordTextField.leftView = leftView;
+        _passwordTextField.leftViewMode = UITextFieldViewModeAlways;
         _passwordTextField.secureTextEntry = YES;
         _passwordTextField.clearButtonMode = UITextFieldViewModeWhileEditing;
         _passwordTextField.rightView = self.safeButton;
@@ -774,9 +785,10 @@
     
     if (!_errorLabel) {
         _errorLabel = [[UILabel alloc] init];
-        _errorLabel.frame = CGRectMake(0, 0, MAXScreenW - 96, 18);
+        _errorLabel.frame = CGRectMake(0, 0, MAXScreenW - 96, 38);
         _errorLabel.textColor = BMXCOLOR_HEX(0xD0021B);
         _errorLabel.font = [UIFont systemFontOfSize:12];
+        _errorLabel.numberOfLines = 2;
         [self addSubview:_errorLabel];
     }
     return _errorLabel;
@@ -882,7 +894,9 @@
         [_otherLoginButton addTarget:self action:@selector(otherLoginButtonClick) forControlEvents:UIControlEventTouchUpInside];
         _otherLoginButton.layer.masksToBounds = YES;
         _otherLoginButton.layer.cornerRadius = 12;
-        [self addSubview:_otherLoginButton];
+        if ([WXApi isWXAppInstalled]) {
+            [self addSubview:_otherLoginButton];
+        }
     }
     return _otherLoginButton;
 }

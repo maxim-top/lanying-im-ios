@@ -20,7 +20,7 @@
 #import "VideoManager.h"
 #import "UIView+Addtions.h"
 #import "AppDelegate.h"
-
+#import "MAXUtils.h"
 
 
 CGFloat const kChatInputTextViewFont = 16.0f;
@@ -364,7 +364,21 @@ CGFloat const kChatBatItemWH = 26.0f;
     [self.viewController presentViewController:imagePickerVc animated:YES completion:nil];
 }
 
+-(void)showAlertForPermissionError {
+    UIAlertController *alertController = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"permission_required", @"权限不足") message:NSLocalizedString(@"permission_need_enabled", @"此业务需要开通，请联系App管理员。") preferredStyle:UIAlertControllerStyleAlert];
+    [alertController addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Confirm", @"确定") style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+        
+    }]];
+    
+    [self.viewController presentViewController:alertController animated:YES completion:nil];
+}
+
 - (void)moreViewLocationAction:(LHChatBarMoreView *)moreView {
+    bool disableSendLocation = [MAXUtils getAppSwitch:@"disable_send_location"];
+    if (disableSendLocation) {
+        [self showAlertForPermissionError];
+        return;
+    }
     // 进入定位页面，获取定位信息
     if (self.delegate && [self.delegate respondsToSelector:@selector(chatViewSendLocation)]) {
  

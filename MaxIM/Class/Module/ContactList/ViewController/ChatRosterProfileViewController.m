@@ -23,6 +23,7 @@
 #import "CallViewController.h"
 #import "IMAcount.h"
 #import "IMAcountInfoStorage.h"
+#import "CopyableLabel.h"
 
 static const float FOOTER_BUTTON_HEIGHT = 50.0f;
 static const float FOOTER_BUTTON_PADDING = 10.0f;
@@ -34,8 +35,9 @@ static const float FOOTER_BUTTON_PADDING = 10.0f;
 @property (nonatomic, strong) UIView *headerView;
 @property (nonatomic, strong) UIButton *beginChatButton;
 @property (nonatomic, strong) UIImageView *avatarImageView;
-@property (nonatomic, strong) UILabel *nameLabel;
-@property (nonatomic, strong) UILabel *userIDLabel;
+@property (nonatomic, strong) CopyableLabel *nameLabel;
+@property (nonatomic, strong) UILabel *userIDLabelCap;
+@property (nonatomic, strong) CopyableLabel *userIDLabel;
 @property (nonatomic, strong) NSArray *cellDataArray;
 @property (nonatomic, strong) BMXRosterItem *currentRoster;
 @property (nonatomic, strong) IMAcount *account;
@@ -68,9 +70,12 @@ static const float FOOTER_BUTTON_PADDING = 10.0f;
     
     if ([self.currentRoster.username length]) {
         self.nameLabel.text = [NSString stringWithFormat:@"%@", [self.currentRoster.nickname length] ? self.currentRoster.nickname : self.currentRoster.username];
+        [self.nameLabel sizeToFit];
+
     }
     
-    self.userIDLabel.text = [NSString stringWithFormat:@"ID:%lld", self.currentRoster.rosterId];
+    self.userIDLabel.text = [NSString stringWithFormat:@"%lld", self.currentRoster.rosterId];
+    [self.userIDLabelCap sizeToFit];
     [self.userIDLabel sizeToFit];
     
     self.cellDataArray = [self getSettingConfigDataArray];
@@ -313,7 +318,8 @@ static const float FOOTER_BUTTON_PADDING = 10.0f;
         _tableView.tableHeaderView.bmx_height = 120.f;
         [self setupFooterView];
         _tableView.tableFooterView = self.footerView;
-        _tableView.tableFooterView.bmx_height = FOOTER_BUTTON_HEIGHT*3 + FOOTER_BUTTON_PADDING*4;
+        int numFooterButtons = self.currentRoster.relation == BMXRosterItem_RosterRelation_Friend ? 3 : 2;
+        _tableView.tableFooterView.bmx_height = FOOTER_BUTTON_HEIGHT*numFooterButtons + FOOTER_BUTTON_PADDING*(numFooterButtons+1);
 
         [self.view addSubview:_tableView];
     }
@@ -321,7 +327,84 @@ static const float FOOTER_BUTTON_PADDING = 10.0f;
 }
 
 - (void)setUpNavItem{
-    [self setNavigationBarTitle:self.currentRoster.username navLeftButtonIcon:@"blackback"];
+    if (self.currentRoster.relation != BMXRosterItem_RosterRelation_Friend) {
+        [self setNavigationBarTitle:self.currentRoster.username navLeftButtonIcon:@"blackback" navRightButtonIcon:@"contact_add"];
+        [self.navRightButton addTarget:self action:@selector(onAddContact) forControlEvents:UIControlEventTouchUpInside];
+    }else{
+        [self setNavigationBarTitle:self.currentRoster.username navLeftButtonIcon:@"blackback"];
+    }
+}
+
+-(void)onAddContact {
+    BMXRosterItem *roster = self.currentRoster;
+    NSString *authQuestion = roster.addFriendAuthMode==BMXRosterItem_AddFriendAuthMode_AnswerQuestion? roster.authQuestion:@"";
+    UIAlertController* alert = [UIAlertController alertControllerWithTitle:authQuestion.length>0 ? NSLocalizedString(@"Friend_verification_question", @"好友验证问题") : NSLocalizedString(@"Leave_a_message", @"留言")
+                                                                   message:authQuestion
+                                                            preferredStyle:UIAlertControllerStyleAlert];
+    
+    UIAlertAction* okAction = [UIAlertAction actionWithTitle:NSLocalizedString(@"Confirm", @"确定") style:UIAlertActionStyleDefault
+                                                     handler:^(UIAlertAction * action) {
+                                                         //响应事件
+                                                         //得到文本信息
+                                                         for(UITextField *text in alert.textFields){
+                                                             MAXLog(@"text = %@", text.text);
+                                                             if (authQuestion.length>0){
+                                                                 [self addRosterId:roster.rosterId authAnswer:[text.text length] ? text.text : @""];
+                                                             }else{
+                                                                 [self addRosterId:roster.rosterId reason:[text.text length] ? text.text : @""];
+                                                             }
+                                                         }
+                                                     }];
+    UIAlertAction* cancelAction = [UIAlertAction actionWithTitle:NSLocalizedString(@"Cancel", @"取消") style:UIAlertActionStyleCancel
+                                                         handler:^(UIAlertAction * action) {
+                                                             //响应事件
+                                                             MAXLog(@"action = %@", alert.textFields);
+                                                         }];
+    [alert addTextFieldWithConfigurationHandler:^(UITextField *textField) {
+        textField.placeholder = authQuestion.length>0 ? NSLocalizedString(@"enter_answer", @"请输入答案") : NSLocalizedString(@"enter_message_for_group_application", @"请输入申请的留言信息");
+    }];
+    
+    [alert addAction:okAction];
+    [alert addAction:cancelAction];
+    [self presentViewController:alert animated:YES completion:nil];
+
+}
+
+// 添加好友
+- (void)addRosterId:(long long)rosterId reason:(NSString *)reason {
+    [[[BMXClient sharedClient] rosterService] applyWithRosterId:rosterId message:reason completion:^(BMXError *error) {
+        MAXLog(@"%lld", rosterId);
+        if (!error) {
+            [HQCustomToast showDialog:NSLocalizedString(@"Request_sent", @"已发出请求")];
+            [self.navigationController popToRootViewControllerAnimated:YES];
+            
+        } else if (error.errorCode == BMXErrorCode_CurrentUserIsInRoster){
+            [self.navigationController  popToRootViewControllerAnimated:NO];
+            
+            UITabBarController *bar =  (UITabBarController *)[UIApplication sharedApplication].keyWindow.rootViewController;
+            UINavigationController *currentNav =  (UINavigationController *)bar.selectedViewController;
+            
+            LHChatVC *vc = [[LHChatVC alloc] initWithRoster:self.currentRoster messageType:BMXMessage_MessageType_Single];
+            vc.hidesBottomBarWhenPushed = YES;
+            [currentNav pushViewController:vc animated:YES];
+        } else {
+            [HQCustomToast showDialog:[error description]];
+        }
+    }];
+}
+
+// 添加好友
+- (void)addRosterId:(long long)rosterId authAnswer:(NSString *)authAnswer {
+    [[[BMXClient sharedClient] rosterService] applyWithRosterId:rosterId message:@"" authAnswer:authAnswer completion:^(BMXError *error) {
+        MAXLog(@"%lld", rosterId);
+        if (!error) {
+            [HQCustomToast showDialog:NSLocalizedString(@"Friend_request_sent", @"已发送添加好友申请")];
+            [self.navigationController popViewControllerAnimated:YES];
+
+        } else {
+            [HQCustomToast showDialog:[error description]];
+        }
+    }];
 }
 
 - (NSArray *)cellDataArray {
@@ -337,15 +420,18 @@ static const float FOOTER_BUTTON_PADDING = 10.0f;
     
     [self avatarImageView];
     [self nameLabel];
+    [self userIDLabelCap];
     [self userIDLabel];
 }
 
 - (void)setupFooterView {
-    self.footerView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, MAXScreenW, 120.f)];
-    self.footerView.backgroundColor = [UIColor lh_colorWithHex:0xf8f8f8];
-    [self startChatButton];
-    [self videoCallButton];
-    [self voiceCallButton];
+    if (self.currentRoster.relation == BMXRosterItem_RosterRelation_Friend) {
+        self.footerView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, MAXScreenW, 120.f)];
+        self.footerView.backgroundColor = [UIColor lh_colorWithHex:0xf8f8f8];
+        [self startChatButton];
+        [self videoCallButton];
+        [self voiceCallButton];
+    }
 }
 
 - (void)startChat{
@@ -363,9 +449,9 @@ static const float FOOTER_BUTTON_PADDING = 10.0f;
         [_startChatButton setTitleColor:[UIColor blackColor] forState:UIControlStateNormal];
         [_startChatButton setBackgroundColor:[UIColor whiteColor]];
         _startChatButton.titleLabel.font =  [UIFont fontWithName:@"PingFangSC-Regular" size:17];
-        _startChatButton.bmx_size = CGSizeMake(MAXScreenW, FOOTER_BUTTON_HEIGHT);
+        _startChatButton.bmx_size = CGSizeMake(MAXScreenW, self.currentRoster.relation == BMXRosterItem_RosterRelation_Friend ? FOOTER_BUTTON_HEIGHT: 1);
         _startChatButton.bmx_centerX = MAXScreenW / 2.0;
-        _startChatButton.bmx_centerY = FOOTER_BUTTON_HEIGHT / 2.0 + FOOTER_BUTTON_PADDING;
+        _startChatButton.bmx_centerY = self.currentRoster.relation == BMXRosterItem_RosterRelation_Friend ? FOOTER_BUTTON_HEIGHT / 2.0 + FOOTER_BUTTON_PADDING : FOOTER_BUTTON_HEIGHT / 2.0 * -1;
     }
     return _startChatButton;
 }
@@ -381,7 +467,7 @@ static const float FOOTER_BUTTON_PADDING = 10.0f;
         _videoCallButton.titleLabel.font =  [UIFont fontWithName:@"PingFangSC-Regular" size:17];
         _videoCallButton.bmx_size = CGSizeMake(MAXScreenW, FOOTER_BUTTON_HEIGHT);
         _videoCallButton.bmx_centerX = MAXScreenW / 2.0;
-        _videoCallButton.bmx_centerY = FOOTER_BUTTON_HEIGHT / 2.0 + FOOTER_BUTTON_HEIGHT + FOOTER_BUTTON_PADDING * 2;
+        _videoCallButton.bmx_centerY = _startChatButton.bmx_centerY + FOOTER_BUTTON_HEIGHT + FOOTER_BUTTON_PADDING;
     }
     return _videoCallButton;
 }
@@ -397,7 +483,7 @@ static const float FOOTER_BUTTON_PADDING = 10.0f;
         _voiceCallButton.titleLabel.font =  [UIFont fontWithName:@"PingFangSC-Regular" size:17];
         _voiceCallButton.bmx_size = CGSizeMake(MAXScreenW, FOOTER_BUTTON_HEIGHT);
         _voiceCallButton.bmx_centerX = MAXScreenW / 2.0;
-        _voiceCallButton.bmx_centerY = FOOTER_BUTTON_HEIGHT / 2.0 + FOOTER_BUTTON_HEIGHT * 2 + FOOTER_BUTTON_PADDING * 3;
+        _voiceCallButton.bmx_centerY = _videoCallButton.bmx_centerY + FOOTER_BUTTON_HEIGHT + FOOTER_BUTTON_PADDING;
     }
     return _voiceCallButton;
 }
@@ -420,9 +506,9 @@ static const float FOOTER_BUTTON_PADDING = 10.0f;
     return _avatarImageView;
 }
 
-- (UILabel *)nameLabel {
+- (CopyableLabel *)nameLabel {
     if (!_nameLabel) {
-        _nameLabel = [[UILabel alloc] init];
+        _nameLabel = [[CopyableLabel alloc] init];
         [self.headerView addSubview:_nameLabel];
         _nameLabel.text = @"Nick";
         _nameLabel.font = [UIFont fontWithName:@"PingFangSC-Semibold" size:20];
@@ -438,9 +524,27 @@ static const float FOOTER_BUTTON_PADDING = 10.0f;
     return _nameLabel;
 }
 
-- (UILabel *)userIDLabel {
+- (UILabel *)userIDLabelCap {
+    if (!_userIDLabelCap) {
+        _userIDLabelCap = [[UILabel alloc] init];
+        [self.headerView addSubview:_userIDLabelCap];
+        _userIDLabelCap.text = @"ID:";
+        _userIDLabelCap.font = [UIFont systemFontOfSize:16];
+        _userIDLabelCap.textColor = [UIColor blackColor];
+        _userIDLabelCap.textAlignment = NSTextAlignmentLeft;
+        [_userIDLabelCap sizeToFit];
+        
+        CGFloat nameLabelRight = 15;
+        _userIDLabelCap.size = CGSizeMake(25, 30);
+        _userIDLabelCap.bmx_top = self.nameLabel.bmx_bottom + 5;
+        _userIDLabelCap.bmx_left = self.avatarImageView.bmx_right + nameLabelRight;
+    }
+    return _userIDLabelCap;
+}
+
+- (CopyableLabel *)userIDLabel {
     if (!_userIDLabel) {
-        _userIDLabel = [[UILabel alloc] init];
+        _userIDLabel = [[CopyableLabel alloc] init];
         [self.headerView addSubview:_userIDLabel];
         _userIDLabel.text = @"Nick";
         _userIDLabel.font = [UIFont systemFontOfSize:16];
@@ -448,10 +552,9 @@ static const float FOOTER_BUTTON_PADDING = 10.0f;
         _userIDLabel.textAlignment = NSTextAlignmentLeft;
         [_userIDLabel sizeToFit];
         
-        CGFloat nameLabelRight = 15;
-        _userIDLabel.size = CGSizeMake(80, 30);
-        _userIDLabel.bmx_top = self.nameLabel.bmx_bottom + 5;
-        _userIDLabel.bmx_left = self.avatarImageView.bmx_right + nameLabelRight;
+        _userIDLabel.size = CGSizeMake(50, 30);
+        _userIDLabel.bmx_top = self.userIDLabelCap.bmx_top;
+        _userIDLabel.bmx_left = self.userIDLabelCap.bmx_right + 1;
     }
     return _userIDLabel;
 }

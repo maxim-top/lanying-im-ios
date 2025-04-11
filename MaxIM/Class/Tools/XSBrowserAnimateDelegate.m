@@ -100,36 +100,46 @@ SingleM(Instance)
         
         [[transitionContext containerView] addSubview:imageView];
         fromVC.view.alpha = isOverstep ? 1 : 0;
-        [UIView animateWithDuration:0.18 animations:^{
-            self.browserTransition.coverView.backgroundColor = [UIColor colorWithWhite:0.0 alpha:0.0];
-            if (isOverstep) {
-                fromVC.view.alpha = 0.65;
-                imageView.image = [self imageByApplyingAlpha:0.45 image:imageView.image];
-            } else imageView.frame = toRect;
-            if (self.isIm) imageView.layer.cornerRadius = 14;
-        } completion:^(BOOL finished) {
+        @try {
+            [UIView animateWithDuration:0.18 animations:^{
+                self.browserTransition.coverView.backgroundColor = [UIColor colorWithWhite:0.0 alpha:0.0];
+                if (isOverstep) {
+                    fromVC.view.alpha = 0.65;
+                    imageView.image = [self imageByApplyingAlpha:0.45 image:imageView.image];
+                } else imageView.frame = toRect;
+                if (self.isIm) imageView.layer.cornerRadius = 14;
+            } completion:^(BOOL finished) {
+                [transitionContext completeTransition:YES];
+                [imageView removeFromSuperview];
+            }];
+        }@catch (NSException *exception) {
+            MAXLog(@"%@",exception.description);
             [transitionContext completeTransition:YES];
             [imageView removeFromSuperview];
-        }];
+        }
     }
 }
 
 //设置图片透明度
 - (UIImage *)imageByApplyingAlpha:(CGFloat)alpha image:(UIImage*)image {
-    UIGraphicsBeginImageContextWithOptions(image.size, NO, 0.0f);
-    
-    CGContextRef ctx = UIGraphicsGetCurrentContext();
-    CGRect area = CGRectMake(0, 0, image.size.width, image.size.height);
-    
-    CGContextScaleCTM(ctx, 1, -1);
-    CGContextTranslateCTM(ctx, 0, -area.size.height);
-    
-    CGContextSetBlendMode(ctx, kCGBlendModeMultiply);
-    
-    CGContextSetAlpha(ctx, alpha);
-    
-    CGContextDrawImage(ctx, area, image.CGImage);
-    
+    @try {
+        UIGraphicsBeginImageContextWithOptions(image.size, NO, 0.0f);
+        
+        CGContextRef ctx = UIGraphicsGetCurrentContext();
+        CGRect area = CGRectMake(0, 0, image.size.width, image.size.height);
+        
+        CGContextScaleCTM(ctx, 1, -1);
+        CGContextTranslateCTM(ctx, 0, -area.size.height);
+        
+        CGContextSetBlendMode(ctx, kCGBlendModeMultiply);
+        
+        CGContextSetAlpha(ctx, alpha);
+        
+        CGContextDrawImage(ctx, area, image.CGImage);
+        
+    } @catch (NSException *exception) {
+        MAXLog(@"imageByApplyingAlpha exception.");
+    }
     UIImage *newImage = UIGraphicsGetImageFromCurrentImageContext();
     
     UIGraphicsEndImageContext();

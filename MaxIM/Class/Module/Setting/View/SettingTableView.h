@@ -7,13 +7,14 @@
 //
 
 #import <UIKit/UIKit.h>
+#import "CopyableLabel.h"
 
 @class BMXUserProfile;
 @interface SettingTableView : UITableView
 
 @property (nonatomic, strong) NSArray *cellDataArray;
 @property (nonatomic, strong) UIImageView *avatarImageView;
-@property (nonatomic, strong) UILabel *nameLabel;
+@property (nonatomic, strong) CopyableLabel *nameLabel;
 
 
 - (void)refeshProfile:(BMXUserProfile *)profile;

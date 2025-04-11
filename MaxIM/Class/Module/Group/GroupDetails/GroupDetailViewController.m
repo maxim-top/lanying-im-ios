@@ -68,7 +68,6 @@
 
 @interface GroupDetailViewController ()<UITableViewDelegate, UITableViewDataSource, GroupManagerProtocol>
 {
-    NSMutableArray* _settingDict;
     BOOL _isAdmin;
 }
 @property (nonatomic, strong) UITableView* tableView;
@@ -87,22 +86,10 @@
     
     self.memberList = [NSArray array];
     _isAdmin = NO;
-    _settingDict = @[
-                     @{@"title":NSLocalizedString(@"Group_ID", @"群ID"), @"detail":@"11122233"},
-                     @{@"title":NSLocalizedString(@"My_nickname_in_group", @"我在群里的昵称"), @"detail":@"11122233"},
-                     @{@"title":NSLocalizedString(@"Group_QR_Code", @"群二维码"), @"detail":@""},
-                     @{@"title":NSLocalizedString(@"Search_chat_history", @"搜索聊天记录"), @"detail":@""},
-                     @{@"title":NSLocalizedString(@"Group_management", @"群管理"), @"detail":@""},
-                     @{@"title":NSLocalizedString(@"Modify_group_name", @"修改群名称"), @"detail":@""},
-                     @{@"title":NSLocalizedString(@"Admin_list", @"管理员列表"), @"detail":@""},
-                     @{@"title":NSLocalizedString(@"Group_announcement", @"群公告"), @"detail":@""},
-                     @{@"title":NSLocalizedString(@"Group_extension_info", @"群扩展信息"), @"detail":@""},
-                     @{@"title":NSLocalizedString(@"List_of_group_shared_list", @"群共享列表"), @"detail":@""},
-                     ];
     [self.view addSubview:self.tableView];
     [self registeNotifications];
     [self getMembers];
-    [self addLeaveBtn];
+//    [self addLeaveBtn];
     [self getAdminList];
     [self get];
 }
@@ -195,19 +182,22 @@
 
 #pragma mark == tableview delegate
 -(NSInteger) numberOfSectionsInTableView:(UITableView *)tableView {
+    if(self.hideMemberInfo){
+        return 1;
+    }
     return 2;
 }
 
 -(NSInteger) tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section{
-    if(section == 0 ) {
+    if(!self.hideMemberInfo && section == 0 ) {
         return 1;
     }
     if([self isOwner]) {
-        return 8;
+        return 10;
     }else if(_isAdmin) {
-        return  7;
+        return  9;
     }
-    return 4;
+    return 6;
     
 }
 
@@ -225,7 +215,7 @@
 
 -(CGFloat) tableView:(UITableView *)tableView heightForRowAtIndexPath:(nonnull NSIndexPath *)indexPath{
     NSInteger section = indexPath.section;
-    if(section == 0) {
+    if(!self.hideMemberInfo && section == 0) {
         if(self.memberList.count == 0){
             return 0 ;
         }
@@ -236,7 +226,7 @@
 
 -(UIView*) tableView:(UITableView *)tableView viewForHeaderInSection:(NSInteger)section
 {
-    if(section == 0) {
+    if(!self.hideMemberInfo && section == 0) {
         return [self sectionHeaderViewWithTitle:NSLocalizedString(@"Group_members", @"群成员") moreClic:@selector(touchedMoreMembers)];
     }else{
         return [self sectionHeaderViewWithTitle:NSLocalizedString(@"Group_settings", @"群设置") moreClic:nil];
@@ -246,7 +236,7 @@
 -(UITableViewCell*) tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
     NSInteger row = indexPath.row;
     NSInteger section = indexPath.section;
-    if(section == 0) {
+    if(!self.hideMemberInfo && section == 0) {
         UITableViewCell* cell = [tableView dequeueReusableCellWithIdentifier:@"collectioncell"];
         if (cell == nil) {
             cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:@"collectioncell"];
@@ -264,24 +254,53 @@
             [cell setMainText:NSLocalizedString(@"My_nickname_in_group", @"我在群里的昵称") detailText:self.group.myNickname switcherFlag:NO switcherTarget:nil switcherSelector:nil];
             [cell showAccesor:YES];
         }else if(row == 2) {
-            [cell setMainText:NSLocalizedString(@"QR_Code", @"二维码") detailText:@"" switcherFlag:NO switcherTarget:nil switcherSelector:nil];
+            [cell setMainText:NSLocalizedString(@"Group_QR_Code", @"群二维码") detailText:@"" switcherFlag:NO switcherTarget:nil switcherSelector:nil];
             [cell showAccesor:YES];
         }else if(row == 3) {
+            [cell.avatarImageView setHidden:YES];
+            [cell showAccesor:YES];
+            NSString *modeStr = @"";
+            switch (self.group.msgMuteMode) {
+                case BMXGroup_MsgMuteMode_None:
+                    modeStr = NSLocalizedString(@"Accept_and_alert_message", @"接受并提醒消息");
+                    break;
+                case BMXGroup_MsgMuteMode_MuteNotification:
+                    modeStr = NSLocalizedString(@"Accept_but_not_alert_message", @"接受但不提醒消息");
+                    break;
+                case BMXGroup_MsgMuteMode_MuteChat:
+                    modeStr = NSLocalizedString(@"Do_not_receive_any_messages", @"不接收任何消息");
+                    break;
+                    
+                default:
+                    break;
+            }
+            [cell setMainText:NSLocalizedString(@"Block_group_message", @"屏蔽群消息") detailText:modeStr switcherFlag:NO switcherTarget:nil switcherSelector:nil];
+        }else if(row == 4) {
             [cell setMainText:NSLocalizedString(@"Search_chat_history", @"搜索聊天记录") detailText:@"" switcherFlag:NO switcherTarget:nil switcherSelector:nil];
             [cell showAccesor:YES];
-        } else if(row == 4) {
-            [cell setMainText:NSLocalizedString(@"Group_announcement", @"群公告") detailText:@"" switcherFlag:NO switcherTarget:nil switcherSelector:nil];
-            [cell showAccesor:YES];
-        }else if(row == 5) {
+        } else if(row == 5) {
+            if([self isOwner] || _isAdmin) {
+                [cell setMainText:NSLocalizedString(@"Group_announcement", @"群公告") detailText:@"" switcherFlag:NO switcherTarget:nil switcherSelector:nil];
+                [cell showAccesor:YES];
+            }else{
+                [cell setMainText:[self isOwner] ? NSLocalizedString(@"Dismiss_group", @"解散群") : NSLocalizedString(@"Delete_and_quit", @"删除并退出") detailText:@"" switcherFlag:NO switcherTarget:nil switcherSelector:nil];
+                [cell showAccesor:NO];
+                [cell showSepLine:YES];
+            }
+        }else if(row == 6) {
             [cell setMainText:NSLocalizedString(@"Modify_group_name", @"修改群名称") detailText:@"" switcherFlag:NO switcherTarget:nil switcherSelector:nil];
             [cell showAccesor:YES];
-        } else if(row == 6) {
+        } else if(row == 7) {
             [cell setMainText:NSLocalizedString(@"Group_management", @"群管理") detailText:@"" switcherFlag:NO switcherTarget:nil switcherSelector:nil];
             [cell showAccesor:YES];
-        } else if(row == 7) {
+        } else if(row == 8) {
             [cell setMainText:NSLocalizedString(@"Admin_list", @"管理员列表") detailText:@"" switcherFlag:NO switcherTarget:nil switcherSelector:nil];
             [cell showAccesor:YES];
-            [cell showSepLine:NO];
+            [cell showSepLine:YES];
+        } else if(row == 9) {
+            [cell setMainText:[self isOwner] ? NSLocalizedString(@"Dismiss_group", @"解散群") : NSLocalizedString(@"Delete_and_quit", @"删除并退出") detailText:@"" switcherFlag:NO switcherTarget:nil switcherSelector:nil];
+            [cell showAccesor:NO];
+            [cell showSepLine:YES];
         }
         return cell;
     }
@@ -300,6 +319,7 @@
     NSInteger row = indexPath.row;
     NSInteger section = indexPath.section;
     NSArray* arr = @[@"CodeImageViewController",
+                     @"",
                      @"SearchContentViewController",
                      @"GroupPublicViewController",
                      @"GroupChangeNameViewController",
@@ -312,35 +332,91 @@
         return;
     }
     
-    if(section == 1 && row > 1) {
-        NSString* className = [arr objectAtIndex:row-2];
-        if ([className isEqualToString: @"SearchContentViewController"]) {
-            SearchContentViewController *vc = [[SearchContentViewController alloc] initWithSearchContentType:BMXMessage_ContentType_Text conversation:self.conversation];
-            vc.isConversation = YES;
-            [self.navigationController pushViewController:vc animated:YES];
-            return;
-        }
-        
-        if ([className isEqualToString: @"CodeImageViewController"]) {
-            
-            MAXLog(@"%ld", (long)self.group.inviteMode);
-            if (self.group.inviteMode == BMXGroup_InviteMode_Open ) {
-                CodeImageViewController * vc = [[CodeImageViewController alloc] initWithGroup:self.group];
-                [self.navigationController pushViewController:vc animated:YES];
-                return;
-            }else {
-                [HQCustomToast showDialog:NSLocalizedString(@"contact_Admin_to_enable_QR_Code", @"请联系管理员开通二维码")];
-                return;
+    if(section == 1) {
+        if (row == 9 || (row == 5 && ![self isOwner] && !_isAdmin)){
+            [self touchedLeaveGroup];
+        } else if(row > 1 && row < 9) {
+            if (row == 3) {
+                [self showPushModealert];
+            }else{
+                NSString* className = [arr objectAtIndex:row-2];
+                if ([className isEqualToString: @"SearchContentViewController"]) {
+                    SearchContentViewController *vc = [[SearchContentViewController alloc] initWithSearchContentType:BMXMessage_ContentType_Text conversation:self.conversation];
+                    vc.isConversation = YES;
+                    [self.navigationController pushViewController:vc animated:YES];
+                    return;
+                }
+                
+                if ([className isEqualToString: @"CodeImageViewController"]) {
+                    
+                    MAXLog(@"%ld", (long)self.group.inviteMode);
+                    if (self.group.inviteMode == BMXGroup_InviteMode_Open ) {
+                        CodeImageViewController * vc = [[CodeImageViewController alloc] initWithGroup:self.group];
+                        [self.navigationController pushViewController:vc animated:YES];
+                        return;
+                    }else {
+                        [HQCustomToast showDialog:NSLocalizedString(@"contact_Admin_to_enable_QR_Code", @"请联系管理员开通二维码")];
+                        return;
+                    }
+                }
+                UIViewController* ctrl = [[NSClassFromString(className) alloc] initWithGroup:self.group hideMemberInfo: self.hideMemberInfo] ;
+                ctrl.hidesBottomBarWhenPushed = YES;
+                if ([className isEqualToString:@"GroupManageViewController"]) {
+                    GroupManageViewController *vc = (GroupManageViewController *)ctrl;
+                    vc.delegate = self;
+                }
+                [self.navigationController pushViewController:ctrl animated:YES];
             }
         }
-        UIViewController* ctrl = [[NSClassFromString(className) alloc] initWithGroup:self.group] ;
-        ctrl.hidesBottomBarWhenPushed = YES;
-        if ([className isEqualToString:@"GroupManageViewController"]) {
-            GroupManageViewController *vc = (GroupManageViewController *)ctrl;
-            vc.delegate = self;
-        }
-        [self.navigationController pushViewController:ctrl animated:YES];
     }
+}
+
+-(void)setMsgMuteModeBy:(BMXGroup_MsgMuteMode)mode {
+    [[[BMXClient sharedClient] groupService] muteMessageWithGroup:self.group mode:mode completion:^(BMXError *error) {
+        if (error == nil) {
+            [HQCustomToast showDialog:NSLocalizedString(@"Set_successfully", @"设置成功")];
+            [self getGroupDetailInfo];
+            [self.tableView reloadData];
+        }
+    }];
+}
+
+
+
+- (void)showPushModealert {
+    UIAlertController* alert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Set_group_message_blocking_mode", @"设置群消息屏蔽模式") message:nil preferredStyle:UIAlertControllerStyleActionSheet];
+    UIAlertAction* action1 = [UIAlertAction actionWithTitle:NSLocalizedString(@"Accept_and_alert_message", @"接受并提醒消息") style:UIAlertActionStyleDefault
+                                                    handler:^(UIAlertAction * action) {
+                                                        //响应事件
+                                                        [self setMsgMuteModeBy:BMXGroup_MsgMuteMode_None];
+//                                                        [self invitmodeWith:BMXGroup_InviteMode_Open];
+                                                    }];
+    UIAlertAction* action2 = [UIAlertAction actionWithTitle:NSLocalizedString(@"Accept_but_not_alert_message", @"接受但不提醒消息") style:UIAlertActionStyleDefault
+                                                    handler:^(UIAlertAction * action) {
+                                                        //响应事件
+                                                        [self setMsgMuteModeBy:BMXGroup_MsgMuteMode_MuteNotification];
+
+                                                    }];
+    UIAlertAction* action3 = [UIAlertAction actionWithTitle:NSLocalizedString(@"Do_not_receive_any_messages", @"不接收任何消息") style:UIAlertActionStyleDefault
+                                                    handler:^(UIAlertAction * action) {
+                                                        //响应事件
+                                                        [self setMsgMuteModeBy:BMXGroup_MsgMuteMode_MuteChat];
+                                                    }];
+    
+    UIAlertAction* cancelAction = [UIAlertAction actionWithTitle:NSLocalizedString(@"Cancel", @"取消") style:UIAlertActionStyleCancel
+                                                         handler:^(UIAlertAction * action) {
+                                                             //响应事件
+                                                             //
+                                                             
+                                                         }];
+    [alert addAction:action1];
+    [alert addAction:action2];
+    [alert addAction:action3];
+
+    [alert addAction:cancelAction];
+    [self presentViewController:alert animated:YES completion:nil];
+    
+    
 }
 
 
@@ -383,7 +459,7 @@
 
 #pragma mark  == touch fuctions
 -(void) touchedMoreMembers {
-    GroupMemberViewController* ctrl = [[GroupMemberViewController alloc] initWithGroup: self.group];
+    GroupMemberViewController* ctrl = [[GroupMemberViewController alloc] initWithGroup: self.group hideMemberInfo:self.hideMemberInfo];
     [ctrl hidesBottomBarWhenPushed];
     [self.navigationController pushViewController: ctrl animated:YES];
 }
@@ -465,7 +541,7 @@
 }
 -(void) groupMemberCellTouchedAdd
 {
-    GroupAddMemberController* ctrl = [[GroupAddMemberController alloc] initWithGroup:self.group];
+    GroupAddMemberController* ctrl = [[GroupAddMemberController alloc] initWithGroup:self.group hideMemberInfo:self.hideMemberInfo];
     [ctrl hidesBottomBarWhenPushed];
     [self.navigationController pushViewController:ctrl animated:YES];
 }

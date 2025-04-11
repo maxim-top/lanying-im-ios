@@ -24,7 +24,7 @@
 
 @property (nonatomic, strong) LHMessageModel *messageModel;
 
-- (id)initWithMessageModel:(LHMessageModel *)model reuseIdentifier:(NSString *)reuseIdentifier;
+- (id)initWithMessageModel:(LHMessageModel *)model hideMemberInfo:(BOOL)hideMemberInfo reuseIdentifier:(NSString *)reuseIdentifier;
 - (void)setupSubviewsForMessageModel:(LHMessageModel *)model;
 
 + (NSString *)cellIdentifierForMessageModel:(LHMessageModel *)model;

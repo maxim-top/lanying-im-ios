@@ -88,22 +88,27 @@ CGFloat const MAX_SIZE = 120.0f;
 #pragma mark - public
 
 + (CGFloat)heightForBubbleWithObject:(LHMessageModel *)object {
-    CGSize retSize = CGSizeMake(object.width, object.height);//object.size;
-    if (retSize.width == 0 || retSize.height == 0) {
-        retSize.width = MAX_SIZE;
-        retSize.height = MAX_SIZE;
-    } else if (retSize.width > retSize.height) {
-        CGFloat height =  MAX_SIZE / retSize.width  *  retSize.height;
-        retSize.height = height;
-        retSize.width = MAX_SIZE;
-    } else {
-        CGFloat width = MAX_SIZE / retSize.height * retSize.width;
-        retSize.width = width;
-        retSize.height = MAX_SIZE;
+    CGFloat h = 200;
+    @try {
+        CGSize retSize = CGSizeMake(object.width, object.height);//object.size;
+        if (retSize.width == 0 || retSize.height == 0) {
+            retSize.width = MAX_SIZE;
+            retSize.height = MAX_SIZE;
+        } else if (retSize.width > retSize.height) {
+            CGFloat height =  MAX_SIZE / retSize.width  *  retSize.height;
+            retSize.height = height;
+            retSize.width = MAX_SIZE;
+        } else {
+            CGFloat width = MAX_SIZE / retSize.height * retSize.width;
+            retSize.width = width;
+            retSize.height = MAX_SIZE;
+        }
+        MAXLog(@"%f, %f", retSize.width, retSize.height);
+        h = 2 * BUBBLE_VIEW_PADDING + retSize.height + 20;
+        MAXLog(@"%f",h);
+    } @catch(NSException *exception) {
+        MAXLog(@"exception:%@", exception.description);
     }
-    MAXLog(@"%f, %f", retSize.width, retSize.height);
-    CGFloat h = 2 * BUBBLE_VIEW_PADDING + retSize.height + 20;
-    MAXLog(@"%f",h);
 
     return h;
 }

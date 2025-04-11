@@ -22,8 +22,8 @@ CGFloat const SEND_STATUS_SIZE = 20.0f;
 
 @implementation LHChatViewCell
 
-- (id)initWithMessageModel:(LHMessageModel *)model reuseIdentifier:(NSString *)reuseIdentifier {
-    if (self = [super initWithMessageModel:model reuseIdentifier:reuseIdentifier]) {
+- (id)initWithMessageModel:(LHMessageModel *)model hideMemberInfo:(BOOL)hideMemberInfo reuseIdentifier:(NSString *)reuseIdentifier {
+    if (self = [super initWithMessageModel:model hideMemberInfo:hideMemberInfo reuseIdentifier:reuseIdentifier]) {
         self.headImageView.clipsToBounds = YES;
         self.headImageView.layer.cornerRadius = 43/2.0;
         self.backgroundColor = [UIColor clearColor];
@@ -38,9 +38,13 @@ CGFloat const SEND_STATUS_SIZE = 20.0f;
 
 - (void)layoutSubviews {
     [super layoutSubviews];
-    if([_content isEqualToString:self.messageModel.content] &&
-       self.messageModel.status == _status){
-        return;
+    @try{
+        if([_content isEqualToString:self.messageModel.content] &&
+           self.messageModel.status == _status){
+            return;
+        }
+    }@catch (NSException *exception) {
+        MAXLog(@"%@",exception.description);
     }
     _content = self.messageModel.content;
     _status = self.messageModel.status;

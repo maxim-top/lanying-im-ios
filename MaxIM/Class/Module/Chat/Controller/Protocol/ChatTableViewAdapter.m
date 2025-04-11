@@ -48,7 +48,7 @@
     messageModel.indexPath = indexPath;
     LHChatViewCell *messageCell = (LHChatViewCell *)[tableView dequeueReusableCellWithIdentifier:cellIdentifier];
     if (!messageCell) {
-        messageCell = [[LHChatViewCell alloc] initWithMessageModel:messageModel reuseIdentifier:cellIdentifier];
+        messageCell = [[LHChatViewCell alloc] initWithMessageModel:messageModel hideMemberInfo:NO reuseIdentifier:cellIdentifier];
     }
     
     if (messageModel.isSender) {

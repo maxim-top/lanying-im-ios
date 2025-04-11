@@ -284,7 +284,7 @@
         } else if (error.errorCode == BMXErrorCode_UserAlreadyExist){
             [self.config showErrorText:NSLocalizedString(@"This_username_already_exists", @"该用户名已存在")];
         } else if (error.errorCode == BMXErrorCode_InvalidRequestParameter) {
-            [HQCustomToast showDialog:NSLocalizedString(@"username_constraint", @"用户名仅支持字母数字下划线中文组合，且不能是纯数字，不能以maxim、mta开头") time:5.0f];
+            [self.config showErrorText:NSLocalizedString(@"username_constraint", @"用户名仅支持字母数字下划线中文组合，且不能是纯数字，不能以maxim、mta开头")];
         } else {
             [HQCustomToast showDialog:[error description]];
         }

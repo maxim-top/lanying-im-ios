@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 51;
+	objectVersion = 54;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -42,6 +42,7 @@
 		AF4C019728461BC400B8913D /* LanyingLangManager.m in Sources */ = {isa = PBXBuildFile; fileRef = AF4C019328461ACC00B8913D /* LanyingLangManager.m */; };
 		AF4C80A729261BC200ADBA82 /* CallView.m in Sources */ = {isa = PBXBuildFile; fileRef = AF3CC7D028E599BE0026EF89 /* CallView.m */; };
 		AF4C80A829261BC600ADBA82 /* CallViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = AF3CC7D128E599BE0026EF89 /* CallViewController.m */; };
+		AF4CFE3E2BF2605500326104 /* AllowLoginWithQRCodeApi.m in Sources */ = {isa = PBXBuildFile; fileRef = AF4CFE3D2BF2605500326104 /* AllowLoginWithQRCodeApi.m */; };
 		AF4EA2392AACCDF4004486AC /* AppIDListStorage.m in Sources */ = {isa = PBXBuildFile; fileRef = AF4EA2372AACCDF3004486AC /* AppIDListStorage.m */; };
 		AF51DDEB29CEDAA8006656CD /* bell.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = AF51DDEA29CEDAA8006656CD /* bell.mp3 */; };
 		AF51DDEC29CEDAA8006656CD /* bell.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = AF51DDEA29CEDAA8006656CD /* bell.mp3 */; };
@@ -59,6 +60,8 @@
 		AFC3EFB22AB9B030006AB98D /* AppIDViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = AFC3EFB42AB9B030006AB98D /* AppIDViewController.xib */; };
 		AFC92E002AE28A8E00EA3EF0 /* TextLayoutCacheNode.m in Sources */ = {isa = PBXBuildFile; fileRef = AFC92DFF2AE28A8E00EA3EF0 /* TextLayoutCacheNode.m */; };
 		AFC92E0D2AE28B6100EA3EF0 /* TextLayoutCache.m in Sources */ = {isa = PBXBuildFile; fileRef = AFC92E0C2AE28B6100EA3EF0 /* TextLayoutCache.m */; };
+		AFDB322C2BF3425600B2C8F4 /* SecretInfoAPI.m in Sources */ = {isa = PBXBuildFile; fileRef = AFDB322A2BF3425600B2C8F4 /* SecretInfoAPI.m */; };
+		AFDB32372BF345BA00B2C8F4 /* LanyingLinkInfoAPI.m in Sources */ = {isa = PBXBuildFile; fileRef = AFDB32352BF345BA00B2C8F4 /* LanyingLinkInfoAPI.m */; };
 		AFED17F929A3E15B001A5F8B /* SupportsStorage.m in Sources */ = {isa = PBXBuildFile; fileRef = AFED17F829A3E15B001A5F8B /* SupportsStorage.m */; };
 		B321D07F2B7F3BE8404603F6 /* libPods-MaxIM.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 0817B35A699F1BD1DD697481 /* libPods-MaxIM.a */; };
 		B500050821D508DA00CD1CF8 /* RecentConversaionTableViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = B500050621D508DA00CD1CF8 /* RecentConversaionTableViewCell.m */; };
@@ -455,6 +458,8 @@
 		AF4B381128C1B6EE0043ADA4 /* MAXUtils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MAXUtils.h; sourceTree = "<group>"; };
 		AF4C018A28461ACB00B8913D /* LanyingLangManager.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = LanyingLangManager.h; sourceTree = "<group>"; };
 		AF4C019328461ACC00B8913D /* LanyingLangManager.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = LanyingLangManager.m; sourceTree = "<group>"; };
+		AF4CFE3C2BF2605500326104 /* AllowLoginWithQRCodeApi.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AllowLoginWithQRCodeApi.h; sourceTree = "<group>"; };
+		AF4CFE3D2BF2605500326104 /* AllowLoginWithQRCodeApi.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AllowLoginWithQRCodeApi.m; sourceTree = "<group>"; };
 		AF4EA2372AACCDF3004486AC /* AppIDListStorage.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AppIDListStorage.m; sourceTree = "<group>"; };
 		AF4EA2382AACCDF4004486AC /* AppIDListStorage.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AppIDListStorage.h; sourceTree = "<group>"; };
 		AF51DDEA29CEDAA8006656CD /* bell.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = bell.mp3; sourceTree = "<group>"; };
@@ -485,6 +490,10 @@
 		AFC92DFF2AE28A8E00EA3EF0 /* TextLayoutCacheNode.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = TextLayoutCacheNode.m; sourceTree = "<group>"; };
 		AFC92E0B2AE28B6100EA3EF0 /* TextLayoutCache.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = TextLayoutCache.h; sourceTree = "<group>"; };
 		AFC92E0C2AE28B6100EA3EF0 /* TextLayoutCache.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = TextLayoutCache.m; sourceTree = "<group>"; };
+		AFDB322A2BF3425600B2C8F4 /* SecretInfoAPI.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SecretInfoAPI.m; sourceTree = "<group>"; };
+		AFDB322B2BF3425600B2C8F4 /* SecretInfoAPI.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SecretInfoAPI.h; sourceTree = "<group>"; };
+		AFDB32342BF345BA00B2C8F4 /* LanyingLinkInfoAPI.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LanyingLinkInfoAPI.h; sourceTree = "<group>"; };
+		AFDB32352BF345BA00B2C8F4 /* LanyingLinkInfoAPI.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LanyingLinkInfoAPI.m; sourceTree = "<group>"; };
 		AFED17EF29A3E15B001A5F8B /* SupportsStorage.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SupportsStorage.h; sourceTree = "<group>"; };
 		AFED17F829A3E15B001A5F8B /* SupportsStorage.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SupportsStorage.m; sourceTree = "<group>"; };
 		AFF48A6C25CF1FE300634E80 /* MobileRTC.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = MobileRTC.framework; sourceTree = "<group>"; };
@@ -1281,6 +1290,15 @@
 			path = MaxIMNotification;
 			sourceTree = "<group>";
 		};
+		AFDB32362BF345BA00B2C8F4 /* lanyinglink */ = {
+			isa = PBXGroup;
+			children = (
+				AFDB32342BF345BA00B2C8F4 /* LanyingLinkInfoAPI.h */,
+				AFDB32352BF345BA00B2C8F4 /* LanyingLinkInfoAPI.m */,
+			);
+			path = lanyinglink;
+			sourceTree = "<group>";
+		};
 		B50AE51622CDE8EF00D82476 /* Record */ = {
 			isa = PBXGroup;
 			children = (
@@ -1334,6 +1352,7 @@
 		B50BEAFA22560E3B00B0753D /* Api */ = {
 			isa = PBXGroup;
 			children = (
+				AFDB32362BF345BA00B2C8F4 /* lanyinglink */,
 				B564293522B0E9320022076C /* consule */,
 				B50BEB04225B3DF600B0753D /* GroupQRcodeInfoApi.h */,
 				B50BEB05225B3DF600B0753D /* GroupQRcodeInfoApi.m */,
@@ -1341,6 +1360,10 @@
 				B50BEAFC225B3B9200B0753D /* TemporaryPasswordApi.m */,
 				B50BEAFE225B3CE200B0753D /* GetTokenApi.h */,
 				B50BEAFF225B3CE200B0753D /* GetTokenApi.m */,
+				AF4CFE3C2BF2605500326104 /* AllowLoginWithQRCodeApi.h */,
+				AF4CFE3D2BF2605500326104 /* AllowLoginWithQRCodeApi.m */,
+				AFDB322B2BF3425600B2C8F4 /* SecretInfoAPI.h */,
+				AFDB322A2BF3425600B2C8F4 /* SecretInfoAPI.m */,
 				B5CA741A2265BC0200EBF04D /* LoginQRCodeInfoApi.h */,
 				B5CA741B2265BC0200EBF04D /* LoginQRCodeInfoApi.m */,
 				B5AFB2ED2271BCFC00C23559 /* QRCodeLoginApi.h */,
@@ -2691,6 +2714,7 @@
 				B559003A22D0A64B003FDA76 /* YYFrameImage.m in Sources */,
 				B5144F192351AFC500CF163E /* MenuView.m in Sources */,
 				B56B025D23830DCA005E22B8 /* MAXLauchVideoViewController.m in Sources */,
+				AF4CFE3E2BF2605500326104 /* AllowLoginWithQRCodeApi.m in Sources */,
 				B539D6AD21BFDD370011D30E /* LHTools.m in Sources */,
 				B559004722D0A64B003FDA76 /* YYTextDebugOption.m in Sources */,
 				B559004C22D0A64B003FDA76 /* YYTextArchiver.m in Sources */,
@@ -2813,6 +2837,7 @@
 				B559004E22D0A64B003FDA76 /* YYTextUtilities.m in Sources */,
 				B55900A722D0A7A1003FDA76 /* GroupOwnerTransterViewController.m in Sources */,
 				B539D6B921BFDD370011D30E /* UIImage+Common.m in Sources */,
+				AFDB32372BF345BA00B2C8F4 /* LanyingLinkInfoAPI.m in Sources */,
 				B539D6C121BFDD370011D30E /* LHChatViewBaseCell.m in Sources */,
 				B557D49A2451AB4E0035D60E /* QRCoodeFactor.m in Sources */,
 				B53FB37822C5F57B002A4B1F /* NotifierUploadPushInfoApi.m in Sources */,
@@ -2821,6 +2846,7 @@
 				B5D9F45C21D64A8C00B31AC3 /* ProfileTableViewCell.m in Sources */,
 				B559004D22D0A64B003FDA76 /* YYTextRubyAnnotation.m in Sources */,
 				B559005222D0A64B003FDA76 /* YYTextTransaction.m in Sources */,
+				AFDB322C2BF3425600B2C8F4 /* SecretInfoAPI.m in Sources */,
 				B50AE52022CDE91900D82476 /* VideoManager.m in Sources */,
 				B50BEAD72255E6B200B0753D /* NetWorkingManager.m in Sources */,
 				B562E5812397A7D2005C2EAC /* ChangeMobileAlert.m in Sources */,
@@ -3216,7 +3242,7 @@
 					"\"$(SRCROOT)/../../floo/deps/openssl/include\"",
 				);
 				INFOPLIST_FILE = "$(SRCROOT)/Info.plist";
-				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 12.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -3231,7 +3257,7 @@
 					"$(PROJECT_DIR)/Class/Vendor/OpenSDK1.8.7.1_NoPay",
 				);
 				MACH_O_TYPE = mh_execute;
-				MARKETING_VERSION = 4.10;
+				MARKETING_VERSION = 4.15;
 				OTHER_LDFLAGS = (
 					"$(inherited)",
 					"-ObjC",
@@ -3301,7 +3327,7 @@
 					"\"$(SRCROOT)/../../floo/deps/openssl/include\"",
 				);
 				INFOPLIST_FILE = "$(SRCROOT)/Info.plist";
-				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 12.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -3316,7 +3342,7 @@
 					"$(PROJECT_DIR)/Class/Vendor/OpenSDK1.8.7.1_NoPay",
 				);
 				MACH_O_TYPE = mh_execute;
-				MARKETING_VERSION = 4.10;
+				MARKETING_VERSION = 4.15;
 				OTHER_LDFLAGS = (
 					"$(inherited)",
 					"-ObjC",

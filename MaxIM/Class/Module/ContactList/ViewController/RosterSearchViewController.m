@@ -57,7 +57,7 @@
 
 - (void)addRoster:(NSNotification *)noti {
     BMXRosterItem *roster = noti.object;
-    NSString *authQuestion = roster.authQuestion;
+    NSString *authQuestion = roster.addFriendAuthMode==BMXRosterItem_AddFriendAuthMode_AnswerQuestion? roster.authQuestion:@"";
     UIAlertController* alert = [UIAlertController alertControllerWithTitle:authQuestion.length>0 ? NSLocalizedString(@"Friend_verification_question", @"好友验证问题") : NSLocalizedString(@"Leave_a_message", @"留言")
                                                                    message:authQuestion
                                                             preferredStyle:UIAlertControllerStyleAlert];

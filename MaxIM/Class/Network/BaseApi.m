@@ -59,6 +59,8 @@
     NSString *baseUrl;
     if ([self baseURL] == MaxIMRequestConsule) {
         baseUrl = [NSString stringWithFormat:@"%@", @"https://butler.maximtop.com/"];
+    } else if ([self baseURL] == MaxIMRequestLanyingLink) {
+        baseUrl = [NSString stringWithFormat:@"%@", @"https://lanying.link/"];
     } else {
         baseUrl = [NSString stringWithFormat:@"%@", @"https://api.maximtop.com/"];
     }
@@ -90,6 +92,8 @@
     NetWorkingManager *manager = NETWORK_MANAGER;
     if ([self baseURL] == MaxIMRequestConsule) {
         manager.baseURL = [NSString stringWithFormat:@"%@", @"https://butler.maxim.top/"];
+    } else if ([self baseURL] == MaxIMRequestLanyingLink) {
+        manager.baseURL = [NSString stringWithFormat:@"%@", @"https://lanying.link/"];
     } else {
         manager.baseURL = [NSString stringWithFormat:@"%@", @"https://api.maxim.top/"];
     }
@@ -104,6 +108,8 @@
     NetWorkingManager *manager = NETWORK_MANAGER;
     if ([self baseURL] == MaxIMRequestConsule) {
         manager.baseURL = [NSString stringWithFormat:@"%@", @"https://butler.maxim.top/"];
+    } else if ([self baseURL] == MaxIMRequestLanyingLink) {
+        manager.baseURL = [NSString stringWithFormat:@"%@", @"https://lanying.link/"];
     } else {
         manager.baseURL = [NSString stringWithFormat:@"%@", @"https://api.maxim.top/"];
     }

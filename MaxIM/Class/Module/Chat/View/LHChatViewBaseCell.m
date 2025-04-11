@@ -9,8 +9,13 @@
 #import "LHChatViewBaseCell.h"
 #import <floo-ios/floo_proxy.h>
 #import "ChatRosterProfileViewController.h"
+#import "IMAcount.h"
+#import "IMAcountInfoStorage.h"
+
 @interface LHChatViewBaseCell ()
 @property (nonatomic, strong) UIImage *headImage;
+@property (nonatomic, assign) BOOL *isAdmin;
+@property (nonatomic, assign) BOOL *hideMemberInfo;
 @end
 
 @implementation LHChatViewBaseCell
@@ -79,6 +84,9 @@
             userId = msg.config.getRTCInitiator;
         }
     }
+    if (self.hideMemberInfo) {
+        return;
+    }
 
     [[[BMXClient sharedClient] rosterService] searchWithRosterId:userId forceRefresh:NO completion:^(BMXRosterItem *item, BMXError *error) {
         if (!error) {
@@ -95,7 +103,7 @@
 }
 
 #pragma mark - public
-- (id)initWithMessageModel:(LHMessageModel *)model reuseIdentifier:(NSString *)reuseIdentifier {
+- (id)initWithMessageModel:(LHMessageModel *)model hideMemberInfo:(BOOL)hideMemberInfo reuseIdentifier:(NSString *)reuseIdentifier {
     if (self = [super initWithStyle:UITableViewCellStyleDefault reuseIdentifier:reuseIdentifier]) {
         UITapGestureRecognizer *tap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(headImagePressed:)];
         _headImageView = [[UIImageView alloc] initWithFrame:CGRectMake(HEAD_X, 0, HEAD_SIZE, HEAD_SIZE)];
@@ -113,6 +121,7 @@
         [self.contentView addSubview:_nameLabel];
         
         [self setupSubviewsForMessageModel:model];
+        self.hideMemberInfo = hideMemberInfo;
     }
     return self;
 }

@@ -68,9 +68,9 @@
     return _titleLabel;
 }
 
-- (UILabel *)contentLabel {
+- (CopyableLabel *)contentLabel {
     if (!_contentLabel) {
-        _contentLabel = [[UILabel alloc] init];
+        _contentLabel = [[CopyableLabel alloc] init];
         _contentLabel.textAlignment = NSTextAlignmentRight;
         _contentLabel.font = [UIFont fontWithName:@"PingFangSC-Semibold" size:16];
         _contentLabel.textColor = [UIColor colorWithRed:51/255.0 green:51/255.0 blue:51/255.0 alpha:1/1.0];
