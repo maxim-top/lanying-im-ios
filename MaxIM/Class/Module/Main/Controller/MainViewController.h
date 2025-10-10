@@ -24,5 +24,6 @@
 
 - (void)sendNewMessage:(BMXMessage *)message;
 
+- (void)scrollToLastUnread:(BOOL)animated;
 
 @end

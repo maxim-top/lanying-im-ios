@@ -101,7 +101,7 @@
     BMXRosterItem *rosterProfile= self.rosterArray[indexPath.row];
     ContactTableViewCell *cell = [ContactTableViewCell contactTableViewCellWith:tableView];
     [cell refresh:rosterProfile];
-    cell.nicknameLabel.text = rosterProfile.username;
+    cell.nicknameLabel.text = [MAXUtils getRosterDisplayName: rosterProfile];
 
     cell.infoLabel.text = application.getMReason;
     if (application.getMStatus == BMXRosterService_ApplicationStatus_Accepted) {

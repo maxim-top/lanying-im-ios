@@ -88,9 +88,13 @@
 
 - (void)getUnreadRoster {
     MAXLog(@"拉取未读群成员");
-    
-    
-    [[[BMXClient sharedClient] chatService] getGroupAckMessageUserIdList:self.message completion:^(ListOfLongLong *groupMemberIdList, BMXError *error) {
+    [[[BMXClient sharedClient] chatService] getGroupAckMessageUnreadUserIdList:self.message completion:^(ListOfLongLong *groupMemberIdList, BMXError *error) {
+        if (error) {
+            return;
+        }
+        if (groupMemberIdList.size == 0) {
+            return;
+        }
         [[[BMXClient sharedClient] rosterService] searchWithRosterIdList:groupMemberIdList forceRefresh:NO completion:^(BMXRosterItemList *rosterList, BMXError *error) {
             [HQCustomToast hideWating];
             NSMutableArray *arr = [[NSMutableArray alloc] init];

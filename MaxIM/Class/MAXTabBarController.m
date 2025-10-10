@@ -43,7 +43,9 @@ typedef enum : NSUInteger {
 @property (nonatomic,assign) BOOL isLoadedContact;
 
 @property (nonatomic, strong) UIView *line;
-
+@property (nonatomic, strong) UIView *bgView;
+@property (nonatomic, assign) NSInteger lastSelectedIndex; // 上一次点击的索引
+@property (nonatomic, strong) NSDate *lastClickDate;     // 上一次点击的时间
 //@property (nonatomic, strong) NSArray *tabbarArray;
 
 @end
@@ -64,7 +66,19 @@ typedef enum : NSUInteger {
 - (void)viewDidLoad {
     [super viewDidLoad];
     [self configtabBarItem];
-    
+    self.bgView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, MAXScreenW, MAXScreenH)];
+    self.bgView.backgroundColor = [UIColor lh_colorWithHex:0x1A18D3];
+    CGFloat logoWidth = 100;
+    CGFloat logoHeight = 80;
+    UIImageView *logo = [[UIImageView alloc] initWithFrame:CGRectMake(MAXScreenW / 2 - logoWidth / 2,
+                                                                      MAXScreenH / 2 - logoHeight / 2,
+                                                                      logoWidth,
+                                                                      logoHeight)];
+    logo.image = [UIImage imageNamed:@"splash"];
+    [self.bgView addSubview:logo];
+    [self.view addSubview:self.bgView];
+    [self.view bringSubviewToFront:self.bgView];
+
     [NetWorkingManager netWorkingManagerWithNetworkStatusListening];
     [self p_addObserver];
 
@@ -85,12 +99,28 @@ typedef enum : NSUInteger {
                     selector:@selector(p_networkStatusDidChanged:)
                         name:disConnectionNetworkNotifation
                       object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(conversationListOk) name:@"conversationListOk" object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(conversationListLoading) name:@"conversationListLoading" object:nil];
+}
+
+- (void)conversationListOk {
+    [self.bgView setHidden:YES];
+}
+
+- (void)conversationListLoading {
+    [self.bgView setHidden:NO];
 }
 
 - (void)p_networkStatusDidChanged:(NSNotification *)notifiaction {
     if ([notifiaction.name isEqualToString:@"disConnectionNetworkNotifation"]) {
         [[BMXClient sharedClient] onNetworkChangedWithType: BMXNetworkType_None reconnect:NO];
         MAXLog(@"无网络");
+    } else if ([notifiaction.name isEqualToString:@"connectingIPhoneNetworkNotifation"]) {
+        [[BMXClient sharedClient] onNetworkChangedWithType: BMXNetworkType_Mobile reconnect:NO];
+        MAXLog(@"蜂窝");
+    } else if ([notifiaction.name isEqualToString:@"connectingInWifiNetworkNotifation"]) {
+        [[BMXClient sharedClient] onNetworkChangedWithType: BMXNetworkType_Wifi reconnect:NO];
+        MAXLog(@"WIFI");
     }
 }
 
@@ -293,6 +323,22 @@ typedef enum : NSUInteger {
         [IMAcountInfoStorage clearObject];
         [appDelegate userLogout];
     }
+    if ([error errorCode] == BMXErrorCode_UserKickedByAppDeprecated) {
+        UIAlertController* alert = [UIAlertController alertControllerWithTitle: NSLocalizedString(@"version_failed", @"版本失效")
+                                                                       message: NSLocalizedString(@"error_code_UserKickedByAppDeprecated", @"当前版本已过时，请立即升级。")
+                                                                preferredStyle: UIAlertControllerStyleAlert];
+        
+        UIAlertAction* okAction = [UIAlertAction actionWithTitle:NSLocalizedString(@"Confirm", @"确定") style:UIAlertActionStyleDefault
+                                                         handler:^(UIAlertAction * action) {
+            [AppIDManager clearAppid];
+            AppDelegate *appDelegate = [UIApplication sharedApplication].delegate;
+            [appDelegate reloadAppID:BMXAppID];
+            [IMAcountInfoStorage clearObject];
+            [appDelegate userLogout];
+        }];
+        [alert addAction:okAction];
+        [self presentViewController:alert animated:YES completion:nil];
+    }
 }
 
 
@@ -351,8 +397,8 @@ typedef enum : NSUInteger {
     
     UINavigationController *navVC = self.childViewControllers[item.tag];
     UIViewController *vc = navVC.topViewController;
+    bool chatTabClicked = false;
     if ([NSStringFromClass(vc.class) isEqualToString:@"SettingViewController"]) {
-        
         if (self.isLoadedProfileSetting == NO) {
             SettingViewController *settingvc = (SettingViewController *)vc;
             [settingvc settingRefreshIfNeededToast:YES];
@@ -361,9 +407,6 @@ typedef enum : NSUInteger {
             SettingViewController *settingvc = (SettingViewController *)vc;
             [settingvc settingRefreshIfNeededToast:NO];
         }
-        
-        
-      
     } else if ([NSStringFromClass(vc.class) isEqualToString:@"ContactListViewController"]) {
         if (self.isLoadedContact == NO) {
             ContactListViewController *contactListvc = (ContactListViewController *)vc;
@@ -373,10 +416,30 @@ typedef enum : NSUInteger {
             ContactListViewController *contactListvc = (ContactListViewController *)vc;
             [contactListvc contactRefreshIfNeededToast:NO];
         }
-        
+    } else {
+        chatTabClicked = true;
     }
     MAXLog(@"点击tab");
     [[NSNotificationCenter defaultCenter] postNotificationName:@"HideMenu" object:nil];
+    
+    NSInteger currentIndex = [tabBar.items indexOfObject:item];
+    NSDate *now = [NSDate date];
+    
+    // 判断双击条件：同一索引 + 时间间隔 < 0.5秒
+    if (currentIndex == self.lastSelectedIndex &&
+        [now timeIntervalSinceDate:self.lastClickDate] < 0.5) {
+        // 触发双击事件
+        if (chatTabClicked) {
+            [[NSNotificationCenter defaultCenter] postNotificationName:@"ChatTabBarDoubleClick"
+                                                                object:nil];
+        }
+        // 重置时间戳，避免三击误判
+        self.lastClickDate = [NSDate dateWithTimeIntervalSince1970:0];
+    } else {
+        // 更新记录
+        self.lastSelectedIndex = currentIndex;
+        self.lastClickDate = now;
+    }
 }
 
 - (void)receivedMessages:(NSArray<BMXMessage*> *)messages {

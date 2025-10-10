@@ -15,6 +15,10 @@
         "control": "alert"
     },
     {
+        "type": "实名认证",
+        "control": "alert"
+    },
+    {
         "type": "修改密码",
         "control": "alert"
     },

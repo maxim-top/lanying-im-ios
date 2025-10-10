@@ -12,6 +12,7 @@
 #import "LHMessageModel.h"
 #import "LHChatViewCell.h"
 #import <floo-ios/floo_proxy.h>
+#import "MAXUtils.h"
 
 @interface ChatTableViewAdapter () <UITableViewDelegate, UITableViewDataSource>
 
@@ -62,6 +63,9 @@
             } else {
                 messageCell.readStatusLabel.text = NSLocalizedString(@"Unread", @"未读");
             }
+            if (messageModel.messageObjc.type == BMXMessage_MessageType_System) {
+                messageCell.readStatusLabel.text = @"";
+            }
         }
         
     } else {
@@ -96,7 +100,7 @@
         __weak  LHChatViewCell *weakCell = messageCell;
         [[[BMXClient sharedClient] rosterService] searchWithRosterId:messageModel.messageObjc.fromId forceRefresh:NO completion:^(BMXRosterItem *item, BMXError *error) {
             if (!error) {
-                messageModel.nickName = [item.nickname length] ? item.nickname : item.username;
+                messageModel.nickName = [MAXUtils getRosterDisplayName:item];
                 [weakCell setMessageName:messageModel.nickName];
             }
         }];

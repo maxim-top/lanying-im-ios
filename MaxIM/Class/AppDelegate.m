@@ -68,7 +68,7 @@
 
 - (BOOL)g_openURL:(NSURL*)url
 {
-    [UIApplication.sharedApplication openURL:url options:nil completionHandler:nil];
+    [UIApplication.sharedApplication openURL:url options:@{} completionHandler:nil];
     return YES;
 }
 
@@ -706,8 +706,8 @@
  @param dic 网络请求数据
  */
 - (void)p_successedWeiChatLogin:(NSDictionary *)dic  {
-    NSDictionary *returnObject = [NSDictionary dictionary];
-    returnObject = dic;
+//    NSDictionary *returnObject = [NSDictionary dictionary];
+//    returnObject = dic;
     
 //    WechatLoginApi *api = [[WechatLoginApi alloc] initWithCode:dic[@""]]
     

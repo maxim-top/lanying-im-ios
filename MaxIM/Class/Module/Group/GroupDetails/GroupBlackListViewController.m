@@ -68,7 +68,7 @@
         cell.selectionStyle = UITableViewCellSelectionStyleNone;
     }
     BMXRosterItem* roster = [self.blackList objectAtIndex:indexPath.row];
-    NSString* uname = (roster.nickname && ![@"" isEqualToString:roster.nickname]) ? roster.nickname : roster.username;
+    NSString* uname = [MAXUtils getRosterDisplayName:roster];
     NSString* rosterIdStr = [NSString stringWithFormat:@"%lld", roster.rosterId];
     BOOL isSel = [[_selectedIdDictionary objectForKey:rosterIdStr] boolValue] ;
     [cell setAvatarStr:roster.avatarUrl RosterName:uname Selected:isSel];

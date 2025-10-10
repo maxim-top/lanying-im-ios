@@ -121,10 +121,7 @@
     NSString* idStr = [NSString stringWithFormat:@"%lld", roster.rosterId];
     NSString* dicIdValue = [_selectedUids objectForKey:idStr];
     BOOL isSelected = ([dicIdValue isEqualToString:@"0"] || dicIdValue == nil) ? NO : YES;
-    NSString* name = roster.nickname;
-    if([name isEqualToString:@""] || name == nil) {
-        name = roster.username;
-    }
+    NSString* name = [MAXUtils getRosterDisplayName:roster];
     [cell setAvatarStr:roster.avatarUrl RosterName: name Selected: isSelected];
     [cell setDlownAvatar:roster Selected:isSelected];
     return cell;

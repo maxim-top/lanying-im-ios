@@ -21,7 +21,8 @@
 
 @interface LoginView () <TimeProtocol>
 
-@property (nonatomic, strong) UILabel *appIDLabel; // show appid
+@property (nonatomic, strong) UIButton *appIDLabel; // show appid
+@property (nonatomic, strong) UIButton *companyNameLabel;
 @property (nonatomic, strong) UIButton *editButton; //appid edit
 @property (nonatomic, strong) UIButton *scanConsuleButton; // scan button
 
@@ -235,12 +236,20 @@
 
 - (void)addAppIDLabelButtonClickWithAppid:(NSString *)appId {
     
-    self.appIDLabel.text = [NSString stringWithFormat:@"%@", appId];
-    self.appIDLabel.bmx_size = CGSizeMake(200, 30);
+    [self.appIDLabel setTitle:[NSString stringWithFormat:@"%@", appId] forState:UIControlStateNormal] ;
     [self.appIDLabel sizeToFit];
     
-    self.appIDLabel.bmx_top = self.scanConsuleButton.bmx_bottom + 10  ;
+    self.appIDLabel.bmx_top = self.companyNameLabel.bmx_bottom - 12;
     self.appIDLabel.bmx_centerX = self.centerX;
+}
+
+- (void)addCompanyNameLabelButtonClickWithName:(NSString *)name {
+    
+    [self.companyNameLabel setTitle:[NSString stringWithFormat:@"%@", name] forState:UIControlStateNormal];;
+    [self.companyNameLabel sizeToFit];
+    
+    self.companyNameLabel.bmx_top = self.scanConsuleButton.bmx_bottom + 10;
+    self.companyNameLabel.bmx_centerX = self.centerX;
 }
 
 - (void)addScanConsuleButton {
@@ -454,6 +463,20 @@
     }
 }
 
+- (void)appIdButtonClick {
+    
+    if (self.delegate && [self.delegate respondsToSelector:@selector(appIdButtonClick)]) {
+        [self.delegate appIdButtonClick];
+    }
+}
+
+- (void)companyNameButtonClick {
+    
+    if (self.delegate && [self.delegate respondsToSelector:@selector(companyNameButtonClick)]) {
+        [self.delegate companyNameButtonClick];
+    }
+}
+
 - (void)privacyCheckButtonClick:(UIButton *)sender {
     sender.selected = !sender.selected;
     [self updateConfirmButton];
@@ -533,16 +556,32 @@
     return _titleLabel;
 }
 
-// app config
-- (UILabel *)appIDLabel {
+// app id
+- (UIButton *)appIDLabel {
     if (!_appIDLabel) {
-        _appIDLabel = [[UILabel alloc] init];
-        _appIDLabel.textAlignment = NSTextAlignmentLeft;
-        _appIDLabel.font = [UIFont systemFontOfSize:16];
-        _appIDLabel.textColor = BMXCOLOR_HEX(0x888888);
+        _appIDLabel = [UIButton buttonWithType:UIButtonTypeCustom];
+        _appIDLabel.titleLabel.textAlignment = NSTextAlignmentCenter;
+        [_appIDLabel setTitleColor:BMXCOLOR_HEX(0x888888) forState:UIControlStateNormal];
+        [_appIDLabel addTarget:self action:@selector(appIdButtonClick) forControlEvents:UIControlEventTouchUpInside];
+        _appIDLabel.titleLabel.font = [UIFont systemFontOfSize:16];
+        _appIDLabel.frame = CGRectMake(0, 0, 200, 10);
+
         [self addSubview:_appIDLabel];
     }
     return _appIDLabel;
+}
+
+- (UIButton *)companyNameLabel {
+    if (!_companyNameLabel) {
+        _companyNameLabel = [UIButton buttonWithType:UIButtonTypeCustom];
+        _companyNameLabel.titleLabel.textAlignment = NSTextAlignmentCenter;
+        [_companyNameLabel setTitleColor:BMXCOLOR_HEX(0x888888) forState:UIControlStateNormal];
+        [_companyNameLabel addTarget:self action:@selector(companyNameButtonClick) forControlEvents:UIControlEventTouchUpInside];
+        _companyNameLabel.titleLabel.font = [UIFont systemFontOfSize:16];
+        _companyNameLabel.frame = CGRectMake(0, 0, 200, 10);
+        [self addSubview:_companyNameLabel];
+    }
+    return _companyNameLabel;
 }
 
 - (UIButton *)privacyCheckButton {
@@ -731,6 +770,9 @@
         _usernameTextField.leftViewMode = UITextFieldViewModeAlways;
         _usernameTextField.layer.cornerRadius = 5.0;
         _usernameTextField.layer.borderColor = [UIColor redColor].CGColor;
+        _usernameTextField.keyboardType =  UIKeyboardTypeASCIICapable; // 仅显示ASCII字符键盘
+        _usernameTextField.autocorrectionType = UITextAutocorrectionTypeNo; // 关闭自动纠正
+        _usernameTextField.autocapitalizationType = UITextAutocapitalizationTypeNone; // 关闭自动首字母大写
         UIButton *button = [UIButton buttonWithType:UIButtonTypeCustom];
         [button setTitle:@"" forState:UIControlStateNormal];
         [button setBackgroundColor:[UIColor redColor]];

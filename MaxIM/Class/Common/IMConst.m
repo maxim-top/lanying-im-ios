@@ -9,7 +9,12 @@
 CGFloat const kNavBarHeight = 64.0f;
 CGFloat const kTabBarHeight = 44;
 CGFloat const kChatBarHeight = 49.0f;
+CGFloat const kChatBarTextViewHeight = 36.0f;
 CGFloat const kYYkitWidth = 250.f;
+
+CGFloat const kChatInputTextViewFont = 16.0f;
+CGFloat const kChatBatItemWH = 26.0f;
+CGFloat const kChatExtensionViewHeight = 205;
 
 NSString *const kMessageKey = @"kMessageKey";
 NSString *const kShouldResendCell = @"kShouldResendCell";
@@ -25,6 +30,9 @@ NSString *const kRouterEventLocationBubbleTapEventName = @"kRouterEventLocationB
 NSString *const kRouterEventFileBubbleTapEventName = @"kRouterEventFileBubbleTapEventName";
 NSString *const kRouterEventLongPressName = @"kRouterEventLongPressName";
 NSInteger kMessageCount = 20;
+
+NSString *const kEmoticonButtonBackspace = @"backspace";
+NSString *const kEmoticonButtonSend = @"send";
 
 #pragma mark - IM模块常量
 

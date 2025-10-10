@@ -261,7 +261,7 @@ static CGFloat nameLabelleft = 36;
         [cell.mswitch setOn:self.profile.isAutoAcceptGroupInvite];
     } else if ([cell.titleLabel.text isEqualToString:NSLocalizedString(@"Whether_to_push_details", @"是否推送详情")]) {
         [cell.mswitch setOn:self.profile.messageSetting.getMPushDetail];
-    }  else if ([cell.titleLabel.text isEqualToString:NSLocalizedString(@"About_Us", @"关于我们")]) {
+    }  else if ([cell.titleLabel.text isEqualToString:NSLocalizedString(@"About_Us", @"关于")]) {
         cell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
     } else if ([cell.titleLabel.text isEqualToString:NSLocalizedString(@"Del_Account", @"删除账号")]) {
         cell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
@@ -425,7 +425,7 @@ static CGFloat nameLabelleft = 36;
         DeviceManagmentViewController *vc = [[DeviceManagmentViewController alloc] init];
         vc.hidesBottomBarWhenPushed = YES;
         [self.currentViewController.navigationController pushViewController:vc animated:YES];
-    } else if ([str isEqualToString:NSLocalizedString(@"About_Us", @"关于我们")]) {
+    } else if ([str isEqualToString:NSLocalizedString(@"About_Us", @"关于")]) {
         AboutUsViewController *vc = [[AboutUsViewController alloc] init];
         vc.hidesBottomBarWhenPushed = YES;
         [self.currentViewController.navigationController pushViewController:vc animated:YES];

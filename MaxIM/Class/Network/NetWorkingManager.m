@@ -97,7 +97,7 @@ NSString * connectingIPhoneNetworkNotifation = @"connectingIPhoneNetworkNotifati
     
     
     [self setHeader];
-    cache = false;
+//    cache = false;
     
     NSURLSessionDataTask *task = [self.manager POST:URLString parameters:params headers:nil progress:^(NSProgress * _Nonnull uploadProgress) {
         

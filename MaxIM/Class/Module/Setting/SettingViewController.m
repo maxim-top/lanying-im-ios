@@ -16,12 +16,18 @@
 @interface SettingViewController ()
 
 @property (nonatomic, strong) SettingTableView *tableview;
+@property (nonatomic,assign) CGFloat height;
 
 @end
 
 @implementation SettingViewController
 
 - (void)viewWillAppear:(BOOL)animated{
+    self.height = MAXScreenH - kTabBarHeight;
+    if (@available(iOS 26.0, *)) {
+        self.height = MAXScreenH;
+    }
+
     [super viewWillAppear:animated];
     //状态栏改为白色
     [UIApplication sharedApplication].statusBarStyle = UIStatusBarStyleLightContent;
@@ -73,7 +79,7 @@
 
 
 - (void)setupTableView {
-    self.tableview = [[SettingTableView alloc] initWithFrame:CGRectMake(0, 0, MAXScreenW, MAXScreenH - kTabBarHeight) style:UITableViewStyleGrouped];
+    self.tableview = [[SettingTableView alloc] initWithFrame:CGRectMake(0, 0, MAXScreenW, self.height) style:UITableViewStyleGrouped];
     [self.view addSubview:self.tableview];
 }
 

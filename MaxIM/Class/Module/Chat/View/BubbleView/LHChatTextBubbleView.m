@@ -12,9 +12,9 @@
 #import "YYAnimatedImageView.h"
 #import "NSAttributedString+YYText.h"
 #import "FaceDefine.h"
-#import <MMMarkdown/MMMarkdown.h>
 #import "TextLayoutCache.h"
 #import "TextRenderStorage.h"
+#import "NSString+Extention.h"
 
 //　textLaebl 最大宽度
 CGFloat const LABEL_FONT_SIZE = 15.0f;
@@ -54,10 +54,15 @@ static CGSize kTextBoundingSize;
     CGRect frame = self.bounds;
     frame.size.width -= BUBBLE_ARROW_WIDTH;
     frame = CGRectInset(frame, BUBBLE_VIEW_PADDING, BUBBLE_VIEW_PADDING);
-    if (self.messageModel.isSender) {
-        frame.origin.x = BUBBLE_VIEW_PADDING;
+    if (self.messageModel.messageObjc.type == BMXMessage_MessageType_System) {
+        frame.origin.x = BUBBLE_VIEW_PADDING * 2;
+        frame.size.width = self.frame.size.width - BUBBLE_VIEW_PADDING * 2 - HEAD_PADDING * 2;
     }else{
-        frame.origin.x = BUBBLE_VIEW_PADDING + BUBBLE_ARROW_WIDTH;
+        if (self.messageModel.isSender) {
+            frame.origin.x = BUBBLE_VIEW_PADDING;
+        }else{
+            frame.origin.x = BUBBLE_VIEW_PADDING + BUBBLE_ARROW_WIDTH;
+        }
     }
     
     frame.origin.y = BUBBLE_VIEW_PADDING;
@@ -69,7 +74,7 @@ static CGSize kTextBoundingSize;
 
 + (CGSize)getSizeWithKey:(LHMessageModel *)object{
     NSString *key = object.content;
-    YYTextLayout *textLayout = [[TextLayoutCache sharedInstance] layoutForKey: key];
+    YYTextLayout *textLayout = [[TextLayoutCache sharedInstance] layoutForKey: object];
     return textLayout.textBoundingSize;
 }
 
@@ -96,16 +101,64 @@ static CGSize kTextBoundingSize;
     [super setMessageModel:messageModel];
     NSMutableAttributedString *attributedString = [[TextLayoutCache sharedInstance] attributedStringForKey: self.messageModel.content];
     NSString *renderType  = [TextRenderStorage loadObject];
-    if (!renderType || [renderType isEqualToString:@"1"]) {
+    BOOL isSystem = self.messageModel.messageObjc.type == BMXMessage_MessageType_System;
+    if (!renderType || [renderType isEqualToString:@"1"] && !isSystem) {
         self.textLabel.attributedText = attributedString;
+        MAXLog(@"=ttt=t1:%ld id:%lld %@",self.messageModel.messageObjc.type,self.messageModel.messageObjc.msgId, self.messageModel.content);
     }
-    YYTextLayout *textLayout = [[TextLayoutCache sharedInstance] layoutForKey: self.messageModel.content];
+    YYTextLayout *textLayout = [[TextLayoutCache sharedInstance] layoutForKey: self.messageModel];
     UITapGestureRecognizer *tapGesture = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(handleTap:)];
-    if ([renderType isEqualToString:@"0"]) {
-        NSAttributedString *text = [LHChatTextBubbleView processModel:self.messageModel];
-        YYTextContainer *container = [YYTextContainer containerWithSize:CGSizeMake(TEXTLABEL_MAX_WIDTH, MAXFLOAT)];
+    if ([renderType isEqualToString:@"0"] || isSystem) {
+        NSString *content = self.messageModel.content;
+        NSDataDetector *detector = [NSDataDetector dataDetectorWithTypes:NSTextCheckingTypeLink error:nil];
+        NSArray *matches = [detector matchesInString:content options:0 range:NSMakeRange(0, content.length)];
+
+        NSMutableParagraphStyle *paragraphStyle = [[NSMutableParagraphStyle alloc] init];
+        [paragraphStyle setLineSpacing:4];//调整行间距
+        [paragraphStyle setParagraphSpacing:4];//调整行间距
+        
+        NSMutableAttributedString *text = [[NSMutableAttributedString alloc] init];
+        NSDictionary *attri = [NSDictionary dictionaryWithObjects:@[[UIFont systemFontOfSize:15],self.messageModel.isSender ? [UIColor blackColor] : [UIColor lh_colorWithHex:0x47474a],paragraphStyle] forKeys:@[NSFontAttributeName,NSForegroundColorAttributeName,NSParagraphStyleAttributeName]];
+        [text appendAttributedString:[[NSAttributedString alloc] initWithString:self.messageModel.content attributes:attri]];
+
+        
+        for (NSTextCheckingResult *match in matches) {
+            if (match.resultType == NSTextCheckingTypeLink) {
+                [text addAttribute:NSLinkAttributeName value:match.URL range:match.range];
+            }
+        }
+        
+        CGFloat width = TEXTLABEL_MAX_WIDTH;
+        if (isSystem) {
+            width = 360.0f;
+        }
+        YYTextContainer *container = [YYTextContainer containerWithSize:CGSizeMake(width, MAXFLOAT)];
         textLayout = [YYTextLayout layoutWithContainer:container text:text];
-        _textLabel.text = self.messageModel.content;
+        _textLabel.attributedText = text;
+        if (isSystem) {
+            NSString *extionJson = self.messageModel.messageObjc.extension;
+            if (extionJson.length > 0) {
+                NSDictionary *dic = [NSString dictionaryWithJsonString:extionJson];
+                NSString *style = dic[@"style"];
+                if (style.length > 0){
+                    _textLabel.textContainerInset = UIEdgeInsetsMake(15, 5, 5, 5);
+                    if ([style isEqualToString:@"emergency"]) {
+                        _textLabel.textColor = [UIColor redColor];
+                    } else if ([style isEqualToString:@"critical"]) {
+                        _textLabel.textColor = [UIColor redColor];
+                    } else if ([style isEqualToString:@"warning"]) {
+                        _textLabel.textColor = [UIColor blackColor];
+                        _textLabel.backgroundColor = [UIColor lh_colorWithHex:0xFFF795];
+                    } else if ([style isEqualToString:@"notice"]) {
+                        _textLabel.textColor = [UIColor lh_colorWithHex:0x666666];
+                    } else if ([style isEqualToString:@"info"]) {
+                        _textLabel.textColor = [UIColor lh_colorWithHex:0x666666];
+                    } else {
+                        _textLabel.textColor = [UIColor blackColor];
+                    }
+                }
+            }
+        }
         kTextBoundingSize = textLayout.textBoundingSize;
     }
     [_textLabel addGestureRecognizer:tapGesture];
@@ -182,6 +235,9 @@ static CGSize kTextBoundingSize;
         textBoundingSize = kTextBoundingSize;
     }
     CGFloat height = 2 * BUBBLE_VIEW_PADDING + textBoundingSize.height + 30;
+    if (object.messageObjc.type == BMXMessage_MessageType_System) {
+        height += 35;
+    }
     return height;
 }
 
@@ -194,6 +250,9 @@ static CGSize kTextBoundingSize;
     CGFloat height = 2*BUBBLE_VIEW_PADDING + textBoundingSize.height;
     if (height < 40) {
         height = 40;
+    }
+    if (self.messageModel.messageObjc.type == BMXMessage_MessageType_System) {
+        height += 35;
     }
     
     CGFloat width = textBoundingSize.width + BUBBLE_VIEW_PADDING*2 + BUBBLE_VIEW_PADDING;
@@ -226,16 +285,23 @@ static CGSize kTextBoundingSize;
             [attributedString addAttribute:NSUnderlineStyleAttributeName value:[NSNumber numberWithInteger:NSUnderlineStyleSingle] range:matchRange];
         }
     }
-    
-    _textLabel.attributedText = attributedString;
+    NSString *renderType  = [TextRenderStorage loadObject];
+    if ([renderType isEqualToString:@"1"] && self.messageModel.messageObjc.type != BMXMessage_MessageType_System) {
+        _textLabel.attributedText = attributedString;
+    }
 }
 
 - (NSInteger)characterIndexAt:(CGPoint)point attributedText:(NSAttributedString *)attributedText {
     NSTextStorage *textStorage = [[NSTextStorage alloc] initWithAttributedString:attributedText];
     NSLayoutManager *layoutManager = [[NSLayoutManager alloc] init];
     [textStorage addLayoutManager:layoutManager];
+    
+    CGFloat width = TEXTLABEL_MAX_WIDTH;
+    if (self.messageModel.messageObjc.type == BMXMessage_MessageType_System) {
+        width = 360.0f;
+    }
 
-    NSTextContainer *textContainer = [[NSTextContainer alloc] initWithSize:CGSizeMake(TEXTLABEL_MAX_WIDTH, MAXFLOAT)];
+    NSTextContainer *textContainer = [[NSTextContainer alloc] initWithSize:CGSizeMake(width, MAXFLOAT)];
     [layoutManager addTextContainer:textContainer];
     textContainer.lineFragmentPadding = 0;
 
@@ -256,8 +322,11 @@ static CGSize kTextBoundingSize;
                                  value:[UIColor lh_colorWithHexString:@"54B8FA"]
                                  range:matchRange];
 //    [attributedString yy_setBackgroundColor:[UIColor blueColor] range:matchRange];
-    _textLabel.attributedText = attributedString;
-     [self routerEventWithName:kRouterEventLongPressName userInfo:@{kMessageKey : self.messageModel,@"ges":sender}];
+    NSString *renderType  = [TextRenderStorage loadObject];
+    if ([renderType isEqualToString:@"1"] && self.messageModel.messageObjc.type != BMXMessage_MessageType_System) {
+        _textLabel.attributedText = attributedString;
+    }
+    [self routerEventWithName:kRouterEventLongPressName userInfo:@{kMessageKey : self.messageModel,@"ges":sender}];
 }
 
 

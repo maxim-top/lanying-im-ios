@@ -52,6 +52,8 @@ typedef enum : NSUInteger {
 
 - (void)showUserPrivacy;
 
+- (void)showAbout;
+
 - (void)privacyLinkClick:(NSString *)url;
 
 - (void)privacyCheckButtonClick;
@@ -108,6 +110,8 @@ typedef enum : NSUInteger {
 - (LoginView *)creteLoginView;
 
 - (void)setAppid:(NSString *)appid;
+
+- (void)setCompanyName:(NSString *)name;
 
 - (void)showErrorText:(NSString *)errorText;
 

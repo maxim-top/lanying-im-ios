@@ -19,6 +19,7 @@
 #import <floo-ios/floo_proxy.h>
 
 #import <UIImageView+WebCache.h>
+#import "MAXUtils.h"
 
 @interface GroupHandleCell()
 {
@@ -121,10 +122,7 @@
     _groupInfo.text = _group.name;
     NSDate* date = [NSDate date];
     NSTimeInterval currInterval = [date timeIntervalSince1970]*1000;
-    NSString* rosterName = _roster.nickname;
-    if(rosterName == nil || [rosterName isEqualToString:@""]) {
-        rosterName = _roster.username;
-    }
+    NSString* rosterName = [MAXUtils getRosterDisplayName:_roster];
     NSString* msg = NSLocalizedString(@"Invite", @"邀请");
     _groupMessage.text = [NSString stringWithFormat:NSLocalizedString(@"sb_invited_you_to_join_group", @"%@ 邀请您加入群 %@:%@"), rosterName, _group.name, msg];
     if(status == 1) {
@@ -167,10 +165,7 @@
     _groupInfo.text = _group.name;
     NSDate* date = [NSDate date];
     NSTimeInterval currInterval = [date timeIntervalSince1970]*1000;
-    NSString* rosterName = _roster.nickname;
-    if(rosterName == nil || [rosterName isEqualToString:@""]) {
-        rosterName = _roster.username;
-    }
+    NSString* rosterName = [MAXUtils getRosterDisplayName:_roster];
     NSString* msg = @"";
     _groupMessage.text = [NSString stringWithFormat:NSLocalizedString(@"Apply_to_join_group", @"%@ 申请加入群 %@:%@"), rosterName, _group.name, msg];
     if(status == BMXGroup_ApplicationStatus_Accepted) {

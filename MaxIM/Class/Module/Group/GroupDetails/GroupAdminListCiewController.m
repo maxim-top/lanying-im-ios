@@ -103,10 +103,7 @@
     NSString* avatar = rosterId;
     BMXRosterItem* roster = [self.userHash objectForKey:rosterId];
     if(roster != nil) {
-        name = roster.nickname;
-        if(!name || [@"" isEqualToString:name]) {
-            name = roster.username;
-        }
+        name = [MAXUtils getRosterDisplayName:roster];
         avatar = roster.avatarUrl;
     }
     [cell setAvatarUrl:avatar RosterName:name Selected:NO];

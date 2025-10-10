@@ -17,6 +17,7 @@
 #import "UIView+BMXframe.h"
 #import <UIImageView+WebCache.h>
 #import <floo-ios/floo_proxy.h>
+#import "MAXUtils.h"
 
 static NSString *cellID = @"ContactTableViewCell";
 
@@ -55,7 +56,7 @@ static NSString *cellID = @"ContactTableViewCell";
     
     
     self.avatarImg.image = [UIImage imageNamed:@"contact_placeholder"];
-    self.nicknameLabel.text = roster.username;
+    self.nicknameLabel.text = [MAXUtils getRosterDisplayName:roster];
     
     UIImage *image = [UIImage imageWithContentsOfFile:roster.avatarThumbnailPath];
     if (!image) {

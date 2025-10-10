@@ -17,7 +17,7 @@
 #import <WebRTC/RTCMTLVideoView.h>
 #endif
 #import "UIView+BMXframe.h"
-
+#import "MAXUtils.h"
 
 static CGFloat const kButtonPadding = 40;
 static CGFloat const kButtonSize = 60;
@@ -73,9 +73,7 @@ static CGFloat const kAvatarSize = 120;
         }
         
         self.remoteImageView.image = [UIImage imageNamed:@"profileavatar"];
-        if ([self.currentRoster.username length]) {
-            self.nameLabel.text = [NSString stringWithFormat:@"%@", [self.currentRoster.nickname length] ? self.currentRoster.nickname : self.currentRoster.username];
-        }
+        self.nameLabel.text = [MAXUtils getRosterDisplayName:self.currentRoster];
 
         if ([self.currentRoster.avatarThumbnailPath length]) {
             UIImage *image = [UIImage imageWithContentsOfFile:self.currentRoster.avatarThumbnailPath];

@@ -24,6 +24,7 @@
 #import "UIView+BMXframe.h"
 #import "UIViewController+CustomNavigationBar.h"
 #import <floo-ios/floo_proxy.h>
+#import "MAXUtils.h"
 
 
 @interface SearchContentViewController () <UITextFieldDelegate, UITableViewDelegate, UITableViewDataSource>
@@ -165,7 +166,7 @@
             BMXMessage *messageObjc = [messageList get:j];
             [self.messageArray addObject:messageObjc];
             dispatch_async(queue, ^{
-                if (messageObjc.type == BMXMessage_MessageType_Single) {
+                if (messageObjc.type == BMXMessage_MessageType_Single || messageObjc.type == BMXMessage_MessageType_System) {
                     IMAcount *im =  [IMAcountInfoStorage loadObject];
                     
                     NSString *fromIdstr = [NSString stringWithFormat:@"%lld", messageObjc.fromId];
@@ -173,8 +174,7 @@
                     
                     [[[BMXClient sharedClient] rosterService] searchWithRosterId:rosterId forceRefresh:NO completion:^(BMXRosterItem *roster, BMXError *error) {
                         dispatch_semaphore_signal(semaphore);
-                        if (roster) {
-                            
+                        if (error == nil && roster != nil) {
                             [tempProfileArray addObject:roster];
                         }
                     }];
@@ -182,7 +182,9 @@
                 }else {
                     [[[BMXClient sharedClient] groupService] fetchGroupByIdWithGroupId:messageObjc.conversationId forceRefresh:NO completion:^(BMXGroup *group, BMXError *error) {
                         dispatch_semaphore_signal(semaphore);
-                        [tempProfileArray addObject:group];
+                        if (error == nil && group != nil) {
+                            [tempProfileArray addObject:group];
+                        }
                     }];
                      dispatch_semaphore_wait(semaphore, DISPATCH_TIME_FOREVER);
                 }
@@ -212,15 +214,14 @@
         BMXMessage *messageObjc = [messages get:i];
         [self.messageArray addObject:messageObjc];
         dispatch_async(queue, ^{
-            if (messageObjc.type == BMXMessage_MessageType_Single) {
+            if (messageObjc.type == BMXMessage_MessageType_Single || messageObjc.type == BMXMessage_MessageType_System) {
                 IMAcount *im =  [IMAcountInfoStorage loadObject];
                 NSString *fromIdStr = [NSString stringWithFormat:@"%lld", messageObjc.fromId];
                 long long rosterId = [fromIdStr isEqualToString:im.usedId] ? messageObjc.toId : messageObjc.fromId;
                 
                 [[[BMXClient sharedClient] rosterService] searchWithRosterId:rosterId forceRefresh:NO completion:^(BMXRosterItem *roster, BMXError *error) {
                     dispatch_semaphore_signal(semaphore);
-                    if (roster) {
-                        
+                    if (error == nil && roster != nil) {
                         [tempProfileArray addObject:roster];
                     }
                 }];
@@ -229,7 +230,9 @@
                 
                 [[[BMXClient sharedClient] groupService] fetchGroupByIdWithGroupId:messageObjc.conversationId forceRefresh:NO completion:^(BMXGroup *group, BMXError *error) {
                     dispatch_semaphore_signal(semaphore);
-                    [tempProfileArray addObject:group];
+                    if (error == nil && group != nil) {
+                        [tempProfileArray addObject:group];
+                    }
                 }];
                 dispatch_semaphore_wait(semaphore, DISPATCH_TIME_FOREVER);
             }
@@ -274,7 +277,7 @@
     if ([NSStringFromClass([self.resultArray[indexPath.row] class]) isEqualToString:@"BMXRosterItem"]) {
         
         BMXRosterItem *roster = self.resultArray[indexPath.row];
-        cell.titleLabel.text = [roster.nickname length] ? roster.nickname : roster.username;
+        cell.titleLabel.text = [MAXUtils getRosterDisplayName:roster];
         cell.avatarImageView.image = [UIImage imageNamed:@"contact_placeholder"];
         
         UIImage *image = [UIImage imageWithContentsOfFile:roster.avatarThumbnailPath];

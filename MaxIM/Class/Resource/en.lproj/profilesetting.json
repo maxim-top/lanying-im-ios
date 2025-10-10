@@ -15,6 +15,10 @@
         "control": "alert"
     },
     {
+        "type": "Real Name Verification",
+        "control": "alert"
+    },
+    {
         "type": "Modify Password",
         "control": "alert"
     },

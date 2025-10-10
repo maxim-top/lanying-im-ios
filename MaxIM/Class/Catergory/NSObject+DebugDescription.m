@@ -26,8 +26,15 @@
         objc_property_t property = properties[i];
         NSString *name = @(property_getName(property));
         if(![name isEqualToString:@"debugDescription"]){
-            id value = [self valueForKey:name]?:@"nil"; // 默认值为nil字符串
-            [dictionary setObject:value forKey:name];
+            SEL getterSelector = NSSelectorFromString(name);
+            if ([self respondsToSelector:getterSelector]) {
+                @try {
+                    id value = [self valueForKey:name]?:@"nil"; // 默认值为nil字符串
+                    [dictionary setObject:value forKey:name];
+                } @catch (NSException *exception) {
+                    MAXLog(@"debugDescription exception:%@", exception.description);
+                }
+            }
         }
     }
     free(properties);

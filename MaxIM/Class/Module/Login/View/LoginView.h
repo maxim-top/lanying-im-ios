@@ -15,6 +15,8 @@ NS_ASSUME_NONNULL_BEGIN
 @optional
 
 - (void)privacyLinkClick:(NSString *)url;
+- (void)appIdButtonClick;
+- (void)companyNameButtonClick;
 - (void)privacyButtonClick;
 - (void)privacyCheckButtonClick;
 - (void)termsButtonClick;
@@ -40,6 +42,8 @@ NS_ASSUME_NONNULL_BEGIN
 + (instancetype)createLoginVieWithTitle:(NSString *)title;
 
 - (void)addAppIDLabelButtonClickWithAppid:(NSString *)appId;
+
+- (void)addCompanyNameLabelButtonClickWithName:(NSString *)name;
 
 - (void)addScanConsuleButton;
 

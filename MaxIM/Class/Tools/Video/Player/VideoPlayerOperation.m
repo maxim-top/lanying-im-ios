@@ -62,7 +62,7 @@
 }
 
 - (UIImageOrientation)orientationFromAVAssetTrack:(AVAssetTrack *)videoTrack {
-    UIImageOrientation orientation;
+    UIImageOrientation orientation = UIImageOrientationUp;
     
     CGAffineTransform t = videoTrack.preferredTransform;
     if(t.a == 0 && t.b == 1.0 && t.c == -1.0 && t.d == 0){
@@ -105,10 +105,9 @@
     CGContextRelease(context);
     CGColorSpaceRelease(colorSpace);
     CVPixelBufferUnlockBaseAddress(imageBuffer, 0);
-    UIGraphicsEndImageContext();
-    
     
     UIImage *img = [UIImage imageWithCGImage:image scale:0 orientation:orientation];
+    CGImageRelease(image);
     return img;
 }
 

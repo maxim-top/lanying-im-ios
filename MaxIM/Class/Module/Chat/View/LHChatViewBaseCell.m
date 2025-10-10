@@ -24,6 +24,11 @@
     [super layoutSubviews];
     CGRect frame = _headImageView.frame;
     frame.origin.x = _messageModel.isSender ? (self.bounds.size.width - _headImageView.frame.size.width - HEAD_X) : HEAD_X;
+    if (self.messageModel.messageObjc.type == BMXMessage_MessageType_System) {
+        [_headImageView setHidden:true];
+        frame.origin.x = 0;
+        frame.size.width = 0.0;
+    }
     _headImageView.frame = frame;
     
     _nameLabel.frame = CGRectMake(CGRectGetMaxX(_headImageView.frame) + 10, CGRectGetMinY(_headImageView.frame) - 2, 80, NAME_LABEL_HEIGHT);
@@ -136,10 +141,14 @@
 
 + (NSString *)cellIdentifierForMessageModel:(LHMessageModel *)model {
     NSString *identifier = @"MessageCell";
-    if (model.isSender) {
-        identifier = [identifier stringByAppendingString:@"Sender"];
-    } else {
-        identifier = [identifier stringByAppendingString:@"Receiver"];
+    if (model.messageObjc.type == BMXMessage_MessageType_System) {
+        identifier = [identifier stringByAppendingString:@"System"];
+    }else{
+        if (model.isSender) {
+            identifier = [identifier stringByAppendingString:@"Sender"];
+        } else {
+            identifier = [identifier stringByAppendingString:@"Receiver"];
+        }
     }
     
     switch (model.type) {

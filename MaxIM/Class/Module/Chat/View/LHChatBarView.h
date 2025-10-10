@@ -1,18 +1,11 @@
-//
-//  LHChatInputView.h
-//  LHChatUI
-//
-//  Created by hyt on 2016/12/22.
-//  Copyright © 2016年 hyt. All rights reserved.
-//
-
 #import <UIKit/UIKit.h>
 
-@class KeyboardEmojiTextView;
 @class LHChatBarView;
+@class LHChatBarMoreView;
+@class LHChatBarEmoticonView;
 @class VideoView;
-@protocol ChatBarProtocol <NSObject>
 
+@protocol LHChatBarViewDelegate <NSObject>
 
 @optional
 /**
@@ -30,25 +23,39 @@
 - (void)chatViewVoiceCall;
 - (void)chatViewSelectedFile:(NSString *)filePath;
 - (void)chatViewSelectedFileData:(NSData *)data displayName:(NSString *)displayName;
-
 - (void)chatViewSendVideoWithVideoView:(VideoView *)view;
-
-
-
 - (void)inputat;
 
 @end
 
+// 聊天输入条的模式
+typedef NS_ENUM(NSInteger, LHChatBarMode) {
+    LHChatBarModeDefault,  // 缺省模式
+    LHChatBarModeVoice,   // 语音模式
+    LHChatBarModeKeyboard, // 键盘模式
+    LHChatBarModeEmoticon, // 表情模式
+    LHChatBarModeMore      // 更多模式
+};
 @class LHContentModel;
 
 @interface LHChatBarView : UIView
 
 @property (nonatomic, weak) UITableView *tableView;
-@property (nonatomic, strong) void(^sendContent)(LHContentModel *content);
-@property (nonatomic, assign) id<ChatBarProtocol> delegate;
-@property (nonatomic, strong) KeyboardEmojiTextView *textView;
+@property (nonatomic, weak) id<LHChatBarViewDelegate> delegate;
+@property (nonatomic, assign) LHChatBarMode currentMode;
 
+@property (nonatomic, strong) UIButton *voiceBtn;
+@property (nonatomic, strong) UITextView *textView;
+@property (nonatomic, strong) UIButton *talkButton;
+@property (nonatomic, strong) UIButton *emoticonButton;
+@property (nonatomic, strong) UIButton *moreBtn;
+@property (nonatomic, strong) void(^sendContent)(LHContentModel *content);
+
+@property (nonatomic, strong) UIView *extensionView;
+@property (nonatomic, strong) LHChatBarEmoticonView *emojiKeyboard;
+@property (nonatomic, strong) LHChatBarMoreView *moreView;
 
 - (void)hideKeyboard;
+- (void)setText:(NSString *)text;
 
 @end

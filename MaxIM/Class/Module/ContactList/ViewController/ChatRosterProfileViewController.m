@@ -24,6 +24,7 @@
 #import "IMAcount.h"
 #import "IMAcountInfoStorage.h"
 #import "CopyableLabel.h"
+#import "MAXUtils.h"
 
 static const float FOOTER_BUTTON_HEIGHT = 50.0f;
 static const float FOOTER_BUTTON_PADDING = 10.0f;
@@ -69,9 +70,8 @@ static const float FOOTER_BUTTON_PADDING = 10.0f;
     }
     
     if ([self.currentRoster.username length]) {
-        self.nameLabel.text = [NSString stringWithFormat:@"%@", [self.currentRoster.nickname length] ? self.currentRoster.nickname : self.currentRoster.username];
+        self.nameLabel.text = [MAXUtils getRosterDisplayName:self.currentRoster];
         [self.nameLabel sizeToFit];
-
     }
     
     self.userIDLabel.text = [NSString stringWithFormat:@"%lld", self.currentRoster.rosterId];
@@ -328,83 +328,16 @@ static const float FOOTER_BUTTON_PADDING = 10.0f;
 
 - (void)setUpNavItem{
     if (self.currentRoster.relation != BMXRosterItem_RosterRelation_Friend) {
-        [self setNavigationBarTitle:self.currentRoster.username navLeftButtonIcon:@"blackback" navRightButtonIcon:@"contact_add"];
+        [self setNavigationBarTitle:[MAXUtils getRosterDisplayName:self.currentRoster] navLeftButtonIcon:@"blackback" navRightButtonIcon:@"contact_add"];
         [self.navRightButton addTarget:self action:@selector(onAddContact) forControlEvents:UIControlEventTouchUpInside];
     }else{
-        [self setNavigationBarTitle:self.currentRoster.username navLeftButtonIcon:@"blackback"];
+        [self setNavigationBarTitle:[MAXUtils getRosterDisplayName:self.currentRoster] navLeftButtonIcon:@"blackback"];
     }
 }
 
 -(void)onAddContact {
     BMXRosterItem *roster = self.currentRoster;
-    NSString *authQuestion = roster.addFriendAuthMode==BMXRosterItem_AddFriendAuthMode_AnswerQuestion? roster.authQuestion:@"";
-    UIAlertController* alert = [UIAlertController alertControllerWithTitle:authQuestion.length>0 ? NSLocalizedString(@"Friend_verification_question", @"好友验证问题") : NSLocalizedString(@"Leave_a_message", @"留言")
-                                                                   message:authQuestion
-                                                            preferredStyle:UIAlertControllerStyleAlert];
-    
-    UIAlertAction* okAction = [UIAlertAction actionWithTitle:NSLocalizedString(@"Confirm", @"确定") style:UIAlertActionStyleDefault
-                                                     handler:^(UIAlertAction * action) {
-                                                         //响应事件
-                                                         //得到文本信息
-                                                         for(UITextField *text in alert.textFields){
-                                                             MAXLog(@"text = %@", text.text);
-                                                             if (authQuestion.length>0){
-                                                                 [self addRosterId:roster.rosterId authAnswer:[text.text length] ? text.text : @""];
-                                                             }else{
-                                                                 [self addRosterId:roster.rosterId reason:[text.text length] ? text.text : @""];
-                                                             }
-                                                         }
-                                                     }];
-    UIAlertAction* cancelAction = [UIAlertAction actionWithTitle:NSLocalizedString(@"Cancel", @"取消") style:UIAlertActionStyleCancel
-                                                         handler:^(UIAlertAction * action) {
-                                                             //响应事件
-                                                             MAXLog(@"action = %@", alert.textFields);
-                                                         }];
-    [alert addTextFieldWithConfigurationHandler:^(UITextField *textField) {
-        textField.placeholder = authQuestion.length>0 ? NSLocalizedString(@"enter_answer", @"请输入答案") : NSLocalizedString(@"enter_message_for_group_application", @"请输入申请的留言信息");
-    }];
-    
-    [alert addAction:okAction];
-    [alert addAction:cancelAction];
-    [self presentViewController:alert animated:YES completion:nil];
-
-}
-
-// 添加好友
-- (void)addRosterId:(long long)rosterId reason:(NSString *)reason {
-    [[[BMXClient sharedClient] rosterService] applyWithRosterId:rosterId message:reason completion:^(BMXError *error) {
-        MAXLog(@"%lld", rosterId);
-        if (!error) {
-            [HQCustomToast showDialog:NSLocalizedString(@"Request_sent", @"已发出请求")];
-            [self.navigationController popToRootViewControllerAnimated:YES];
-            
-        } else if (error.errorCode == BMXErrorCode_CurrentUserIsInRoster){
-            [self.navigationController  popToRootViewControllerAnimated:NO];
-            
-            UITabBarController *bar =  (UITabBarController *)[UIApplication sharedApplication].keyWindow.rootViewController;
-            UINavigationController *currentNav =  (UINavigationController *)bar.selectedViewController;
-            
-            LHChatVC *vc = [[LHChatVC alloc] initWithRoster:self.currentRoster messageType:BMXMessage_MessageType_Single];
-            vc.hidesBottomBarWhenPushed = YES;
-            [currentNav pushViewController:vc animated:YES];
-        } else {
-            [HQCustomToast showDialog:[error description]];
-        }
-    }];
-}
-
-// 添加好友
-- (void)addRosterId:(long long)rosterId authAnswer:(NSString *)authAnswer {
-    [[[BMXClient sharedClient] rosterService] applyWithRosterId:rosterId message:@"" authAnswer:authAnswer completion:^(BMXError *error) {
-        MAXLog(@"%lld", rosterId);
-        if (!error) {
-            [HQCustomToast showDialog:NSLocalizedString(@"Friend_request_sent", @"已发送添加好友申请")];
-            [self.navigationController popViewControllerAnimated:YES];
-
-        } else {
-            [HQCustomToast showDialog:[error description]];
-        }
-    }];
+    [MAXUtils addContact:self andRosterItem:roster];
 }
 
 - (NSArray *)cellDataArray {

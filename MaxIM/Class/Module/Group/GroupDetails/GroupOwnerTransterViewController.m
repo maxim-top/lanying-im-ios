@@ -72,7 +72,7 @@
         cell = [[GorupLittleCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:@"GorupLittleCell"];
         cell.selectionStyle = UITableViewCellSelectionStyleNone;
     }
-    NSString* uname = (roster.nickname && ![@"" isEqualToString:roster.nickname]) ? roster.nickname : roster.username;
+    NSString* uname = [MAXUtils getRosterDisplayName:roster];
     BOOL isSelected = indexPath.row == _selectedIndex;
     [cell setAvatarRoster:roster RosterName:uname Selected:isSelected];
     return cell;

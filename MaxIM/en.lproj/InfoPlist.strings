@@ -6,3 +6,12 @@
   Copyright © 2022 hyt. All rights reserved.
 */
 CFBundleDisplayName = "Lanying IM";
+NSBluetoothAlwaysUsageDescription = "Capturing a video requires the Bluetooth capability";
+NSBluetoothPeripheralUsageDescription = "Capturing a video requires the Bluetooth capability";
+NSCameraUsageDescription = "The app takes photos and sends them to friends while chatting, as well as adding friends by scanning QR codes, requires the camera capability";
+NSLocationAlwaysAndWhenInUseUsageDescription = "The app shares your location information to friends, requires the location capability";
+NSLocationAlwaysUsageDescription = "The app shares your location information to friends, requires the location capability";
+NSLocationWhenInUseUsageDescription = "The app shares your location information to friends, requires the location capability";
+NSMicrophoneUsageDescription = "The app record a voice message and send it to friends while chatting, requires the mircrophone capability";
+NSPhotoLibraryAddUsageDescription = "The app saves pictures to the album requires album permission";
+NSPhotoLibraryUsageDescription = "The app send pictures to the friends requires album permission";

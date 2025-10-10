@@ -113,6 +113,11 @@
     [self.loginView addAppIDLabelButtonClickWithAppid:appid];
 }
 
+- (void)setCompanyName:(NSString *)name {
+    
+    [self.loginView addCompanyNameLabelButtonClickWithName:name];
+}
+
 - (void)showErrorText:(NSString *)errorText {
     
     [self.loginView showErrorText:errorText];
@@ -143,6 +148,22 @@
     
     if (self.delegate && [self.delegate respondsToSelector:@selector(showUserPrivacy)]) {
         [self.delegate showUserPrivacy];
+    }
+    
+}
+
+- (void)appIdButtonClick {
+    
+    if (self.delegate && [self.delegate respondsToSelector:@selector(showAbout)]) {
+        [self.delegate showAbout];
+    }
+    
+}
+
+- (void)companyNameButtonClick {
+    
+    if (self.delegate && [self.delegate respondsToSelector:@selector(showAbout)]) {
+        [self.delegate showAbout];
     }
     
 }

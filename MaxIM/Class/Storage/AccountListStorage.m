@@ -18,17 +18,13 @@
 + (void)removeAccount:(IMAcount *)account {
     NSArray * array = [NSArray arrayWithArray:  [AccountListStorage loadObject]];
 
-    IMAcount *temp;
     for (IMAcount *model  in array) {
         if ([account.usedId isEqualToString:model.usedId]) {
-            temp = model;
+            NSMutableArray *arrM = [NSMutableArray arrayWithArray:array];
+            [arrM removeObject:model];
+            [AccountListStorage saveObject:[NSArray arrayWithArray:arrM]];
         }
     }
-    
-    NSMutableArray *arrM = [NSMutableArray arrayWithArray:array];
-    [arrM removeObject:temp];
-    [AccountListStorage saveObject:[NSArray arrayWithArray:arrM]];
-
 }
 
 @end

@@ -14,6 +14,7 @@
 
 #import "MAXUtils.h"
 #import <CommonCrypto/CommonCrypto.h>
+#import "LHChatVC.h"
 
 @interface MAXUtils ()
 @end
@@ -158,5 +159,138 @@ NSString *HEXStringFromData(NSData *data) {
     NSDictionary *configDic = [NSJSONSerialization JSONObjectWithData:data options:kNilOptions error:nil];
     bool value = [[configDic objectForKey:key] boolValue];
     return value;
+}
+
++ (NSString *)getAppConfigString:(NSString *)key {
+    BMXSDKConfig *sdkconfig = [[BMXClient sharedClient] getSDKConfig];
+    NSString *appConfig = sdkconfig.getAppConfig;
+    if (appConfig.length == 0) {
+        return nil;
+    }
+    NSData *data = [appConfig dataUsingEncoding:NSUTF8StringEncoding];
+    NSDictionary *configDic = [NSJSONSerialization JSONObjectWithData:data options:kNilOptions error:nil];
+    NSString *value = [configDic objectForKey:key];
+    return value;
+}
+
++ (NSString *)getRosterDisplayName:(BMXRosterItem *)item {
+    NSString *name = @"";
+    if (item != nil) {
+        if (item.alias.length > 0) {
+            name = item.alias;
+        }else if (item.nickname.length > 0) {
+            name = item.nickname;
+        }else if (item.username.length > 0) {
+            name = item.username;
+        }
+    }
+    return name;
+}
+
++ (NSString *)getCompanyName {
+    NSString *companyName = [MAXUtils getAppConfigString:@"account_verification_name"];
+    NSString *verificationType = [MAXUtils getAppConfigString:@"account_verification_type"];
+    if ([verificationType isEqualToString:@"personal"] && companyName.length != 0) {
+        companyName = [NSString stringWithFormat:@"%@%@",NSLocalizedString(@"about_us_individual_developer", @"个人开发者:"), companyName];
+    }
+    if (companyName == nil || companyName.length == 0) {
+        NSString *unverified = [NSString stringWithFormat:@"%@",NSLocalizedString(@"about_us_unverified_developer", @"未认证开发者")];
+        companyName = unverified;
+    }
+    return companyName;
+}
+
++ (NSString *)getCompanyNameWithVerifyStatus {
+    return [NSString stringWithFormat:@"%@ %@", [MAXUtils getCompanyName],[MAXUtils getVerificationStatusChar]];
+}
+
++ (NSString *)getVerificationStatusText {
+    NSString *verificationStatus = [MAXUtils getAppConfigString:@"account_verification_status"];
+    NSDictionary *map= @{@"verified":[NSString stringWithFormat:@"%@",NSLocalizedString(@"about_us_verified", @"✅已认证")],
+                         @"unverified":[NSString stringWithFormat:@"%@",NSLocalizedString(@"about_us_unverified", @"❓未认证")],
+                         @"expired":[NSString stringWithFormat:@"%@",NSLocalizedString(@"about_us_expired", @"❗认证失败")]};
+    NSString *verifyString = map[verificationStatus];
+    if (verifyString == nil) {
+        verifyString = @"";
+    }
+    return verifyString;
+}
+
++ (NSString *)getVerificationStatusChar {
+    NSString *verificationStatus = [MAXUtils getAppConfigString:@"account_verification_status"];
+    NSDictionary *map= @{@"verified":@"✅",
+                         @"unverified":@"❓",
+                         @"expired":@"❗"};
+    NSString *verifyString = map[verificationStatus];
+    if (verifyString == nil) {
+        verifyString = @"";
+    }
+    return verifyString;
+}
+
++ (void)addContact:(UIViewController *)vc andRosterItem:(BMXRosterItem *)roster {
+    NSString *authQuestion = roster.addFriendAuthMode==BMXRosterItem_AddFriendAuthMode_AnswerQuestion? roster.authQuestion:@"";
+    UIAlertController* alert = [UIAlertController alertControllerWithTitle:authQuestion.length>0 ? NSLocalizedString(@"Friend_verification_question", @"好友验证问题") : NSLocalizedString(@"Add_friend", @"添加好友")
+                                                                   message:authQuestion
+                                                            preferredStyle:UIAlertControllerStyleAlert];
+    
+    UIAlertAction* okAction = [UIAlertAction actionWithTitle:NSLocalizedString(@"Confirm", @"确定") style:UIAlertActionStyleDefault
+                                                     handler:^(UIAlertAction * action) {
+                                                         //响应事件
+                                                         //得到文本信息
+                                                         for(UITextField *text in alert.textFields){
+                                                             MAXLog(@"text = %@", text.text);
+                                                             if (authQuestion.length>0){
+                                                                 [MAXUtils addRoster:roster authAnswer:[text.text length] ? text.text : @"" vc:vc];
+                                                             }else{
+                                                                 [MAXUtils addRoster:roster reason:[text.text length] ? text.text : @"" vc:vc];
+                                                             }
+                                                         }
+                                                     }];
+    UIAlertAction* cancelAction = [UIAlertAction actionWithTitle:NSLocalizedString(@"Cancel", @"取消") style:UIAlertActionStyleCancel
+                                                         handler:^(UIAlertAction * action) {
+                                                             //响应事件
+                                                             MAXLog(@"action = %@", alert.textFields);
+                                                         }];
+    [alert addTextFieldWithConfigurationHandler:^(UITextField *textField) {
+        textField.placeholder = authQuestion.length>0 ? NSLocalizedString(@"enter_answer", @"请输入答案") : NSLocalizedString(@"enter_message_for_group_application", @"请输入申请的留言信息");
+    }];
+    
+    [alert addAction:okAction];
+    [alert addAction:cancelAction];
+    [vc presentViewController:alert animated:YES completion:nil];
+}
+
+// 添加好友
++ (void)addRoster:(BMXRosterItem *)roster reason:(NSString *)reason vc:(UIViewController *)vc{
+    [[[BMXClient sharedClient] rosterService] applyWithRosterId:roster.rosterId message:reason completion:^(BMXError *error) {
+        [MAXUtils addContactResult:error vc:vc roster:roster];
+    }];
+}
+
+// 添加好友
++ (void)addRoster:(BMXRosterItem *)roster authAnswer:(NSString *)authAnswer vc:(UIViewController *)vc {
+    [[[BMXClient sharedClient] rosterService] applyWithRosterId:roster.rosterId message:@"" authAnswer:authAnswer completion:^(BMXError *error) {
+        [MAXUtils addContactResult:error vc:vc roster:roster];
+    }];
+}
++ (void)addContactResult:(BMXError *)error vc:(UIViewController *)vc roster:(BMXRosterItem *)roster{
+    MAXLog(@"%lld", roster.rosterId);
+    if (!error) {
+        [HQCustomToast showDialog:NSLocalizedString(@"Request_sent", @"已发出请求")];
+        [vc.navigationController popToRootViewControllerAnimated:YES];
+        
+    } else if (error.errorCode == BMXErrorCode_CurrentUserIsInRoster){
+        [vc.navigationController  popToRootViewControllerAnimated:NO];
+        
+        UITabBarController *bar =  (UITabBarController *)[UIApplication sharedApplication].keyWindow.rootViewController;
+        UINavigationController *currentNav =  (UINavigationController *)bar.selectedViewController;
+        
+        LHChatVC *vc = [[LHChatVC alloc] initWithRoster:roster messageType:BMXMessage_MessageType_Single];
+        vc.hidesBottomBarWhenPushed = YES;
+        [currentNav pushViewController:vc animated:YES];
+    } else {
+        [HQCustomToast showDialog:[error description]];
+    }
 }
 @end

@@ -29,6 +29,9 @@
 #import "AppWechatUnbindApi.h"
 #import "LogViewController.h"
 #import "WXApi.h"
+#import "UserVerificationApi.h"
+#import "UserVerificationByMobile.h"
+#import "UserVerificationViewController.h"
 
 @interface ProfileSettingViewController ()<UITableViewDataSource, UITableViewDelegate, ChangeMobileAlertDelegate>
 
@@ -42,7 +45,8 @@
 @property (nonatomic, strong) UIImageView *avatarImageView;
 @property (nonatomic, strong) UIImageView *editImageView;
 @property (nonatomic,assign) BOOL isbindWechat;
-
+@property (nonatomic,assign) BOOL hasVerified;
+@property (nonatomic, strong) NSString *verifiedMobile;
 
 @end
 
@@ -60,6 +64,10 @@
     [self checkWechatBind];
     [self setupHeaderView];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(wechatBound) name:@"wechatBound" object:nil];
+}
+
+- (void)viewDidAppear:(BOOL)animated{
+    [self getUserVerification];
 }
 
 - (void)checkWechatBind {
@@ -106,6 +114,26 @@
             [self.tableView reloadData];
         }
     }];
+}
+
+- (void)getUserVerification {
+    UserVerificationApi *api = [[UserVerificationApi alloc] initWithUserId:@""];
+    [api startWithSuccessBlock:^(ApiResult * _Nullable result) {
+        if (result.isOK) {
+            NSNumber *status = result.resultData[@"status"];
+            NSString *mobile = result.resultData[@"mobile"];
+
+            self.hasVerified = status.intValue == 1;
+            self.verifiedMobile = mobile;
+            [self.tableView reloadData];
+        } else {
+            MAXLog(@"errmsg:%@",result.errmsg);
+        }
+
+    } failureBlock:^(NSError * _Nullable error) {
+        [HQCustomToast showNetworkError];
+    }];
+
 }
 
 - (void)alertDidSelectCaptchaButton:(ChangeMobileAlert *)alert {
@@ -227,6 +255,11 @@
 
 - (void)gotoBindPhone {
     BindPhoneViewController *bindPhone = [[BindPhoneViewController alloc] init];
+    [self.navigationController pushViewController:bindPhone animated:YES];
+}
+
+- (void)gotoUserVerification {
+    UserVerificationViewController *bindPhone = [[UserVerificationViewController alloc] init];
     [self.navigationController pushViewController:bindPhone animated:YES];
 }
 
@@ -382,6 +415,9 @@
     } else if ([dic[@"type"] isEqualToString:NSLocalizedString(@"Phone_number", @"手机号")]) {
         NSString *aString = [self.profile.mobilePhone length] ? self.profile.mobilePhone : NSLocalizedString(@"Go_to_bind", @"去绑定");
         cell.contentLabel.text = aString;
+    } else if ([dic[@"type"] isEqualToString:NSLocalizedString(@"real_name_verification", @"实名认证")]) {
+        NSString *aString = self.hasVerified ? self.verifiedMobile : NSLocalizedString(@"Go_to_verify", @"去认证");
+        cell.contentLabel.text = aString;
     }else if ([dic[@"type"] isEqualToString:NSLocalizedString(@"Modify_password", @"修改密码")]) {
         NSString *aString = @"";
         cell.contentLabel.text = aString;
@@ -462,6 +498,30 @@
         [self presentViewController:alert animated:YES completion:nil];
         
         
+    } else if ([dic[@"type"] isEqualToString:NSLocalizedString(@"real_name_verification", @"实名认证")]) {
+        if (self.hasVerified) {
+            NSString *message = [NSString stringWithFormat:NSLocalizedString(@"real_name_verified", @"您已实名认证。手机号："),  self.verifiedMobile];
+            
+            UIAlertController* alert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"real_name_verification", @"实名认证")
+                                                                           message:message
+                                                                    preferredStyle:UIAlertControllerStyleAlert];
+            
+            UIAlertAction* okAction = [UIAlertAction actionWithTitle:NSLocalizedString(@"re_verify", @"重新认证") style:UIAlertActionStyleDefault
+                                                             handler:^(UIAlertAction * action) {
+                                                                 //响应事件
+                                                                [self gotoUserVerification];
+                                                             }];
+            UIAlertAction* cancelAction = [UIAlertAction actionWithTitle:NSLocalizedString(@"Confirm", @"确定") style:UIAlertActionStyleCancel
+                                                                 handler:^(UIAlertAction * action) {
+                                                                     //响应事件
+                                                                     MAXLog(@"action = %@", alert.textFields);
+                                                                 }];
+            [alert addAction:okAction];
+            [alert addAction:cancelAction];
+            [self presentViewController:alert animated:YES completion:nil];
+        } else {
+            [self gotoUserVerification];
+        }
     } else if ([dic[@"type"] isEqualToString:NSLocalizedString(@"Phone_number", @"手机号")]) {
         if ([self.profile.mobilePhone length]) {
             self.alert = [ChangeMobileAlert alertWithTitle:NSLocalizedString(@"Change_the_bound_phone_number", @"更改绑定手机号") Phone:self.profile.mobilePhone];

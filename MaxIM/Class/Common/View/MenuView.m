@@ -47,7 +47,7 @@ NSUInteger kMenuViewTag = 1121;
 }
 
 - (void)addBackGroundView {
-    UIImage *image = [UIImage imageNamed:@"menuBubble_arrow"];
+//    UIImage *image = [UIImage imageNamed:@"menuBubble_arrow"];
     self.backgroudView = [[UIView alloc] initWithFrame:CGRectMake(MAXScreenW - 10 -  130 ,0 , 130, self.buttonArray.count * 44)];
     [self addSubview:self.backgroudView];
     self.backgroudView.backgroundColor = BMXCOLOR_HEX(0x414040);
@@ -62,7 +62,7 @@ NSUInteger kMenuViewTag = 1121;
         UIButton *btn = [UIButton buttonWithType:UIButtonTypeCustom];
         [self.backgroudView addSubview:btn];
         [btn setTitle:self.buttonArray[i] forState:UIControlStateNormal];
-        UIImage *image = [UIImage imageNamed:@"menuBubble_arrow"];
+//        UIImage *image = [UIImage imageNamed:@"menuBubble_arrow"];
         btn.frame = CGRectMake(0, 44 * i, self.width, 44);
         btn.tag = 20000 + i;
         btn.titleLabel.font = [UIFont fontWithName:@"PingFangSC-Regular" size:16];

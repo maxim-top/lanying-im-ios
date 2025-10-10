@@ -20,10 +20,7 @@
 #import "GroupAddMemberController.h"
 
 #import <floo-ios/floo_proxy.h>
-
-
-
-
+#import "MAXUtils.h"
 
 @interface GroupMemberCollectionCell : UICollectionViewCell
 @property (nonatomic, strong) UIImageView* avatar;
@@ -70,10 +67,7 @@
         self.avatar.image = image;
     }
     
-    NSString* name = roster.nickname;
-    if(name == nil || [name isEqualToString:@""]) {
-        name = roster.username;
-    }
+    NSString* name = [MAXUtils getRosterDisplayName:roster];
     self.textLabel.text = name;
 }
 -(void) setLast
@@ -203,7 +197,7 @@
 // 点击高亮
 - (void)collectionView:(UICollectionView *)collectionView didHighlightItemAtIndexPath:(NSIndexPath *)indexPath
 {
-    UICollectionViewCell *cell = [collectionView cellForItemAtIndexPath:indexPath];
+//    UICollectionViewCell *cell = [collectionView cellForItemAtIndexPath:indexPath];
 //    cell.backgroundColor = [UIColor greenColor];
 }
 // 选中某item

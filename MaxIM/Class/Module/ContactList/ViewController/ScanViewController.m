@@ -449,7 +449,11 @@
             SearchRosterProfileViewController *vc = [[SearchRosterProfileViewController alloc] initWithRoster:rosterItem];
             [self.navigationController pushViewController:vc animated:YES];
         } else {
-            [HQCustomToast showDialog: @"Unknow error."];
+            NSString *message = NSLocalizedString(@"unknown_error", @"未知错误");
+            if ([error errorCode] == BMXErrorCode_UserNotExist) {
+                message = NSLocalizedString(@"user_not_exist_or_app_id_not_same", @"用户账号已注销或者不在同一App ID");
+            }
+            [HQCustomToast showDialog: message time:3.0];
             [self.navigationController popViewControllerAnimated:YES];
 
         }

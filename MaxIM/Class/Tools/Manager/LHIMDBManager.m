@@ -247,7 +247,7 @@ SingleM(Manager)
 - (NSArray *)searchModelArr:(Class)modelClass byKey:(NSString *)key {
     if ([self.dataBase open]) {
         
-        NSString *classNameTip = [NSString stringWithFormat:NSLocalizedString(@"table_does_not_exist_create_first", @"%@ 表不存在，请先创建"),modelClass];
+//        NSString *classNameTip = [NSString stringWithFormat:NSLocalizedString(@"table_does_not_exist_create_first", @"%@ 表不存在，请先创建"),modelClass];
         [self isExitTable:modelClass autoCloseDB:NO];
         // 查询数据
         NSMutableString *sql = [NSString stringWithFormat:@"SELECT * FROM %@",modelClass].mutableCopy;

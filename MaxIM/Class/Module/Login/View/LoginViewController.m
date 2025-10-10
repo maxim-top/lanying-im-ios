@@ -34,6 +34,10 @@
 
 #import <floo-ios/floo_proxy.h>
 #import "PrivacyView.h"
+#import "MAXUtils.h"
+#import "AboutUsViewController.h"
+#import "OnceHappenStorage.h"
+#import "BMXError+Description.h"
 
 @interface LoginViewController ()<LoginViewConfigProtocol, SDKConfigViewControllerProtocl, PrivacyProtocol>
 
@@ -45,6 +49,7 @@
 @property (nonatomic, strong) LoginView *loginView_Register;
 @property (nonatomic, strong) LoginView *loginView;
 @property (nonatomic, assign) BOOL privacyChecked;
+@property(nonatomic, strong, nullable) dispatch_source_t refreshCompanyNameTimer;//延时获取公司名
 
 @end
 
@@ -104,6 +109,39 @@
     return YES;
 }
 
+-(void)dealloc{
+    dispatch_source_cancel(self.refreshCompanyNameTimer);
+    self.refreshCompanyNameTimer = nil;
+}
+
+- (void)viewDidAppear:(BOOL)animated{
+    dispatch_queue_t queue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
+    if (self.refreshCompanyNameTimer) {
+        dispatch_cancel(self.refreshCompanyNameTimer);
+        self.refreshCompanyNameTimer = nil;
+    }
+    self.refreshCompanyNameTimer = dispatch_source_create(DISPATCH_SOURCE_TYPE_TIMER, 0, 0, queue);
+    dispatch_time_t start = dispatch_time(DISPATCH_TIME_NOW, 0 * NSEC_PER_SEC);
+    uint64_t interval = 1 * NSEC_PER_SEC;
+    dispatch_source_set_timer(self.refreshCompanyNameTimer, start, interval, 0);
+    __weak typeof(self) weakSelf = self;
+    dispatch_source_set_event_handler(self.refreshCompanyNameTimer, ^{
+        typeof(self) strongSelf = weakSelf;
+        NSString *name = [MAXUtils getCompanyNameWithVerifyStatus];
+        dispatch_async(dispatch_get_main_queue(), ^{
+            [strongSelf.config setCompanyName:name];
+        });
+        dispatch_source_cancel(strongSelf.refreshCompanyNameTimer);
+    });
+    dispatch_resume(self.refreshCompanyNameTimer);
+
+    NSString *appId = [AppIDManager sharedManager].appid.appId;
+    if (![OnceHappenStorage has:appId byType:@"ABOUT_PAGE"]) {
+        [OnceHappenStorage add:appId byType:@"ABOUT_PAGE"];
+        [self showAbout];
+    }
+}
+
 - (void)viewDidLoad {
     [super viewDidLoad];
     self.view.backgroundColor = [UIColor whiteColor];
@@ -113,6 +151,8 @@
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(jumpToRegistVC:) name:@"wechatloginsuccess_newuser" object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(inputUserTextFeild:) name:@"ScanConsule" object:nil];
     
+    NSString *name = [MAXUtils getCompanyNameWithVerifyStatus];
+    [self.config setCompanyName:name];
     [self.config setAppid:[AppIDManager sharedManager].appid.appId];
 
     UIWindow *keyWindow;
@@ -143,6 +183,7 @@
     self.config.loginView = self.loginView;
     self.loginView.delegate = self.config;
     [self.config setAppid:[AppIDManager sharedManager].appid.appId];
+    [self.config setCompanyName:[MAXUtils getCompanyNameWithVerifyStatus]];
     [self reloadLocalAppID:[AppIDManager sharedManager].appid.appId];
 }
 
@@ -152,6 +193,7 @@
     self.config.loginView = self.loginView;
     self.loginView.delegate = self.config;
     [self.config setAppid:[AppIDManager sharedManager].appid.appId];
+    [self.config setCompanyName:[MAXUtils getCompanyNameWithVerifyStatus]];
     [self reloadLocalAppID:[AppIDManager sharedManager].appid.appId];
 }
 
@@ -160,6 +202,7 @@
     self.loginView = self.loginView_Register;
     self.config.loginView = self.loginView;
     self.loginView.delegate = self.config;
+    [self.config setCompanyName:[MAXUtils getCompanyNameWithVerifyStatus]];
     [self.config setAppid:[AppIDManager sharedManager].appid.appId];
     [self reloadLocalAppID:[AppIDManager sharedManager].appid.appId];
 }
@@ -189,6 +232,11 @@
 
 - (void)showUserPrivacy {
     [self showWebViewWithUrl:NSLocalizedString(@"protocol_privacy", @"https://www.lanyingim.com/privacy")];
+}
+
+- (void)showAbout {
+    AboutUsViewController *vc = [[AboutUsViewController alloc] init];
+    [self.navigationController pushViewController:vc animated:YES];
 }
 
 - (void)privacyLinkClick:(NSString *)url{
@@ -284,7 +332,7 @@
         } else if (error.errorCode == BMXErrorCode_UserAlreadyExist){
             [self.config showErrorText:NSLocalizedString(@"This_username_already_exists", @"该用户名已存在")];
         } else if (error.errorCode == BMXErrorCode_InvalidRequestParameter) {
-            [self.config showErrorText:NSLocalizedString(@"username_constraint", @"用户名仅支持字母数字下划线中文组合，且不能是纯数字，不能以maxim、mta开头")];
+            [self.config showErrorText:NSLocalizedString(@"username_constraint", @"用户名仅支持字母数字下划线组合，且不能是纯数字，不能以maxim、mta开头")];
         } else {
             [HQCustomToast showDialog:[error description]];
         }
@@ -412,6 +460,7 @@
 }
 
 - (void)sdkconfigdidClickReturn {
+    [self.config setCompanyName:[MAXUtils getCompanyNameWithVerifyStatus]];
     [self.config setAppid:[AppIDManager sharedManager].appid.appId];
 }
 
@@ -456,7 +505,7 @@
             [[NSNotificationCenter defaultCenter] postNotificationName:@"loginSuccess" object:nil];
             [[MAXGlobalTool share].rootViewController addIMListener];
         } else {
-            [HQCustomToast showDialog:[NSString stringWithFormat:@"%@",[error description]]];
+            [HQCustomToast showDialog:[NSString stringWithFormat:@"%@",[error localizedDescription]]];
             MAXLog(@"失败 errorCode = %lu ", error.errorCode);
         }
     }];
@@ -485,6 +534,7 @@
 
         self.scanConsuleUserName = username;
         [self reloadLocalAppID:appId];
+        [self.config setCompanyName:[MAXUtils getCompanyNameWithVerifyStatus]];
         [self.config setAppid:appId];
         [self.config setUserName:username];
         [self.config setPassword:password];
@@ -507,6 +557,7 @@
                                                          for(UITextField *text in alert.textFields){
                                                              MAXLog(@"text = %@", text.text);
                                                              [self reloadLocalAppID:text.text];
+                                                             [self.config setCompanyName:[MAXUtils getCompanyNameWithVerifyStatus]];
                                                              [self.config setAppid:text.text];
                                                              
                                                          }
@@ -709,7 +760,7 @@
             [[MAXGlobalTool share].rootViewController addIMListener];
         } else {
             MAXLog(@"失败 errorCode = %lu ", error.errorCode);
-            [HQCustomToast showDialog:[NSString stringWithFormat:@"%@", [error description]]];
+            [HQCustomToast showDialog:[NSString stringWithFormat:@"%@", [error localizedDescription]]];
         }
     }];
 }

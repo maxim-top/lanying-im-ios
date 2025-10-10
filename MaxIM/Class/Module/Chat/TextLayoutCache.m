@@ -87,13 +87,19 @@ CGFloat const TEXTLABEL_MAX_WIDTH = 260.0f;
     return val;
 }
 
-- (YYTextLayout *)layoutForKey:(NSString *)key {
-    NSString *tmp = [NSString stringWithFormat:@"LAYOUT_%@",key];
+- (YYTextLayout *)layoutForKey:(LHMessageModel *)msg {
+    NSString *key = msg.content;
+    BMXMessage_MessageType type = msg.messageObjc.type;
+    NSString *tmp = [NSString stringWithFormat:@"LAYOUT_%d_%@",type, key];
     NSString *internalKey = [self MD5HashOfString:tmp];
     YYTextLayout *val = [self objectForKey:internalKey];
     if(!val){
         NSMutableAttributedString *attr = [self attributedStringForKey:key];
-        val = [TextLayoutCache textLayoutForBubbleWithAttributedString:attr];
+        CGFloat width = TEXTLABEL_MAX_WIDTH;
+        if (msg.messageObjc.type == BMXMessage_MessageType_System) {
+            width = 360.0f;
+        }
+        val = [TextLayoutCache textLayoutForBubbleWithAttributedString:attr andWidth:width];
         [self setObject:val forKey:internalKey];
     }
     return val;
@@ -112,8 +118,8 @@ CGFloat const TEXTLABEL_MAX_WIDTH = 260.0f;
     return attributedString;
 }
 
-+ (YYTextLayout *)textLayoutForBubbleWithAttributedString:(NSMutableAttributedString *)attributedString{
-    YYTextContainer *container = [YYTextContainer containerWithSize:CGSizeMake(TEXTLABEL_MAX_WIDTH, MAXFLOAT)];
++ (YYTextLayout *)textLayoutForBubbleWithAttributedString:(NSMutableAttributedString *)attributedString andWidth:(CGFloat)width{
+    YYTextContainer *container = [YYTextContainer containerWithSize:CGSizeMake(width, MAXFLOAT)];
     return [YYTextLayout layoutWithContainer:container text:attributedString];
 }
 

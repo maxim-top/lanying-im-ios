@@ -6,3 +6,12 @@
   Copyright © 2022 hyt. All rights reserved.
 */
 CFBundleDisplayName = "蓝莺IM";
+NSBluetoothAlwaysUsageDescription = "为了使用视频功能，需要使用您的蓝牙功能";
+NSBluetoothPeripheralUsageDescription = "为了使用视频功能，需要使用您的蓝牙功能";
+NSCameraUsageDescription = "为了在聊天时拍照并发送给好友，以及通过扫描二维码来添加好友，需要使用您的相机功能";
+NSLocationAlwaysAndWhenInUseUsageDescription = "为了可以将您的位置信息分享给您的朋友，需要使用您的定位";
+NSLocationAlwaysUsageDescription = "为了可以将您的位置信息分享给您的朋友，需要使用您的定位";
+NSLocationWhenInUseUsageDescription = "为了可以将您的位置信息分享给您的朋友，需要使用您的定位";
+NSMicrophoneUsageDescription = "为了让您可以发送语音消息，需要使用您的麦克风";
+NSPhotoLibraryAddUsageDescription = "为了可以将图片保存到您的相册，需要您的相册权限";
+NSPhotoLibraryUsageDescription = "为了可以将您的照片分享给您的朋友，需要您的相册权限";

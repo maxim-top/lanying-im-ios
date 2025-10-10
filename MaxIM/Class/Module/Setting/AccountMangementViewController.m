@@ -70,8 +70,6 @@
 }
 
 - (void)loginWithaccount:(IMAcount *)account {
-    
-    [HQCustomToast showWating];
     AppDelegate *appDelegate = (AppDelegate *)[UIApplication sharedApplication].delegate;
     UIViewController *vc = appDelegate.window.rootViewController;
     if ([vc isKindOfClass:[MAXTabBarController class]]) {
@@ -91,20 +89,18 @@
         if (!error) {
             [self signByaccount:account];
         } else {
-            [HQCustomToast hideWating];
             [IMAcountInfoStorage clearObject]; //清除当前存储的账号
             AppDelegate *appDelegate = (AppDelegate *)[UIApplication sharedApplication].delegate;
             [appDelegate userLogout];
             // 切换失败之后，退出登录状态，但是保存切换后的appid
             [appDelegate reloadAppID:account.appid];
         }
-        
+        [[NSNotificationCenter defaultCenter] postNotificationName:@"conversationListLoading" object:nil];
     }];
 }
 
 - (void)signByaccount:(IMAcount *)account {
         [[BMXClient sharedClient] signInByNameWithName:account.userName password:account.password completion:^(BMXError * _Nonnull error) {
-            [HQCustomToast hideWating];
                 if (!error) {
                     
                     MAXLog(@"登录成功 username = %@ , password = %@",account.userName, account.password);

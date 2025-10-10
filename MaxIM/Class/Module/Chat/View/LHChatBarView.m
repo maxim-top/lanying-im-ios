@@ -1,15 +1,6 @@
-//
-//  LHChatInputView.m
-//  LHChatUI
-//
-//  Created by hyt on 2016/12/22.
-//  Copyright © 2016年 hyt. All rights reserved.
-//
-
 #import "LHChatBarView.h"
-#import "KeyboardEmojiTextView.h"
+#import "LHChatBarEmoticonView.h"
 #import "LHChatBarMoreView.h"
-#import "KeyboardVC.h"
 #import "LHContentModel.h"
 #import "LHTools.h"
 #import "TZImagePickerController.h"
@@ -21,58 +12,115 @@
 #import "UIView+Addtions.h"
 #import "AppDelegate.h"
 #import "MAXUtils.h"
+#import "UIResponder+Router.h"
 
-
-CGFloat const kChatInputTextViewFont = 16.0f;
-CGFloat const kChatEmojiHeight = 216.0f;
-CGFloat const kChatMoreHeight = 130.0f + 20 + 55;
-CGFloat const kChatBatItemWH = 26.0f;
-
-@interface LHChatBarView () <UITextViewDelegate, LHChatBarMoreViewDelegate,TZImagePickerControllerDelegate, UINavigationControllerDelegate, UIImagePickerControllerDelegate, ICDocumentDelegate, UIDocumentPickerDelegate> {
+@interface LHChatBarView () <UITextViewDelegate, LHChatBarMoreViewDelegate,
+TZImagePickerControllerDelegate, UINavigationControllerDelegate,
+UIImagePickerControllerDelegate, ICDocumentDelegate, UIDocumentPickerDelegate>{
     UIViewAnimationCurve _animationCurve;
     CGFloat _animationDuration;
     CGFloat _keyboardHeight;
 }
 
-@property (nonatomic, strong) UIButton *voiceBtn;
-@property (nonatomic, strong) UIButton *moreBtn;
-@property (nonatomic, strong) UIButton *talkButton;
-@property (nonatomic, strong) LHChatBarMoreView *moreView;
-@property (nonatomic, strong) UIView *emojiView;
-@property (nonatomic, strong) KeyboardVC *emojiKeyboardVC;
+@property (nonatomic, strong) UIButton *emojiBtn;
 
-/** 是否正在切换键盘emoji */
-@property (nonatomic, assign, getter=isEmojiKeyboard) BOOL emojiKeyboard;
-/** 是否正在切换键盘more */
-@property (nonatomic, assign, getter=isMoreKeyboard) BOOL moreKeyboard;
-/** 是否系统键盘显示 */
-@property (nonatomic, assign, getter=isShowingSystemKeyboard) BOOL showingSystemKeyboard;
 
+@property (nonatomic, strong) UIView *inputAccessoryView;
 @property (nonatomic, strong) LHPhotosModel *photos;
 @property (nonatomic, strong) LHContentModel *contentModel;
 @property (nonatomic, strong) UIView *videoView;
-
 @property (nonatomic, strong) NSString *filePath;
+@property (nonatomic, strong) NSLayoutConstraint *textViewHeightConstraint; // 用于动态调整高度
 
 @end
 
 @implementation LHChatBarView
 
-
-#pragma mark - 初始化
 - (instancetype)initWithFrame:(CGRect)frame {
     if (self = [super initWithFrame:frame]) {
-        [self setupSubViews];
+        [self setupUI];
         [self setupConfig];
+        self.currentMode = LHChatBarModeDefault;
     }
     return self;
 }
 
-- (void)setupSubViews {
-    [self addSubview:self.textView];
+- (void)setupUI {
+    // 语音按钮
+    self.voiceBtn = [UIButton buttonWithType:UIButtonTypeCustom];
+    [self.voiceBtn setImage:[UIImage imageNamed:@"record"] forState:UIControlStateNormal];
+    [self.voiceBtn addTarget:self action:@selector(voiceBtnTapped) forControlEvents:UIControlEventTouchUpInside];
     [self addSubview:self.voiceBtn];
-    [self addSubview:self.moreBtn];
+    
+    // 输入框
+    self.textView = [[UITextView alloc] init];
+    self.textView.font = [UIFont systemFontOfSize:16];
+    self.textView.delegate = self;
+    self.textView.layer.cornerRadius = 4;
+    self.textView.layer.borderWidth = 0.5;
+    self.textView.layer.borderColor = [UIColor lightGrayColor].CGColor;
+    self.textView.layoutManager.allowsNonContiguousLayout = NO;
+    [self addSubview:self.textView];
+
+    // 按住说话按钮
+    self.talkButton = [UIButton buttonWithType:UIButtonTypeCustom];
+    [self.talkButton setTitle:NSLocalizedString(@"Press_to_speak", @"按住 说话") forState:UIControlStateNormal];
+    [self.talkButton setTitleColor:[UIColor darkGrayColor] forState:UIControlStateNormal];
+    self.talkButton.layer.cornerRadius = 4;
+    self.talkButton.layer.borderWidth = 0.5;
+    self.talkButton.layer.borderColor = [UIColor lightGrayColor].CGColor;
+    [self.talkButton addTarget:self action:@selector(talkButtonDown:) forControlEvents:UIControlEventTouchDown];
+    [self.talkButton addTarget:self action:@selector(talkButtonUpInside:) forControlEvents:UIControlEventTouchUpInside];
+    [self.talkButton addTarget:self action:@selector(talkButtonUpOutside:) forControlEvents:UIControlEventTouchUpOutside];
+    [self.talkButton addTarget:self action:@selector(talkButtonTouchCancel:) forControlEvents:UIControlEventTouchCancel];
+    [self.talkButton addTarget:self action:@selector(talkButtonDragOutside:) forControlEvents:UIControlEventTouchDragOutside];
+    [self.talkButton addTarget:self action:@selector(talkButtonDragInside:) forControlEvents:UIControlEventTouchDragInside];
+
+    self.talkButton.hidden = YES;
     [self addSubview:self.talkButton];
+    
+    // 表情按钮
+    self.emoticonButton = [UIButton buttonWithType:UIButtonTypeCustom];
+    [self.emoticonButton setImage:[UIImage imageNamed:@"emoji"] forState:UIControlStateNormal];
+    [self.emoticonButton addTarget:self action:@selector(emoticonButtonTapped) forControlEvents:UIControlEventTouchUpInside];
+    [self addSubview:self.emoticonButton];
+    
+    // 更多按钮
+    self.moreBtn = [UIButton buttonWithType:UIButtonTypeCustom];
+    [self.moreBtn setImage:[UIImage imageNamed:@"more"] forState:UIControlStateNormal];
+    [self.moreBtn addTarget:self action:@selector(moreBtnTapped) forControlEvents:UIControlEventTouchUpInside];
+    [self addSubview:self.moreBtn];
+    
+    // 表情视图
+    self.emojiKeyboard = [[LHChatBarEmoticonView alloc] init];
+    self.emojiKeyboard.hidden = YES;
+    __weak typeof(self) weakSelf = self;
+    self.emojiKeyboard.didSelectEmoticon = ^(NSString *emoticon) {
+        NSRange selectedRange = weakSelf.textView.selectedRange;
+        NSString *text = weakSelf.textView.text;
+        if ([emoticon isEqualToString:kEmoticonButtonBackspace]) {
+            [weakSelf.textView deleteBackward];
+        } else if ([emoticon isEqualToString:kEmoticonButtonSend]) {
+            !weakSelf.sendContent ? : weakSelf.sendContent(weakSelf.contentModel);
+            [weakSelf resetState];
+        } else {
+            NSString *newText = [text stringByReplacingCharactersInRange:selectedRange withString:emoticon];
+            weakSelf.textView.text = newText;
+            weakSelf.textView.selectedRange = NSMakeRange(selectedRange.location + emoticon.length, 0);
+        }
+        
+        [self textViewChanged:weakSelf.textView];
+    };
+    [self addSubview:self.emojiKeyboard];
+    
+    // 更多功能视图
+    self.moreView = [[LHChatBarMoreView alloc]initWithFrame:CGRectMake(0, MAXScreenH - kChatExtensionViewHeight, MAXScreenW, kChatExtensionViewHeight)];;
+    self.moreView.delegate = self;
+    self.moreView.hidden = YES;
+    self.moreView.autoresizingMask = UIViewAutoresizingFlexibleTopMargin;
+    [self addSubview:self.moreView];
+    
+    [self setupConstraints];
 }
 
 - (void)setupConfig {
@@ -80,246 +128,242 @@ CGFloat const kChatBatItemWH = 26.0f;
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(keyboardWillHide:) name:UIKeyboardWillHideNotification object:nil];
 }
 
-- (void)layoutSubviews {
-    [super layoutSubviews];
+#pragma mark - Keyboard Notifications
 
-    self.voiceBtn.frame = CGRectMake(MAXScreenW - 10 - kChatBatItemWH * 2 - 10 , self.height - kChatBatItemWH - 11, kChatBatItemWH, kChatBatItemWH);
-    
-    self.moreBtn.frame = CGRectMake(CGRectGetMaxX(self.voiceBtn.frame) + 10, self.height - kChatBatItemWH - 11, kChatBatItemWH, kChatBatItemWH);
-    
-//    CGFloat textViewX = CGRectGetMaxX(self.moreBtn.frame) + 10;
-
-    self.textView.frame = CGRectMake(10, 7.5, MAXScreenW - kChatBatItemWH * 2  - 30 - 10, self.height - 15);
-    
-    self.talkButton.frame = CGRectMake(10, 7.5, MAXScreenW - kChatBatItemWH * 2  -30 -10, self.height - 15);
-    
-}
-
-#pragma mark - 事件监听
-/**
- *  键盘弹出
- *
- *  @param notice 通知
- */
-- (void)keyboardWillShow:(NSNotification *)notice {
-    self.showingSystemKeyboard = YES;
-    self.moreBtn.selected = NO;
-    self.voiceBtn.selected = NO;
-    
-    NSDictionary *userInfo = [notice userInfo];
-    CGRect endFrame = [[userInfo objectForKey:UIKeyboardFrameEndUserInfoKey] CGRectValue];
-    _keyboardHeight = (endFrame.origin.y != MAXScreenH) ? endFrame.size.height:0;
+- (void)keyboardWillShow:(NSNotification *)notification {
+    NSDictionary *userInfo = notification.userInfo;
+    CGRect keyboardFrame = [userInfo[UIKeyboardFrameEndUserInfoKey] CGRectValue];
+    _keyboardHeight = (keyboardFrame.origin.y != MAXScreenH) ? keyboardFrame.size.height:0;
     if (!_keyboardHeight) return;
-    
-    CGRect beginRect = [[userInfo objectForKey:UIKeyboardFrameBeginUserInfoKey] CGRectValue];
-    CGRect endRect = [[userInfo objectForKey:UIKeyboardFrameEndUserInfoKey] CGRectValue];
-    if(!(beginRect.size.height > 0 && ( fabs(beginRect.origin.y - endRect.origin.y) > 0))) return;
-    
-    UIApplicationState appState = [[UIApplication sharedApplication] applicationState];
-    if (appState != UIApplicationStateActive) {
-        return;
-    }
-    _animationDuration = [userInfo[UIKeyboardAnimationDurationUserInfoKey] floatValue];
-    _animationCurve = [userInfo[UIKeyboardAnimationCurveUserInfoKey] integerValue];
-    
-    [UIView animateWithDuration:_animationDuration delay:0 options:(_animationCurve << 16 | UIViewAnimationOptionBeginFromCurrentState) animations:^{
-        // 修改frame
-        self.y = MAXScreenH - self.height - self->_keyboardHeight;
-        self->_tableView.height = self.y - kNavBarHeight;
-//        [_conversationChatVC scrollToBottomAnimated:NO refresh:NO];
-    } completion:nil];
-    
-    // 添加动画
-    if (self.emojiKeyboard) { // 当前展示的是表情键盘
-        [UIView animateWithDuration:_animationDuration delay:0 options:(_animationCurve << 16 | UIViewAnimationOptionBeginFromCurrentState) animations:^{
-            self.emojiView.y = MAXScreenH - kChatEmojiHeight;
-            [self.superview layoutIfNeeded];
-        } completion:^(BOOL finished) {
-            self.emojiView.y = MAXScreenH;
-            self.moreView.y = MAXScreenH - kChatMoreHeight;
-            [self.emojiView removeFromSuperview];
-        }];
-        
-    } else if (self.isMoreKeyboard) { // 当前展示的是工具
-        [UIView animateWithDuration:_animationDuration delay:0 options:(_animationCurve << 16 | UIViewAnimationOptionBeginFromCurrentState) animations:^{
-            self.moreView.y = MAXScreenH - kChatMoreHeight;
-            [self.superview layoutIfNeeded];
-        } completion:^(BOOL finished) {
-            [self.moreView removeFromSuperview];
-        }];
-    }
-}
-
-
-- (void)keyboardWillHide:(NSNotification *)noti {
-    self.showingSystemKeyboard = NO;
-    if (self.voiceBtn.selected || self.moreBtn.selected) return;
-    self.moreBtn.selected = NO;
-    self.voiceBtn.selected = NO;
-    
-    //获取键盘的高度
-    NSDictionary *userInfo = [noti userInfo];
-    NSValue *aValue = [userInfo objectForKey:UIKeyboardFrameEndUserInfoKey];
-    _keyboardHeight = [aValue CGRectValue].size.height;
-    
-    CGFloat duration = [userInfo[UIKeyboardAnimationDurationUserInfoKey] doubleValue];
+    NSTimeInterval duration = [userInfo[UIKeyboardAnimationDurationUserInfoKey] doubleValue];
     UIViewAnimationCurve curve = [userInfo[UIKeyboardAnimationCurveUserInfoKey] integerValue];
     
-    [UIView animateWithDuration:duration delay:0 options:(curve << 16 | UIViewAnimationOptionBeginFromCurrentState) animations:^{
-        self.y = MAXScreenH - self.height;
-        _tableView.height = self.y - kNavBarHeight;
+    [UIView animateWithDuration:duration
+                          delay:0
+                        options:(curve << 16)
+                     animations:^{
+        CGFloat y = MAXScreenH - (MAXIsFullScreen ? 83 : kChatBarHeight) - keyboardFrame.size.height;
+        [self setTop: y];
+        [self setTableViewHeight:y - kNavBarHeight];
+        self.currentMode = LHChatBarModeKeyboard;
     } completion:nil];
+    [self textViewChanged:self.textView];
 }
 
-
-// 点击语音按钮
-- (void)voiceBtnClick:(UIButton *)voiceBtn {
-    [self.moreView removeFromSuperview];
-    self.moreKeyboard = NO;
-    self.emojiKeyboard = YES;
-    [self.talkButton setHidden:!self.talkButton.isHidden];
-    [self.textView endEditing:YES];
-    
-    if (self.moreBtn.selected) { 
-        self.moreBtn.selected = NO;
-        [UIView animateWithDuration:0.25 animations:^{
-            self.y = MAXScreenH  - self.height - (MAXIsFullScreen ? 34 : 0);
-            _tableView.height = self.y - kNavBarHeight;
-            self.emojiView.y = MAXScreenH ;
-        }];
+- (void)keyboardWillHide:(NSNotification *)notification {
+    if (self.currentMode == LHChatBarModeDefault || self.currentMode == LHChatBarModeVoice) {
+        NSDictionary *userInfo = notification.userInfo;
+        CGRect keyboardFrame = [userInfo[UIKeyboardFrameEndUserInfoKey] CGRectValue];
+        NSTimeInterval duration = [userInfo[UIKeyboardAnimationDurationUserInfoKey] doubleValue];
+        UIViewAnimationCurve curve = [userInfo[UIKeyboardAnimationCurveUserInfoKey] integerValue];
         
+        [UIView animateWithDuration:duration
+                              delay:0
+                            options:(curve << 16)
+                         animations:^{
+            self.transform = CGAffineTransformIdentity;
+            CGFloat y = MAXScreenH - (MAXIsFullScreen ? 83 : kChatBarHeight);
+            [self setTop: y];
+            [self setTableViewHeight:y - kNavBarHeight];
+        } completion:nil];
     }
 }
 
-// 点击工具按钮
-- (void)moreBtnClick:(UIButton *)moreBtn {
-    [self.talkButton setHidden:!self.talkButton.isHidden];
+- (void)setupConstraints {
+    // 设置自动布局约束
+    self.voiceBtn.translatesAutoresizingMaskIntoConstraints = NO;
+    self.textView.translatesAutoresizingMaskIntoConstraints = NO;
+    self.talkButton.translatesAutoresizingMaskIntoConstraints = NO;
+    self.emoticonButton.translatesAutoresizingMaskIntoConstraints = NO;
+    self.moreBtn.translatesAutoresizingMaskIntoConstraints = NO;
     
-    [self.emojiView removeFromSuperview];
-    self.emojiKeyboard = NO;
-    UIView *moreView = self.moreView;
+    [NSLayoutConstraint activateConstraints:@[
+        // 语音按钮约束
+        [self.voiceBtn.leadingAnchor constraintEqualToAnchor:self.leadingAnchor constant:8],
+        [self.voiceBtn.topAnchor constraintEqualToAnchor:self.topAnchor constant:8],
+        [self.voiceBtn.widthAnchor constraintEqualToConstant:32],
+        [self.voiceBtn.heightAnchor constraintEqualToConstant:32],
+        
+        // 输入框约束
+        [self.textView.leadingAnchor constraintEqualToAnchor:self.voiceBtn.trailingAnchor constant:8],
+        [self.textView.topAnchor constraintEqualToAnchor:self.topAnchor constant:8],
+        [self.textView.trailingAnchor constraintEqualToAnchor:self.emoticonButton.leadingAnchor constant:-8],
+       ( self.textViewHeightConstraint = [self.textView.heightAnchor constraintEqualToConstant:kChatBarTextViewHeight]),
+        
+        // 按住说话按钮约束
+        [self.talkButton.leadingAnchor constraintEqualToAnchor:self.voiceBtn.trailingAnchor constant:8],
+        [self.talkButton.trailingAnchor constraintEqualToAnchor:self.emoticonButton.leadingAnchor constant:-8],
+        [self.talkButton.topAnchor constraintEqualToAnchor:self.topAnchor constant:8],
+        [self.talkButton.heightAnchor constraintEqualToConstant:kChatBarTextViewHeight],
+        
+        // 表情按钮约束
+        [self.emoticonButton.leadingAnchor constraintEqualToAnchor:self.textView.trailingAnchor constant:8],
+        [self.emoticonButton.topAnchor constraintEqualToAnchor:self.topAnchor constant:8],
+        [self.emoticonButton.widthAnchor constraintEqualToConstant:32],
+        [self.emoticonButton.heightAnchor constraintEqualToConstant:32],
+        
+        // 更多按钮约束
+        [self.moreBtn.leadingAnchor constraintEqualToAnchor:self.emoticonButton.trailingAnchor constant:8],
+        [self.moreBtn.trailingAnchor constraintEqualToAnchor:self.trailingAnchor constant:-8],
+        [self.moreBtn.topAnchor constraintEqualToAnchor:self.topAnchor constant:8],
+        [self.moreBtn.widthAnchor constraintEqualToConstant:32],
+        [self.moreBtn.heightAnchor constraintEqualToConstant:32],
+    ]];
+    self.textViewHeightConstraint.priority = UILayoutPriorityDefaultHigh; // 优先级非必需，但有时可避免布局警告
+
+    // 设置表情视图和更多功能视图的约束
+    self.emojiKeyboard.translatesAutoresizingMaskIntoConstraints = NO;
+    self.moreView.translatesAutoresizingMaskIntoConstraints = NO;
     
-    if (self.voiceBtn.selected) { // 表情键盘有选中
-        self.moreBtn.selected = YES;
-        self.moreKeyboard = YES;
-        if (!self.showingSystemKeyboard) {
-            self.moreView.y = MAXScreenH;
-        }
-        
-        self.emojiView.y = MAXScreenH;
-        self.voiceBtn.selected = NO;
-        [self.superview addSubview:moreView];
-        // 2.更改inputToolBar 底部约束
-        
-        
-        // 添加动画
-        [UIView animateWithDuration:0.25 animations:^{
-            self.y = MAXScreenH - kChatMoreHeight - self.height;
-            _tableView.height = self.y - kNavBarHeight;
-            moreView.y = MAXScreenH - kChatMoreHeight;
-        }];
-        
-    } else { // 表情键盘没有选择
-        moreBtn.selected = !moreBtn.selected;
-        if (moreBtn.selected) {
-            // 让vioce声音按钮,取消选择,隐藏录音按钮
-            
-            if (!self.showingSystemKeyboard) {
-                self.moreView.y = MAXScreenH;
-            }
-            [self.textView resignFirstResponder];
-            self.moreKeyboard = YES;
-            [self.superview addSubview:moreView];
-            // 2.更改inputToolBar 底部约束
-            
-            
-            // 添加动画
-            [UIView animateWithDuration:0.25 animations:^{
-                self.y = MAXScreenH - kChatMoreHeight - self.height;
-                _tableView.height = self.y - kNavBarHeight;
-                
-                moreView.y = MAXScreenH - kChatMoreHeight;
-                // 4.把消息现在在顶部
-//                [_conversationChatVC scrollToBottomAnimated:NO refresh:NO];
-            }];
-            
-        } else {
-            self.moreKeyboard = YES;
-            [self.textView becomeFirstResponder];
-        }
+    [NSLayoutConstraint activateConstraints:@[
+        [self.emojiKeyboard.leadingAnchor constraintEqualToAnchor:self.leadingAnchor],
+        [self.emojiKeyboard.trailingAnchor constraintEqualToAnchor:self.trailingAnchor],
+        [self.emojiKeyboard.bottomAnchor constraintEqualToAnchor:self.bottomAnchor],
+        [self.emojiKeyboard.heightAnchor constraintEqualToConstant:kChatExtensionViewHeight],
+        [self.moreView.leadingAnchor constraintEqualToAnchor:self.leadingAnchor],
+        [self.moreView.trailingAnchor constraintEqualToAnchor:self.trailingAnchor],
+        [self.moreView.bottomAnchor constraintEqualToAnchor:self.bottomAnchor],
+        [self.moreView.heightAnchor constraintEqualToConstant:kChatExtensionViewHeight]
+    ]];
+}
+
+#pragma mark - Mode Switching
+
+- (void)setCurrentMode:(LHChatBarMode)currentMode {
+    if (_currentMode == currentMode) return;
+    
+    _currentMode = currentMode;
+    
+    // 更新UI状态
+    switch (currentMode) {
+        case LHChatBarModeDefault:
+            [self setupDefaultMode];
+            break;
+        case LHChatBarModeVoice:
+            [self setupVoiceMode];
+            break;
+        case LHChatBarModeKeyboard:
+            [self setupKeyboardMode];
+            break;
+        case LHChatBarModeEmoticon:
+            [self setupEmoticonMode];
+            break;
+        case LHChatBarModeMore:
+            [self setupMoreMode];
+            break;
     }
 }
 
-#pragma mark - 公共方法
-- (void)hideKeyboard {
-    [self.superview endEditing:YES];
+- (void)setupDefaultMode {
+    [self.voiceBtn setImage:[UIImage imageNamed:@"record"] forState:UIControlStateNormal];
+    self.textView.hidden = NO;
+    self.textViewHeightConstraint.constant = kChatBarTextViewHeight;
+    self.talkButton.hidden = YES;
+    self.emojiKeyboard.hidden = YES;
+    self.moreView.hidden = YES;
+
+    [self.emoticonButton setImage:[UIImage imageNamed:@"emoji"] forState:UIControlStateNormal];
+    [self.moreBtn setImage:[UIImage imageNamed:@"more"] forState:UIControlStateNormal];
     
-    // 添加动画
-    [UIView animateWithDuration:0.25 animations:^{
-        if (self.showingSystemKeyboard || self.voiceBtn.selected || self.moreBtn.selected) {
-            self.moreView.y = MAXScreenH;
-            self.emojiView.y = MAXScreenH;
-        }
-        self.y = MAXScreenH - self.height - (MAXIsFullScreen ? 34 : 0);
-        _tableView.height = self.y - kNavBarHeight;
-    } completion:^(BOOL finished) {
-    }];
-    self.moreBtn.selected = NO;
-    self.voiceBtn.selected = NO;
+    [self.textView resignFirstResponder];
+
+    CGFloat y = MAXScreenH - (MAXIsFullScreen ? 83 : kChatBarHeight);
+    [self setTop: y];
+    [self setTableViewHeight:y - kNavBarHeight];
 }
 
-#pragma mark - 私有方法
-//重置状态
-- (void)resetState {
+- (void)setupVoiceMode {
+    [self.voiceBtn setImage:[UIImage imageNamed:@"keyboard"] forState:UIControlStateNormal];
+    self.textView.hidden = YES;
+    self.textViewHeightConstraint.constant = kChatBarTextViewHeight;
+    self.talkButton.hidden = NO;
+    self.emojiKeyboard.hidden = YES;
+    self.moreView.hidden = YES;
+    [self.emoticonButton setImage:[UIImage imageNamed:@"emoji"] forState:UIControlStateNormal];
+    [self.moreBtn setImage:[UIImage imageNamed:@"more"] forState:UIControlStateNormal];
     
-    [UIView animateWithDuration:0.25 animations:^{
-        self.height = kChatBarHeight;
-        CGFloat keyboardHeight = _keyboardHeight;
-        if (self.moreBtn.selected) {
-            keyboardHeight = kChatMoreHeight;
-        }
-        else if (self.voiceBtn.selected) {
-            keyboardHeight = kChatEmojiHeight;
-        }
-        self.y = MAXScreenH - self.height - keyboardHeight;
-        _tableView.height = self.y - kNavBarHeight;
-        [self layoutIfNeeded];
-    } completion:^(BOOL finished) {
-        if (!finished) return;
-        self.contentModel = nil;
-        _textView.text = @"";
-        self.photos = nil;
-    }];
+    [self.textView resignFirstResponder];
+    
+    CGFloat y = MAXScreenH - (MAXIsFullScreen ? 83 : kChatBarHeight);
+    [self setTop: y];
+    [self setTableViewHeight:y - kNavBarHeight];
 }
 
-- (NSRange)isPresenceExpressionWithText:(NSString *)text {
-    NSInteger length = text.length;
+- (void)setupKeyboardMode {
+    [self.voiceBtn setImage:[UIImage imageNamed:@"record"] forState:UIControlStateNormal];
+    self.textView.hidden = NO;
+    self.talkButton.hidden = YES;
+    self.emojiKeyboard.hidden = YES;
+    self.moreView.hidden = YES;
+    [self.emoticonButton setImage:[UIImage imageNamed:@"emoji"] forState:UIControlStateNormal];
+    [self.moreBtn setImage:[UIImage imageNamed:@"more"] forState:UIControlStateNormal];
+    [self.textView becomeFirstResponder];
+}
+
+- (void)setupEmoticonMode {
+    [self.voiceBtn setImage:[UIImage imageNamed:@"record"] forState:UIControlStateNormal];
+    self.textView.hidden = NO;
+    self.talkButton.hidden = YES;
+    [self.emoticonButton setImage:[UIImage imageNamed:@"keyboard"] forState:UIControlStateNormal];
+    [self.moreBtn setImage:[UIImage imageNamed:@"more"] forState:UIControlStateNormal];
     
-    NSArray *array = [self emojiArrayWithText:text];
+    [self showEmoticonView];
+    [self.textView resignFirstResponder];
+}
+
+- (void)setupMoreMode {
+    [self.voiceBtn setImage:[UIImage imageNamed:@"record"] forState:UIControlStateNormal];
+    self.textView.hidden = NO;
+    self.talkButton.hidden = YES;
+    [self.emoticonButton setImage:[UIImage imageNamed:@"emoji"] forState:UIControlStateNormal];
+    [self.moreBtn setImage:[UIImage imageNamed:@"keyboard"] forState:UIControlStateNormal];
     
-    NSInteger index = array.count;
-    if (!index) return NSMakeRange(0, 0);
-    while (index > 0) {
-        index --;
-        NSTextCheckingResult *result = array[index];
-        if (length == result.range.location + result.range.length) {
-            return result.range;
-        }
+    [self showMoreView];
+    [self.textView resignFirstResponder];
+}
+
+#pragma mark - Button Actions
+
+- (void)voiceBtnTapped {
+    if (self.currentMode == LHChatBarModeVoice) {
+        self.currentMode = LHChatBarModeKeyboard;
+    } else {
+        self.currentMode = LHChatBarModeVoice;
     }
-    return NSMakeRange(0, 0);
 }
 
-- (NSArray *)emojiArrayWithText:(NSString *)text {
-    NSRegularExpression *regex = [NSRegularExpression regularExpressionWithPattern:@"\\[\\w+\\]" options:NSRegularExpressionCaseInsensitive error:nil];
-    
-    return [regex matchesInString:text options:NSMatchingReportProgress range:NSMakeRange(0, text.length)];
+- (void)emoticonButtonTapped {
+    if (self.currentMode == LHChatBarModeEmoticon) {
+        self.currentMode = LHChatBarModeKeyboard;
+    } else {
+        self.currentMode = LHChatBarModeEmoticon;
+    }
 }
 
+- (void)moreBtnTapped {
+    if (self.currentMode == LHChatBarModeMore) {
+        self.currentMode = LHChatBarModeKeyboard;
+    } else {
+        self.currentMode = LHChatBarModeMore;
+    }
+}
 
-- (void)deleteEmoji:(NSString *)text range:(NSRange)range {
-    text = [text substringToIndex:range.location];
-    self.textView.text = text;
-    [self textViewDidChange:self.textView];
+- (LHContentModel *)contentModel {
+    return [LHContentModel contentModelWitiPhotos:self.photos words:self.textView.text];
+}
+
+#pragma mark - Extension View Animation
+
+- (void)showEmoticonView {
+    self.emojiKeyboard.hidden = NO;
+    self.moreView.hidden = YES;
+    [self textViewChanged:self.textView];
+}
+
+- (void)showMoreView {
+    self.emojiKeyboard.hidden = YES;
+    self.moreView.hidden = NO;
+    [self textViewChanged:self.textView];
 }
 
 #pragma mark - LHChatBarMoreViewDelegate
@@ -357,7 +401,7 @@ CGFloat const kChatBatItemWH = 26.0f;
     
     TZImagePickerController *imagePickerVc = [[TZImagePickerController alloc] initWithMaxImagesCount:9 delegate:self];
     imagePickerVc.alwaysEnableDoneBtn = NO;
-    imagePickerVc.allowPickingVideo = NO;
+    imagePickerVc.allowPickingVideo = YES;
     imagePickerVc.allowTakePicture = NO;
     imagePickerVc.allowPickingOriginalPhoto = NO;
     imagePickerVc.modalPresentationStyle = UIModalPresentationFullScreen;
@@ -469,44 +513,11 @@ CGFloat const kChatBatItemWH = 26.0f;
 
 #pragma mark - UITextViewDelegate
 - (void)textViewDidChange:(UITextView *)textView {
-    
-    static CGFloat maxHeight = 80.0f;
-    CGRect frame = textView.frame;
-    CGSize constraintSize = CGSizeMake(frame.size.width, MAXFLOAT);
-    CGSize size = [textView sizeThatFits:constraintSize];
-    if (size.height >= maxHeight) {
-        size.height = maxHeight;
-        textView.scrollEnabled = YES;   // 允许滚动
-        [textView scrollRectToVisible:CGRectMake(0, textView.contentSize.height-7.5, textView.contentSize.width, 10) animated:NO];
-    } else {
-        textView.scrollEnabled = NO;    // 不允许滚动，当textview的大小足以容纳它的text的时候，需要设置scrollEnabed为NO，否则会出现光标乱滚动的情况
-    }
-    
-    [UIView animateWithDuration:_animationDuration delay:0 options:(_animationCurve << 16 | UIViewAnimationOptionBeginFromCurrentState) animations:^{
-        // 调整整个InputToolBar 的高度
-        self.height = (15 + size.height) - kChatBarHeight < 5 ? kChatBarHeight : 15 + size.height;
-        CGFloat keyboardHeight = self->_keyboardHeight;
-        if (self.moreBtn.selected) {
-            keyboardHeight = kChatMoreHeight;
-        }
-        else if (self.voiceBtn.selected) {
-            keyboardHeight = kChatEmojiHeight;
-        }
-        
-        self.y = MAXScreenH - self.height - keyboardHeight;
-        self->_tableView.height = self.y - kNavBarHeight;
-        [self layoutIfNeeded];
-    } completion:nil];
+    [self textViewChanged:textView];
 }
 
 - (BOOL)textView:(UITextView *)textView shouldChangeTextInRange:(NSRange)range replacementText:(NSString *)text {
     if (!text.length) {
-        NSRange range = [self isPresenceExpressionWithText:textView.text];
-        if (range.length) {
-            [self deleteEmoji:textView.text range:range];
-            return NO;
-        }
-        
         return YES;
     }
     else {
@@ -559,6 +570,28 @@ CGFloat const kChatBatItemWH = 26.0f;
     [self resetState];
 }
 
+- (void)imagePickerController:(TZImagePickerController *)picker didFinishPickingVideo:(UIImage *)coverImage sourceAssets:(PHAsset *)asset {
+    PHVideoRequestOptions *options = [[PHVideoRequestOptions alloc] init];
+    options.version = PHVideoRequestOptionsVersionOriginal; // 获取原始视频
+    __weak typeof(self) weakSelf = self;
+
+    [[PHImageManager defaultManager] requestAVAssetForVideo:asset
+                                                       options:options
+                                                 resultHandler:^(AVAsset * _Nullable avAsset,
+                                                                 AVAudioMix * _Nullable audioMix,
+                                                                 NSDictionary * _Nullable info) {
+        __strong typeof(weakSelf) strongSelf = weakSelf;
+        if ([avAsset isKindOfClass:[AVURLAsset class]]) {
+            AVURLAsset *urlAsset = (AVURLAsset *)avAsset;
+            NSURL *videoURL = urlAsset.URL;
+            NSDictionary *userInfo = @{VideoPathKey : videoURL.path};
+            dispatch_async(dispatch_get_main_queue(), ^{
+                [strongSelf routerEventWithName:GXRouterEventVideoRecordFinish userInfo:userInfo];
+            });
+        }
+    }];
+}
+
 #pragma mark - ICDocumentDelegate
 - (void)selectedFileName:(NSString *)fileName {
     MAXLog(@"%@", fileName);
@@ -598,112 +631,87 @@ CGFloat const kChatBatItemWH = 26.0f;
     }
 }
 
-#pragma mark - lazy
-- (KeyboardEmojiTextView *)textView {
-    if (!_textView) {
-        LHWeakSelf
-        _textView = [KeyboardEmojiTextView new];
-        _textView.delegate = self;
-        _textView.backgroundColor = [UIColor whiteColor];
-        _textView.font = [UIFont systemFontOfSize:kChatInputTextViewFont];
-        _textView.returnKeyType = UIReturnKeySend;
-        _textView.enablesReturnKeyAutomatically = YES;
-        _textView.layer.borderColor = [UIColor lh_colorWithHex:0xe1e1e5].CGColor;
-        _textView.layer.borderWidth = 0.5;
-        _textView.showsVerticalScrollIndicator = YES;
-        _textView.showsHorizontalScrollIndicator = NO;
-        _textView.layer.cornerRadius = 5;
-        _textView.insertEmojiTextBlock = ^(UITextView *textView) {
-            [weakSelf textViewDidChange:textView];
-        };
-        _textView.layoutManager.allowsNonContiguousLayout = NO;
+#pragma mark - 公共方法
+- (void)hideKeyboard {
+    if (self.currentMode != LHChatBarModeDefault && self.currentMode != LHChatBarModeVoice) {
+        self.currentMode = LHChatBarModeDefault;
     }
-    return _textView;
 }
 
-- (UIButton *)voiceBtn {
-    if (!_voiceBtn) {
-        _voiceBtn = [UIButton buttonWithType:UIButtonTypeCustom];
-        [_voiceBtn setImage:[UIImage imageNamed:@"record"] forState:UIControlStateNormal];
-        [_voiceBtn setImage:[UIImage imageNamed:@"record"] forState:UIControlStateSelected];
-        [_voiceBtn addTarget:self action:@selector(voiceBtnClick:) forControlEvents:UIControlEventTouchUpInside];
+- (void)setText:(NSString *)text {
+    self.textView.text = text;
+
+    dispatch_async(dispatch_get_main_queue(), ^{
+        [self.textView becomeFirstResponder];
+        NSRange endRange = NSMakeRange(self.textView.text.length, 0);
+        self.textView.selectedRange = endRange;
+    });
+}
+
+#pragma mark - 私有方法
+//重置状态
+- (void)resetState {
+    [self hideKeyboard];
+    [UIView animateWithDuration:0.25 animations:^{
+        CGFloat y = MAXScreenH - (MAXIsFullScreen ? 83 : kChatBarHeight);
+        [self setTop: y];
+        [self setTableViewHeight:y - kNavBarHeight];
+
+        [self layoutIfNeeded];
+    } completion:^(BOOL finished) {
+        if (!finished) return;
+        self.contentModel = nil;
+        _textView.text = @"";
+        self.photos = nil;
+    }];
+}
+
+- (void)textViewChanged:(UITextView *)textView {
+    if (textView != self.textView) {
+        return;
     }
-    return _voiceBtn;
-}
-
-- (UIButton *)moreBtn {
-    if (!_moreBtn) {
-        _moreBtn = [UIButton buttonWithType:UIButtonTypeCustom];
-        [_moreBtn setImage:[UIImage imageNamed:@"more"] forState:UIControlStateNormal];
-        [_moreBtn setImage:[UIImage imageNamed:@"more"] forState:UIControlStateSelected];
-        [_moreBtn addTarget:self action:@selector(moreBtnClick:) forControlEvents:UIControlEventTouchUpInside];
+    static CGFloat maxHeight = 80.0f;
+    CGRect frame = textView.frame;
+    CGSize constraintSize = CGSizeMake(frame.size.width, MAXFLOAT);
+    CGSize size = [textView sizeThatFits:constraintSize];
+    self.textViewHeightConstraint.constant = size.height;
+    if (size.height >= maxHeight) {
+        size.height = maxHeight;
+        self.textViewHeightConstraint.constant = size.height;
+        textView.scrollEnabled = YES;   // 允许滚动
+        [textView scrollRectToVisible:CGRectMake(0, textView.contentSize.height-7.5, textView.contentSize.width, 10) animated:NO];
+    } else {
+        textView.scrollEnabled = NO;    // 不允许滚动，当textview的大小足以容纳它的text的时候，需要设置scrollEnabed为NO，否则会出现光标乱滚动的情况
     }
-    return _moreBtn;
+    
+    [UIView animateWithDuration:_animationDuration delay:0 options:(_animationCurve << 16 | UIViewAnimationOptionBeginFromCurrentState) animations:^{
+        CGFloat keyboardHeight = self->_keyboardHeight;
+        if (self.currentMode == LHChatBarModeMore || self.currentMode == LHChatBarModeEmoticon) {
+            keyboardHeight = kChatExtensionViewHeight;
+        } else if(self.currentMode == LHChatBarModeDefault){
+            keyboardHeight = 0;
+        }
+        self.height = (size.height < kChatBarTextViewHeight ? (MAXIsFullScreen ? 83 : kChatBarHeight) : (size.height + 50)) + keyboardHeight;
+        CGFloat y = MAXScreenH - self.height;
+        [self setTop: y];
+        [self setTableViewHeight:y - kNavBarHeight];
+        [self layoutIfNeeded];
+    } completion:nil];
 }
 
-- (UIButton *)talkButton {
-    if (_talkButton == nil) {
-        _talkButton = [[UIButton alloc] init];
-        [_talkButton setTitle:NSLocalizedString(@"Press_to_speak", @"按住 说话") forState:UIControlStateNormal];
-        [_talkButton setTitle:NSLocalizedString(@"Release_to_end", @"松开 结束") forState:UIControlStateHighlighted];
-        [_talkButton setTitleColor:[UIColor colorWithRed:0.3 green:0.3 blue:0.3 alpha:1.0] forState:UIControlStateNormal];
-        [_talkButton.titleLabel setFont:[UIFont boldSystemFontOfSize:16.0f]];
-        [_talkButton.layer setMasksToBounds:YES];
-        [_talkButton.layer setCornerRadius:4.0f];
-        [_talkButton.layer setBorderWidth:0.5f];
-        [_talkButton setHidden:YES];
-        [_talkButton addTarget:self action:@selector(talkButtonDown:) forControlEvents:UIControlEventTouchDown];
-        [_talkButton addTarget:self action:@selector(talkButtonUpInside:) forControlEvents:UIControlEventTouchUpInside];
-        [_talkButton addTarget:self action:@selector(talkButtonUpOutside:) forControlEvents:UIControlEventTouchUpOutside];
-        [_talkButton addTarget:self action:@selector(talkButtonTouchCancel:) forControlEvents:UIControlEventTouchCancel];
-        [_talkButton addTarget:self action:@selector(talkButtonDragOutside:) forControlEvents:UIControlEventTouchDragOutside];
-        [_talkButton addTarget:self action:@selector(talkButtonDragInside:) forControlEvents:UIControlEventTouchDragInside];
-    }
-    return _talkButton;
+- (void)dealloc {
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
 }
 
-- (LHChatBarMoreView *)moreView {
-    if (!_moreView) {
-        _moreView = [[LHChatBarMoreView alloc]initWithFrame:CGRectMake(0, MAXScreenH, MAXScreenW, kChatMoreHeight)];
-        _moreView.backgroundColor = [UIColor lh_colorWithHex:0xf8f8f8];
-        _moreView.autoresizingMask = UIViewAutoresizingFlexibleTopMargin;
-        _moreView.delegate = self;
-        [self.superview addSubview:_moreView];
-    }
-    return _moreView;
+- (void)setTop:(CGFloat)y{
+    self.y = y;
 }
 
-- (UIView *)emojiView {
-    if (!_emojiView) {
-        _emojiView = self.emojiKeyboardVC.view;
-        _emojiView.frame = CGRectMake(0, MAXScreenH, MAXScreenW, kChatEmojiHeight);
-        [self.emojiKeyboardVC.view layoutIfNeeded];
-        [self.superview addSubview:_emojiView];
-    }
-    return _emojiView;
+- (void)setTableViewHeight:(CGFloat)h{
+    self.tableView.height = h;
 }
 
-- (KeyboardVC *)emojiKeyboardVC {
-    if (!_emojiKeyboardVC) {
-        LHWeakSelf;
-        _emojiKeyboardVC = [[KeyboardVC alloc] initWithCallBack:^(KeyboardEmojiModel *keyboardEmoticon) {
-            [weakSelf.textView insertEmojiText:keyboardEmoticon];
-        }];
-        _emojiKeyboardVC.emojiSend = ^() {
-            !weakSelf.sendContent ? : weakSelf.sendContent(weakSelf.contentModel);
-            [weakSelf resetState];
-        };
-    }
-    return _emojiKeyboardVC;
-}
-
-- (LHContentModel *)contentModel {
-    return [LHContentModel contentModelWitiPhotos:self.photos words:self.textView.text];
-}
-
-
-
-#pragma mark -- Recoder
+#pragma mark - Voice Recording
 // 说话按钮
 - (void)talkButtonDown:(UIButton *)sender
 {

@@ -32,4 +32,18 @@
 + (NSString *)MD5InBase64:(NSString *)input;
 // 获取AppConfig开关
 + (bool)getAppSwitch:(NSString *)key;
+// 获取AppConfig字符串类型值
++ (NSString *)getAppConfigString:(NSString *)key;
+// 获取好友名称
++ (NSString *)getRosterDisplayName:(BMXRosterItem *)item;
+// 获取认证信息中的公司名
++ (NSString *)getCompanyName;
+// 获取认证信息中的公司名加认证状态
++ (NSString *)getCompanyNameWithVerifyStatus;
+// 获取认证状态
++ (NSString *)getVerificationStatusText;
+// 获取认证状态符号
++ (NSString *)getVerificationStatusChar;
+// 添加好友
++(void)addContact:(UIViewController *)vc andRosterItem:(BMXRosterItem *)roster;
 @end

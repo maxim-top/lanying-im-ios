@@ -22,6 +22,7 @@
 @property (nonatomic, strong) UIView *cardView;
 @property (nonatomic, strong) UILabel *nameLabel;
 @property (nonatomic, strong) UILabel *idLabel;
+@property (nonatomic, strong) UILabel *appIdLabel;
 @property (nonatomic, strong) UIImageView *codeImageView;
 @property (nonatomic, strong) UIImageView *avatarImageView;
 
@@ -98,6 +99,10 @@
             }
         }];
     }
+    
+    [self.appIdLabel setText:[[BMXClient sharedClient] getSDKConfig].getAppID];
+    [self.appIdLabel sizeToFit];
+    self.appIdLabel.bmx_centerX = MAXScreenW/2.0;
 }
 
 - (void)configGroupQRCodeWithQRCodeInfo:(NSString *)info {
@@ -185,6 +190,10 @@
 //                              error:nil];
 //    ZXImage *image = [ZXImage imageWithMatrix:r];
     self.codeImageView.image = [QRCoodeFactor generateQRCodeWithString:data Size:self.codeImageView.frame.size.width];
+    
+    [self.appIdLabel setText:[[BMXClient sharedClient] getSDKConfig].getAppID];
+    [self.appIdLabel sizeToFit];
+    self.appIdLabel.bmx_centerX = MAXScreenW/2.0;
 }
 
 - (void)clickunbindWechatButton:(UIButton *)button {
@@ -260,12 +269,22 @@
     return _codeImageView;
 }
 
+- (UILabel *)appIdLabel {
+    if (!_appIdLabel) {
+        _appIdLabel = [[UILabel alloc] init];
+        _appIdLabel.bmx_top = _codeImageView.bmx_bottom + 5;
+        _appIdLabel.font = [UIFont systemFontOfSize:14];
+        [self.cardView addSubview:_appIdLabel];
+    }
+    return _appIdLabel;
+}
+
 - (UIView *)cardView {
     if (!_cardView ) {
         _cardView = [[UIView alloc] init];
         [self.view addSubview:_cardView];
         _cardView.bmx_left = 20;
-        _cardView.bmx_size = CGSizeMake(MAXScreenW - 40, 450);
+        _cardView.bmx_size = CGSizeMake(MAXScreenW - 40, 480);
         _cardView.bmx_top = kNavBarHeight + 100;
         _cardView.layer.cornerRadius = 8;
         _cardView.layer.masksToBounds = YES;

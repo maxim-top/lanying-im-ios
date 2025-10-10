@@ -54,6 +54,7 @@
 @property (nonatomic, strong) MenuViewManager *menuViewManager;
 
 @property (nonatomic, strong) MaxEmptyTipView *tipView;
+@property (nonatomic,assign) CGFloat height;
 
 @end
 
@@ -61,6 +62,12 @@
 
 - (void)viewDidLoad {
     [super viewDidLoad];
+    
+    self.height = MAXScreenH - NavHeight- 36;
+    if (@available(iOS 26.0, *)) {
+        self.height = MAXScreenH - NavHeight;
+    }
+
     [self setUpNavItem];
     [self selectView];
     [self rosterListTableView];
@@ -547,8 +554,7 @@
 
 - (UITableView *)rosterListTableView {
     if (!_rosterListTableView) {
-        _rosterListTableView = [[UITableView alloc] initWithFrame:CGRectMake(0, NavHeight, MAXScreenW, MAXScreenH
-                                                                    - NavHeight- 64) style:UITableViewStylePlain];
+        _rosterListTableView = [[UITableView alloc] initWithFrame:CGRectMake(0, NavHeight, MAXScreenW, self.height) style:UITableViewStylePlain];
         _rosterListTableView.bounces = NO;
         _rosterListTableView.delegate = self;
         _rosterListTableView.dataSource = self;
@@ -566,8 +572,7 @@
 
 - (UITableView *)groupListTableView {
     if (!_groupListTableView) {
-        _groupListTableView = [[UITableView alloc] initWithFrame:CGRectMake(0, NavHeight, MAXScreenW, MAXScreenH
-                                                                             - NavHeight- 64) style:UITableViewStylePlain];
+        _groupListTableView = [[UITableView alloc] initWithFrame:CGRectMake(0, NavHeight, MAXScreenW, self.height) style:UITableViewStylePlain];
         _groupListTableView.bounces = NO;
         _groupListTableView.delegate = self;
         _groupListTableView.dataSource = self;
@@ -586,8 +591,7 @@
 
 - (UITableView *)supportListTableView {
     if (!_supportListTableView) {
-        _supportListTableView = [[UITableView alloc] initWithFrame:CGRectMake(0, NavHeight, MAXScreenW, MAXScreenH
-                                                                            - NavHeight- 64) style:UITableViewStylePlain];
+        _supportListTableView = [[UITableView alloc] initWithFrame:CGRectMake(0, NavHeight, MAXScreenW, self.height) style:UITableViewStylePlain];
         _supportListTableView.bounces = NO;
         _supportListTableView.delegate = self;
         _supportListTableView.dataSource = self;

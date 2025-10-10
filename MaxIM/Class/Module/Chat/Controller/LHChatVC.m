@@ -55,6 +55,8 @@
 #import <SafariServices/SFSafariViewController.h>
 #import "TextLayoutCache.h"
 #import "MAXUtils.h"
+#import "FraudNoticedIdStorage.h"
+#import "TextRenderStorage.h"
 
 NSString *const kTableViewOffset = @"contentOffset";
 NSString *const kTableViewFrame = @"frame";
@@ -63,8 +65,9 @@ NSUInteger const kMaxWaitTimes = 200;
 UITableViewDataSource,
 XSBrowserDelegate,
 BMXChatServiceProtocol,
+BMXRosterServiceProtocol,
 BMXRTCServiceProtocol,
-ChatBarProtocol,
+LHChatBarViewDelegate,
 GroupCreateViewControllerDelegate,
 GroupOwnerTransterViewControllerDelegate,
 TransterContactProtocol,
@@ -204,25 +207,29 @@ CLLocationManagerDelegate>
     [super viewWillDisappear:animated];
     [[BMXRecoderTools shareManager] stopPlayRecorder:@""];
 
-    if (self.chatBarView.textView.text && [self.chatBarView.textView.text  length]) {
+    if (self.chatBarView.textView.editable && self.chatBarView.textView.text &&
+        [self.chatBarView.textView.text length]) {
         self.conversation.editMessage = self.chatBarView.textView.text;
     } else {
         self.conversation.editMessage = @"";
     }
     [[NSNotificationCenter defaultCenter] postNotificationName:@"RefreshConversation" object:self.conversation];
-
-    self.documentIntertactionController.delegate = nil;
-    [self timerInvalue];
-    [[NSNotificationCenter defaultCenter] removeObserver:self];
-    [[[BMXClient sharedClient] chatService] removeDelegate:self];
-    [[[BMXClient sharedClient] rtcService] removeDelegate:self];
-    [[[BMXClient sharedClient] groupService] removeDelegate:self];
     if (self.curVoiceIndexPath) {
         LHChatViewCell *cell = [self.tableView cellForRowAtIndexPath:self.curVoiceIndexPath];
         LHChatAudioBubbleView *bubbleView =  (LHChatAudioBubbleView *)cell.bubbleView;
         [bubbleView.voiceIcon stopAnimating];
         self.curVoiceIndexPath = nil;
     }
+}
+
+- (void)viewDidUnload {
+    self.documentIntertactionController.delegate = nil;
+    [self timerInvalue];
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
+    [[[BMXClient sharedClient] chatService] removeDelegate:self];
+    [[[BMXClient sharedClient] rosterService] removeDelegate:self];
+    [[[BMXClient sharedClient] rtcService] removeDelegate:self];
+    [[[BMXClient sharedClient] groupService] removeDelegate:self];
 }
 
 #pragma mark - 初始化
@@ -239,11 +246,12 @@ CLLocationManagerDelegate>
     [self setupSubview];
     
     if (self.messageType == BMXMessage_MessageType_Single) {
-        [self loadMessages];
+        [self loadMessages:0];
     }
     
     dispatch_queue_t queue = dispatch_queue_create("chatServiceDelegate",DISPATCH_QUEUE_SERIAL);
     [[[BMXClient sharedClient] chatService] addDelegate:self delegateQueue:queue];
+    [[[BMXClient sharedClient] rosterService] addDelegate:self delegateQueue:dispatch_get_main_queue()];
     [[[BMXClient sharedClient] rtcService] addDelegate:self delegateQueue:dispatch_get_main_queue()];
     [[[BMXClient sharedClient] groupService] addDelegate:self delegateQueue:dispatch_get_main_queue()];
 
@@ -253,6 +261,39 @@ CLLocationManagerDelegate>
     _typeWriterLock = [NSLock new];
     _messageHandleLock = [NSLock new];
     [self getAdminList];
+    if (false && ![FraudNoticedIdStorage has:[NSString stringWithFormat:@"%lld", self.conversationId]]) {
+        //插入消息
+        NSString *message = [NSString stringWithFormat:NSLocalizedString(@"fraud_notice", @"请您不轻信他人发送的链接、二维码，谨防诈骗！凡涉及金钱交易，务必通过正规渠道核实，守护家人财产安全！")];
+        BMXMessage *messageObject;
+        long long toId = [self.account.usedId longLongValue];
+        messageObject = [BMXMessage createMessageWithFrom:self.conversationId to:toId type:BMXMessage_MessageType_System conversationId:self.conversationId content:message];
+        BMXMessageList *list = [[BMXMessageList alloc] init];
+        [list addWithX: messageObject];
+        [[[BMXClient sharedClient] chatService] insertMessagesWithList:list completion:^(BMXError *aError) {
+        }];
+        [FraudNoticedIdStorage add:[NSString stringWithFormat:@"%lld", self.conversationId]];
+    }
+    [self updateCaptionBar];
+}
+
+-(void)updateCaptionBar{
+    if (self.messageType == BMXMessage_MessageType_Single) {
+        [[[BMXClient sharedClient] rosterService] searchWithRosterId:self.conversationId forceRefresh:YES completion:^(BMXRosterItem *roster, BMXError *error) {
+            if (!error && roster) {
+                BOOL isFriend = roster.relation == BMXRosterItem_RosterRelation_Friend;
+                NSString *title = [MAXUtils getRosterDisplayName:self.currentRoster];
+                if (!title) {
+                    title = [NSString stringWithFormat:@"%lld", self.conversationId];
+                }
+
+                [self setNavigationBarTitle:title navLeftButtonIcon:@"blackback"
+                         navRightButtonIcon:isFriend?@"chatNavMore":@"contact_add"];
+                [self.navRightButton addTarget:self action:isFriend ? @selector(clickMoreButton) : @selector(onAddContact)
+                              forControlEvents:UIControlEventTouchUpInside];
+
+            }
+        }];
+    }
 }
 
 -(void)getAdminList
@@ -280,7 +321,7 @@ CLLocationManagerDelegate>
 
 - (void)p_configEditMessage {
     if ([self.conversation.editMessage length] > 0) {
-        self.chatBarView.textView.text = self.conversation.editMessage;
+        [self.chatBarView setText: self.conversation.editMessage];
     }
 }
 
@@ -362,7 +403,7 @@ CLLocationManagerDelegate>
     if (istyping == YES) {
         self.title = NSLocalizedString(@"Typing", @"对方正在输入...");
     } else {
-        self.title = [self.currentRoster.nickname length] ? self.currentRoster.nickname : self.currentRoster.username;
+        self.title = [MAXUtils getRosterDisplayName:self.currentRoster];
     }
     [self setNavigationBarTitle:self.title navLeftButtonIcon:@"blackback" navRightButtonIcon:@"chatNavMore"];
     [self.navRightButton addTarget:self action:@selector(clickMoreButton) forControlEvents:UIControlEventTouchUpInside];
@@ -407,7 +448,7 @@ CLLocationManagerDelegate>
     return [dic objectForKey:@"input_status"] != nil;
 }
 
-- (void)loadMessages {
+- (void)loadMessages:(long long)firstMessageId {
     BMXConversation *conversation;
     if (self.messageType == BMXConversation_Type_Group) {
         self.conversationId =  self.conversationId ?self.conversationId : (NSInteger)self.currentGroup.groupId;
@@ -433,42 +474,52 @@ CLLocationManagerDelegate>
         
     }
     self.conversation = conversation;
-    [conversation loadMessagesWithRefMsgId:0 size:10 completion:^(BMXMessageList *messageList, BMXError *error) {
+    [conversation loadMessagesWithRefMsgId:firstMessageId size:10 completion:^(BMXMessageList *messageList, BMXError *error) {
         if (!error) {
-            NSMutableArray *messageListms = [[NSMutableArray alloc] init];
-            for (int i=0; i<messageList.size; i++){
-                BMXMessage *msg = [messageList get:i];
-                if (msg.contentType != BMXMessage_ContentType_RTC ||
-                    [msg.config.getRTCAction isEqualToString: @"record"]) {
-                    [messageListms addObject: msg];
-                }
-            }
-
-            NSArray *sortedMessages =  [messageListms sortedArrayUsingComparator:^NSComparisonResult(BMXMessage *message1, BMXMessage *message2) {
-                return message1.serverTimestamp < message2.serverTimestamp;
-            }];
-            
-            [sortedMessages enumerateObjectsUsingBlock:^(BMXMessage *message, NSUInteger idx, BOOL * stop) {
-                
-                LHMessageModel *messageModel = [self changeUIModelWithBMXMessage:message atIndex:0];
-                
-                if (self.messageType == BMXMessage_MessageType_Single) {
-                    [self ackMessagebyModel:messageModel];
-                } else {
-                    if (self.currentGroup.enableReadAck == YES) {
-                        [self ackMessagebyModel:messageModel];
+            if (messageList.isEmpty) {
+                [self getHistoryMessageFromServer:firstMessageId];
+            }else{
+                NSMutableArray *messageListms = [[NSMutableArray alloc] init];
+                for (int i=0; i<messageList.size; i++){
+                    BMXMessage *msg = [messageList get:i];
+                    if (msg.contentType != BMXMessage_ContentType_RTC ||
+                        [msg.config.getRTCAction isEqualToString: @"record"]) {
+                        [messageListms addObject: msg];
                     }
                 }
                 
-                NSString *time = [LHTools dayStringWithDate:messageModel.date];
-                if (![self.lastTime isEqualToString:time]) {
-                    [self.dataSource insertObject:time atIndex:0];
-                    self.lastTime = time;
+                NSArray *sortedMessages =  [messageListms sortedArrayUsingComparator:^NSComparisonResult(BMXMessage *message1, BMXMessage *message2) {
+                    return message1.serverTimestamp < message2.serverTimestamp;
+                }];
+                
+                [sortedMessages enumerateObjectsUsingBlock:^(BMXMessage *message, NSUInteger idx, BOOL * stop) {
+                    
+                    LHMessageModel *messageModel = [self changeUIModelWithBMXMessage:message atIndex:0];
+                    
+                    if (self.messageType == BMXMessage_MessageType_Single) {
+                        [self ackMessagebyModel:messageModel];
+                    } else {
+                        if (self.currentGroup.enableReadAck == YES) {
+                            [self ackMessagebyModel:messageModel];
+                        }
+                    }
+                    
+                    NSString *time = [LHTools dayStringWithDate:messageModel.date];
+                    if (![self.lastTime isEqualToString:time]) {
+                        [self.dataSource insertObject:time atIndex:0];
+                        self.lastTime = time;
+                    }
+                }];
+                [self.tableView.mj_header endRefreshing];
+                [self.tableView reloadData];
+                if (firstMessageId == 0) {
+                    dispatch_async(dispatch_get_main_queue(), ^{
+                        [self scrollToBottomAnimated:NO refresh:NO];
+                    });
                 }
-            }];
-            
-            [self.tableView reloadData];
-            [self scrollToBottomAnimated:NO refresh:NO];
+            }
+        }else{
+            [self getHistoryMessageFromServer:firstMessageId];
         }
     }];
 }
@@ -782,7 +833,7 @@ CLLocationManagerDelegate>
     } else if ([eventName isEqualToString:kRouterEventTextURLTapEventName]) {
         MAXLog(@"点击文本中超链接");
         NSString *url = userInfo[@"url"];
-        [self showWebViewWithUrl:url];
+        [self p_showHyperLinkMenuViewController:url];
     }
 }
 
@@ -798,6 +849,11 @@ CLLocationManagerDelegate>
                           @"thumbImage":image};
 
     [self p_configsendMessage:dic type:MessageBodyType_Video duartion:dur];
+}
+
+-(void)onAddContact {
+    BMXRosterItem *roster = self.currentRoster;
+    [MAXUtils addContact:self andRosterItem:roster];
 }
 
 -(void)clickMoreButton {
@@ -912,7 +968,8 @@ CLLocationManagerDelegate>
     [self.navigationController popViewControllerAnimated:YES];
     //    weakSelf.editContent = content.words;
     
-    if (self.chatBarView.textView.text && [self.chatBarView.textView.text  length]) {
+    if (self.chatBarView.textView.editable && self.chatBarView.textView.text &&
+        [self.chatBarView.textView.text length]) {
         self.conversation.editMessage = self.chatBarView.textView.text;
     } else {
         self.conversation.editMessage = @"";
@@ -1288,6 +1345,27 @@ CLLocationManagerDelegate>
     }
 }
 
+- (void)p_showHyperLinkMenuViewController:(NSString *)url {
+    UIAlertController* alert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"open_url", @"打开网址") message:nil preferredStyle:UIAlertControllerStyleActionSheet];
+   
+    UIAlertAction* action1 = [UIAlertAction actionWithTitle:NSLocalizedString(@"copy_url", @"复制链接") style:UIAlertActionStyleDefault                                                        handler:^(UIAlertAction * action) {
+        UIPasteboard *pasteboard  = [UIPasteboard generalPasteboard];
+        pasteboard.string         = url;
+        [[UIMenuController sharedMenuController] setMenuItems:@[]];
+    }];
+    UIAlertAction* action2 = [UIAlertAction actionWithTitle:NSLocalizedString(@"navigate_url", @"用Safari打开") style:UIAlertActionStyleDefault
+        handler:^(UIAlertAction * action) {
+        [self showWebViewWithUrl:url];
+    }];
+   UIAlertAction* cancelAction = [UIAlertAction actionWithTitle:NSLocalizedString(@"Cancel", @"取消") style:UIAlertActionStyleCancel
+                                                         handler:^(UIAlertAction * action) {
+                                                         }];
+    [alert addAction:action1];
+    [alert addAction:action2];
+    [alert addAction:cancelAction];
+    [self presentViewController:alert animated:YES completion:nil];
+}
+
 
 #pragma mark - Delegate UIDocumentInteractionControllerDelegate
 // 预览的时候需要加上系统的代理方法
@@ -1340,6 +1418,9 @@ CLLocationManagerDelegate>
             } else {
                 messageCell.readStatusLabel.text = NSLocalizedString(@"Unread", @"未读");
             }
+            if (message.type == BMXMessage_MessageType_System) {
+                messageCell.readStatusLabel.text = @"";
+            }
         } else {
             messageCell.readStatusLabel.text = [NSString stringWithFormat:NSLocalizedString(@"npersons_have_read", @"%d人已读"), messageModel.messageObjc.groupAckCount];
         }
@@ -1378,7 +1459,7 @@ CLLocationManagerDelegate>
             if (!error) {
                 NSString* rosterId = [NSString stringWithFormat:@"%lld", item.rosterId];
                 NSString *groupNickName = [self.groupNickNameById objectForKey:rosterId];
-                messageModel.nickName = [groupNickName length]>0 ? groupNickName: [item.nickname length] ? item.nickname : item.username;
+                messageModel.nickName = [groupNickName length]>0 ? groupNickName: [MAXUtils getRosterDisplayName:item];
                 if (self.hideMemberInfo && [messageModel.nickName isEqualToString:item.username]) {
                     NSString* text = [NSString stringWithFormat:@"%@%lld",item.username, item.rosterId];
                     messageModel.nickName = [[MAXUtils MD5InBase64:text] substringToIndex:12];
@@ -1390,20 +1471,66 @@ CLLocationManagerDelegate>
         messageModel.isChatGroup = NO;
     }
     if (messageModel.content && ![messageModel.content isKindOfClass:[NSNull class]]){
-        [[TextLayoutCache sharedInstance] layoutForKey:messageModel.content];
+        [[TextLayoutCache sharedInstance] layoutForKey:messageModel];
     }
     messageCell.messageModel = messageModel;
     return messageCell;
 }
 
 #pragma mark - UITableViewDelegate
+- (CGFloat)heightForMesage:(LHMessageModel *)messageModel {
+    NSString *renderType  = [TextRenderStorage loadObject];
+    BOOL isSystem = messageModel.messageObjc.type == BMXMessage_MessageType_System;
+    YYTextLayout *textLayout = [[TextLayoutCache sharedInstance] layoutForKey: messageModel];
+    if ([renderType isEqualToString:@"0"] || isSystem) {
+        NSString *content = messageModel.content;
+        NSDataDetector *detector = [NSDataDetector dataDetectorWithTypes:NSTextCheckingTypeLink error:nil];
+        NSArray *matches = [detector matchesInString:content options:0 range:NSMakeRange(0, content.length)];
+
+        NSMutableParagraphStyle *paragraphStyle = [[NSMutableParagraphStyle alloc] init];
+        [paragraphStyle setLineSpacing:4];//调整行间距
+        [paragraphStyle setParagraphSpacing:4];//调整行间距
+        
+        NSMutableAttributedString *text = [[NSMutableAttributedString alloc] init];
+        NSDictionary *attri = [NSDictionary dictionaryWithObjects:@[[UIFont systemFontOfSize:15],messageModel.isSender ? [UIColor blackColor] : [UIColor lh_colorWithHex:0x47474a],paragraphStyle] forKeys:@[NSFontAttributeName,NSForegroundColorAttributeName,NSParagraphStyleAttributeName]];
+        [text appendAttributedString:[[NSAttributedString alloc] initWithString:messageModel.content attributes:attri]];
+
+        
+        for (NSTextCheckingResult *match in matches) {
+            if (match.resultType == NSTextCheckingTypeLink) {
+                [text addAttribute:NSLinkAttributeName value:match.URL range:match.range];
+            }
+        }
+        
+        CGFloat width = TEXTLABEL_MAX_WIDTH;
+        if (isSystem) {
+            width = 360.0f;
+        }
+        YYTextContainer *container = [YYTextContainer containerWithSize:CGSizeMake(width, MAXFLOAT)];
+        textLayout = [YYTextLayout layoutWithContainer:container text:text];
+    }
+    
+    CGFloat height = 2 * BUBBLE_VIEW_PADDING + textLayout.textBoundingSize.height + 30;
+    if (messageModel.messageObjc.type == BMXMessage_MessageType_System) {
+        height += 35;
+    }
+
+    return height;
+}
+
 - (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath {
     NSObject *obj = [self.dataSource objectAtIndex:indexPath.row];
     if ([obj isKindOfClass:[NSString class]]) {
         return 31;
     } else {
         LHMessageModel *model = (LHMessageModel *)obj;
-        CGFloat height = [LHChatViewCell tableView:tableView heightForRowAtIndexPath:indexPath withObject:model];
+        CGFloat height;
+        NSString *renderType  = [TextRenderStorage loadObject];
+        if ([renderType isEqualToString:@"0"] && model.messageObjc.contentType == BMXMessage_ContentType_Text) {
+            height = [self heightForMesage:model];
+        } else {
+            height = [LHChatViewCell tableView:tableView heightForRowAtIndexPath:indexPath withObject:model];
+        }
         return height;
     }
 }
@@ -1572,17 +1699,8 @@ CLLocationManagerDelegate>
 }
 
 #pragma mark - manager
-- (void)getHistoryMessage {
-    BMXMessage *firstMessage;
-    for (int i = 0; i < self.dataSource.count;i++) {
-        LHMessageModel *messageModel = self.dataSource[i];
-        if ([messageModel isKindOfClass:[LHMessageModel class]]) {
-            firstMessage = messageModel.messageObjc;
-            break;
-        }
-    }
-    long long firstMessageId = firstMessage? firstMessage.msgId : 0;
-    
+
+- (void)getHistoryMessageFromServer:(long long)firstMessageId {
     [[[BMXClient sharedClient] chatService] retrieveHistoryMessagesWithConversation:self.conversation refMsgId:firstMessageId size:10 completion:^(BMXMessageList *messageList, BMXError *error) {
         MAXLog(@"retrieveHistoryBMXconversation:%lu", (unsigned long)messageList.size);
         NSMutableArray *messageListms = [[NSMutableArray alloc] init];
@@ -1615,6 +1733,19 @@ CLLocationManagerDelegate>
         [self.tableView.mj_header endRefreshing];
         [self.tableView reloadData];
     }];
+}
+
+- (void)getHistoryMessage {
+    BMXMessage *firstMessage;
+    for (int i = 0; i < self.dataSource.count;i++) {
+        LHMessageModel *messageModel = self.dataSource[i];
+        if ([messageModel isKindOfClass:[LHMessageModel class]]) {
+            firstMessage = messageModel.messageObjc;
+            break;
+        }
+    }
+    long long firstMessageId = firstMessage? firstMessage.msgId : 0;
+    [self loadMessages:firstMessageId];
 }
 
 - (void)messageCellUpdateWithIndex:(NSInteger)index message:(BMXMessage*)message model:(LHMessageModel *)viewmodel{
@@ -1662,19 +1793,21 @@ CLLocationManagerDelegate>
 #pragma mark - listener
 //  消息状态发生变化
 - (void)messageStatusChanged:(BMXMessage *)message error:(BMXError *)error {
-    if (error) {
-        [HQCustomToast showDialog:[error description]];
-    }
     MAXLog(@"message content:%@", message.content);
     if ([self isHaveExtion:message]) {
         //如果是扩展信息（现在的扩展信息，是不展示消息，）所以return不做UI处理
         return;
     } else {
         MAXLogDebug(@"Message have no ext");
+        if (error) {
+            [HQCustomToast showDialog:NSLocalizedString(@"Network_does_not_work_retry_later", @"网络正在开小差，请稍后重试")];
+        }
         [self.deliveringMsgClientIds removeObject:[NSNumber numberWithLong:(long) message.clientMsgId]];
+        bool sentByMe = false;
         for (LHMessageModel *viewmodel in self.dataSource) {
             if ([viewmodel isKindOfClass:[LHMessageModel class]] && viewmodel.messageObjc.clientMsgId  == message.clientMsgId) {
                 MAXLogDebug(@"Message found in list");
+                sentByMe = true;
                 NSInteger index = [self.dataSource indexOfObject:viewmodel];
                 if ([NSThread isMainThread]) {
                     [self messageCellUpdateWithIndex:index message:message model:viewmodel];
@@ -1685,6 +1818,9 @@ CLLocationManagerDelegate>
                 }
                 break;
             }
+        }
+        if (!sentByMe) {
+            [self dealWithMessage:message];
         }
     }
 }
@@ -1841,7 +1977,7 @@ CLLocationManagerDelegate>
             return;
         }
     } else {
-        if (message.fromId  != self.conversation.conversationId || message.type != BMXMessage_MessageType_Single) {
+        if (message.fromId  != self.conversation.conversationId && message.type == BMXMessage_MessageType_Single) {
             if (message.fromId == [self.account.usedId longLongValue] && message.toId == self.conversation.conversationId) {
             } else {
                 return;
@@ -1893,8 +2029,9 @@ CLLocationManagerDelegate>
                 NSDictionary *ext = (NSDictionary *)result;
                 NSDictionary *ai = [ext objectForKey:@"ai"];
                 if(ai){
+                    BOOL aiGenerate = [[ai objectForKey:@"ai_generate"] boolValue];
                     BOOL finish = [[ai objectForKey:@"finish"] boolValue];
-                    if(!finish){
+                    if(aiGenerate && !finish){
                         needTypeWriter = YES;
                     }
                 }
@@ -2259,6 +2396,31 @@ CLLocationManagerDelegate>
         }
     }];
 }
+//
+//- (void)chatBar:(LHChatBarView *)chatBar didChangeHeight:(CGFloat)newTotalHeight keyboardHeight:(CGFloat)keyboardHeight animationDuration:(NSTimeInterval)duration animationCurve:(UIViewAnimationCurve)curve {
+//    
+//    // 在这里处理布局变化
+//    // 1. 更新ChatBar的frame或约束，以及可能随之移动的其他UI元素（如tableView）
+//    // 2. 通常需要将键盘高度和动画参数应用到布局调整中，以实现平滑动画
+//    
+//    // 示例：更新ChatBar的约束（假设使用Auto Layout）
+////    self.chatBarBottomConstraint.constant = keyboardHeight; // 假设有一个约束ChatBar底部的约束
+//    [self.view setNeedsUpdateConstraints];
+//    
+//    // 使用接收到的动画参数执行动画
+//    [UIView animateWithDuration:duration
+//                          delay:0
+//                        options:(curve << 16) // 将UIViewAnimationCurve转换为UIViewAnimationOptions
+//                     animations:^{
+//        [self.view layoutIfNeeded]; // 触发布局更新动画
+//        // 也可以同时调整其他需要跟随键盘移动的视图，例如调整tableView的contentInset
+//        UIEdgeInsets newInset = self.tableView.contentInset;
+//        newInset.bottom = keyboardHeight + chatBar.bounds.size.height; // 根据实际情况计算
+//        self.tableView.contentInset = newInset;
+//        self.tableView.scrollIndicatorInsets = newInset;
+//    } completion:nil];
+//}
+
 
 - (NSString *)p_currentRecordFileName {
     NSTimeInterval timeInterval = [[NSDate date] timeIntervalSince1970] * 1000;
@@ -2461,7 +2623,7 @@ CLLocationManagerDelegate>
     [self p_configsendMessage:recordPath type:MessageBodyType_Voice duartion:duration];
 }
 
-#pragma mark - Delegate ChatBarProtocol
+#pragma mark - Delegate LHChatBarViewDelegate
 - (void)chatViewSendLocation {
     [self p_StartLocate];
 }
@@ -2583,7 +2745,7 @@ CLLocationManagerDelegate>
 - (void)atgroupmemberVCdidPopToLastVC:(NSArray<BMXRosterItem *> *)rosterArray {
     NSMutableArray *array = [NSMutableArray array];
     for (BMXRosterItem *r in rosterArray) {
-        [array addObject:r.nickname == nil||r.nickname.length==0 ? r.username: r.nickname];
+        [array addObject:[MAXUtils getRosterDisplayName:r]];
     }
     NSString *string = [array componentsJoinedByString:@",@"];
     self.chatBarView.textView.text = [self.chatBarView.textView.text stringByAppendingString:string];
@@ -2616,7 +2778,7 @@ CLLocationManagerDelegate>
         } else {
             height = kChatBarHeight;
         }
-        _chatBarView = [[LHChatBarView alloc] initWithFrame:CGRectMake(0, MAXScreenH - height, MAXScreenW, kChatBarHeight)];
+        _chatBarView = [[LHChatBarView alloc] initWithFrame:CGRectMake(0, MAXScreenH - height, MAXScreenW, kChatBarHeight + kChatExtensionViewHeight)];
         _chatBarView.backgroundColor = [UIColor lh_colorWithHex:0xf8f8fa];
         _chatBarView.tableView = self.tableView;
         _chatBarView.delegate = self;
@@ -2668,7 +2830,7 @@ CLLocationManagerDelegate>
     if (self.messageType == BMXMessage_MessageType_Group) {
         title = self.currentGroup.name;
     } else if (self.messageType == BMXMessage_MessageType_Single){
-        title = [self.currentRoster.nickname length] ? self.currentRoster.nickname : self.currentRoster.username;
+        title = [MAXUtils getRosterDisplayName:self.currentRoster];
         if (!title) {
             title = [NSString stringWithFormat:@"%lld", self.conversationId];
         }
@@ -2694,6 +2856,67 @@ CLLocationManagerDelegate>
     return _locationManager;
 }
 
+-(void)enableInputBarWithCanInput:(BOOL)canInput andMuteAll:(BOOL)muteAll{
+    self.chatBarView.textView.editable = canInput;
+    self.chatBarView.textView.userInteractionEnabled = canInput;
+    
+    self.chatBarView.textView.text = @"";
+    if (!canInput) {
+        if (muteAll) {
+            self.chatBarView.textView.text = NSLocalizedString(@"group_mute_all", @"全员禁言中");
+        }else{
+            self.chatBarView.textView.text = NSLocalizedString(@"group_mute_you", @"你已被管理员禁言");
+        }
+        self.chatBarView.textView.textColor = [UIColor colorWithRed:153/255.0 green:153/255.0 blue:153/255.0 alpha:1/1.0];
+    }else{
+        self.chatBarView.textView.textColor = [UIColor blackColor];
+    }
+    self.chatBarView.voiceBtn.enabled = canInput;
+    self.chatBarView.moreBtn.enabled = canInput;
+}
+
+-(void)initGroupInfoWithGroup:(BMXGroup *)group andMembers:(BMXGroupMemberList *)groupMembers{
+    NSMutableDictionary* dict = [NSMutableDictionary dictionary];
+    unsigned long sz = groupMembers.size;
+    IMAcount* acc = [IMAcountInfoStorage loadObject];
+    NSString* currentAccId = acc.usedId;
+    for (int i=0; i<sz; i++) {
+        BMXGroupMember* member = [groupMembers get:i];
+        NSString* guidStr = [NSString stringWithFormat:@"%lld", member.getMUid];
+        if([guidStr isEqualToString:currentAccId]) {
+            self.isAdmin = YES;
+        }
+        [dict setObject:member.getMGroupNickname forKey:guidStr];
+    }
+    self.groupNickNameById = [NSDictionary dictionaryWithDictionary:dict];
+    BOOL hide = group.hideMemberInfo;
+    NSString* ownerId = [NSString stringWithFormat:@"%lld", group.ownerId];
+    BOOL isOwner = [ownerId isEqualToString:currentAccId];
+    if (hide && !self.isAdmin && !isOwner) {
+        self.hideMemberInfo = YES;
+    }else{
+        self.hideMemberInfo = NO;
+    }
+    long long currentTime = (long long) [[NSDate date] timeIntervalSince1970];
+    long banExpireTime = group.banExpireTime * 1000;
+    BOOL canInput = self.isAdmin || isOwner || (banExpireTime <= currentTime && banExpireTime != -1000);
+    [self enableInputBarWithCanInput:canInput andMuteAll:true];
+    [[[BMXClient sharedClient] groupService] getBannedMembers:group completion:^(BMXGroupBannedMemberList *muteMemberList, BMXError *error) {
+        unsigned long sz = muteMemberList.size;
+        for (int i=0; i<sz; i++) {
+            BMXGroupBannedMember *bannedMember = [muteMemberList get:i];
+            long long uid = bannedMember.getMUid;
+            NSString* guidStr = [NSString stringWithFormat:@"%lld", uid];
+            if([guidStr isEqualToString:currentAccId]) {
+                long banExpireTime = bannedMember.getMExpired * 1000;
+                BOOL canInput = self.isAdmin || isOwner || (banExpireTime <= currentTime && banExpireTime != -1000);
+                [self enableInputBarWithCanInput:canInput andMuteAll:false];
+            }
+        }
+    }];
+    [self loadMessages:0];
+}
+
 -(void)initHideMemberInfo
 {
     if (self.messageType == BMXMessage_MessageType_Group) {
@@ -2704,27 +2927,7 @@ CLLocationManagerDelegate>
                         if(error){
                             return;
                         }
-                        NSMutableDictionary* dict = [NSMutableDictionary dictionary];
-                        unsigned long sz = groupMembers.size;
-                        IMAcount* acc = [IMAcountInfoStorage loadObject];
-                        NSString* currentAccId = acc.usedId;
-                        for (int i=0; i<sz; i++) {
-                            BMXGroupMember* member = [groupMembers get:i];
-                            NSString* guidStr = [NSString stringWithFormat:@"%lld", member.getMUid];
-                            if([guidStr isEqualToString:currentAccId]) {
-                                self.isAdmin = YES;
-                            }
-                            [dict setObject:member.getMGroupNickname forKey:guidStr];
-                        }
-                        self.groupNickNameById = [NSDictionary dictionaryWithDictionary:dict];
-                        BOOL hide = group.hideMemberInfo;
-                        NSString* ownerId = [NSString stringWithFormat:@"%lld", group.ownerId];
-                        if (hide && !self.isAdmin && ![ownerId isEqualToString:currentAccId]) {
-                            self.hideMemberInfo = YES;
-                        }else{
-                            self.hideMemberInfo = NO;
-                        }
-                        [self loadMessages];
+                        [self initGroupInfoWithGroup:group andMembers:groupMembers];
                     }];
                 }];
                 return;
@@ -2733,27 +2936,7 @@ CLLocationManagerDelegate>
                 if(error){
                     return;
                 }
-                NSMutableDictionary* dict = [NSMutableDictionary dictionary];
-                unsigned long sz = groupMembers.size;
-                IMAcount* acc = [IMAcountInfoStorage loadObject];
-                NSString* currentAccId = acc.usedId;
-                for (int i=0; i<sz; i++) {
-                    BMXGroupMember* member = [groupMembers get:i];
-                    NSString* guidStr = [NSString stringWithFormat:@"%lld", member.getMUid];
-                    if([guidStr isEqualToString:currentAccId]) {
-                        self.isAdmin = YES;
-                    }
-                    [dict setObject:member.getMGroupNickname forKey:guidStr];
-                }
-                self.groupNickNameById = [NSDictionary dictionaryWithDictionary:dict];
-                BOOL hide = group.hideMemberInfo;
-                NSString* ownerId = [NSString stringWithFormat:@"%lld", group.ownerId];
-                if (hide && !self.isAdmin && ![ownerId isEqualToString:currentAccId]) {
-                    self.hideMemberInfo = YES;
-                }else{
-                    self.hideMemberInfo = NO;
-                }
-                [self loadMessages];
+                [self initGroupInfoWithGroup:group andMembers:groupMembers];
             }];
         }];
     }
@@ -2766,6 +2949,10 @@ CLLocationManagerDelegate>
     if (self.messageType == BMXMessage_MessageType_Group && group.groupId == self.currentGroup.groupId) {
         [self initHideMemberInfo];
     }
+}
+
+- (void)friendDidRecivedAppliedSponsorId:(long long)sponsorId recipientId:(long long)recipientId message:(NSString *)message {
+    [self updateCaptionBar];
 }
 
 @end

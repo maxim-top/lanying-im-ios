@@ -126,7 +126,7 @@
     NSString *iosConfig = [NSString stringWithFormat:@"{\"mutable_content\":true}"];
     [config setIOSConfig:iosConfig];
     [config setPushMessageLocKey:@"call_in"];
-    BMXMessage *msg = [BMXMessage createRTCMessageWithFrom:_myId to:_peerId type:BMXMessage_MessageType_Single conversationId:_peerId content:@""];
+    BMXMessage *msg = [BMXMessage createRTCMessageWithFrom:_myId to:_peerId type:BMXMessage_MessageType_Single conversationId:_peerId content:@"call"];
     msg.config = config;
     [msg setExtension:@"{\"rtc\":\"call\"}"];
     [[[BMXClient sharedClient] rtcService] sendRTCMessageWithMsg:msg completion:^(BMXError *aError) {
@@ -136,7 +136,7 @@
 - (void)sendPickupMessage{
     BMXMessageConfig *config = [BMXMessageConfig createMessageConfigWithMentionAll: NO];
     [config setRTCPickupInfo:_callId];
-    BMXMessage *msg = [BMXMessage createRTCMessageWithFrom:_myId to:_peerId type:BMXMessage_MessageType_Single conversationId:_peerId content:@""];
+    BMXMessage *msg = [BMXMessage createRTCMessageWithFrom:_myId to:_peerId type:BMXMessage_MessageType_Single conversationId:_peerId content:@"pickup"];
     msg.config = config;
     [[[BMXClient sharedClient] rtcService] sendRTCMessageWithMsg:msg completion:^(BMXError *aError) {
     }];

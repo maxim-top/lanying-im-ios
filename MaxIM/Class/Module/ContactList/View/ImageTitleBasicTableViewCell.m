@@ -10,6 +10,7 @@
 #import "ImageTitleBasicTableViewCell.h"
 #import "UIView+BMXframe.h"
 #import <floo-ios/floo_proxy.h>
+#import "MAXUtils.h"
 
 static NSString *cellID = @"ImageTitleBasicTableViewCell";
 
@@ -80,7 +81,7 @@ static NSString *cellID = @"ImageTitleBasicTableViewCell";
     self.avatarImg.layer.borderWidth = 0.5;
     self.avatarImg.layer.borderColor = kColorC4_5.CGColor;
     
-    self.nicknameLabel.text = [[roster nickname] length] ?  roster.nickname : roster.username;
+    self.nicknameLabel.text = [MAXUtils getRosterDisplayName:roster];
     
     UIImage *image = [UIImage imageWithContentsOfFile:roster.avatarThumbnailPath];
     if (!image) {
@@ -105,7 +106,7 @@ static NSString *cellID = @"ImageTitleBasicTableViewCell";
     self.avatarImg.layer.borderWidth = 0.5;
     self.avatarImg.layer.borderColor = kColorC4_5.CGColor;
     
-    self.nicknameLabel.text = [[roster nickname] length] ?  roster.nickname : roster.username;
+    self.nicknameLabel.text = [MAXUtils getRosterDisplayName:roster];
     
     [[[BMXClient sharedClient] rosterService] downloadAvatarWithItem:roster thumbnail:YES callback:^(int progress){}completion:^(BMXError *error) {
         if (!error) {

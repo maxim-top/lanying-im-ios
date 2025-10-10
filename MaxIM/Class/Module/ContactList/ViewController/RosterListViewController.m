@@ -63,7 +63,7 @@
     if (!avarart) {
         avarart = [UIImage imageNamed:@"contact_placeholder"];
     }
-    [alertView setAvarat:avarart nickName:roster.username contentImg:contentImg];
+    [alertView setAvarat:avarart nickName:[MAXUtils getRosterDisplayName:roster] contentImg:contentImg];
 
 
     alertView.btnClickBlock = ^{

@@ -38,14 +38,6 @@ CGFloat const SEND_STATUS_SIZE = 20.0f;
 
 - (void)layoutSubviews {
     [super layoutSubviews];
-    @try{
-        if([_content isEqualToString:self.messageModel.content] &&
-           self.messageModel.status == _status){
-            return;
-        }
-    }@catch (NSException *exception) {
-        MAXLog(@"%@",exception.description);
-    }
     _content = self.messageModel.content;
     _status = self.messageModel.status;
     CGRect bubbleFrame = _bubbleView.frame;
@@ -112,6 +104,11 @@ CGFloat const SEND_STATUS_SIZE = 20.0f;
     }
     else{
         bubbleFrame.origin.x = HEAD_PADDING  + HEAD_SIZE + 8;
+        _bubbleView.frame = bubbleFrame;
+    }
+    if (self.messageModel.messageObjc.type == BMXMessage_MessageType_System) {
+        bubbleFrame.origin.x = HEAD_PADDING;
+        bubbleFrame.size.width = self.frame.size.width - HEAD_PADDING * 2;
         _bubbleView.frame = bubbleFrame;
     }
 }

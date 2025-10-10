@@ -9,8 +9,12 @@
 extern CGFloat const kNavBarHeight;
 extern CGFloat const kTabBarHeight;
 extern CGFloat const kChatBarHeight;
+extern CGFloat const kChatBarTextViewHeight;
 
 extern CGFloat const kYYkitWidth;
+extern CGFloat const kChatInputTextViewFont;
+extern CGFloat const kChatBatItemWH;
+extern CGFloat const kChatExtensionViewHeight;
 
 extern NSString *const kMessageKey;
 extern NSString *const kShouldResendCell;
@@ -27,6 +31,8 @@ extern NSString *const kRouterEventFileBubbleTapEventName;
 extern NSString *const kRouterEventLongPressName;
 
 extern NSInteger kMessageCount;
+extern NSString *const kEmoticonButtonBackspace;
+extern NSString *const kEmoticonButtonSend;
 
 #pragma mark - IM模块常量
  // 头像大小

@@ -45,7 +45,9 @@ NSString *const BUBBLE_RIGHT_IMAGE_NAME = @"bubble_normal_owner";
     NSInteger bottomCapHeight = image.size.height - topCapHeight - 1;
     NSInteger rightCapWidth = image.size.width - leftCapWidth -1;
     image = [image resizableImageWithCapInsets:UIEdgeInsetsMake(topCapHeight, leftCapWidth, bottomCapHeight, rightCapWidth)];
-    self.backImageView.image = image;
+    if (messageModel.messageObjc.type != BMXMessage_MessageType_System) {
+        self.backImageView.image = image;
+    }
 }
 
 #pragma mark - public

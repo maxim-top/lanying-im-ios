@@ -96,7 +96,7 @@
     BMXImageAttachment *attachment = [BMXImageAttachment dynamicCastWithAttachment:messagemodel.attachment];
     self.imageView.image = [UIImage imageNamed:@"contact_placeholder"];
     if (attachment.path == nil ||  [@"" isEqualToString:attachment.path] || ![[NSFileManager defaultManager] fileExistsAtPath:attachment.path]) {
-        if ([[NSFileManager defaultManager] fileExistsAtPath:attachment.thumbnailPath]) {
+        if (![[NSFileManager defaultManager] fileExistsAtPath:attachment.thumbnailPath]) {
             self.imageView.image = [UIImage imageNamed:@"contact_placeholder"];
         } else {
             self.imageView.image = [UIImage imageWithContentsOfFile:attachment.thumbnailPath];
