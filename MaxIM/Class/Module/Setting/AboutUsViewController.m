@@ -49,8 +49,10 @@ static NSDictionary *dictAppStatus = nil;
 }
 
 -(void)dealloc{
-    dispatch_source_cancel(self.refreshCompanyNameTimer);
-    self.refreshCompanyNameTimer = nil;
+    if (self.refreshCompanyNameTimer) {
+        dispatch_source_cancel(self.refreshCompanyNameTimer);
+        self.refreshCompanyNameTimer = nil;
+    }
 }
 
 -(NSString *)getAppStatus{
@@ -60,6 +62,42 @@ static NSDictionary *dictAppStatus = nil;
 }
 
 - (void)viewDidAppear:(BOOL)animated{
+    [self setCompanyName];
+}
+
+- (void)setCompanyName{
+    NSString *companyName = [MAXUtils getCompanyName];
+    NSString *text = companyName;
+    if (companyName == nil || companyName.length == 0) {
+        text = [MAXUtils getCompanyNameFromLocal];
+        if (text == nil || text.length == 0) {
+            text = [NSString stringWithFormat:@"%@",NSLocalizedString(@"about_us_unverified_developer", @"未认证开发者")];
+        }
+    }
+    NSString *vst = [MAXUtils getVerificationStatusText];
+    if (vst == nil || vst.length == 0) {
+        vst = [MAXUtils getVerificationStatusTextFromLocal];
+        if (vst == nil || vst.length == 0) {
+            vst = [NSString stringWithFormat:@"%@",NSLocalizedString(@"about_us_unverified", @"❓未认证")];
+        }
+    }
+
+    self.labelCompanyName.text = text;
+    self.labelVerifyStatus.text = vst;
+        
+    self.labelCompanyName.bmx_width = MAXScreenW - 20;
+    [self.labelCompanyName sizeToFit];
+    self.labelCompanyName.bmx_centerX = self.view.bmx_centerX;
+
+    self.labelVerifyStatus.bmx_width = MAXScreenW - 20;
+    self.labelVerifyStatus.bmx_top =  self.labelCompanyName.bmx_bottom + 15;
+    [self.labelVerifyStatus sizeToFit];
+    self.labelVerifyStatus.bmx_centerX = self.view.bmx_centerX;
+
+    if (companyName.length > 0) {
+        return;
+    }
+    
     dispatch_queue_t queue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
     if (self.refreshCompanyNameTimer) {
         dispatch_cancel(self.refreshCompanyNameTimer);
@@ -72,11 +110,28 @@ static NSDictionary *dictAppStatus = nil;
     __weak typeof(self) weakSelf = self;
     dispatch_source_set_event_handler(self.refreshCompanyNameTimer, ^{
         typeof(self) strongSelf = weakSelf;
-        NSString *name = [MAXUtils getCompanyNameWithVerifyStatus];
+        
+        NSString *name = [MAXUtils getCompanyName];
+        if (name == nil || name.length == 0) {
+            return;
+        }
+        NSString *vst = [MAXUtils getVerificationStatusText];
+        if (vst == nil || vst.length == 0) {
+            return;
+        }
+
         dispatch_async(dispatch_get_main_queue(), ^{
-            self.labelCompanyName.text = [MAXUtils getCompanyName];
-            self.labelVerifyStatus.text = [MAXUtils getVerificationStatusText];
-            self.labelAppStatus.text = [self getAppStatus];
+            strongSelf.labelCompanyName.text = name;
+            strongSelf.labelVerifyStatus.text = vst;
+            
+            strongSelf.labelCompanyName.bmx_width = MAXScreenW - 20;
+            [strongSelf.labelCompanyName sizeToFit];
+            strongSelf.labelCompanyName.bmx_centerX = self.view.bmx_centerX;
+
+            strongSelf.labelVerifyStatus.bmx_width = MAXScreenW - 20;
+            strongSelf.labelVerifyStatus.bmx_top =  self.labelCompanyName.bmx_bottom + 15;
+            [strongSelf.labelVerifyStatus sizeToFit];
+            strongSelf.labelVerifyStatus.bmx_centerX = self.view.bmx_centerX;
         });
         dispatch_source_cancel(strongSelf.refreshCompanyNameTimer);
     });
@@ -96,6 +151,9 @@ static NSDictionary *dictAppStatus = nil;
 
     self.labelCompanyName = [[UILabel alloc] init];
     NSString *companyName = [MAXUtils getCompanyName];
+    if (companyName == nil || companyName.length == 0) {
+        companyName = [NSString stringWithFormat:@"%@",NSLocalizedString(@"about_us_unverified_developer", @"未认证开发者")];
+    }
     self.labelCompanyName.text = companyName;
     self.labelCompanyName.textAlignment = NSTextAlignmentCenter;
     self.labelCompanyName.numberOfLines = 2;
@@ -105,6 +163,9 @@ static NSDictionary *dictAppStatus = nil;
 
     self.labelVerifyStatus = [[UILabel alloc] init];
     NSString *verifyStatus = [MAXUtils getVerificationStatusText];
+    if (verifyStatus == nil || verifyStatus.length == 0) {
+        verifyStatus = [NSString stringWithFormat:@"%@",NSLocalizedString(@"about_us_unverified", @"❓未认证")];
+    }
     self.labelVerifyStatus.text = verifyStatus;
     self.labelVerifyStatus.textAlignment = NSTextAlignmentCenter;
     self.labelVerifyStatus.numberOfLines = 0;

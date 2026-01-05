@@ -153,11 +153,16 @@
 
 - (void)RefreshConversation:(NSNotification *)notify {
     BMXConversation *conversation = notify.object;
-    for (int i=0; i<self.conversatonList.count; i++) {
-        BMXConversation *c = [self.conversatonList objectAtIndex:i];
-        if(c.conversationId == conversation.conversationId){
-            NSIndexPath *ip = [NSIndexPath indexPathForRow:i inSection:0];
-            [self.tableview reloadRowsAtIndexPaths:@[ip] withRowAnimation:(UITableViewRowAnimation)UITableViewRowAnimationNone];
+    long long ts = conversation.lastMsg.serverTimestamp;
+    if (ts / 1000 > self.lastTimestamp) {
+        self.lastTimestamp = ts / 1000;
+    } else {
+        for (int i=0; i<self.conversatonList.count; i++) {
+            BMXConversation *c = [self.conversatonList objectAtIndex:i];
+            if(c.conversationId == conversation.conversationId){
+                NSIndexPath *ip = [NSIndexPath indexPathForRow:i inSection:0];
+                [self.tableview reloadRowsAtIndexPaths:@[ip] withRowAnimation:(UITableViewRowAnimation)UITableViewRowAnimationNone];
+            }
         }
     }
 }
@@ -216,7 +221,9 @@
         BMXConversation *c = [self.conversatonList objectAtIndex:i];
         if(c.conversationId == roster.rosterId){
             NSIndexPath *ip = [NSIndexPath indexPathForRow:i inSection:0];
-            [self.tableview reloadRowsAtIndexPaths:@[ip] withRowAnimation:(UITableViewRowAnimation)UITableViewRowAnimationNone];
+            dispatch_async(dispatch_get_main_queue(), ^{
+                [self.tableview reloadRowsAtIndexPaths:@[ip] withRowAnimation:(UITableViewRowAnimation)UITableViewRowAnimationNone];
+            });
         }
     }
 }
@@ -476,20 +483,24 @@
             } else {
                 [[[BMXClient sharedClient] rosterService] searchWithRosterId:conversation.conversationId forceRefresh:NO completion:^(BMXRosterItem *bmxRosterItem, BMXError *error) {
                     if (!error) {
-                        [self.rosters setObject:bmxRosterItem forKey:@(bmxRosterItem.rosterId)];
-                        NSNumber *row = [self.indexOfConversationId objectForKey:@(conversation.conversationId)];
-                        NSIndexPath *ip = [NSIndexPath indexPathForRow:[row integerValue] inSection:0];
-                        [self.tableview reloadRowsAtIndexPaths:@[ip] withRowAnimation:(UITableViewRowAnimation)UITableViewRowAnimationNone];
+                        dispatch_async(dispatch_get_main_queue(), ^{
+                            [self.rosters setObject:bmxRosterItem forKey:@(bmxRosterItem.rosterId)];
+                            NSNumber *row = [self.indexOfConversationId objectForKey:@(conversation.conversationId)];
+                            NSIndexPath *ip = [NSIndexPath indexPathForRow:[row integerValue] inSection:0];
+                            [self.tableview reloadRowsAtIndexPaths:@[ip] withRowAnimation:(UITableViewRowAnimation)UITableViewRowAnimationNone];
+                        });
                     }
                 }];
             }
         } else {
             [[[BMXClient sharedClient] groupService] searchWithGroupId:conversation.conversationId forceRefresh:NO completion:^(BMXGroup *res, BMXError *error) {
                 if (!error) {
-                    [self.rosters setObject:res forKey:@(res.groupId)];
-                    NSNumber *row = [self.indexOfConversationId objectForKey:@(conversation.conversationId)];
-                    NSIndexPath *ip = [NSIndexPath indexPathForRow:[row integerValue] inSection:0];
-                    [self.tableview reloadRowsAtIndexPaths:@[ip] withRowAnimation:(UITableViewRowAnimation)UITableViewRowAnimationNone];
+                    dispatch_async(dispatch_get_main_queue(), ^{
+                        [self.rosters setObject:res forKey:@(res.groupId)];
+                        NSNumber *row = [self.indexOfConversationId objectForKey:@(conversation.conversationId)];
+                        NSIndexPath *ip = [NSIndexPath indexPathForRow:[row integerValue] inSection:0];
+                        [self.tableview reloadRowsAtIndexPaths:@[ip] withRowAnimation:(UITableViewRowAnimation)UITableViewRowAnimationNone];
+                    });
                 }
             }];
         }
@@ -511,8 +522,10 @@
                 cell.avatarImageView.image = [UIImage imageNamed:@"contact_placeholder"];
                 [[[BMXClient sharedClient] rosterService] downloadAvatarWithItem:roster thumbnail:YES callback:^(int progress) {} completion:^(BMXError *error) {
                     if (!error){
-                        UIImage *image = [UIImage imageWithContentsOfFile:roster.avatarThumbnailPath];
-                        cell.avatarImageView.image = image;
+                        dispatch_async(dispatch_get_main_queue(), ^{
+                            UIImage *image = [UIImage imageWithContentsOfFile:roster.avatarThumbnailPath];
+                            cell.avatarImageView.image = image;
+                        });
                     }
                 }];
             }else {
@@ -565,14 +578,7 @@
     cell.subtitleLabel.text = @"";
     BMXMessage *lastMsg = conversation.lastMsg;
     if (lastMsg.contentType == BMXMessage_ContentType_Text || (lastMsg.contentType == BMXMessage_ContentType_RTC&&[conversation.editMessage length]>0)) {
-        NSString *str;
-        if ([conversation.editMessage length]) {
-            str = [NSString stringWithFormat:@"[草稿] %@", conversation.editMessage];
-        } else {
-            str = lastMsg.content;
-        }
-        
-        cell.subtitleLabel.text = str;
+        cell.subtitleLabel.text = lastMsg.content;
     } else if (lastMsg.contentType == BMXMessage_ContentType_Image) {
         cell.subtitleLabel.text = @"[图片]";
     } else if (lastMsg.contentType == BMXMessage_ContentType_File) {
@@ -620,6 +626,10 @@
                 cell.subtitleLabel.text = [NSString stringWithFormat:format, sec/60, sec%60];
             }
         }
+    }
+    
+    if ([conversation.editMessage length]) {
+        cell.subtitleLabel.text = [NSString stringWithFormat:@"[草稿] %@", conversation.editMessage];
     }
     
     if (lastMsg.serverTimestamp > 0) {
@@ -688,7 +698,7 @@ forRowAtIndexPath:(NSIndexPath *)indexPath {
 }
 
 - (void)chatVCDidSelectReturnButton {
-    
+    [self.tableview reloadData];
 }
 - (void)conversationTotalCountChanged:(NSInteger)unreadCount {
     
@@ -717,8 +727,6 @@ forRowAtIndexPath:(NSIndexPath *)indexPath {
         BMXRosterItem *roster = row;
         chatVC = [[LHChatVC alloc] initWithRoster:roster messageType:BMXMessage_MessageType_Single];
         if (conversation.unreadNumber > 0) {
-//            [conversation setAllMessagesReadCompletion:^(BMXError * _Nonnull error) {
-//            }];
             [conversation setAllMessagesRead];
             cell.dotLabel.hidden = YES;
         }
@@ -744,20 +752,14 @@ forRowAtIndexPath:(NSIndexPath *)indexPath {
         [chatVC setHidesBottomBarWhenPushed:YES];
         [self.navigationController pushViewController:chatVC animated:YES];
     } else if ([row isKindOfClass:[NSDictionary class]]) {
+        chatVC = [[LHChatVC alloc] initWithConversationId:conversation.conversationId messageType:BMXMessage_MessageType_Single];
         if (conversation.unreadNumber > 0) {
-            
-            if (lastMsg) {
-                [[[BMXClient sharedClient] chatService] readAllMessageWithMsg:lastMsg];
-            }
+            [conversation setAllMessagesRead];
             cell.dotLabel.hidden = YES;
         }
-        
-        SystemNotificationViewController *vc = [[SystemNotificationViewController alloc] init];
-        vc.hidesBottomBarWhenPushed = YES;
-        vc.conversation = conversation;
-        [self.navigationController pushViewController:vc animated: YES];
-
-        
+        chatVC.delegate = self;
+        [chatVC setHidesBottomBarWhenPushed:YES];
+        [self.navigationController pushViewController:chatVC animated:YES];
     } else {
         [HQCustomToast showDialog:NSLocalizedString(@"Unable_to_access_conversation_profile", @"无法获取会话资料") time:1.0f];
         BMXMessage_MessageType messageType = BMXMessage_MessageType_Single;

@@ -113,14 +113,23 @@ typedef enum : NSUInteger {
 
 - (void)p_networkStatusDidChanged:(NSNotification *)notifiaction {
     if ([notifiaction.name isEqualToString:@"disConnectionNetworkNotifation"]) {
-        [[BMXClient sharedClient] onNetworkChangedWithType: BMXNetworkType_None reconnect:NO];
-        MAXLog(@"无网络");
+        dispatch_queue_t queue = dispatch_queue_create("reconnect on MAXTabBarController",DISPATCH_QUEUE_SERIAL);
+        dispatch_async(queue, ^{
+            [[BMXClient sharedClient] onNetworkChangedWithType: BMXNetworkType_None reconnect:NO];
+            MAXLog(@"无网络");
+        });
     } else if ([notifiaction.name isEqualToString:@"connectingIPhoneNetworkNotifation"]) {
-        [[BMXClient sharedClient] onNetworkChangedWithType: BMXNetworkType_Mobile reconnect:NO];
-        MAXLog(@"蜂窝");
+        dispatch_queue_t queue = dispatch_queue_create("reconnect on MAXTabBarController",DISPATCH_QUEUE_SERIAL);
+        dispatch_async(queue, ^{
+            [[BMXClient sharedClient] onNetworkChangedWithType: BMXNetworkType_Mobile reconnect:NO];
+            MAXLog(@"蜂窝");
+        });
     } else if ([notifiaction.name isEqualToString:@"connectingInWifiNetworkNotifation"]) {
-        [[BMXClient sharedClient] onNetworkChangedWithType: BMXNetworkType_Wifi reconnect:NO];
-        MAXLog(@"WIFI");
+        dispatch_queue_t queue = dispatch_queue_create("reconnect on MAXTabBarController",DISPATCH_QUEUE_SERIAL);
+        dispatch_async(queue, ^{
+            [[BMXClient sharedClient] onNetworkChangedWithType: BMXNetworkType_Wifi reconnect:NO];
+            MAXLog(@"WIFI");
+        });
     }
 }
 

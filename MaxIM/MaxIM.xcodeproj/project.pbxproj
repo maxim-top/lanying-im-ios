@@ -30,6 +30,10 @@
 		48FBBC6121A5852E00DB875A /* AssetsLibrary.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 48FBBC6021A5852D00DB875A /* AssetsLibrary.framework */; };
 		AF226BF028588778005C5C7F /* about.png in Resources */ = {isa = PBXBuildFile; fileRef = AF226BF228588778005C5C7F /* about.png */; };
 		AF241CF92E65AE2600D8F260 /* LHChatBarEmoticonView.m in Sources */ = {isa = PBXBuildFile; fileRef = AF241CF82E65AE2600D8F260 /* LHChatBarEmoticonView.m */; };
+		AF30A8AE2EE3241300780892 /* UserVerificationByIdNumber.m in Sources */ = {isa = PBXBuildFile; fileRef = AF30A8AD2EE3241300780892 /* UserVerificationByIdNumber.m */; };
+		AF30A8B12EE5AC9600780892 /* UserVerificationView.m in Sources */ = {isa = PBXBuildFile; fileRef = AF30A8B02EE5AC9600780892 /* UserVerificationView.m */; };
+		AF30A8B42EE5BDA000780892 /* UserVerificationByIdNumberView.m in Sources */ = {isa = PBXBuildFile; fileRef = AF30A8B32EE5BDA000780892 /* UserVerificationByIdNumberView.m */; };
+		AF30A8B72EE5BDD800780892 /* UserVerificationByIdNumberViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = AF30A8B62EE5BDD800780892 /* UserVerificationByIdNumberViewController.m */; };
 		AF3E6C3727D37ED000D016C7 /* appsetting.json in Resources */ = {isa = PBXBuildFile; fileRef = AF3E6C3927D37ED000D016C7 /* appsetting.json */; };
 		AF3E6C4327D37FC300D016C7 /* setting.json in Resources */ = {isa = PBXBuildFile; fileRef = AF3E6C4527D37FC300D016C7 /* setting.json */; };
 		AF3E6C4727D3813A00D016C7 /* group.json in Resources */ = {isa = PBXBuildFile; fileRef = AF3E6C4927D3813A00D016C7 /* group.json */; };
@@ -52,6 +56,7 @@
 		AF5DB35129AE617500E1367B /* CopyableLabel.m in Sources */ = {isa = PBXBuildFile; fileRef = AF5DB35029AE617500E1367B /* CopyableLabel.m */; };
 		AF5F6B8F2B21C276006C35E1 /* SchemURIStorage.m in Sources */ = {isa = PBXBuildFile; fileRef = AF5F6B8E2B21C276006C35E1 /* SchemURIStorage.m */; };
 		AF6EF5912DD1E38200B61D93 /* OnceHappenStorage.m in Sources */ = {isa = PBXBuildFile; fileRef = AF6EF5902DD1E38200B61D93 /* OnceHappenStorage.m */; };
+		AF72C1412ED0B4AC00F2A8AE /* GetDomainAccessibility.m in Sources */ = {isa = PBXBuildFile; fileRef = AF72C1402ED0B4AC00F2A8AE /* GetDomainAccessibility.m */; };
 		AF88CF0B2848AC7300013713 /* NSBundle+LanyingLanguage.m in Sources */ = {isa = PBXBuildFile; fileRef = AF88CF0A2848AC7300013713 /* NSBundle+LanyingLanguage.m */; };
 		AF8E57F92AA7428A00CD2C3F /* AppIDViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = AF8E57F82AA7428A00CD2C3F /* AppIDViewController.m */; };
 		AF8F120D27D2045D000C4104 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = AF8F120F27D2045D000C4104 /* InfoPlist.strings */; };
@@ -444,6 +449,14 @@
 		AF226BF428588789005C5C7F /* zh-Hans */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "zh-Hans"; path = "zh-Hans.lproj/about.png"; sourceTree = "<group>"; };
 		AF241CF72E65AE2600D8F260 /* LHChatBarEmoticonView.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = LHChatBarEmoticonView.h; sourceTree = "<group>"; };
 		AF241CF82E65AE2600D8F260 /* LHChatBarEmoticonView.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = LHChatBarEmoticonView.m; sourceTree = "<group>"; };
+		AF30A8AC2EE3241300780892 /* UserVerificationByIdNumber.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = UserVerificationByIdNumber.h; sourceTree = "<group>"; };
+		AF30A8AD2EE3241300780892 /* UserVerificationByIdNumber.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = UserVerificationByIdNumber.m; sourceTree = "<group>"; };
+		AF30A8AF2EE5AC9600780892 /* UserVerificationView.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = UserVerificationView.h; sourceTree = "<group>"; };
+		AF30A8B02EE5AC9600780892 /* UserVerificationView.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = UserVerificationView.m; sourceTree = "<group>"; };
+		AF30A8B22EE5BDA000780892 /* UserVerificationByIdNumberView.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = UserVerificationByIdNumberView.h; sourceTree = "<group>"; };
+		AF30A8B32EE5BDA000780892 /* UserVerificationByIdNumberView.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = UserVerificationByIdNumberView.m; sourceTree = "<group>"; };
+		AF30A8B52EE5BDD800780892 /* UserVerificationByIdNumberViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = UserVerificationByIdNumberViewController.h; sourceTree = "<group>"; };
+		AF30A8B62EE5BDD800780892 /* UserVerificationByIdNumberViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = UserVerificationByIdNumberViewController.m; sourceTree = "<group>"; };
 		AF3CC7C528E599BE0026EF89 /* CallView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CallView.h; sourceTree = "<group>"; };
 		AF3CC7D028E599BE0026EF89 /* CallView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CallView.m; sourceTree = "<group>"; };
 		AF3CC7D128E599BE0026EF89 /* CallViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CallViewController.m; sourceTree = "<group>"; };
@@ -482,6 +495,8 @@
 		AF5F6B8E2B21C276006C35E1 /* SchemURIStorage.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SchemURIStorage.m; sourceTree = "<group>"; };
 		AF6EF58F2DD1E38200B61D93 /* OnceHappenStorage.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = OnceHappenStorage.h; sourceTree = "<group>"; };
 		AF6EF5902DD1E38200B61D93 /* OnceHappenStorage.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = OnceHappenStorage.m; sourceTree = "<group>"; };
+		AF72C13F2ED0B4AC00F2A8AE /* GetDomainAccessibility.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = GetDomainAccessibility.h; sourceTree = "<group>"; };
+		AF72C1402ED0B4AC00F2A8AE /* GetDomainAccessibility.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = GetDomainAccessibility.m; sourceTree = "<group>"; };
 		AF88CF092848AC7300013713 /* NSBundle+LanyingLanguage.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSBundle+LanyingLanguage.h"; sourceTree = "<group>"; };
 		AF88CF0A2848AC7300013713 /* NSBundle+LanyingLanguage.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSBundle+LanyingLanguage.m"; sourceTree = "<group>"; };
 		AF8E57F72AA7428A00CD2C3F /* AppIDViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppIDViewController.h; sourceTree = "<group>"; };
@@ -1397,6 +1412,8 @@
 				B5AFB3022276F98B00C23559 /* WechatLoginApi.m */,
 				B5AFB30A227989EC00C23559 /* BindOpenIdApi.h */,
 				B5AFB30B227989EC00C23559 /* BindOpenIdApi.m */,
+				AF72C13F2ED0B4AC00F2A8AE /* GetDomainAccessibility.h */,
+				AF72C1402ED0B4AC00F2A8AE /* GetDomainAccessibility.m */,
 				B5AFB3042278199600C23559 /* QRCodeGroupInviteApi.h */,
 				B5AFB3052278199600C23559 /* QRCodeGroupInviteApi.m */,
 				B564293922B340610022076C /* CaptchaApi.h */,
@@ -1405,6 +1422,8 @@
 				AFBCCC402DFFFB57009A7B4E /* UserVerificationApi.m */,
 				AFBCCC452DFFFC96009A7B4E /* UserVerificationByMobile.h */,
 				AFBCCC462DFFFC96009A7B4E /* UserVerificationByMobile.m */,
+				AF30A8AC2EE3241300780892 /* UserVerificationByIdNumber.h */,
+				AF30A8AD2EE3241300780892 /* UserVerificationByIdNumber.m */,
 				B5144F1423509A9500CF163E /* SupportStaffApi.h */,
 				B5144F1523509A9500CF163E /* SupportStaffApi.m */,
 				B56B024F238293A8005E22B8 /* UserMobileBindApi.h */,
@@ -1455,6 +1474,8 @@
 				B5119BBD2397F23A005F68A0 /* View */,
 				B5119BBA2397F0F3005F68A0 /* BindPhoneViewController.h */,
 				B5119BBB2397F0F3005F68A0 /* BindPhoneViewController.m */,
+				AF30A8B52EE5BDD800780892 /* UserVerificationByIdNumberViewController.h */,
+				AF30A8B62EE5BDD800780892 /* UserVerificationByIdNumberViewController.m */,
 				AFBCCC4B2E00784B009A7B4E /* UserVerificationViewController.h */,
 				AFBCCC4C2E00784B009A7B4E /* UserVerificationViewController.m */,
 				B51FFBEB2398121000E82887 /* BindNewViewController.h */,
@@ -1474,6 +1495,10 @@
 		B5119BBD2397F23A005F68A0 /* View */ = {
 			isa = PBXGroup;
 			children = (
+				AF30A8B22EE5BDA000780892 /* UserVerificationByIdNumberView.h */,
+				AF30A8B32EE5BDA000780892 /* UserVerificationByIdNumberView.m */,
+				AF30A8AF2EE5AC9600780892 /* UserVerificationView.h */,
+				AF30A8B02EE5AC9600780892 /* UserVerificationView.m */,
 				B5119BBE2397F259005F68A0 /* BindPhoneView.h */,
 				B5119BBF2397F259005F68A0 /* BindPhoneView.m */,
 				B51FFBF12398148D00E82887 /* VerifyPasswordView.h */,
@@ -2746,6 +2771,7 @@
 				B508DA7C2298509100490C95 /* ImageAlertView.m in Sources */,
 				B559004922D0A64B003FDA76 /* YYTextRunDelegate.m in Sources */,
 				B55900B722D0A7A1003FDA76 /* GroupDetailViewController.m in Sources */,
+				AF30A8B42EE5BDA000780892 /* UserVerificationByIdNumberView.m in Sources */,
 				B5CDA8AD2244C27000BF04BE /* SearchRosterProfileViewController.m in Sources */,
 				B53D1ED323A8C514004E01BA /* AccountManagementManager.m in Sources */,
 				B58A17EA244D5EFC006A7BEA /* PwdChangeVerifyByMobileApi.m in Sources */,
@@ -2859,8 +2885,10 @@
 				4849CD8821A52C36006CB41D /* AppDelegate.m in Sources */,
 				B5B4F7E121D8762500997882 /* TitleSwitchTableViewCell.m in Sources */,
 				B559003822D0A64B003FDA76 /* YYImage.m in Sources */,
+				AF30A8B12EE5AC9600780892 /* UserVerificationView.m in Sources */,
 				B5577C9923BF2E6600ED76E6 /* DropdownListView.m in Sources */,
 				B539D6D821BFDD370011D30E /* KeyboardEmojiTextView.m in Sources */,
+				AF30A8AE2EE3241300780892 /* UserVerificationByIdNumber.m in Sources */,
 				B559004F22D0A64B003FDA76 /* NSParagraphStyle+YYText.m in Sources */,
 				B539D6D421BFDD370011D30E /* KeyboardVC.m in Sources */,
 				B5AFB3032276F98B00C23559 /* WechatLoginApi.m in Sources */,
@@ -2886,6 +2914,7 @@
 				B55900A722D0A7A1003FDA76 /* GroupOwnerTransterViewController.m in Sources */,
 				AF9D7C272E7950D0004EA71E /* BMXError+Description.m in Sources */,
 				B539D6B921BFDD370011D30E /* UIImage+Common.m in Sources */,
+				AF72C1412ED0B4AC00F2A8AE /* GetDomainAccessibility.m in Sources */,
 				AFDB32372BF345BA00B2C8F4 /* LanyingLinkInfoAPI.m in Sources */,
 				B539D6C121BFDD370011D30E /* LHChatViewBaseCell.m in Sources */,
 				B557D49A2451AB4E0035D60E /* QRCoodeFactor.m in Sources */,
@@ -2938,6 +2967,7 @@
 				B5BBCAC022F05C0B00ABADFC /* UIResponder+Router.m in Sources */,
 				B559004022D0A64B003FDA76 /* YYTextContainerView.m in Sources */,
 				48BE997121CFF0F30042A535 /* MAXGlobalTool.m in Sources */,
+				AF30A8B72EE5BDD800780892 /* UserVerificationByIdNumberViewController.m in Sources */,
 				B559009F22D0A7A1003FDA76 /* GroupDetailListViewController.m in Sources */,
 				B5144F1623509A9500CF163E /* SupportStaffApi.m in Sources */,
 				B559003622D0A64B003FDA76 /* YYSpriteSheetImage.m in Sources */,
@@ -3256,7 +3286,7 @@
 				CODE_SIGN_ENTITLEMENTS = MaxIMDebug.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 18;
+				CURRENT_PROJECT_VERSION = 2;
 				DEVELOPMENT_TEAM = 963BX74UXU;
 				ENABLE_BITCODE = NO;
 				FRAMEWORK_SEARCH_PATHS = (
@@ -3307,7 +3337,7 @@
 					"$(PROJECT_DIR)/Class/Vendor/OpenSDK1.8.7.1_NoPay",
 				);
 				MACH_O_TYPE = mh_execute;
-				MARKETING_VERSION = 4.18;
+				MARKETING_VERSION = 4.21;
 				OTHER_LDFLAGS = (
 					"$(inherited)",
 					"-ObjC",
@@ -3341,7 +3371,7 @@
 				CODE_SIGN_ENTITLEMENTS = MaxIM.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 18;
+				CURRENT_PROJECT_VERSION = 2;
 				DEVELOPMENT_TEAM = 963BX74UXU;
 				ENABLE_BITCODE = NO;
 				FRAMEWORK_SEARCH_PATHS = (
@@ -3392,7 +3422,7 @@
 					"$(PROJECT_DIR)/Class/Vendor/OpenSDK1.8.7.1_NoPay",
 				);
 				MACH_O_TYPE = mh_execute;
-				MARKETING_VERSION = 4.18;
+				MARKETING_VERSION = 4.21;
 				OTHER_LDFLAGS = (
 					"$(inherited)",
 					"-ObjC",

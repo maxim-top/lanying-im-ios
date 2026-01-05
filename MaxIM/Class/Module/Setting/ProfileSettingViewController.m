@@ -32,6 +32,8 @@
 #import "UserVerificationApi.h"
 #import "UserVerificationByMobile.h"
 #import "UserVerificationViewController.h"
+#import "MAXUtils.h"
+#import "UserVerificationByIdNumberViewController.h"
 
 @interface ProfileSettingViewController ()<UITableViewDataSource, UITableViewDelegate, ChangeMobileAlertDelegate>
 
@@ -45,8 +47,10 @@
 @property (nonatomic, strong) UIImageView *avatarImageView;
 @property (nonatomic, strong) UIImageView *editImageView;
 @property (nonatomic,assign) BOOL isbindWechat;
-@property (nonatomic,assign) BOOL hasVerified;
 @property (nonatomic, strong) NSString *verifiedMobile;
+@property (nonatomic, strong) NSString *verifiedRealName;
+@property (nonatomic, strong) NSString *verifiedIdNumber;
+@property (nonatomic, strong) NSString *verificationDeatail;
 
 @end
 
@@ -116,15 +120,45 @@
     }];
 }
 
+- (NSString *)stringForKey:(NSString *)key inDict:(NSDictionary *)dic {
+    NSString *value = [dic objectForKey:key];
+    if (value != nil) {
+        return value;
+    } else {
+        return @"";
+    }
+}
+
+- (NSArray *)arrayForKey:(NSString *)key inDict:(NSDictionary *)dic {
+    NSArray *value = [dic objectForKey:key];
+    if (value != nil) {
+        return value;
+    } else {
+        return nil;
+    }
+}
+
 - (void)getUserVerification {
+    self.verifiedMobile = @"";
+    self.verifiedRealName = @"";
+    self.verifiedIdNumber = @"";
+    self.verificationDeatail = @"";
+
     UserVerificationApi *api = [[UserVerificationApi alloc] initWithUserId:@""];
     [api startWithSuccessBlock:^(ApiResult * _Nullable result) {
         if (result.isOK) {
             NSNumber *status = result.resultData[@"status"];
-            NSString *mobile = result.resultData[@"mobile"];
+            if (status.intValue == 1) {
+                NSDictionary *dic = result.resultData;
+                self.verifiedMobile = [MAXUtils replacePhoneNumber: [self stringForKey:@"mobile" inDict:dic]];
+                self.verifiedRealName = [self stringForKey:@"name" inDict:dic];
+                self.verifiedIdNumber = [self stringForKey:@"id_card_number" inDict:dic];
+                [MAXUtils setRequiredVerificationsWithArray:[self arrayForKey:@"required_list" inDict:dic]];
+                [MAXUtils setOptionalVerificationsWithArray:[self arrayForKey:@"optional_list" inDict:dic]];
+                [MAXUtils setFinishedVerificationsWithArray:[self arrayForKey:@"finish_list" inDict:dic]];
+                self.verificationDeatail = self.verifiedIdNumber.length > 0 ? [NSString stringWithFormat:NSLocalizedString(@"real_name_verified_id_card", @"您已实名认证。手机号：%@\n姓名：%@\n身份证号：%@"), self.verifiedMobile, self.verifiedRealName, self.verifiedIdNumber] : [NSString stringWithFormat:NSLocalizedString(@"real_name_verified", @"您已实名认证。手机号："),  self.verifiedMobile];
 
-            self.hasVerified = status.intValue == 1;
-            self.verifiedMobile = mobile;
+            }
             [self.tableView reloadData];
         } else {
             MAXLog(@"errmsg:%@",result.errmsg);
@@ -259,8 +293,13 @@
 }
 
 - (void)gotoUserVerification {
-    UserVerificationViewController *bindPhone = [[UserVerificationViewController alloc] init];
-    [self.navigationController pushViewController:bindPhone animated:YES];
+    UserVerificationViewController *vc = [[UserVerificationViewController alloc] init];
+    [self.navigationController pushViewController:vc animated:YES];
+}
+
+- (void)gotoIdNumberUserVerification {
+    UserVerificationByIdNumberViewController *vc = [[UserVerificationByIdNumberViewController alloc] init];
+    [self.navigationController pushViewController:vc animated:YES];
 }
 
 - (void)showSetMobileAlert {
@@ -403,6 +442,32 @@
     return 69.f;
 }
 
+- (NSString *)replacePhoneNumber:(NSString *)phone {
+    // 1. 检查手机号是否有效
+    if (phone == nil || phone.length < 5) {
+        return phone;
+    }
+    
+    // 2. 处理长度足够的手机号（通常是11位）
+    if (phone.length >= 11) {
+        // 截取前3位
+        NSString *prefix = [phone substringToIndex:3];
+        // 截取后4位。注意：substringFromIndex 的参数是起始索引（从0开始）
+        NSString *suffix = [phone substringFromIndex:phone.length - 4];
+        // 拼接成 "前3位****后4位" 的形式
+        return [NSString stringWithFormat:@"%@****%@", prefix, suffix];
+    }
+    // 3. 处理长度不足11位但大于等于5位的情况
+    else {
+        // 截取前3位
+        NSString *prefix = [phone substringToIndex:3];
+        // 生成与手机号剩余长度等量的星号
+        NSString *asterisks = [@"" stringByPaddingToLength:phone.length - 3 withString:@"*" startingAtIndex:0];
+        // 拼接。因为长度不足11位，所以没有“后4位”的概念，用星号填充前缀之后的所有字符
+        return [prefix stringByAppendingString:asterisks];
+    }
+}
+
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
     ProfileTableViewCell *cell =[ProfileTableViewCell cellWithTableView:tableView];
     NSDictionary *dic = self.dataArray[indexPath.row];
@@ -413,10 +478,12 @@
         NSString *aString = [self.profile.nickname length] ? self.profile.nickname : NSLocalizedString(@"set_nickname", @"请设置昵称");
         cell.contentLabel.text = aString;
     } else if ([dic[@"type"] isEqualToString:NSLocalizedString(@"Phone_number", @"手机号")]) {
-        NSString *aString = [self.profile.mobilePhone length] ? self.profile.mobilePhone : NSLocalizedString(@"Go_to_bind", @"去绑定");
+        NSString *phone = self.profile.mobilePhone;
+        NSString *masked = [self replacePhoneNumber:phone];
+        NSString *aString = [phone length] ? masked : NSLocalizedString(@"Go_to_bind", @"去绑定");
         cell.contentLabel.text = aString;
     } else if ([dic[@"type"] isEqualToString:NSLocalizedString(@"real_name_verification", @"实名认证")]) {
-        NSString *aString = self.hasVerified ? self.verifiedMobile : NSLocalizedString(@"Go_to_verify", @"去认证");
+        NSString *aString = self.verifiedRealName.length > 0 ? NSLocalizedString(@"id_verified", @"身份已认证") : self.verifiedMobile.length > 0 ? NSLocalizedString(@"phone_verified", @"手机号已认证") : NSLocalizedString(@"Go_to_verify", @"去认证");
         cell.contentLabel.text = aString;
     }else if ([dic[@"type"] isEqualToString:NSLocalizedString(@"Modify_password", @"修改密码")]) {
         NSString *aString = @"";
@@ -499,17 +566,30 @@
         
         
     } else if ([dic[@"type"] isEqualToString:NSLocalizedString(@"real_name_verification", @"实名认证")]) {
-        if (self.hasVerified) {
-            NSString *message = [NSString stringWithFormat:NSLocalizedString(@"real_name_verified", @"您已实名认证。手机号："),  self.verifiedMobile];
+        if (self.verificationDeatail.length == 0) {
+            return;
+        }
+
+        if (self.verifiedRealName.length > 0 || self.verifiedMobile.length > 0) {
+            bool allRequiredFinished = [MAXUtils didAllRequiredFinished];
+            NSString *okTitle = allRequiredFinished ? NSLocalizedString(@"re_verify", @"重新认证") :
+            NSLocalizedString(@"continue_verify", @"继续认证");
             
             UIAlertController* alert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"real_name_verification", @"实名认证")
-                                                                           message:message
+                                                                           message:self.verificationDeatail
                                                                     preferredStyle:UIAlertControllerStyleAlert];
             
-            UIAlertAction* okAction = [UIAlertAction actionWithTitle:NSLocalizedString(@"re_verify", @"重新认证") style:UIAlertActionStyleDefault
+            UIAlertAction* okAction = [UIAlertAction actionWithTitle:okTitle style:UIAlertActionStyleDefault
                                                              handler:^(UIAlertAction * action) {
                                                                  //响应事件
-                                                                [self gotoUserVerification];
+                                                                if ([MAXUtils didAllRequiredFinished]) {
+                                                                    [MAXUtils setFinishedVerificationsWithArray:@[]];
+                                                                }
+                                                                if ([MAXUtils needShowVerificationPage:@"mobile"]) {
+                                                                    [self gotoUserVerification];
+                                                                } else if ([MAXUtils needShowVerificationPage:@"id_card"]) {
+                                                                    [self gotoIdNumberUserVerification];
+                                                                }
                                                              }];
             UIAlertAction* cancelAction = [UIAlertAction actionWithTitle:NSLocalizedString(@"Confirm", @"确定") style:UIAlertActionStyleCancel
                                                                  handler:^(UIAlertAction * action) {

@@ -90,7 +90,8 @@
 
 -(UITableViewCell*) tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
     NSInteger row = indexPath.row;
-    GroupCommonCell* cell = [tableView dequeueReusableCellWithIdentifier:@"GroupCommonCell"];
+    NSString * identifier = [NSString stringWithFormat:@"GroupCommonCell_%d", row];
+    GroupCommonCell* cell = [tableView dequeueReusableCellWithIdentifier:identifier];
     if(cell == nil) {
         cell = [[GroupCommonCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:@"GroupCommonCell"];
     }
@@ -200,18 +201,18 @@
         [cell showSepLine:NO];
     } else if (row == 7) {
         [cell showAccesor:NO];
-        [cell setMainText:NSLocalizedString(@"Set_whether_to_send_read_acknowledgement", @"设置是否发送已读回执") detailText:nil switcherFlag:self.group.enableReadAck switcherTarget:self switcherSelector:@selector(p_configEnableRecieveAck)];
+        [cell setMainText:tableTitle detailText:nil switcherFlag:self.group.enableReadAck switcherTarget:self switcherSelector:@selector(p_configEnableRecieveAck)];
         
     } else if (row == 9) {
         [cell showAccesor:NO];
         long long currentTime = (long long) [[NSDate date] timeIntervalSince1970];
         self.isGroupBanned = self.group.banExpireTime > currentTime;
-        [cell setMainText:NSLocalizedString(@"Ban_all_group_members", @"全群禁言") detailText:nil switcherFlag:self.isGroupBanned switcherTarget:self switcherSelector:@selector(p_configBanGroup)];
+        [cell setMainText:tableTitle detailText:nil switcherFlag:self.isGroupBanned switcherTarget:self switcherSelector:@selector(p_configBanGroup)];
 
     } else if (row == 10) {
         [cell showAccesor:NO];
         self.hideMemberInfo = self.group.hideMemberInfo;
-        [cell setMainText:NSLocalizedString(@"Hide_member_info", @"隐藏群成员信息") detailText:nil switcherFlag:self.hideMemberInfo switcherTarget:self switcherSelector:@selector(p_configHideMemberInfo)];
+        [cell setMainText:tableTitle detailText:nil switcherFlag:self.hideMemberInfo switcherTarget:self switcherSelector:@selector(p_configHideMemberInfo)];
 
     } else {
         [cell.avatarImageView setHidden:YES];
@@ -255,9 +256,6 @@
         GroupMuteListViewController* ctrl = [[GroupMuteListViewController alloc] initWithGroup:self.group hideMemberInfo:NO];
         [ctrl hidesBottomBarWhenPushed];
         [self.navigationController pushViewController:ctrl animated:YES];
-    } else if(row == 7) {
-        
-        
     } else if(row == 8) {
         GroupOwnerTransterViewController* ctrl = [[GroupOwnerTransterViewController alloc] initWithGroup:self.group hideMemberInfo:NO];
         [ctrl hidesBottomBarWhenPushed];
@@ -328,8 +326,8 @@
 
 - (void)p_configEnableRecieveAck {
     [[[BMXClient sharedClient] groupService] setEnableReadAck:self.group enable:!self.group.enableReadAck completion:^(BMXError *error) {
-        MAXLog(@"设置成功");
         if (error == nil) {
+            MAXLog(@"设置成功");
             [HQCustomToast showDialog:NSLocalizedString(@"Set_successfully", @"设置成功")];
             [self.tableView reloadData];
         } else {
@@ -368,7 +366,7 @@
 
 - (void)p_configHideMemberInfo {
     bool hideMemberInfo = [MAXUtils getAppSwitch:@"hide_member_info"];
-    if (hideMemberInfo) {
+    if (!hideMemberInfo) {
         [self showAlertForPermissionError];
         [self.tableView reloadData];
         return;

@@ -760,8 +760,11 @@
 - (void)applicationDidEnterBackground:(UIApplication *)application {
     //进入后台
     if (![[RTCEngineManager engineWithType:kMaxEngine] isOnCall]) {
-        [[BMXClient sharedClient] disconnect];
-        _isDisconnected = YES;
+        dispatch_queue_t queue = dispatch_queue_create("disconnect on AppDelegate",DISPATCH_QUEUE_SERIAL);
+        dispatch_async(queue, ^{
+            [[BMXClient sharedClient] disconnect];
+            _isDisconnected = YES;
+        });
     }
 }
 
@@ -773,9 +776,12 @@
     if (_isDisconnected) {
         IMAcount *accout = [IMAcountInfoStorage loadObject];
         if (accout) {
-            [[BMXClient sharedClient]  reconnect];
-            MAXLog(@"reconnect");
-            _isDisconnected = NO;
+            dispatch_queue_t queue = dispatch_queue_create("reconnect on AppDelegate",DISPATCH_QUEUE_SERIAL);
+            dispatch_async(queue, ^{
+                [[BMXClient sharedClient]  reconnect];
+                MAXLog(@"reconnect");
+                _isDisconnected = NO;
+            });
         }
     }
 }

@@ -57,6 +57,7 @@
 #import "MAXUtils.h"
 #import "FraudNoticedIdStorage.h"
 #import "TextRenderStorage.h"
+#import "GetDomainAccessibility.h"
 
 NSString *const kTableViewOffset = @"contentOffset";
 NSString *const kTableViewFrame = @"frame";
@@ -285,12 +286,7 @@ CLLocationManagerDelegate>
                 if (!title) {
                     title = [NSString stringWithFormat:@"%lld", self.conversationId];
                 }
-
-                [self setNavigationBarTitle:title navLeftButtonIcon:@"blackback"
-                         navRightButtonIcon:isFriend?@"chatNavMore":@"contact_add"];
-                [self.navRightButton addTarget:self action:isFriend ? @selector(clickMoreButton) : @selector(onAddContact)
-                              forControlEvents:UIControlEventTouchUpInside];
-
+                [self setupNavWithTitle:title];
             }
         }];
     }
@@ -405,8 +401,7 @@ CLLocationManagerDelegate>
     } else {
         self.title = [MAXUtils getRosterDisplayName:self.currentRoster];
     }
-    [self setNavigationBarTitle:self.title navLeftButtonIcon:@"blackback" navRightButtonIcon:@"chatNavMore"];
-    [self.navRightButton addTarget:self action:@selector(clickMoreButton) forControlEvents:UIControlEventTouchUpInside];
+    [self setupNavWithTitle:self.title];
 }
 
 - (void)p_dropDownLoadDataWithScrollView:(UIScrollView *)scrollView {
@@ -474,6 +469,7 @@ CLLocationManagerDelegate>
         
     }
     self.conversation = conversation;
+    [self p_configEditMessage];
     [conversation loadMessagesWithRefMsgId:firstMessageId size:10 completion:^(BMXMessageList *messageList, BMXError *error) {
         if (!error) {
             if (messageList.isEmpty) {
@@ -789,15 +785,62 @@ CLLocationManagerDelegate>
     if (!self.headerRefreshing) self.headerRefreshing = newValue.y < 40 && self.isMeetRefresh;
 }
 
+- (void)showWarningDialog: (NSString*)target  {
+    UIAlertController* alert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"risk_notice", @"安全提示") message:NSLocalizedString(@"risk_notice_open_browser", @"请注意您的账号和财产安全，您即将用内置浏览器打开该网页。") preferredStyle:UIAlertControllerStyleAlert];
+    UIAlertAction* okAction = [UIAlertAction actionWithTitle:NSLocalizedString(@"Confirm", @"确定") style:UIAlertActionStyleDefault handler:^(UIAlertAction * action) {
+        @try{
+            NSURL *url = [NSURL URLWithString:target];
+            SFSafariViewController *safariViewController = [[SFSafariViewController alloc] initWithURL:url];
+            safariViewController.delegate = self;
+            [self presentViewController:safariViewController animated:YES completion:nil];
+        }@catch (NSException *exception) {
+            MAXLog(@"%@",exception.description);
+        }
+    }];
+    UIAlertAction* cancelAction = [UIAlertAction actionWithTitle:NSLocalizedString(@"Cancel", @"取消") style:UIAlertActionStyleCancel handler:^(UIAlertAction * action) {}];
+    [alert addAction:okAction];
+    [alert addAction:cancelAction];
+    [self presentViewController:alert animated:YES completion:nil];
+}
+
+- (void)showForbiddenDialog{
+    UIAlertController* alert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"risk_notice", @"安全提示") message:NSLocalizedString(@"risk_notice_url_cannot_verified", @"经安全检测，该网页涉嫌包含恶意内容，已停止访问。") preferredStyle:UIAlertControllerStyleAlert];
+    UIAlertAction* okAction = [UIAlertAction actionWithTitle:NSLocalizedString(@"Confirm", @"确定") style:UIAlertActionStyleDefault handler:^(UIAlertAction * action) {}];
+    UIAlertAction* cancelAction = [UIAlertAction actionWithTitle:NSLocalizedString(@"Cancel", @"取消") style:UIAlertActionStyleCancel handler:^(UIAlertAction * action) {}];
+    [alert addAction:okAction];
+    [alert addAction:cancelAction];
+    [self presentViewController:alert animated:YES completion:nil];
+}
+
 - (void)showWebViewWithUrl: (NSString*)target {
-    @try{
-        NSURL *url = [NSURL URLWithString:target];
-        SFSafariViewController *safariViewController = [[SFSafariViewController alloc] initWithURL:url];
-        safariViewController.delegate = self;
-        [self presentViewController:safariViewController animated:YES completion:nil];
-    }@catch (NSException *exception) {
-        MAXLog(@"%@",exception.description);
-    }
+    NSURL *url = [NSURL URLWithString:target];
+    NSString *domain = [url host];
+
+    GetDomainAccessibility *api = [[GetDomainAccessibility alloc] initWithDomain:domain];
+    [api startWithSuccessBlock:^(ApiResult * _Nullable result) {
+        if (result.isOK) {
+            NSDictionary *configDic = result.resultData;
+            NSString *action = [[configDic objectForKey:@"action"] stringValue];
+            if ([action isEqualToString:@"safe"]) {
+                @try{
+                    NSURL *url = [NSURL URLWithString:target];
+                    SFSafariViewController *safariViewController = [[SFSafariViewController alloc] initWithURL:url];
+                    safariViewController.delegate = self;
+                    [self presentViewController:safariViewController animated:YES completion:nil];
+                }@catch (NSException *exception) {
+                    MAXLog(@"%@",exception.description);
+                }
+            } else if ([action isEqualToString:@"warning"]) {
+                [self showWarningDialog:target];
+            } else {
+                [self showForbiddenDialog];
+            }
+        } else {
+            [self showForbiddenDialog];
+        }
+    } failureBlock:^(NSError * _Nullable error) {
+        [self showForbiddenDialog];
+    }];
 }
 
 #pragma mark  cell事件处理
@@ -1446,6 +1489,9 @@ CLLocationManagerDelegate>
                         }
                     }];
                 }
+            } else if (self.conversationId == 0) {
+                UIImage *avarat = [UIImage imageNamed:@"systemAvater"];
+                [weakCell setAvaratImage:avarat];
             }
         }];
     }
@@ -2825,24 +2871,34 @@ CLLocationManagerDelegate>
     return _browserAnimateDelegate;
 }
 
+- (void)setupNavWithTitle:(NSString*)title{
+    if (self.conversationId != 0 || (self.currentRoster != nil || self.currentGroup != nil)) {
+        [self setNavigationBarTitle:title navLeftButtonIcon:@"blackback" navRightButtonIcon:@"chatNavMore"];
+        [self.navRightButton addTarget:self action:@selector(clickMoreButton) forControlEvents:UIControlEventTouchUpInside];
+    } else {
+        [self setNavigationBarTitle:title navLeftButtonIcon:@"blackback"];
+    }
+    [self removeNavLeftButtonDefaultEvent];
+    [self.navLeftButton addTarget:self action:@selector(returnButtonClick) forControlEvents:UIControlEventTouchUpInside];
+}
+
 - (void)setUpNavItem{
     NSString *title ;
     if (self.messageType == BMXMessage_MessageType_Group) {
         title = self.currentGroup.name;
     } else if (self.messageType == BMXMessage_MessageType_Single){
-        title = [MAXUtils getRosterDisplayName:self.currentRoster];
-        if (!title) {
-            title = [NSString stringWithFormat:@"%lld", self.conversationId];
+        if (self.currentRoster!=nil) {
+            title = [MAXUtils getRosterDisplayName:self.currentRoster];
+            if (!title || title.length == 0) {
+                title = [NSString stringWithFormat:@"%lld", self.conversationId];
+            }
+        } else if (self.conversationId == 0) {
+            title = NSLocalizedString(@"System_notification", @"系统通知");
         }
     } else {
         title = @"";
     }
-    
-    [self removeNavLeftButtonDefaultEvent];
-    [self.navLeftButton addTarget:self action:@selector(returnButtonClick) forControlEvents:UIControlEventTouchUpInside];
-    
-    [self setNavigationBarTitle:title navLeftButtonIcon:@"blackback" navRightButtonIcon:@"chatNavMore"];
-    [self.navRightButton addTarget:self action:@selector(clickMoreButton) forControlEvents:UIControlEventTouchUpInside];
+    [self setupNavWithTitle:title];
 }
 
 - (void)dealloc {

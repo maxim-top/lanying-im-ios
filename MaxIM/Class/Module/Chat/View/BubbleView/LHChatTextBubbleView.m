@@ -110,8 +110,7 @@ static CGSize kTextBoundingSize;
     UITapGestureRecognizer *tapGesture = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(handleTap:)];
     if ([renderType isEqualToString:@"0"] || isSystem) {
         NSString *content = self.messageModel.content;
-        NSDataDetector *detector = [NSDataDetector dataDetectorWithTypes:NSTextCheckingTypeLink error:nil];
-        NSArray *matches = [detector matchesInString:content options:0 range:NSMakeRange(0, content.length)];
+        NSArray *matches = [_detector matchesInString:content options:0 range:NSMakeRange(0, content.length)];
 
         NSMutableParagraphStyle *paragraphStyle = [[NSMutableParagraphStyle alloc] init];
         [paragraphStyle setLineSpacing:4];//调整行间距

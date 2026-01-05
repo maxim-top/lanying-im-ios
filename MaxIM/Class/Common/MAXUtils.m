@@ -20,6 +20,10 @@
 @end
 
 @implementation MAXUtils
+// 静态变量实现
+static NSSet *_requiredVerifications = nil;
+static NSMutableSet<NSString *> *_optionalVerifications = nil;
+static NSMutableSet<NSString *> *_finishedVerifications = nil;
 
 + (void)getAllRosterIdsWithCompletion:(void (^)(ListOfLongLong *list)) resBlock {
     if (resBlock) {
@@ -155,7 +159,16 @@ NSString *HEXStringFromData(NSData *data) {
 
 + (bool)getAppSwitch:(NSString *)key {
     BMXSDKConfig *sdkconfig = [[BMXClient sharedClient] getSDKConfig];
-    NSData *data = [sdkconfig.getAppConfig dataUsingEncoding:NSUTF8StringEncoding];
+    NSString *appConfig = sdkconfig.getAppConfig;
+    if (appConfig.length == 0) {
+        return false;
+    }
+    
+    NSString *appId = [[BMXClient sharedClient] getSDKConfig].getAppID;
+    NSString *appConfigKey = [NSString stringWithFormat:@"AppConfig_%@", appId];
+    [[NSUserDefaults standardUserDefaults] setValue:appConfig forKey:appConfigKey];
+
+    NSData *data = [appConfig dataUsingEncoding:NSUTF8StringEncoding];
     NSDictionary *configDic = [NSJSONSerialization JSONObjectWithData:data options:kNilOptions error:nil];
     bool value = [[configDic objectForKey:key] boolValue];
     return value;
@@ -164,6 +177,24 @@ NSString *HEXStringFromData(NSData *data) {
 + (NSString *)getAppConfigString:(NSString *)key {
     BMXSDKConfig *sdkconfig = [[BMXClient sharedClient] getSDKConfig];
     NSString *appConfig = sdkconfig.getAppConfig;
+    if (appConfig.length == 0) {
+        return nil;
+    }
+    
+    NSString *appId = [[BMXClient sharedClient] getSDKConfig].getAppID;
+    NSString *appConfigKey = [NSString stringWithFormat:@"AppConfig_%@", appId];
+    [[NSUserDefaults standardUserDefaults] setValue:appConfig forKey:appConfigKey];
+    
+    NSData *data = [appConfig dataUsingEncoding:NSUTF8StringEncoding];
+    NSDictionary *configDic = [NSJSONSerialization JSONObjectWithData:data options:kNilOptions error:nil];
+    NSString *value = [configDic objectForKey:key];
+    return value;
+}
+
++ (NSString *)getAppConfigStringFromLocal:(NSString *)key {
+    NSString *appId = [[BMXClient sharedClient] getSDKConfig].getAppID;
+    NSString *appConfigKey = [NSString stringWithFormat:@"AppConfig_%@", appId];
+    NSString *appConfig = [[NSUserDefaults standardUserDefaults] valueForKey:appConfigKey];
     if (appConfig.length == 0) {
         return nil;
     }
@@ -193,15 +224,34 @@ NSString *HEXStringFromData(NSData *data) {
     if ([verificationType isEqualToString:@"personal"] && companyName.length != 0) {
         companyName = [NSString stringWithFormat:@"%@%@",NSLocalizedString(@"about_us_individual_developer", @"个人开发者:"), companyName];
     }
-    if (companyName == nil || companyName.length == 0) {
-        NSString *unverified = [NSString stringWithFormat:@"%@",NSLocalizedString(@"about_us_unverified_developer", @"未认证开发者")];
-        companyName = unverified;
+    return companyName;
+}
+
++ (NSString *)getCompanyNameFromLocal {
+    NSString *companyName = [MAXUtils getAppConfigStringFromLocal:@"account_verification_name"];
+    NSString *verificationType = [MAXUtils getAppConfigStringFromLocal:@"account_verification_type"];
+    if ([verificationType isEqualToString:@"personal"] && companyName.length != 0) {
+        companyName = [NSString stringWithFormat:@"%@%@",NSLocalizedString(@"about_us_individual_developer", @"个人开发者:"), companyName];
     }
     return companyName;
 }
 
 + (NSString *)getCompanyNameWithVerifyStatus {
-    return [NSString stringWithFormat:@"%@ %@", [MAXUtils getCompanyName],[MAXUtils getVerificationStatusChar]];
+    NSString *companyName = [MAXUtils getCompanyName];
+    NSString * vsc = [MAXUtils getVerificationStatusChar];
+    if (companyName == nil || vsc == nil) {
+        return nil;
+    }
+    return [NSString stringWithFormat:@"%@ %@", companyName, vsc];
+}
+
++ (NSString *)getCompanyNameWithVerifyStatusFromLocal {
+    NSString *companyName = [MAXUtils getCompanyNameFromLocal];
+    NSString * vsc = [MAXUtils getVerificationStatusCharFromLocal];
+    if (companyName == nil || vsc == nil) {
+        return nil;
+    }
+    return [NSString stringWithFormat:@"%@ %@", companyName, vsc];
 }
 
 + (NSString *)getVerificationStatusText {
@@ -210,9 +260,15 @@ NSString *HEXStringFromData(NSData *data) {
                          @"unverified":[NSString stringWithFormat:@"%@",NSLocalizedString(@"about_us_unverified", @"❓未认证")],
                          @"expired":[NSString stringWithFormat:@"%@",NSLocalizedString(@"about_us_expired", @"❗认证失败")]};
     NSString *verifyString = map[verificationStatus];
-    if (verifyString == nil) {
-        verifyString = @"";
-    }
+    return verifyString;
+}
+
++ (NSString *)getVerificationStatusTextFromLocal {
+    NSString *verificationStatus = [MAXUtils getAppConfigStringFromLocal:@"account_verification_status"];
+    NSDictionary *map= @{@"verified":[NSString stringWithFormat:@"%@",NSLocalizedString(@"about_us_verified", @"✅已认证")],
+                         @"unverified":[NSString stringWithFormat:@"%@",NSLocalizedString(@"about_us_unverified", @"❓未认证")],
+                         @"expired":[NSString stringWithFormat:@"%@",NSLocalizedString(@"about_us_expired", @"❗认证失败")]};
+    NSString *verifyString = map[verificationStatus];
     return verifyString;
 }
 
@@ -222,9 +278,15 @@ NSString *HEXStringFromData(NSData *data) {
                          @"unverified":@"❓",
                          @"expired":@"❗"};
     NSString *verifyString = map[verificationStatus];
-    if (verifyString == nil) {
-        verifyString = @"";
-    }
+    return verifyString;
+}
+
++ (NSString *)getVerificationStatusCharFromLocal {
+    NSString *verificationStatus = [MAXUtils getAppConfigStringFromLocal:@"account_verification_status"];
+    NSDictionary *map= @{@"verified":@"✅",
+                         @"unverified":@"❓",
+                         @"expired":@"❗"};
+    NSString *verifyString = map[verificationStatus];
     return verifyString;
 }
 
@@ -293,4 +355,94 @@ NSString *HEXStringFromData(NSData *data) {
         [HQCustomToast showDialog:[error description]];
     }
 }
+
++ (NSSet *)requiredVerifications {
+    return _requiredVerifications;
+}
+
++ (NSMutableSet<NSString *> *)optionalVerifications {
+    if (!_optionalVerifications) {
+        _optionalVerifications = [[NSMutableSet alloc] init];
+    }
+    return _optionalVerifications;
+}
+
++ (NSMutableSet<NSString *> *)finishedVerifications {
+    if (!_finishedVerifications) {
+        _finishedVerifications = [[NSMutableSet alloc] init];
+    }
+    return _finishedVerifications;
+}
+
++ (NSString *)replacePhoneNumber:(NSString *)phone {
+    if (!phone || phone.length < 5) {
+        return phone;
+    }
+    
+    // 第一种脱敏模式：匹配 前3位-中间4位-后4位 的模式
+    NSString *pattern1 = @".*\\d{3}\\d{4}\\d{4}";
+    NSRegularExpression *regex1 = [NSRegularExpression regularExpressionWithPattern:pattern1 options:0 error:nil];
+    NSTextCheckingResult *match1 = [regex1 firstMatchInString:phone options:0 range:NSMakeRange(0, phone.length)];
+    
+    if (match1) {
+        // 使用正则表达式替换：将中间4位替换为****
+        NSString *pattern2 = @"(.*\\d{3})\\d{4}(\\d{4})";
+        NSString *replacement = @"$1****$2";
+        NSString *masked = [phone stringByReplacingOccurrencesOfString:pattern2
+                                                            withString:replacement
+                                                               options:NSRegularExpressionSearch
+                                                                 range:NSMakeRange(0, phone.length)];
+        
+        if (![masked isEqualToString:phone]) {
+            return masked;
+        }
+    }
+    
+    // 第二种脱敏模式：通用脱敏，保留前3位，后面全部替换为*
+    if (phone.length >= 3) {
+        NSString *firstThree = [phone substringToIndex:3];
+        NSInteger starCount = phone.length - 3;
+        NSString *stars = [@"" stringByPaddingToLength:starCount withString:@"*" startingAtIndex:0];
+        return [firstThree stringByAppendingString:stars];
+    }
+    
+    return phone;
+}
+
++ (BOOL)needShowVerificationPage:(NSString *)verificationName {
+    if (!verificationName) return NO;
+    
+    BOOL isRequiredOrOptional = [_requiredVerifications containsObject:verificationName] ||
+                               [_optionalVerifications containsObject:verificationName];
+    BOOL isNotFinished = ![_finishedVerifications containsObject:verificationName];
+    
+    return isRequiredOrOptional && isNotFinished;
+}
+
++ (void)setRequiredVerificationsWithArray:(NSArray *)array {
+    _requiredVerifications = [NSSet setWithArray: array];
+}
+
++ (void)setOptionalVerificationsWithArray:(NSArray *)array {
+    _optionalVerifications = [NSSet setWithArray: array];
+}
+
++ (void)setFinishedVerificationsWithArray:(NSArray *)array {
+    _finishedVerifications = [NSSet setWithArray: array];
+}
+
++ (BOOL)didAllRequiredFinished {
+    for (NSString *required in _requiredVerifications) {
+        if (![_finishedVerifications containsObject:required]) {
+            return NO;
+        }
+    }
+    return YES;
+}
+
++ (BOOL)isOptionalVerification:(NSString *)verificationName {
+    if (!verificationName) return NO;
+    return [_optionalVerifications containsObject:verificationName];
+}
+
 @end

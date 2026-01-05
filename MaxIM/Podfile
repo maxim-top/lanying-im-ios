@@ -21,7 +21,7 @@ target 'MaxIM' do
   pod 'tingyunApp'
   pod 'FMDB'
   pod 'CocoaLumberjack'
-  pod 'floo-ios', '~> 4.5.10'
+  pod 'floo-ios', '~> 4.5.13'
   pod 'GoogleWebRTC', '~> 1.1'
   pod 'floo-rtc-ios', '~> 1.2.0'
   pod 'ActionSheetPicker-3.0'

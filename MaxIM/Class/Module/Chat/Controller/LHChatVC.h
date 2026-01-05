@@ -26,6 +26,8 @@
 - (instancetype)initWithGroupChat:(BMXGroup *)group
                       messageType:(BMXMessage_MessageType)messageType;
 
+- (void)showForbiddenDialog: (NSString*)target;
+
 @property (nonatomic,weak) id<ChatVCDelegate> delegate;
 
 

@@ -110,11 +110,37 @@
 }
 
 -(void)dealloc{
-    dispatch_source_cancel(self.refreshCompanyNameTimer);
-    self.refreshCompanyNameTimer = nil;
+    if (self.refreshCompanyNameTimer) {
+        dispatch_source_cancel(self.refreshCompanyNameTimer);
+        self.refreshCompanyNameTimer = nil;
+    }
 }
 
 - (void)viewDidAppear:(BOOL)animated{
+    [self setCompanyName];
+
+    NSString *appId = [AppIDManager sharedManager].appid.appId;
+    if (![OnceHappenStorage has:appId byType:@"ABOUT_PAGE"]) {
+        [OnceHappenStorage add:appId byType:@"ABOUT_PAGE"];
+        [self showAbout];
+    }
+}
+
+- (void)setCompanyName{
+    NSString *companyName = [MAXUtils getCompanyNameWithVerifyStatus];
+    NSString *text = companyName;
+    if (text == nil || text.length == 0) {
+        text = [MAXUtils getCompanyNameWithVerifyStatusFromLocal];
+        if (text == nil || text.length == 0) {
+            text = [NSString stringWithFormat:@"%@",NSLocalizedString(@"about_us_unverified_developer", @"未认证开发者")];
+        }
+    }
+    [self.config setCompanyName:text];
+    
+    if (companyName.length > 0) {
+        return;
+    }
+    
     dispatch_queue_t queue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
     if (self.refreshCompanyNameTimer) {
         dispatch_cancel(self.refreshCompanyNameTimer);
@@ -128,18 +154,15 @@
     dispatch_source_set_event_handler(self.refreshCompanyNameTimer, ^{
         typeof(self) strongSelf = weakSelf;
         NSString *name = [MAXUtils getCompanyNameWithVerifyStatus];
+        if (name == nil || name.length == 0) {
+            return;
+        }
         dispatch_async(dispatch_get_main_queue(), ^{
             [strongSelf.config setCompanyName:name];
         });
         dispatch_source_cancel(strongSelf.refreshCompanyNameTimer);
     });
     dispatch_resume(self.refreshCompanyNameTimer);
-
-    NSString *appId = [AppIDManager sharedManager].appid.appId;
-    if (![OnceHappenStorage has:appId byType:@"ABOUT_PAGE"]) {
-        [OnceHappenStorage add:appId byType:@"ABOUT_PAGE"];
-        [self showAbout];
-    }
 }
 
 - (void)viewDidLoad {
@@ -151,8 +174,7 @@
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(jumpToRegistVC:) name:@"wechatloginsuccess_newuser" object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(inputUserTextFeild:) name:@"ScanConsule" object:nil];
     
-    NSString *name = [MAXUtils getCompanyNameWithVerifyStatus];
-    [self.config setCompanyName:name];
+    [self setCompanyName];
     [self.config setAppid:[AppIDManager sharedManager].appid.appId];
 
     UIWindow *keyWindow;
@@ -183,8 +205,7 @@
     self.config.loginView = self.loginView;
     self.loginView.delegate = self.config;
     [self.config setAppid:[AppIDManager sharedManager].appid.appId];
-    [self.config setCompanyName:[MAXUtils getCompanyNameWithVerifyStatus]];
-    [self reloadLocalAppID:[AppIDManager sharedManager].appid.appId];
+    [self setCompanyName];
 }
 
 - (void)passwordLogin{
@@ -192,9 +213,8 @@
     self.loginView = self.loginView_Password;
     self.config.loginView = self.loginView;
     self.loginView.delegate = self.config;
+    [self setCompanyName];
     [self.config setAppid:[AppIDManager sharedManager].appid.appId];
-    [self.config setCompanyName:[MAXUtils getCompanyNameWithVerifyStatus]];
-    [self reloadLocalAppID:[AppIDManager sharedManager].appid.appId];
 }
 
 - (void)signUp{
@@ -202,9 +222,8 @@
     self.loginView = self.loginView_Register;
     self.config.loginView = self.loginView;
     self.loginView.delegate = self.config;
-    [self.config setCompanyName:[MAXUtils getCompanyNameWithVerifyStatus]];
+    [self setCompanyName];
     [self.config setAppid:[AppIDManager sharedManager].appid.appId];
-    [self reloadLocalAppID:[AppIDManager sharedManager].appid.appId];
 }
 
 - (void)pushToSmsLogin {
@@ -460,7 +479,7 @@
 }
 
 - (void)sdkconfigdidClickReturn {
-    [self.config setCompanyName:[MAXUtils getCompanyNameWithVerifyStatus]];
+    [self setCompanyName];
     [self.config setAppid:[AppIDManager sharedManager].appid.appId];
 }
 
@@ -534,7 +553,7 @@
 
         self.scanConsuleUserName = username;
         [self reloadLocalAppID:appId];
-        [self.config setCompanyName:[MAXUtils getCompanyNameWithVerifyStatus]];
+        [self setCompanyName];
         [self.config setAppid:appId];
         [self.config setUserName:username];
         [self.config setPassword:password];
@@ -557,7 +576,7 @@
                                                          for(UITextField *text in alert.textFields){
                                                              MAXLog(@"text = %@", text.text);
                                                              [self reloadLocalAppID:text.text];
-                                                             [self.config setCompanyName:[MAXUtils getCompanyNameWithVerifyStatus]];
+                                                             [self setCompanyName];
                                                              [self.config setAppid:text.text];
                                                              
                                                          }

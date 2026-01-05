@@ -22,6 +22,7 @@
 @property (nonatomic, strong) UIView *cardView;
 @property (nonatomic, strong) UILabel *nameLabel;
 @property (nonatomic, strong) UILabel *idLabel;
+@property (nonatomic, strong) UILabel *nicknameLabel;
 @property (nonatomic, strong) UILabel *appIdLabel;
 @property (nonatomic, strong) UIImageView *codeImageView;
 @property (nonatomic, strong) UIImageView *avatarImageView;
@@ -80,7 +81,7 @@
 
 - (void)configGrouopCodeAndContent {
     self.idLabel.text = [NSString stringWithFormat:@"id : %lld", self.group.groupId];
-    self.nameLabel.text = [NSString stringWithFormat:NSLocalizedString(@"Nickname_name", @"昵称 : %@"), self.group.name];
+    self.nameLabel.text = [NSString stringWithFormat:@"%@", self.group.name];
     
     self.avatarImageView.image = [UIImage imageNamed:@"group_placeHo"];
     
@@ -161,7 +162,8 @@
 
 - (void)configUserCodeAndContent {
     self.idLabel.text = [NSString stringWithFormat:@"id : %lld", self.profile.userId];
-    self.nameLabel.text = [NSString stringWithFormat:NSLocalizedString(@"Nickname_name", @"昵称 : %@"), self.profile.username];
+    self.nameLabel.text = [NSString stringWithFormat:@"%@", self.profile.username];
+    self.nicknameLabel.text = [NSString stringWithFormat:NSLocalizedString(@"Nickname_name", @"昵称 : %@"), self.profile.nickname];
     
     self.avatarImageView.image = [UIImage imageNamed:@"profileavatar"];
     
@@ -216,6 +218,7 @@
     [self cardView];
     [self nameLabel];
     [self idLabel];
+    [self nicknameLabel];
     [self codeImageView];
 }
 
@@ -237,7 +240,7 @@
         _nameLabel = [[UILabel alloc] init];
         _nameLabel.bmx_top = 15;
         _nameLabel.bmx_left = 80;
-        _nameLabel.bmx_size = CGSizeMake(200, 40);
+        _nameLabel.bmx_size = CGSizeMake(200, 20);
         _nameLabel.font = [UIFont systemFontOfSize:17];
         _nameLabel.text = NSLocalizedString(@"Anybody", @"张三");
         [self.cardView addSubview:_nameLabel];
@@ -250,7 +253,7 @@
         _idLabel = [[UILabel alloc] init];
         _idLabel.bmx_top = _nameLabel.bmx_bottom + 5;
         _idLabel.bmx_left = 80;
-        _idLabel.bmx_size = CGSizeMake(200, 30);
+        _idLabel.bmx_size = CGSizeMake(200, 20);
         _idLabel.text = NSLocalizedString(@"My_id", @"我的id");
         _idLabel.font = [UIFont systemFontOfSize:14];
         [self.cardView addSubview:_idLabel];
@@ -258,10 +261,23 @@
     return _idLabel;
 }
 
+- (UILabel *)nicknameLabel{
+    if (!_nicknameLabel) {
+        _nicknameLabel = [[UILabel alloc] init];
+        _nicknameLabel.bmx_top = _idLabel.bmx_bottom + 5;
+        _nicknameLabel.bmx_left = 80;
+        _nicknameLabel.bmx_size = CGSizeMake(200, 20);
+        _nicknameLabel.font = [UIFont systemFontOfSize:17];
+        _nicknameLabel.text = @"";
+        [self.cardView addSubview:_nicknameLabel];
+    }
+    return _nicknameLabel;
+}
+
 - (UIImageView *)codeImageView {
     if (!_codeImageView) {
         _codeImageView = [[UIImageView alloc] init];
-        _codeImageView.bmx_top = _idLabel.bmx_bottom + 10;
+        _codeImageView.bmx_top = _nicknameLabel.bmx_bottom + 10;
         _codeImageView.bmx_left = 30;
         _codeImageView.bmx_size = CGSizeMake(MAXScreenW - 100, MAXScreenW - 80);
         [self.cardView addSubview:_codeImageView];
